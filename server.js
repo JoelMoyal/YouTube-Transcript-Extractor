@@ -1,5 +1,5 @@
 // server.js
-// Basic backend with youtube-transcript-api
+// Backend for basic transcript fetching
 const express = require('express');
 const cors = require('cors');
 const { YoutubeTranscript } = require('youtube-transcript');
@@ -23,4 +23,4 @@ app.get('/api/transcript', async (req, res) => {
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
-app.listen(PORT, () => console.log(\`Server running on port \${PORT}\`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
