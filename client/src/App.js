@@ -1,21 +1,35 @@
-
 import React, { useState } from 'react';
 
 const App = () => {
   const [videoUrl, setVideoUrl] = useState('');
   const [transcript, setTranscript] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const getTranscript = async () => {
-    const videoId = new URL(videoUrl).searchParams.get("v");
-    if (!videoId) return alert("Invalid YouTube URL");
+    setError('');
+    setTranscript('');
+    
+    try {
+      const url = new URL(videoUrl);
+      const videoId = url.searchParams.get("v");
+      if (!videoId) throw new Error("Invalid YouTube URL");
 
-    setLoading(true);
-    const res = await fetch(\`/api/transcript?videoId=\${videoId}\`);
-    const data = await res.json();
-    if (data.transcript) setTranscript(data.transcript);
-    else alert("Transcript not available");
-    setLoading(false);
+      setLoading(true);
+      const res = await fetch(`/api/transcript?videoId=${videoId}`);
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch transcript');
+      if (data.transcript) {
+        setTranscript(data.transcript);
+      } else {
+        throw new Error("Transcript not available");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -48,6 +62,11 @@ const App = () => {
                 {loading ? "Extracting..." : "Extract Transcript"}
               </button>
             </div>
+            {error && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-500 rounded-md text-red-700">
+                {error}
+              </div>
+            )}
             {transcript && (
               <div className="mt-6">
                 <h3 className="text-lg font-medium">Transcript</h3>
