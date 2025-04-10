@@ -8,7 +8,12 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'client/build')));
+const clientBuildPath = path.join(__dirname, 'client/build');
+if (fs.existsSync(clientBuildPath)) {
+  app.use(express.static(clientBuildPath));
+} else {
+  console.warn('Warning: client/build directory does not exist.');
+}
 
 app.get('/api/transcript', async (req, res) => {
   const { videoId } = req.query;
@@ -18,7 +23,12 @@ app.get('/api/transcript', async (req, res) => {
     const fullTranscript = transcriptItems.map(item => item.text).join(' ');
     res.json({ transcript: fullTranscript, source: 'subtitles' });
   } catch {
-    res.status(404).json({ error: 'Transcript not available' });
+  const indexPath = path.join(__dirname, 'client/build/index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send('Client build files not found.');
+  }
   }
 });
 
