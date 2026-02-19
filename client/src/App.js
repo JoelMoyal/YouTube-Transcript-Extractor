@@ -375,6 +375,7 @@ const App = () => {
   };
 
   const wordCount = transcript ? transcript.trim().split(/\s+/).length : 0;
+  const readingMins = wordCount > 0 ? Math.max(1, Math.round(wordCount / 200)) : 0;
   const isShortTranscript = transcript && wordCount < 50;
   const matchCount = search.trim() && transcript
     ? (transcript.match(new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')) || []).length
@@ -661,6 +662,8 @@ const App = () => {
                           <span style={{ padding: '2px 8px', fontSize: 11, fontWeight: 600, background: '#dcfce7', color: '#16a34a', borderRadius: 999 }}>From subtitles</span>
                         )}
                         <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>{wordCount.toLocaleString()} words</span>
+                        <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 500 }}>·</span>
+                        <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>~{readingMins} min read</span>
                       </div>
 
                       <div style={{ display: 'flex', gap: 6 }}>
