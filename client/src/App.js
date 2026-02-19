@@ -182,6 +182,7 @@ const App = () => {
   const [showHistory, setShowHistory]     = useState(false);
   const [summary, setSummary]             = useState('');
   const [summarizing, setSummarizing]     = useState(false);
+  const [summaryCopied, setSummaryCopied] = useState(false);
 
   const downloadMenuRef = useRef(null);
 
@@ -811,7 +812,16 @@ const App = () => {
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                           <span style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed' }}>AI Summary</span>
                         </div>
-                        <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#a78bfa', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button
+                            onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 4, border: '1px solid #e9d5ff', background: summaryCopied ? '#ede9fe' : 'white', cursor: 'pointer', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: summaryCopied ? '#7c3aed' : '#a78bfa', transition: 'all 0.15s' }}
+                          >
+                            {summaryCopied ? <CheckIcon /> : <CopyIcon />}
+                            {summaryCopied ? 'Copied!' : 'Copy'}
+                          </button>
+                          <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#a78bfa', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
+                        </div>
                       </div>
                       <div style={{ padding: '14px 16px', background: 'white', fontSize: 13, lineHeight: 1.75, color: '#334155', whiteSpace: 'pre-wrap' }}>
                         {summary}
