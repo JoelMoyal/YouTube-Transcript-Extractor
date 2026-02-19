@@ -16,33 +16,78 @@ app.use(express.json());
 // Serve static files from React app
 app.use(express.static(path.join(__dirname, 'client/build')));
 
+function parseTimestamp(ts) {
+  const parts = ts.trim().replace(',', '.').split(':');
+  if (parts.length === 3) return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]);
+  if (parts.length === 2) return parseInt(parts[0]) * 60 + parseFloat(parts[1]);
+  return 0;
+}
+
 function parseVTT(content) {
   const lines = content.split('\n');
-  const textLines = [];
+  const segments = [];
+  let currentSeconds = null;
+  let currentTexts = [];
+
+  const flush = () => {
+    if (currentSeconds !== null && currentTexts.length > 0) {
+      const text = currentTexts.join(' ').replace(/\s+/g, ' ').trim();
+      if (text) segments.push({ seconds: currentSeconds, text });
+    }
+    currentTexts = [];
+    currentSeconds = null;
+  };
+
   for (const line of lines) {
     const trimmed = line.trim();
-    if (
-      !trimmed ||
-      trimmed.startsWith('WEBVTT') ||
-      trimmed.startsWith('Kind:') ||
-      trimmed.startsWith('Language:') ||
-      trimmed.includes('-->')
-    ) continue;
+    if (!trimmed) { flush(); continue; }
+    if (trimmed.startsWith('WEBVTT') || trimmed.startsWith('Kind:') || trimmed.startsWith('Language:')) continue;
+
+    const tsMatch = trimmed.match(/^([\d:]+[.,]\d+)\s*-->/);
+    if (tsMatch) {
+      flush();
+      currentSeconds = Math.floor(parseTimestamp(tsMatch[1]));
+      continue;
+    }
+    if (/^\d+$/.test(trimmed)) continue; // cue ID
+
     const cleaned = trimmed.replace(/<[^>]+>/g, '').trim();
-    if (cleaned) textLines.push(cleaned);
+    if (cleaned) currentTexts.push(cleaned);
   }
-  return [...new Set(textLines)].join(' ').replace(/\s+/g, ' ').trim();
+  flush();
+
+  // Deduplicate consecutive identical segments
+  const seen = new Set();
+  const deduped = segments.filter(s => {
+    if (seen.has(s.text)) return false;
+    seen.add(s.text);
+    return true;
+  });
+
+  const transcript = deduped.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
+  return { transcript, segments: deduped };
 }
 
 function parseJSON3(content) {
   const json3 = JSON.parse(content);
-  return json3.events
-    .filter(e => e.segs)
-    .flatMap(e => e.segs.map(s => s.utf8))
-    .join(' ')
-    .replace(/\n/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const segments = [];
+
+  for (const event of json3.events) {
+    if (!event.segs) continue;
+    const seconds = Math.floor((event.tStartMs || 0) / 1000);
+    const text = event.segs.map(s => s.utf8 || '').join('').replace(/\n/g, ' ').trim();
+    if (text) segments.push({ seconds, text });
+  }
+
+  const seen = new Set();
+  const deduped = segments.filter(s => {
+    if (seen.has(s.text)) return false;
+    seen.add(s.text);
+    return true;
+  });
+
+  const transcript = deduped.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
+  return { transcript, segments: deduped };
 }
 
 function toWhisperLang(lang) {
@@ -124,8 +169,8 @@ app.get('/api/transcript', async (req, res) => {
       const subPath = path.join(tmpDir, subFile);
       const content = await fsPromises.readFile(subPath, 'utf-8');
       await fsPromises.unlink(subPath);
-      const text = subFile.endsWith('.json3') ? parseJSON3(content) : parseVTT(content);
-      return res.json({ transcript: text, source: 'subtitles' });
+      const result = subFile.endsWith('.json3') ? parseJSON3(content) : parseVTT(content);
+      return res.json({ transcript: result.transcript, segments: result.segments, source: 'subtitles' });
     }
 
     // ── Step 2: No subtitles — fall back to Whisper STT ──────────────────────
@@ -145,18 +190,19 @@ app.get('/api/transcript', async (req, res) => {
     await execFileAsync('whisper', [
       audioFile,
       '--model', 'base',
-      '--output_format', 'txt',
+      '--output_format', 'vtt',
       '--output_dir', tmpDir,
       '--language', toWhisperLang(safeLang)
     ], { timeout: 600000 }); // 10 min for transcription
 
-    const whisperTxt = path.join(tmpDir, `${videoId}_audio.txt`);
-    const text = (await fsPromises.readFile(whisperTxt, 'utf-8')).trim();
+    const whisperVtt = path.join(tmpDir, `${videoId}_audio.vtt`);
+    const whisperContent = await fsPromises.readFile(whisperVtt, 'utf-8');
+    const result = parseVTT(whisperContent);
 
     await fsPromises.unlink(audioFile).catch(() => {});
-    await fsPromises.unlink(whisperTxt).catch(() => {});
+    await fsPromises.unlink(whisperVtt).catch(() => {});
 
-    return res.json({ transcript: text, source: 'whisper' });
+    return res.json({ transcript: result.transcript, segments: result.segments, source: 'whisper' });
 
   } catch (error) {
     await cleanup(tmpDir, videoId);

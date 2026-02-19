@@ -20,6 +20,31 @@ const LANGUAGES = [
   { code: 'pl',      label: 'Polish' },
 ];
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function extractVideoId(input) {
+  if (!input) return null;
+  const trimmed = input.trim();
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+  try {
+    const url = new URL(trimmed);
+    let id = url.searchParams.get('v');
+    if (!id && url.hostname === 'youtu.be') id = url.pathname.slice(1).split('?')[0];
+    if (!id) {
+      const m = url.pathname.match(/\/(shorts|embed|v)\/([a-zA-Z0-9_-]{11})/);
+      if (m) id = m[2];
+    }
+    return id && /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+  } catch { return null; }
+}
+
+function formatTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 // ── Icons ─────────────────────────────────────────────────────────────────────
 const DownloadIcon = ({ size = 15 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -67,7 +92,6 @@ const GitHubIcon = () => (
   </svg>
 );
 
-
 const SpinnerIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
     stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
@@ -81,8 +105,9 @@ const Footer = () => {
   const iconBtn = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     width: 32, height: 32, borderRadius: '50%',
-    color: '#94a3b8', textDecoration: 'none',
-    border: '1.5px solid #e2e8f0', background: 'white',
+    color: '#64748b', textDecoration: 'none',
+    border: '1.5px solid rgba(255,255,255,0.1)',
+    background: 'rgba(255,255,255,0.05)',
     transition: 'all 0.18s',
     flexShrink: 0,
   };
@@ -92,64 +117,67 @@ const Footer = () => {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '0 24px',
       height: 56,
-      background: 'rgba(255,255,255,0.85)',
+      background: 'rgba(10,15,30,0.97)',
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
-      borderTop: '1px solid #f1f5f9',
+      borderTop: '1px solid rgba(255,255,255,0.06)',
       zIndex: 50,
       fontFamily: 'system-ui, sans-serif',
     }}>
-      {/* Left rule */}
-      <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, #e2e8f0)' }} />
+      <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.08))' }} />
 
-      {/* Center content */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '0 28px', flexShrink: 0 }}>
-        {/* Text block */}
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-          <span style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>
+          <span style={{ fontSize: 10, fontWeight: 600, color: '#475569', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>
             Built by
           </span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.03em' }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9', letterSpacing: '-0.03em' }}>
             Joel Moyal
           </span>
         </div>
 
-        {/* Icon links */}
         <div style={{ display: 'flex', gap: 6, marginLeft: 4 }}>
           <a href="https://joelmoyal.com/" target="_blank" rel="noopener noreferrer"
             title="Website" style={iconBtn}
-            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = '#fca5a5'; e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'none'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.4)'; e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'none'; }}
           >
             <GlobeIcon />
           </a>
           <a href="https://github.com/joelmoyal" target="_blank" rel="noopener noreferrer"
             title="GitHub" style={iconBtn}
-            onMouseEnter={e => { e.currentTarget.style.color = '#0f172a'; e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'none'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#f1f5f9'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'none'; }}
           >
             <GitHubIcon />
           </a>
         </div>
       </div>
 
-      {/* Right rule */}
-      <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, #e2e8f0)' }} />
+      <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.08))' }} />
     </footer>
   );
 };
 
-// ── Main app ──────────────────────────────────────────────────────────────────
+// ── Main App ──────────────────────────────────────────────────────────────────
 const App = () => {
   const [videoUrl, setVideoUrl]           = useState('');
   const [lang, setLang]                   = useState('en');
+  const [previewId, setPreviewId]         = useState(null);
   const [transcript, setTranscript]       = useState('');
+  const [segments, setSegments]           = useState([]);
   const [transcriptSource, setTranscriptSource] = useState('');
+  const [currentVideoId, setCurrentVideoId] = useState(null);
   const [loading, setLoading]             = useState(false);
   const [loadingMsg, setLoadingMsg]       = useState('');
   const [error, setError]                 = useState('');
   const [copied, setCopied]               = useState(false);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const [search, setSearch]               = useState('');
+  const [history, setHistory]             = useState(() => {
+    try { return JSON.parse(localStorage.getItem('yte_history') || '[]'); } catch { return []; }
+  });
+  const [showHistory, setShowHistory]     = useState(false);
 
   const downloadMenuRef = useRef(null);
 
@@ -162,51 +190,91 @@ const App = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const getTranscript = async () => {
-    setError(''); setTranscript(''); setTranscriptSource('');
+  // Auto-paste YouTube URL from clipboard on input focus
+  const handleInputFocus = async () => {
+    if (videoUrl) return;
     try {
-      let videoId = null;
-      const trimmed = videoUrl.trim();
-      if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
-        videoId = trimmed;
-      } else {
-        try {
-          const url = new URL(trimmed);
-          videoId = url.searchParams.get("v");
-          if (!videoId && url.hostname === 'youtu.be') videoId = url.pathname.slice(1);
-          if (!videoId) {
-            const m = url.pathname.match(/\/(shorts|embed|v)\/([a-zA-Z0-9_-]{11})/);
-            if (m) videoId = m[2];
-          }
-        } catch { throw new Error("Invalid YouTube URL"); }
+      const text = await navigator.clipboard.readText();
+      if (text && (text.includes('youtube.com') || text.includes('youtu.be'))) {
+        const cleaned = text.trim();
+        setVideoUrl(cleaned);
+        setPreviewId(extractVideoId(cleaned));
       }
-      if (!videoId) throw new Error("Invalid YouTube URL");
+    } catch {} // clipboard permission denied — ignore silently
+  };
 
-      setLoading(true);
-      setLoadingMsg('Looking for subtitles…');
+  const handleUrlChange = (e) => {
+    const val = e.target.value;
+    setVideoUrl(val);
+    setPreviewId(extractVideoId(val));
+  };
 
-      const controller = new AbortController();
-      // 3-minute client-side timeout so the UI never hangs indefinitely
-      const clientTimeout = setTimeout(() => controller.abort(), 180000);
-      const hint = setTimeout(() => setLoadingMsg('Generating via AI — this may take a minute…'), 5000);
+  const saveToHistory = (entry) => {
+    setHistory(prev => {
+      const next = [entry, ...prev.filter(h => h.id !== entry.id)].slice(0, 10);
+      localStorage.setItem('yte_history', JSON.stringify(next));
+      return next;
+    });
+  };
 
-      let res;
-      try {
-        res = await fetch(`/api/transcript?videoId=${videoId}&lang=${lang}`, { signal: controller.signal });
-      } catch (fetchErr) {
-        clearTimeout(hint);
-        clearTimeout(clientTimeout);
-        throw fetchErr.name === 'AbortError'
-          ? new Error('Request timed out. The video may be too long or unavailable.')
-          : fetchErr;
-      }
+  const loadFromHistory = (entry) => {
+    setVideoUrl(`https://youtube.com/watch?v=${entry.id}`);
+    setPreviewId(entry.id);
+    setTranscript(entry.transcript);
+    setSegments(entry.segments || []);
+    setTranscriptSource(entry.source || '');
+    setCurrentVideoId(entry.id);
+    setError('');
+    setSearch('');
+    setShowHistory(false);
+  };
+
+  const getTranscript = async () => {
+    const videoId = extractVideoId(videoUrl);
+    if (!videoId) { setError('Invalid YouTube URL'); return; }
+
+    setError(''); setTranscript(''); setTranscriptSource('');
+    setSegments([]); setCurrentVideoId(null); setSearch('');
+    setLoading(true);
+    setLoadingMsg('Looking for subtitles…');
+
+    const controller = new AbortController();
+    const clientTimeout = setTimeout(() => controller.abort(), 180000);
+    const hint = setTimeout(() => setLoadingMsg('Generating via AI — this may take a minute…'), 5000);
+
+    let res;
+    try {
+      res = await fetch(`/api/transcript?videoId=${videoId}&lang=${lang}`, { signal: controller.signal });
+    } catch (fetchErr) {
       clearTimeout(hint);
       clearTimeout(clientTimeout);
-      const data = await res.json();
+      const msg = fetchErr.name === 'AbortError'
+        ? 'Request timed out. The video may be too long or unavailable.'
+        : fetchErr.message;
+      setError(msg);
+      setLoading(false); setLoadingMsg('');
+      return;
+    }
+    clearTimeout(hint);
+    clearTimeout(clientTimeout);
 
+    try {
+      const data = await res.json();
       if (!res.ok) throw new Error(data.details ? `${data.error}: ${data.details}` : (data.error || 'Failed to fetch transcript'));
-      if (data.transcript) { setTranscript(data.transcript); setTranscriptSource(data.source || ''); }
-      else throw new Error("Transcript not available");
+      if (data.transcript) {
+        setTranscript(data.transcript);
+        setSegments(data.segments || []);
+        setTranscriptSource(data.source || '');
+        setCurrentVideoId(videoId);
+        saveToHistory({
+          id: videoId,
+          transcript: data.transcript,
+          segments: data.segments || [],
+          source: data.source || '',
+          date: new Date().toISOString(),
+          thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+        });
+      } else throw new Error('Transcript not available');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -238,7 +306,38 @@ const App = () => {
     });
   };
 
+  const copyAsMarkdown = () => {
+    let md;
+    if (segments.length > 0) {
+      md = segments
+        .map(s => `**[${formatTime(s.seconds)}](https://youtube.com/watch?v=${currentVideoId}&t=${s.seconds}s)** ${s.text}`)
+        .join('\n\n');
+    } else {
+      md = transcript;
+    }
+    navigator.clipboard.writeText(md).then(() => {
+      setCopied(true); setTimeout(() => setCopied(false), 2000);
+    });
+    setShowDownloadMenu(false);
+  };
+
+  const highlightText = (text) => {
+    if (!search.trim()) return text;
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(${escaped})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map((part, i) =>
+      regex.test(part)
+        ? <mark key={i} style={{ background: '#fef08a', borderRadius: 2, padding: '0 1px' }}>{part}</mark>
+        : part
+    );
+  };
+
   const wordCount = transcript ? transcript.trim().split(/\s+/).length : 0;
+  const isShortTranscript = transcript && wordCount < 50;
+  const matchCount = search.trim() && transcript
+    ? (transcript.match(new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')) || []).length
+    : 0;
 
   return (
     <>
@@ -246,22 +345,25 @@ const App = () => {
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         .fade-up { animation: fadeUp 0.35s ease forwards; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
       `}</style>
 
-      {/* Page background */}
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-16 px-4 pb-24"
-        style={{ background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #fef2f2 100%)' }}>
+      {/* Dark page background */}
+      <div className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center py-16 px-4 pb-24"
+        style={{ background: 'linear-gradient(135deg, #0a0f1e 0%, #111827 50%, #0d1117 100%)' }}>
 
         {/* Decorative blobs */}
-        <div style={{ position:'absolute', top:-80, right:-80, width:320, height:320,
-          borderRadius:'50%', background:'radial-gradient(circle, rgba(239,68,68,0.12) 0%, transparent 70%)', pointerEvents:'none' }} />
-        <div style={{ position:'absolute', bottom:-60, left:-60, width:260, height:260,
-          borderRadius:'50%', background:'radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', top:-80, right:-80, width:360, height:360,
+          borderRadius:'50%', background:'radial-gradient(circle, rgba(239,68,68,0.18) 0%, transparent 70%)', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', bottom:-60, left:-60, width:280, height:280,
+          borderRadius:'50%', background:'radial-gradient(circle, rgba(99,102,241,0.14) 0%, transparent 70%)', pointerEvents:'none' }} />
 
         {/* Card */}
         <div className="w-full max-w-lg relative" style={{ animation: 'fadeUp 0.4s ease' }}>
           <div className="bg-white rounded-3xl overflow-hidden"
-            style={{ boxShadow: '0 1px 0 rgba(255,255,255,0.8) inset, 0 20px 60px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)' }}>
+            style={{ boxShadow: '0 30px 90px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06) inset' }}>
 
             {/* Card top accent bar */}
             <div style={{ height: 4, background: 'linear-gradient(90deg, #ef4444, #f97316)' }} />
@@ -306,9 +408,16 @@ const App = () => {
                     <input
                       type="text"
                       value={videoUrl}
-                      onChange={e => setVideoUrl(e.target.value)}
+                      onChange={handleUrlChange}
+                      onFocus={(e) => {
+                        handleInputFocus();
+                        e.target.style.borderColor = '#ef4444';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.1)';
+                        e.target.style.background = '#fff';
+                      }}
+                      onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; e.target.style.background = '#f8fafc'; }}
                       onKeyDown={e => e.key === 'Enter' && !loading && getTranscript()}
-                      placeholder="https://youtube.com/watch?v=..."
+                      placeholder="https://youtube.com/watch?v=…"
                       style={{
                         width: '100%', boxSizing: 'border-box',
                         padding: '11px 14px 11px 38px',
@@ -317,10 +426,24 @@ const App = () => {
                         outline: 'none', background: '#f8fafc',
                         transition: 'border-color 0.15s, box-shadow 0.15s',
                       }}
-                      onFocus={e => { e.target.style.borderColor = '#ef4444'; e.target.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.1)'; e.target.style.background = '#fff'; }}
-                      onBlur={e  => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; e.target.style.background = '#f8fafc'; }}
                     />
                   </div>
+
+                  {/* Video preview thumbnail */}
+                  {previewId && !transcript && !loading && (
+                    <div className="fade-up" style={{ marginTop: 10, borderRadius: 10, overflow: 'hidden', border: '1.5px solid #e2e8f0', position: 'relative' }}>
+                      <img
+                        src={`https://img.youtube.com/vi/${previewId}/mqdefault.jpg`}
+                        alt="Video preview"
+                        style={{ width: '100%', display: 'block', maxHeight: 160, objectFit: 'cover' }}
+                        onError={e => { e.target.parentElement.style.display = 'none'; }}
+                      />
+                      <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55) 100%)' }} />
+                      <div style={{ position:'absolute', bottom:8, left:10, fontSize:11, fontWeight:600, color:'rgba(255,255,255,0.85)', fontFamily:'monospace' }}>
+                        {previewId}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Language select */}
@@ -405,12 +528,43 @@ const App = () => {
               {/* ── Transcript result ── */}
               {transcript && (
                 <div className="fade-up" style={{ marginTop: 24 }}>
+
+                  {/* Hero thumbnail */}
+                  {currentVideoId && (
+                    <a href={`https://youtube.com/watch?v=${currentVideoId}`} target="_blank" rel="noopener noreferrer"
+                      style={{ display: 'block', marginBottom: 12, borderRadius: 12, overflow: 'hidden', border: '1.5px solid #e2e8f0', textDecoration: 'none', position: 'relative' }}>
+                      <img
+                        src={`https://img.youtube.com/vi/${currentVideoId}/mqdefault.jpg`}
+                        alt="Video thumbnail"
+                        style={{ width: '100%', display: 'block' }}
+                      />
+                      <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <div style={{ width:44, height:44, borderRadius:'50%', background:'rgba(0,0,0,0.65)', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)' }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </div>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* Short transcript warning */}
+                  {isShortTranscript && (
+                    <div className="fade-up" style={{
+                      marginBottom: 12, padding: '8px 12px',
+                      background: '#fffbeb', border: '1px solid #fde68a',
+                      borderRadius: 8, fontSize: 12, color: '#92400e',
+                      display: 'flex', alignItems: 'center', gap: 6,
+                    }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                      </svg>
+                      Transcript is very short — subtitle coverage may be limited.
+                    </div>
+                  )}
+
                   {/* Result card */}
-                  <div style={{
-                    border: '1.5px solid #e2e8f0', borderRadius: 16,
-                    overflow: 'hidden',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-                  }}>
+                  <div style={{ border: '1.5px solid #e2e8f0', borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+
                     {/* Result header */}
                     <div style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -468,7 +622,7 @@ const App = () => {
                           {showDownloadMenu && (
                             <div className="fade-up" style={{
                               position: 'absolute', right: 0, top: 'calc(100% + 6px)',
-                              width: 160, background: 'white',
+                              width: 188, background: 'white',
                               border: '1px solid #e2e8f0', borderRadius: 12,
                               boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
                               overflow: 'hidden', zIndex: 20,
@@ -476,6 +630,7 @@ const App = () => {
                               {[
                                 { label: 'Save as TXT', sub: 'Plain text file', color: '#64748b', fn: downloadTxt },
                                 { label: 'Save as PDF', sub: 'Formatted document', color: '#ef4444', fn: downloadPdf },
+                                { label: 'Copy as Markdown', sub: 'With timestamps', color: '#7c3aed', fn: copyAsMarkdown },
                               ].map((item, i) => (
                                 <React.Fragment key={item.label}>
                                   {i > 0 && <div style={{ height: 1, background: '#f1f5f9' }} />}
@@ -502,19 +657,117 @@ const App = () => {
                       </div>
                     </div>
 
+                    {/* Search bar */}
+                    <div style={{ padding: '8px 12px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                      </svg>
+                      <input
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        placeholder="Search transcript…"
+                        style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: '#334155' }}
+                      />
+                      {search && matchCount > 0 && (
+                        <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500, whiteSpace: 'nowrap' }}>{matchCount} match{matchCount !== 1 ? 'es' : ''}</span>
+                      )}
+                      {search && (
+                        <button onClick={() => setSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0, fontSize: 18, lineHeight: 1 }}>×</button>
+                      )}
+                    </div>
+
                     {/* Transcript text */}
                     <div style={{
                       padding: '16px', maxHeight: 320, overflowY: 'auto',
                       fontSize: 13.5, lineHeight: 1.75, color: '#334155',
                       background: 'white',
                     }}>
-                      {transcript}
+                      {segments.length > 0 ? (
+                        segments.map((seg, i) => (
+                          <span key={i}>
+                            <a
+                              href={`https://youtube.com/watch?v=${currentVideoId}&t=${seg.seconds}s`}
+                              target="_blank" rel="noopener noreferrer"
+                              title={`Jump to ${formatTime(seg.seconds)}`}
+                              style={{ color: '#ef4444', fontWeight: 700, fontSize: 11, marginRight: 5, textDecoration: 'none', fontFamily: 'monospace', letterSpacing: '-0.02em', flexShrink: 0 }}
+                            >
+                              {formatTime(seg.seconds)}
+                            </a>
+                            {highlightText(seg.text)}{' '}
+                          </span>
+                        ))
+                      ) : (
+                        <span>{highlightText(transcript)}</span>
+                      )}
                     </div>
                   </div>
                 </div>
               )}
             </div>
           </div>
+
+          {/* ── History panel ── */}
+          {history.length > 0 && (
+            <div style={{ marginTop: 12 }}>
+              <button
+                onClick={() => setShowHistory(v => !v)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  width: '100%', justifyContent: 'center',
+                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 10, padding: '7px 14px',
+                  color: '#94a3b8', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#f1f5f9'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#94a3b8'; }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                {showHistory ? 'Hide' : 'Recent transcripts'} ({history.length})
+                <span style={{ opacity: 0.5, transform: showHistory ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>
+              </button>
+
+              {showHistory && (
+                <div className="fade-up" style={{
+                  marginTop: 8,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 14, overflow: 'hidden',
+                }}>
+                  {history.map((h, i) => (
+                    <React.Fragment key={h.id}>
+                      {i > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />}
+                      <button
+                        onClick={() => loadFromHistory(h)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          width: '100%', padding: '12px 16px',
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          textAlign: 'left', transition: 'background 0.1s',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                      >
+                        <img
+                          src={h.thumbnail} alt=""
+                          style={{ width: 64, height: 36, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }}
+                          onError={e => { e.target.style.display = 'none'; }}
+                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', fontFamily: 'monospace' }}>{h.id}</div>
+                          <div style={{ fontSize: 11, color: '#64748b', marginTop: 3 }}>
+                            {h.source === 'whisper' ? '🤖 AI' : '📝 Subtitles'} · {new Date(h.date).toLocaleDateString()} · {h.transcript.trim().split(/\s+/).length.toLocaleString()} words
+                          </div>
+                        </div>
+                      </button>
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
