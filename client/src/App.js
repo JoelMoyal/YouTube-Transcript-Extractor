@@ -183,6 +183,7 @@ const App = () => {
   const [summary, setSummary]             = useState('');
   const [summarizing, setSummarizing]     = useState(false);
   const [summaryCopied, setSummaryCopied] = useState(false);
+  const [showTimestamps, setShowTimestamps] = useState(true);
 
   const downloadMenuRef = useRef(null);
 
@@ -682,6 +683,26 @@ const App = () => {
                       </div>
 
                       <div style={{ display: 'flex', gap: 6 }}>
+                        {/* Timestamps toggle */}
+                        {segments.length > 0 && (
+                          <button
+                            onClick={() => setShowTimestamps(v => !v)}
+                            title={showTimestamps ? 'Hide timestamps' : 'Show timestamps'}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 4,
+                              padding: '5px 10px', borderRadius: 8, border: '1px solid #e2e8f0',
+                              background: showTimestamps ? '#f0fdf4' : 'white', cursor: 'pointer',
+                              fontSize: 12, fontWeight: 600, color: showTimestamps ? '#16a34a' : '#94a3b8',
+                              transition: 'all 0.15s',
+                            }}
+                          >
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            {showTimestamps ? 'TS on' : 'TS off'}
+                          </button>
+                        )}
+
                         {/* Summarize */}
                         <button
                           onClick={summarize}
@@ -802,7 +823,7 @@ const App = () => {
                       fontSize: 13.5, lineHeight: 1.75, color: '#334155',
                       background: 'white',
                     }}>
-                      {segments.length > 0 ? (
+                      {segments.length > 0 && showTimestamps ? (
                         segments.map((seg, i) => (
                           <span key={i}>
                             <a
