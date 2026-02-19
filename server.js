@@ -49,14 +49,13 @@ function parseVTT(content) {
       currentSeconds = Math.floor(parseTimestamp(tsMatch[1]));
       continue;
     }
-    if (/^\d+$/.test(trimmed)) continue; // cue ID
+    if (/^\d+$/.test(trimmed)) continue;
 
     const cleaned = trimmed.replace(/<[^>]+>/g, '').trim();
     if (cleaned) currentTexts.push(cleaned);
   }
   flush();
 
-  // Deduplicate consecutive identical segments
   const seen = new Set();
   const deduped = segments.filter(s => {
     if (seen.has(s.text)) return false;
@@ -94,7 +93,6 @@ function toWhisperLang(lang) {
   return lang.split('-')[0];
 }
 
-// Classify a yt-dlp error into a user-friendly message
 function classifyYtdlpError(err) {
   const msg = (err?.stderr || err?.message || '').toLowerCase();
   if (msg.includes('429') || msg.includes('too many requests'))
@@ -117,20 +115,31 @@ async function cleanup(tmpDir, prefix) {
   } catch {}
 }
 
+// ── SSE transcript endpoint ───────────────────────────────────────────────────
 app.get('/api/transcript', async (req, res) => {
   const { videoId, lang } = req.query;
   if (!videoId) return res.status(400).json({ error: 'Missing videoId parameter' });
-
-  if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+  if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId))
     return res.status(400).json({ error: 'Invalid videoId format' });
-  }
 
   const safeLang = lang && /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,10})?$/.test(lang) ? lang : 'en';
   const tmpDir = os.tmpdir();
   const outputTemplate = path.join(tmpDir, videoId);
 
+  // Set up SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const send = (event, data) => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+
   try {
-    // ── Step 1: Try subtitle extraction ──────────────────────────────────────
+    // ── Stage 1: subtitles ────────────────────────────────────────────────────
+    send('progress', { stage: 'subtitles', message: 'Looking for subtitles…', percent: 10 });
+
     let lastSubError = null;
 
     for (const langArgs of [['--sub-lang', safeLang], []]) {
@@ -155,10 +164,9 @@ app.get('/api/transcript', async (req, res) => {
       }
     }
 
-    // If yt-dlp threw a recognisable error on both passes, surface it now
     if (lastSubError) {
       const friendly = classifyYtdlpError(lastSubError);
-      if (friendly) return res.status(500).json({ error: friendly });
+      if (friendly) { send('error', { error: friendly }); res.end(); return; }
     }
 
     const subFile = (await fsPromises.readdir(tmpDir)).find(
@@ -166,16 +174,20 @@ app.get('/api/transcript', async (req, res) => {
     );
 
     if (subFile) {
+      send('progress', { stage: 'subtitles', message: 'Parsing subtitles…', percent: 80 });
       const subPath = path.join(tmpDir, subFile);
       const content = await fsPromises.readFile(subPath, 'utf-8');
       await fsPromises.unlink(subPath);
       const result = subFile.endsWith('.json3') ? parseJSON3(content) : parseVTT(content);
-      return res.json({ transcript: result.transcript, segments: result.segments, source: 'subtitles' });
+      send('done', { transcript: result.transcript, segments: result.segments, source: 'subtitles' });
+      res.end();
+      return;
     }
 
-    // ── Step 2: No subtitles — fall back to Whisper STT ──────────────────────
-    const audioBase = path.join(tmpDir, `${videoId}_audio`);
+    // ── Stage 2: download audio ───────────────────────────────────────────────
+    send('progress', { stage: 'audio', message: 'No subtitles found — downloading audio…', percent: 30 });
 
+    const audioBase = path.join(tmpDir, `${videoId}_audio`);
     await execFileAsync('yt-dlp', [
       '--extract-audio',
       '--audio-format', 'mp3',
@@ -183,17 +195,21 @@ app.get('/api/transcript', async (req, res) => {
       '--cookies-from-browser', 'chrome',
       '-o', audioBase,
       `https://www.youtube.com/watch?v=${videoId}`
-    ], { timeout: 300000 }); // 5 min for download
+    ], { timeout: 300000 });
+
+    // ── Stage 3: Whisper ──────────────────────────────────────────────────────
+    send('progress', { stage: 'whisper', message: 'Transcribing with AI — this may take a few minutes…', percent: 60 });
 
     const audioFile = `${audioBase}.mp3`;
-
     await execFileAsync('whisper', [
       audioFile,
       '--model', 'base',
       '--output_format', 'vtt',
       '--output_dir', tmpDir,
       '--language', toWhisperLang(safeLang)
-    ], { timeout: 600000 }); // 10 min for transcription
+    ], { timeout: 600000 });
+
+    send('progress', { stage: 'whisper', message: 'Finalising transcript…', percent: 95 });
 
     const whisperVtt = path.join(tmpDir, `${videoId}_audio.vtt`);
     const whisperContent = await fsPromises.readFile(whisperVtt, 'utf-8');
@@ -202,12 +218,14 @@ app.get('/api/transcript', async (req, res) => {
     await fsPromises.unlink(audioFile).catch(() => {});
     await fsPromises.unlink(whisperVtt).catch(() => {});
 
-    return res.json({ transcript: result.transcript, segments: result.segments, source: 'whisper' });
+    send('done', { transcript: result.transcript, segments: result.segments, source: 'whisper' });
+    res.end();
 
   } catch (error) {
     await cleanup(tmpDir, videoId);
     const friendly = classifyYtdlpError(error);
-    res.status(500).json({ error: friendly || 'Failed to fetch transcript', details: friendly ? undefined : error.message });
+    send('error', { error: friendly || 'Failed to fetch transcript', details: friendly ? undefined : error.message });
+    res.end();
   }
 });
 

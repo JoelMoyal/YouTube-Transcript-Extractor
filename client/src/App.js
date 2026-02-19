@@ -170,6 +170,8 @@ const App = () => {
   const [currentVideoId, setCurrentVideoId] = useState(null);
   const [loading, setLoading]             = useState(false);
   const [loadingMsg, setLoadingMsg]       = useState('');
+  const [loadingPercent, setLoadingPercent] = useState(0);
+  const [loadingStage, setLoadingStage]   = useState('');
   const [error, setError]                 = useState('');
   const [copied, setCopied]               = useState(false);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
@@ -229,57 +231,71 @@ const App = () => {
     setShowHistory(false);
   };
 
-  const getTranscript = async () => {
+  const getTranscript = () => {
     const videoId = extractVideoId(videoUrl);
     if (!videoId) { setError('Invalid YouTube URL'); return; }
 
     setError(''); setTranscript(''); setTranscriptSource('');
     setSegments([]); setCurrentVideoId(null); setSearch('');
-    setLoading(true);
-    setLoadingMsg('Looking for subtitles…');
+    setLoading(true); setLoadingMsg('Looking for subtitles…');
+    setLoadingPercent(5); setLoadingStage('subtitles');
 
-    const controller = new AbortController();
-    const clientTimeout = setTimeout(() => controller.abort(), 180000);
-    const hint = setTimeout(() => setLoadingMsg('Generating via AI — this may take a minute…'), 5000);
+    const es = new EventSource(`/api/transcript?videoId=${videoId}&lang=${lang}`);
 
-    let res;
-    try {
-      res = await fetch(`/api/transcript?videoId=${videoId}&lang=${lang}`, { signal: controller.signal });
-    } catch (fetchErr) {
-      clearTimeout(hint);
-      clearTimeout(clientTimeout);
-      const msg = fetchErr.name === 'AbortError'
-        ? 'Request timed out. The video may be too long or unavailable.'
-        : fetchErr.message;
-      setError(msg);
-      setLoading(false); setLoadingMsg('');
-      return;
-    }
-    clearTimeout(hint);
-    clearTimeout(clientTimeout);
+    // 3-minute hard timeout
+    const killTimer = setTimeout(() => {
+      es.close();
+      setError('Request timed out. The video may be too long or unavailable.');
+      setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+    }, 180000);
 
-    try {
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.details ? `${data.error}: ${data.details}` : (data.error || 'Failed to fetch transcript'));
-      if (data.transcript) {
-        setTranscript(data.transcript);
-        setSegments(data.segments || []);
-        setTranscriptSource(data.source || '');
-        setCurrentVideoId(videoId);
-        saveToHistory({
-          id: videoId,
-          transcript: data.transcript,
-          segments: data.segments || [],
-          source: data.source || '',
-          date: new Date().toISOString(),
-          thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
-        });
-      } else throw new Error('Transcript not available');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false); setLoadingMsg('');
-    }
+    es.addEventListener('progress', (e) => {
+      const { message, percent, stage } = JSON.parse(e.data);
+      setLoadingMsg(message);
+      setLoadingPercent(percent || 0);
+      setLoadingStage(stage || '');
+    });
+
+    es.addEventListener('done', (e) => {
+      clearTimeout(killTimer);
+      es.close();
+      const data = JSON.parse(e.data);
+      setTranscript(data.transcript);
+      setSegments(data.segments || []);
+      setTranscriptSource(data.source || '');
+      setCurrentVideoId(videoId);
+      setLoadingPercent(100);
+      saveToHistory({
+        id: videoId,
+        transcript: data.transcript,
+        segments: data.segments || [],
+        source: data.source || '',
+        date: new Date().toISOString(),
+        thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+      });
+      setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+    });
+
+    es.addEventListener('error', (e) => {
+      clearTimeout(killTimer);
+      es.close();
+      try {
+        const data = JSON.parse(e.data);
+        setError(data.details ? `${data.error}: ${data.details}` : (data.error || 'Failed to fetch transcript'));
+      } catch {
+        setError('Connection lost. Please try again.');
+      }
+      setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+    });
+
+    // EventSource onerror fires on network errors
+    es.onerror = () => {
+      if (es.readyState === EventSource.CLOSED) return; // already handled
+      clearTimeout(killTimer);
+      es.close();
+      setError('Connection lost. Please try again.');
+      setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+    };
   };
 
   const downloadTxt = () => {
@@ -498,7 +514,7 @@ const App = () => {
                   onMouseLeave={e => { e.currentTarget.style.boxShadow='0 4px 14px rgba(239,68,68,0.4)'; e.currentTarget.style.transform='translateY(0)'; }}
                 >
                   {loading ? (
-                    <><SpinnerIcon /><span style={{ fontSize: 13, fontWeight: 500 }}>{loadingMsg}</span></>
+                    <><SpinnerIcon /><span style={{ fontSize: 13, fontWeight: 500 }}>{loadingMsg || 'Loading…'}</span></>
                   ) : (
                     <>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -509,6 +525,45 @@ const App = () => {
                   )}
                 </button>
               </div>
+
+              {/* ── Progress bar ── */}
+              {loading && loadingPercent > 0 && (
+                <div style={{ marginTop: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {['subtitles', 'audio', 'whisper'].map((stage) => {
+                        const labels = { subtitles: 'Subtitles', audio: 'Audio', whisper: 'AI' };
+                        const stageOrder = ['subtitles', 'audio', 'whisper'];
+                        const currentIdx = stageOrder.indexOf(loadingStage);
+                        const thisIdx = stageOrder.indexOf(stage);
+                        const isDone = thisIdx < currentIdx;
+                        const isActive = stage === loadingStage;
+                        return (
+                          <span key={stage} style={{
+                            fontSize: 10, fontWeight: 600, letterSpacing: '0.04em',
+                            padding: '2px 7px', borderRadius: 999,
+                            background: isDone ? '#dcfce7' : isActive ? '#fef2f2' : '#f1f5f9',
+                            color: isDone ? '#16a34a' : isActive ? '#ef4444' : '#94a3b8',
+                            transition: 'all 0.3s',
+                          }}>
+                            {isDone ? '✓ ' : ''}{labels[stage]}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{loadingPercent}%</span>
+                  </div>
+                  <div style={{ height: 4, borderRadius: 999, background: '#f1f5f9', overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${loadingPercent}%`,
+                      background: 'linear-gradient(90deg, #ef4444, #f97316)',
+                      borderRadius: 999,
+                      transition: 'width 0.6s ease',
+                    }} />
+                  </div>
+                </div>
+              )}
 
               {/* ── Error ── */}
               {error && (
