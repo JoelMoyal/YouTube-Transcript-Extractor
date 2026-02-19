@@ -180,6 +180,8 @@ const App = () => {
     try { return JSON.parse(localStorage.getItem('yte_history') || '[]'); } catch { return []; }
   });
   const [showHistory, setShowHistory]     = useState(false);
+  const [summary, setSummary]             = useState('');
+  const [summarizing, setSummarizing]     = useState(false);
 
   const downloadMenuRef = useRef(null);
 
@@ -335,6 +337,24 @@ const App = () => {
       setCopied(true); setTimeout(() => setCopied(false), 2000);
     });
     setShowDownloadMenu(false);
+  };
+
+  const summarize = async () => {
+    setSummarizing(true); setSummary('');
+    try {
+      const res = await fetch('/api/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to summarize');
+      setSummary(data.summary);
+    } catch (err) {
+      setSummary(`Error: ${err.message}`);
+    } finally {
+      setSummarizing(false);
+    }
   };
 
   const highlightText = (text) => {
@@ -639,6 +659,28 @@ const App = () => {
                       </div>
 
                       <div style={{ display: 'flex', gap: 6 }}>
+                        {/* Summarize */}
+                        <button
+                          onClick={summarize}
+                          disabled={summarizing}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 5,
+                            padding: '5px 10px', borderRadius: 8, border: '1px solid #e2e8f0',
+                            background: summarizing ? '#f5f3ff' : 'white', cursor: summarizing ? 'not-allowed' : 'pointer',
+                            fontSize: 12, fontWeight: 600, color: '#7c3aed',
+                            transition: 'all 0.15s',
+                          }}
+                          onMouseEnter={e => { if (!summarizing) e.currentTarget.style.background = '#f5f3ff'; }}
+                          onMouseLeave={e => { if (!summarizing) e.currentTarget.style.background = 'white'; }}
+                        >
+                          {summarizing ? (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                          ) : (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                          )}
+                          {summarizing ? 'Summarizing…' : 'Summarize'}
+                        </button>
+
                         {/* Copy */}
                         <button
                           onClick={copyToClipboard}
@@ -756,6 +798,22 @@ const App = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* AI Summary panel */}
+                  {summary && (
+                    <div className="fade-up" style={{ marginTop: 12, border: '1.5px solid #e9d5ff', borderRadius: 14, overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f5f3ff', borderBottom: '1px solid #e9d5ff' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed' }}>AI Summary</span>
+                        </div>
+                        <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#a78bfa', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
+                      </div>
+                      <div style={{ padding: '14px 16px', background: 'white', fontSize: 13, lineHeight: 1.75, color: '#334155', whiteSpace: 'pre-wrap' }}>
+                        {summary}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

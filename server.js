@@ -5,6 +5,7 @@ const fsPromises = require('fs').promises;
 const os = require('os');
 const { execFile } = require('child_process');
 const { promisify } = require('util');
+const Anthropic = require('@anthropic-ai/sdk');
 
 const execFileAsync = promisify(execFile);
 const app = express();
@@ -226,6 +227,33 @@ app.get('/api/transcript', async (req, res) => {
     const friendly = classifyYtdlpError(error);
     send('error', { error: friendly || 'Failed to fetch transcript', details: friendly ? undefined : error.message });
     res.end();
+  }
+});
+
+// ── AI summary endpoint ───────────────────────────────────────────────────────
+app.post('/api/summarize', async (req, res) => {
+  const { transcript } = req.body;
+  if (!transcript || typeof transcript !== 'string')
+    return res.status(400).json({ error: 'Missing transcript' });
+  if (transcript.length > 100000)
+    return res.status(400).json({ error: 'Transcript too long to summarize' });
+  if (!process.env.ANTHROPIC_API_KEY)
+    return res.status(503).json({ error: 'AI summary is not configured (missing ANTHROPIC_API_KEY)' });
+
+  try {
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const message = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: `Summarize the following YouTube video transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 80000)}`,
+      }],
+    });
+    const summary = message.content[0]?.text || '';
+    res.json({ summary });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to summarize', details: err.message });
   }
 });
 
