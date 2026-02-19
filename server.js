@@ -149,7 +149,6 @@ app.get('/api/transcript', async (req, res) => {
           '--skip-download',
           '--write-auto-sub',
           '--write-subs',
-          '--cookies-from-browser', 'chrome',
           ...langArgs,
           '-o', outputTemplate,
           `https://www.youtube.com/watch?v=${videoId}`
@@ -193,7 +192,6 @@ app.get('/api/transcript', async (req, res) => {
       '--extract-audio',
       '--audio-format', 'mp3',
       '--audio-quality', '5',
-      '--cookies-from-browser', 'chrome',
       '-o', audioBase,
       `https://www.youtube.com/watch?v=${videoId}`
     ], { timeout: 300000 });
