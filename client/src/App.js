@@ -186,6 +186,7 @@ const App = () => {
   const [showTimestamps, setShowTimestamps] = useState(true);
 
   const downloadMenuRef = useRef(null);
+  const resultRef = useRef(null);
 
   useEffect(() => {
     const handler = (e) => {
@@ -284,6 +285,7 @@ const App = () => {
       setTranscriptSource(data.source || '');
       setCurrentVideoId(videoId);
       setLoadingPercent(100);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
       saveToHistory({
         id: videoId,
         transcript: data.transcript,
@@ -638,7 +640,7 @@ const App = () => {
 
               {/* ── Transcript result ── */}
               {transcript && (
-                <div className="fade-up" style={{ marginTop: 24 }}>
+                <div ref={resultRef} className="fade-up" style={{ marginTop: 24 }}>
 
                   {/* New transcript button */}
                   <button
