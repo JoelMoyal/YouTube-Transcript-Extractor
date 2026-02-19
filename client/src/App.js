@@ -887,6 +887,9 @@ const App = () => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                           <span style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed' }}>AI Summary</span>
+                          <span style={{ fontSize: 11, color: '#a78bfa', fontWeight: 500 }}>
+                            · {summary.trim().split(/\s+/).length.toLocaleString()} words
+                          </span>
                         </div>
                         <div style={{ display: 'flex', gap: 6 }}>
                           <button
