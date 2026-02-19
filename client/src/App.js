@@ -487,6 +487,14 @@ const App = () => {
                     />
                   </div>
 
+                  {/* Enter key hint */}
+                  {previewId && !transcript && !loading && (
+                    <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <kbd style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '1px 5px', fontSize: 10, fontFamily: 'monospace', fontWeight: 700, color: '#94a3b8', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 4, boxShadow: '0 1px 0 #cbd5e1' }}>↵ Enter</kbd>
+                      <span style={{ fontSize: 11, color: '#94a3b8' }}>to extract</span>
+                    </div>
+                  )}
+
                   {/* Video preview thumbnail */}
                   {previewId && !transcript && !loading && (
                     <div className="fade-up" style={{ marginTop: 10, borderRadius: 10, overflow: 'hidden', border: '1.5px solid #e2e8f0', position: 'relative' }}>
