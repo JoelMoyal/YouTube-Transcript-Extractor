@@ -602,7 +602,13 @@ const App = () => {
                   <svg style={{ flexShrink: 0, marginTop: 1 }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                   </svg>
-                  <span>{error}</span>
+                  <span style={{ flex: 1 }}>{error}</span>
+                  <button
+                    onClick={getTranscript}
+                    style={{ flexShrink: 0, border: '1px solid #fca5a5', background: 'white', borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 600, color: '#dc2626', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                  >
+                    Retry
+                  </button>
                 </div>
               )}
 
