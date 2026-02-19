@@ -5,7 +5,7 @@ const fsPromises = require('fs').promises;
 const os = require('os');
 const { execFile } = require('child_process');
 const { promisify } = require('util');
-const Anthropic = require('@anthropic-ai/sdk');
+const Groq = require('groq-sdk');
 
 const execFileAsync = promisify(execFile);
 const app = express();
@@ -237,20 +237,20 @@ app.post('/api/summarize', async (req, res) => {
     return res.status(400).json({ error: 'Missing transcript' });
   if (transcript.length > 100000)
     return res.status(400).json({ error: 'Transcript too long to summarize' });
-  if (!process.env.ANTHROPIC_API_KEY)
-    return res.status(503).json({ error: 'AI summary is not configured (missing ANTHROPIC_API_KEY)' });
+  if (!process.env.GROQ_API_KEY)
+    return res.status(503).json({ error: 'AI summary is not configured (missing GROQ_API_KEY)' });
 
   try {
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    const message = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+    const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    const completion = await client.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
       max_tokens: 1024,
       messages: [{
         role: 'user',
         content: `Summarize the following YouTube video transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 80000)}`,
       }],
     });
-    const summary = message.content[0]?.text || '';
+    const summary = completion.choices[0]?.message?.content || '';
     res.json({ summary });
   } catch (err) {
     res.status(500).json({ error: 'Failed to summarize', details: err.message });
