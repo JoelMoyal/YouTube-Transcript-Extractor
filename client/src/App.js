@@ -222,6 +222,15 @@ const App = () => {
     });
   };
 
+  const deleteFromHistory = (id, e) => {
+    e.stopPropagation();
+    setHistory(prev => {
+      const next = prev.filter(h => h.id !== id);
+      localStorage.setItem('yte_history', JSON.stringify(next));
+      return next;
+    });
+  };
+
   const loadFromHistory = (entry) => {
     setVideoUrl(`https://youtube.com/watch?v=${entry.id}`);
     setPreviewId(entry.id);
@@ -897,6 +906,13 @@ const App = () => {
                             {h.source === 'whisper' ? '🤖 AI' : '📝 Subtitles'} · {new Date(h.date).toLocaleDateString()} · {h.transcript.trim().split(/\s+/).length.toLocaleString()} words
                           </div>
                         </div>
+                        <button
+                          onClick={(e) => deleteFromHistory(h.id, e)}
+                          title="Remove from history"
+                          style={{ flexShrink: 0, border: 'none', background: 'none', cursor: 'pointer', color: '#475569', fontSize: 16, lineHeight: 1, padding: '4px 6px', borderRadius: 6, transition: 'all 0.1s' }}
+                          onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.background = 'none'; }}
+                        >×</button>
                       </button>
                     </React.Fragment>
                   ))}
