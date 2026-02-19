@@ -244,6 +244,12 @@ const App = () => {
     setShowHistory(false);
   };
 
+  const resetAll = () => {
+    setVideoUrl(''); setPreviewId(null); setTranscript(''); setSegments([]);
+    setTranscriptSource(''); setCurrentVideoId(null); setError(''); setSearch('');
+    setSummary(''); setShowTimestamps(true);
+  };
+
   const getTranscript = () => {
     const videoId = extractVideoId(videoUrl);
     if (!videoId) { setError('Invalid YouTube URL'); return; }
@@ -625,6 +631,24 @@ const App = () => {
               {/* ── Transcript result ── */}
               {transcript && (
                 <div className="fade-up" style={{ marginTop: 24 }}>
+
+                  {/* New transcript button */}
+                  <button
+                    onClick={resetAll}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 5, marginBottom: 14,
+                      border: '1px solid #e2e8f0', background: '#f8fafc', borderRadius: 8,
+                      padding: '5px 12px', fontSize: 12, fontWeight: 600, color: '#64748b',
+                      cursor: 'pointer', transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#334155'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#64748b'; }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    New Transcript
+                  </button>
 
                   {/* Hero thumbnail */}
                   {currentVideoId && (
