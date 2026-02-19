@@ -347,7 +347,11 @@ const App = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transcript }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch {
+        throw new Error(res.ok ? 'Unexpected server response' : `Server error ${res.status}`);
+      }
       if (!res.ok) throw new Error(data.error || 'Failed to summarize');
       setSummary(data.summary);
     } catch (err) {
