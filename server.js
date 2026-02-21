@@ -19,6 +19,19 @@ if (process.env.YT_COOKIES) {
   console.log('YouTube cookies loaded from YT_COOKIES env var');
 }
 
+// Build cookie args: file (Railway) → browser (local dev) → none
+const cookieArgs = cookiesPath
+  ? ['--cookies', cookiesPath]
+  : process.env.RAILWAY_ENVIRONMENT
+    ? []
+    : ['--cookies-from-browser', 'chrome'];
+
+// Resolve Node.js path for yt-dlp JS runtime (avoids "no runtime found" warning)
+const { execFileSync } = require('child_process');
+let nodePath = 'node';
+try { nodePath = execFileSync('which', ['node'], { encoding: 'utf8' }).trim(); } catch {}
+const jsRuntimeArgs = ['--js-runtimes', `node:${nodePath}`];
+
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
@@ -157,8 +170,8 @@ app.get('/api/transcript', async (req, res) => {
           '--skip-download',
           '--write-auto-sub',
           '--write-subs',
-          '--js-runtimes', 'node',
-          ...(cookiesPath ? ['--cookies', cookiesPath] : []),
+          ...jsRuntimeArgs,
+          ...cookieArgs,
           ...langArgs,
           '-o', outputTemplate,
           `https://www.youtube.com/watch?v=${videoId}`
@@ -202,8 +215,8 @@ app.get('/api/transcript', async (req, res) => {
       '--extract-audio',
       '--audio-format', 'mp3',
       '--audio-quality', '5',
-      '--js-runtimes', 'node',
-      ...(cookiesPath ? ['--cookies', cookiesPath] : []),
+      ...jsRuntimeArgs,
+      ...cookieArgs,
       '-o', audioBase,
       `https://www.youtube.com/watch?v=${videoId}`
     ], { timeout: 300000 });
