@@ -146,8 +146,94 @@ const GitHubIcon = () => (
   </svg>
 );
 
+// ── Credits ───────────────────────────────────────────────────────────────────
+const CREDITS_MAX = 20;
+const CREDITS_PERIOD_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+function initCredits() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('yte_credits') || 'null');
+    if (!stored || Date.now() > stored.resetAt) {
+      const fresh = { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
+      localStorage.setItem('yte_credits', JSON.stringify(fresh));
+      return fresh;
+    }
+    return stored;
+  } catch {
+    return { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
+  }
+}
+
+const CreditsWidget = ({ credits }) => {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+  const used = credits?.used ?? 0;
+  const resetAt = credits?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS);
+  const daysLeft = Math.max(0, Math.ceil((resetAt - Date.now()) / 86400000));
+  const pct = Math.min(100, (used / CREDITS_MAX) * 100);
+  const nearLimit = used >= CREDITS_MAX * 0.8;
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          padding: '5px 10px', borderRadius: 8,
+          border: `1px solid ${nearLimit ? 'rgba(180,83,9,0.3)' : P.border}`,
+          background: nearLimit ? 'rgba(180,83,9,0.06)' : P.paper,
+          cursor: 'pointer', transition: 'all 0.15s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = nearLimit ? 'rgba(180,83,9,0.1)' : P.surface; }}
+        onMouseLeave={e => { e.currentTarget.style.background = nearLimit ? 'rgba(180,83,9,0.06)' : P.paper; }}
+      >
+        <svg width="11" height="11" viewBox="0 0 24 24" fill={nearLimit ? P.warning : P.accent}>
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        <span style={{ fontSize: 12, fontWeight: 600, color: nearLimit ? P.warning : P.ink, fontVariantNumeric: 'tabular-nums' }}>
+          {used} / {CREDITS_MAX}
+        </span>
+      </button>
+
+      {open && (
+        <div className="fade-up" style={{
+          position: 'absolute', right: 0, top: 'calc(100% + 8px)',
+          width: 220, background: P.surface, border: `1px solid ${P.border}`,
+          borderRadius: 14, boxShadow: '0 8px 32px rgba(28,25,23,0.12)',
+          padding: '14px 16px', zIndex: 200,
+        }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: P.ink, marginBottom: 10 }}>Free Credits</div>
+
+          {/* Progress bar */}
+          <div style={{ height: 5, borderRadius: 999, background: P.border, overflow: 'hidden', marginBottom: 8 }}>
+            <div style={{
+              height: '100%', width: `${pct}%`, borderRadius: 999,
+              background: nearLimit ? P.warning : P.accent,
+              transition: 'width 0.4s ease',
+            }} />
+          </div>
+
+          <div style={{ fontSize: 12, color: P.muted, marginBottom: 4 }}>
+            <span style={{ color: P.ink, fontWeight: 600 }}>{used} of {CREDITS_MAX}</span> used
+          </div>
+          <div style={{ fontSize: 11, color: P.muted }}>
+            Resets in <span style={{ fontWeight: 600, color: P.ink }}>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ── Navbar ────────────────────────────────────────────────────────────────────
-const Navbar = ({ onAskAI, hasTranscript }) => (
+const Navbar = ({ onAskAI, hasTranscript, credits }) => (
   <nav style={{
     position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
     height: 56, display: 'flex', alignItems: 'center',
@@ -166,7 +252,9 @@ const Navbar = ({ onAskAI, hasTranscript }) => (
 
     <div style={{ flex: 1 }} />
 
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <CreditsWidget credits={credits} />
+      <div style={{ width: 1, height: 18, background: P.border }} />
       <a href="https://joelmoyal.com" target="_blank" rel="noopener noreferrer"
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: 7, color: P.muted, textDecoration: 'none', transition: 'all 0.15s' }}
         onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
@@ -182,7 +270,7 @@ const Navbar = ({ onAskAI, hasTranscript }) => (
       <button
         onClick={onAskAI}
         style={{
-          marginLeft: 6, padding: '7px 16px', borderRadius: 8, border: 'none',
+          marginLeft: 2, padding: '7px 16px', borderRadius: 8, border: 'none',
           background: P.accent, color: 'white',
           fontSize: 13, fontWeight: 600, cursor: 'pointer',
           transition: 'background 0.15s',
@@ -217,6 +305,7 @@ const App = () => {
   const [history, setHistory]             = useState(() => {
     try { return JSON.parse(localStorage.getItem('yte_history') || '[]'); } catch { return []; }
   });
+  const [credits, setCredits] = useState(initCredits);
   const [showBookmarkBanner, setShowBookmarkBanner] = useState(false);
   const [summary, setSummary]             = useState('');
   const [summarizing, setSummarizing]     = useState(false);
@@ -257,6 +346,14 @@ const App = () => {
   const dismissBookmarkBanner = () => {
     setShowBookmarkBanner(false);
     localStorage.setItem('yte_bookmark_dismissed', '1');
+  };
+
+  const incrementCredits = () => {
+    setCredits(prev => {
+      const next = { ...prev, used: prev.used + 1 };
+      localStorage.setItem('yte_credits', JSON.stringify(next));
+      return next;
+    });
   };
 
   const handleInputFocus = async () => {
@@ -372,6 +469,7 @@ const App = () => {
       setCurrentVideoId(videoId);
       setCurrentThumbnail(thumb);
       setLoadingPercent(100);
+      incrementCredits();
       saveToHistory({
         id: videoId, platform, transcript: data.transcript, segments: data.segments || [],
         source: data.source || '', date: new Date().toISOString(),
@@ -546,7 +644,7 @@ const App = () => {
         .bookmark-banner { animation: slideDown 0.3s ease forwards; }
       `}</style>
 
-      <Navbar onAskAI={onNavAskAI} hasTranscript={!!transcript} />
+      <Navbar onAskAI={onNavAskAI} hasTranscript={!!transcript} credits={credits} />
 
       {showBookmarkBanner && (
         <div className="bookmark-banner" style={{
