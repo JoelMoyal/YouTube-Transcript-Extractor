@@ -477,13 +477,22 @@ const App = () => {
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
         @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity:0.4; } 40% { transform: scale(1); opacity:1; } }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
         .fade-up { animation: fadeUp 0.3s ease forwards; }
         * { box-sizing: border-box; }
-        body { margin: 0; background: ${P.paper}; font-family: system-ui, -apple-system, sans-serif; }
+        body { margin: 0; background: ${P.paper}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: ${P.paper}; }
         ::-webkit-scrollbar-thumb { background: ${P.border}; border-radius: 3px; }
         input, select, textarea { font-family: inherit; }
+        .hero-grad {
+          background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(45,108,223,0.12) 0%, transparent 70%),
+                      ${P.paper};
+        }
+        .feature-card { transition: box-shadow 0.2s, transform 0.2s; }
+        .feature-card:hover { box-shadow: 0 8px 32px rgba(28,25,23,0.1); transform: translateY(-2px); }
+        .chip-btn { transition: all 0.15s; }
+        .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(45,108,223,0.06) !important; }
       `}</style>
 
       <Navbar onAskAI={onNavAskAI} hasTranscript={!!transcript} />
@@ -497,38 +506,41 @@ const App = () => {
           <div style={{ animation: 'fadeUp 0.4s ease' }}>
 
             {/* Hero */}
+            <div className="hero-grad" style={{
+              paddingBottom: 56,
+            }}>
             <div style={{
-              maxWidth: 680, margin: '0 auto', padding: '64px 24px 40px',
+              maxWidth: 700, margin: '0 auto', padding: '72px 24px 40px',
               textAlign: 'center',
             }}>
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '4px 12px', borderRadius: 999, marginBottom: 24,
-                background: P.accentLight, border: `1px solid rgba(45,108,223,0.2)`,
+                padding: '5px 14px', borderRadius: 999, marginBottom: 28,
+                background: 'rgba(45,108,223,0.08)', border: `1px solid rgba(45,108,223,0.18)`,
                 fontSize: 12, fontWeight: 600, color: P.accent,
               }}>
-                <svg width="10" height="10" viewBox="0 0 10 10" fill={P.accent}><circle cx="5" cy="5" r="5"/></svg>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
                 Free · No account required
               </div>
 
               <h1 style={{
-                fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: 800, color: P.ink,
-                letterSpacing: '-0.04em', lineHeight: 1.15, margin: '0 0 16px',
+                fontSize: 'clamp(32px, 6vw, 52px)', fontWeight: 800, color: P.ink,
+                letterSpacing: '-0.04em', lineHeight: 1.1, margin: '0 0 18px',
               }}>
-                Extract any YouTube transcript<br />& ask AI questions
+                Extract any YouTube<br />transcript, ask AI anything
               </h1>
-              <p style={{ fontSize: 16, color: P.muted, margin: '0 0 36px', lineHeight: 1.6 }}>
-                Paste a link, get a precise transcript, then summarize<br />and ask anything using AI.
+              <p style={{ fontSize: 17, color: P.muted, margin: '0 0 40px', lineHeight: 1.65, maxWidth: 520, marginLeft: 'auto', marginRight: 'auto' }}>
+                Paste a link, get a precise transcript instantly. Then summarize, ask questions, or export — all AI-powered.
               </p>
 
               {/* Input card */}
               <div style={{
                 background: P.surface, border: `1px solid ${P.border}`,
-                borderRadius: 16, boxShadow: '0 4px 32px rgba(28,25,23,0.08)',
-                padding: 6,
+                borderRadius: 18, boxShadow: '0 8px 48px rgba(28,25,23,0.1)',
+                padding: 8,
               }}>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: P.paper, borderRadius: 11, border: `1px solid ${P.border}` }}>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: P.paper, borderRadius: 12, border: `1px solid ${P.border}` }}>
                     <YouTubeIcon />
                     <input
                       ref={urlInputRef}
@@ -540,7 +552,7 @@ const App = () => {
                       placeholder="Paste a YouTube URL…"
                       style={{
                         flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                        fontSize: 15, color: P.ink,
+                        fontSize: 16, color: P.ink,
                       }}
                     />
                   </div>
@@ -548,12 +560,12 @@ const App = () => {
                     onClick={getTranscript}
                     disabled={loading}
                     style={{
-                      flexShrink: 0, padding: '0 22px', borderRadius: 11, border: 'none',
+                      flexShrink: 0, padding: '0 24px', borderRadius: 12, border: 'none',
                       background: loading ? `rgba(45,108,223,0.5)` : P.accent,
                       color: 'white', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
                       display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap',
-                      transition: 'background 0.15s, transform 0.1s',
-                      minWidth: 120,
+                      transition: 'background 0.15s',
+                      minWidth: 130,
                     }}
                     onMouseEnter={e => { if (!loading) e.currentTarget.style.background = P.accentHover; }}
                     onMouseLeave={e => { e.currentTarget.style.background = loading ? `rgba(45,108,223,0.5)` : P.accent; }}
@@ -568,9 +580,9 @@ const App = () => {
                 </div>
 
                 {/* Hint row */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px 4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px 5px' }}>
                   <span style={{ fontSize: 12, color: P.muted }}>
-                    or paste a <code style={{ fontFamily: 'monospace', background: P.paper, padding: '1px 4px', borderRadius: 4, fontSize: 11 }}>youtu.be</code> link
+                    Supports <code style={{ fontFamily: 'monospace', background: P.paper, padding: '1px 4px', borderRadius: 4, fontSize: 11 }}>youtube.com</code> and <code style={{ fontFamily: 'monospace', background: P.paper, padding: '1px 4px', borderRadius: 4, fontSize: 11 }}>youtu.be</code>
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 11, color: P.muted }}>Language:</span>
@@ -634,72 +646,102 @@ const App = () => {
               )}
 
               {/* Demo question chips */}
-              <div style={{ marginTop: 20, display: 'flex', flexWrap: 'wrap', gap: 7, justifyContent: 'center' }}>
+              <div style={{ marginTop: 22, display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+                <span style={{ fontSize: 12, color: P.muted, width: '100%', marginBottom: 2, display: 'block' }}>Try asking:</span>
                 {DEMO_CHIPS.map(chip => (
                   <button
                     key={chip}
+                    className="chip-btn"
                     onClick={() => handleChipClick(chip)}
                     style={{
-                      padding: '6px 14px', borderRadius: 999,
+                      padding: '7px 15px', borderRadius: 999,
                       border: `1px solid ${P.border}`, background: P.surface,
                       fontSize: 13, color: P.muted, cursor: 'pointer',
-                      transition: 'all 0.15s',
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.color = P.accent; e.currentTarget.style.background = P.accentLight; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = P.muted; e.currentTarget.style.background = P.surface; }}
                   >
                     {chip}
                   </button>
                 ))}
               </div>
             </div>
+            </div>{/* end hero-grad */}
+
+            {/* How it works */}
+            <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 24px 40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, flexWrap: 'wrap' }}>
+              {[
+                { num: '1', label: 'Paste a YouTube URL' },
+                { num: '2', label: 'Get the transcript instantly' },
+                { num: '3', label: 'Ask AI anything about it' },
+              ].map((step, i) => (
+                <React.Fragment key={step.num}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', border: `1.5px solid ${P.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: P.accent, background: P.surface, flexShrink: 0 }}>{step.num}</div>
+                    <span style={{ fontSize: 13.5, fontWeight: 500, color: P.ink }}>{step.label}</span>
+                  </div>
+                  {i < 2 && <div style={{ width: 32, height: 1, background: P.border, margin: '0 8px', flexShrink: 0 }} />}
+                </React.Fragment>
+              ))}
+            </div>
 
             {/* Feature cards */}
-            <div style={{ maxWidth: 780, margin: '0 auto', padding: '0 24px 48px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+            <div style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px 48px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
               {[
                 {
                   icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                      <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                  ),
+                  bg: 'rgba(45,108,223,0.07)',
+                  label: 'Instant Transcript',
+                  desc: 'Extract complete transcripts with timestamps in seconds — no login needed',
+                },
+                {
+                  icon: (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                     </svg>
                   ),
-                  title: 'AI Summaries',
-                  desc: 'Automatically summarize long transcripts into concise highlights',
-                  color: P.accent,
+                  bg: 'rgba(15,118,110,0.07)',
+                  label: 'AI Summaries',
+                  desc: 'Summarize long transcripts into concise highlights using fast LLMs',
                 },
                 {
                   icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                     </svg>
                   ),
-                  title: 'Q&A',
-                  desc: 'Ask anything about the video — get clear, precise answers from AI',
-                  color: P.success,
-                  badge: '·',
+                  bg: 'rgba(124,58,237,0.07)',
+                  label: 'Ask Anything',
+                  desc: 'Chat with the transcript — get precise answers from AI in seconds',
                 },
                 {
                   icon: (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={P.warning} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={P.warning} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                     </svg>
                   ),
-                  title: 'Privacy First',
-                  desc: 'We prioritize your data security and never store your videos or chats',
-                  color: P.warning,
+                  bg: 'rgba(180,83,9,0.07)',
+                  label: 'Privacy First',
+                  desc: 'No account needed. We never store your video data or conversations',
                 },
               ].map(card => (
-                <div key={card.title} style={{
-                  background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14,
-                  padding: '20px 18px',
+                <div key={card.label} className="feature-card" style={{
+                  background: P.surface, border: `1px solid ${P.border}`, borderRadius: 16,
+                  padding: '24px 20px',
                 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: P.paper, marginBottom: 12 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: card.bg, marginBottom: 14 }}>
                     {card.icon}
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: P.ink, marginBottom: 6 }}>
-                    {card.title}{card.badge && <span style={{ color: card.color, marginLeft: 4 }}>{card.badge}</span>}
+                  <div style={{ fontSize: 15, fontWeight: 700, color: P.ink, marginBottom: 8, letterSpacing: '-0.02em' }}>
+                    {card.label}
                   </div>
-                  <div style={{ fontSize: 13, color: P.muted, lineHeight: 1.55 }}>{card.desc}</div>
+                  <div style={{ fontSize: 13.5, color: P.muted, lineHeight: 1.6 }}>{card.desc}</div>
                 </div>
               ))}
             </div>
