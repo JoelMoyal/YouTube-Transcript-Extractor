@@ -7,11 +7,48 @@ const { execFile } = require('child_process');
 const { promisify } = require('util');
 const Groq = require('groq-sdk');
 const { Supadata } = require('@supadata/js');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-function geminiClient() {
-  return new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-    .getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
+async function aiComplete(prompt) {
+  // Try Groq first
+  if (process.env.GROQ_API_KEY) {
+    try {
+      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+      const completion = await groq.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 1024,
+      });
+      return completion.choices[0].message.content;
+    } catch (err) {
+      const msg = err.message || '';
+      if (!msg.includes('429') && !msg.includes('rate') && !msg.includes('quota')) throw err;
+      // Rate limited — fall through to OpenRouter
+    }
+  }
+
+  // Fallback: OpenRouter
+  if (process.env.OPENROUTER_API_KEY) {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.1-8b-instruct:free',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 1024,
+      }),
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error?.message || `OpenRouter error: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.choices[0].message.content;
+  }
+
+  throw new Error('No AI provider configured (GROQ_API_KEY or OPENROUTER_API_KEY required)');
 }
 
 const execFileAsync = promisify(execFile);
@@ -317,15 +354,14 @@ app.post('/api/summarize', async (req, res) => {
   const { transcript } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
-  if (!process.env.GEMINI_API_KEY)
-    return res.status(503).json({ error: 'AI summary is not configured (missing GEMINI_API_KEY)' });
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY)
+    return res.status(503).json({ error: 'AI summary is not configured (missing GROQ_API_KEY or OPENROUTER_API_KEY)' });
 
   try {
-    const model = geminiClient();
-    const result = await model.generateContent(
-      `Summarize the following YouTube video transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 30000)}`
+    const text = await aiComplete(
+      `Summarize the following YouTube video transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 15000)}`
     );
-    res.json({ summary: result.response.text() });
+    res.json({ summary: text });
   } catch (err) {
     res.status(500).json({ error: 'Failed to summarize', details: err.message });
   }
@@ -336,19 +372,17 @@ app.post('/api/chapters', async (req, res) => {
   const { transcript, segments } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
-  if (!process.env.GEMINI_API_KEY)
-    return res.status(503).json({ error: 'AI not configured (missing GEMINI_API_KEY)' });
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY)
+    return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY or OPENROUTER_API_KEY)' });
 
   try {
     const segmentsHint = Array.isArray(segments) && segments.length > 0
       ? `\n\nTimestamp reference (seconds → text snippet):\n${segments.slice(0, 60).map(s => `${s.seconds}s: ${s.text.slice(0, 80)}`).join('\n')}`
       : '';
 
-    const model = geminiClient();
-    const result = await model.generateContent(
-      `You detect natural chapter breaks in YouTube video transcripts. Return ONLY a valid JSON array of chapter objects with "seconds" (integer, must match one of the provided timestamps) and "title" (short, 2-6 words). No explanation, no markdown, just the JSON array.\n\nDetect 3-8 natural chapter breaks in this transcript. Use the timestamp reference to assign accurate seconds values.\n\nTranscript:\n${transcript.slice(0, 30000)}${segmentsHint}\n\nReturn JSON array only: [{"seconds": 0, "title": "Introduction"}, ...]`
+    const raw = await aiComplete(
+      `You detect natural chapter breaks in YouTube video transcripts. Return ONLY a valid JSON array of chapter objects with "seconds" (integer, must match one of the provided timestamps) and "title" (short, 2-6 words). No explanation, no markdown, just the JSON array.\n\nDetect 3-8 natural chapter breaks in this transcript. Use the timestamp reference to assign accurate seconds values.\n\nTranscript:\n${transcript.slice(0, 15000)}${segmentsHint}\n\nReturn JSON array only: [{"seconds": 0, "title": "Introduction"}, ...]`
     );
-    const raw = result.response.text();
     const match = raw.match(/\[[\s\S]*\]/);
     const chapters = match ? JSON.parse(match[0]) : [];
     res.json({ chapters });
@@ -362,15 +396,13 @@ app.post('/api/quotes', async (req, res) => {
   const { transcript } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
-  if (!process.env.GEMINI_API_KEY)
-    return res.status(503).json({ error: 'AI not configured (missing GEMINI_API_KEY)' });
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY)
+    return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY or OPENROUTER_API_KEY)' });
 
   try {
-    const model = geminiClient();
-    const result = await model.generateContent(
-      `You extract memorable, insightful, or impactful quotes from YouTube video transcripts. Return ONLY a valid JSON array of strings — each string is a direct, verbatim quote from the transcript. No explanation, no markdown, no attribution, just the JSON array of quote strings.\n\nExtract 4-7 of the most memorable or insightful quotes from this transcript. Each quote should be a complete sentence or phrase, taken verbatim.\n\nTranscript:\n${transcript.slice(0, 30000)}\n\nReturn JSON array only: ["quote one", "quote two", ...]`
+    const raw = await aiComplete(
+      `You extract memorable, insightful, or impactful quotes from YouTube video transcripts. Return ONLY a valid JSON array of strings — each string is a direct, verbatim quote from the transcript. No explanation, no markdown, no attribution, just the JSON array of quote strings.\n\nExtract 4-7 of the most memorable or insightful quotes from this transcript. Each quote should be a complete sentence or phrase, taken verbatim.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nReturn JSON array only: ["quote one", "quote two", ...]`
     );
-    const raw = result.response.text();
     const match = raw.match(/\[[\s\S]*\]/);
     const quotes = match ? JSON.parse(match[0]) : [];
     res.json({ quotes });
@@ -386,15 +418,14 @@ app.post('/api/ask', async (req, res) => {
     return res.status(400).json({ error: 'Missing transcript or question' });
   if (question.length > 500)
     return res.status(400).json({ error: 'Question too long' });
-  if (!process.env.GEMINI_API_KEY)
-    return res.status(503).json({ error: 'AI not configured (missing GEMINI_API_KEY)' });
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY)
+    return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY or OPENROUTER_API_KEY)' });
 
   try {
-    const model = geminiClient();
-    const result = await model.generateContent(
-      `You are a helpful assistant that answers questions about YouTube video transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.\n\nTranscript:\n${transcript.slice(0, 30000)}\n\nQuestion: ${question}`
+    const text = await aiComplete(
+      `You are a helpful assistant that answers questions about YouTube video transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nQuestion: ${question}`
     );
-    res.json({ answer: result.response.text() });
+    res.json({ answer: text });
   } catch (err) {
     res.status(500).json({ error: 'Failed to answer', details: err.message });
   }
