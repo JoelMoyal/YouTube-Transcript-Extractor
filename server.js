@@ -323,7 +323,7 @@ app.post('/api/summarize', async (req, res) => {
       max_tokens: 1024,
       messages: [{
         role: 'user',
-        content: `Summarize the following YouTube video transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 80000)}`,
+        content: `Summarize the following YouTube video transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 18000)}`,
       }],
     });
     const summary = completion.choices[0]?.message?.content || '';
@@ -358,7 +358,7 @@ app.post('/api/chapters', async (req, res) => {
         },
         {
           role: 'user',
-          content: `Detect 3-8 natural chapter breaks in this transcript. Use the timestamp reference to assign accurate seconds values.\n\nTranscript:\n${transcript.slice(0, 60000)}${segmentsHint}\n\nReturn JSON array only: [{"seconds": 0, "title": "Introduction"}, ...]`,
+          content: `Detect 3-8 natural chapter breaks in this transcript. Use the timestamp reference to assign accurate seconds values.\n\nTranscript:\n${transcript.slice(0, 18000)}${segmentsHint}\n\nReturn JSON array only: [{"seconds": 0, "title": "Introduction"}, ...]`,
         },
       ],
     });
@@ -393,7 +393,7 @@ app.post('/api/quotes', async (req, res) => {
         },
         {
           role: 'user',
-          content: `Extract 4-7 of the most memorable or insightful quotes from this transcript. Each quote should be a complete sentence or phrase, taken verbatim.\n\nTranscript:\n${transcript.slice(0, 80000)}\n\nReturn JSON array only: ["quote one", "quote two", ...]`,
+          content: `Extract 4-7 of the most memorable or insightful quotes from this transcript. Each quote should be a complete sentence or phrase, taken verbatim.\n\nTranscript:\n${transcript.slice(0, 18000)}\n\nReturn JSON array only: ["quote one", "quote two", ...]`,
         },
       ],
     });
@@ -428,7 +428,7 @@ app.post('/api/ask', async (req, res) => {
         },
         {
           role: 'user',
-          content: `Transcript:\n${transcript.slice(0, 80000)}\n\nQuestion: ${question}`,
+          content: `Transcript:\n${transcript.slice(0, 18000)}\n\nQuestion: ${question}`,
         },
       ],
     });
