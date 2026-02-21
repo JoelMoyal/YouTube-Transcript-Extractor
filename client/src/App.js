@@ -283,7 +283,7 @@ const App = () => {
       try { data = JSON.parse(text); } catch {
         throw new Error(res.ok ? 'Unexpected server response' : `Server error ${res.status}`);
       }
-      if (!res.ok) throw new Error(data.error || 'Failed to get answer');
+      if (!res.ok) throw new Error(data.details || data.error || 'Failed to get answer');
       setQaMessages(prev => [...prev, { role: 'ai', text: data.answer }]);
     } catch (err) {
       setQaMessages(prev => [...prev, { role: 'ai', text: `Error: ${err.message}`, isError: true }]);
