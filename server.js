@@ -7,6 +7,12 @@ const { execFile } = require('child_process');
 const { promisify } = require('util');
 const Groq = require('groq-sdk');
 const { Supadata } = require('@supadata/js');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
+function geminiClient() {
+  return new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+    .getGenerativeModel({ model: 'gemini-1.5-flash' });
+}
 
 const execFileAsync = promisify(execFile);
 const app = express();
@@ -311,23 +317,15 @@ app.post('/api/summarize', async (req, res) => {
   const { transcript } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
-  if (transcript.length > 100000)
-    return res.status(400).json({ error: 'Transcript too long to summarize' });
-  if (!process.env.GROQ_API_KEY)
-    return res.status(503).json({ error: 'AI summary is not configured (missing GROQ_API_KEY)' });
+  if (!process.env.GEMINI_API_KEY)
+    return res.status(503).json({ error: 'AI summary is not configured (missing GEMINI_API_KEY)' });
 
   try {
-    const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
-    const completion = await client.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
-      max_tokens: 1024,
-      messages: [{
-        role: 'user',
-        content: `Summarize the following YouTube video transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 18000)}`,
-      }],
-    });
-    const summary = completion.choices[0]?.message?.content || '';
-    res.json({ summary });
+    const model = geminiClient();
+    const result = await model.generateContent(
+      `Summarize the following YouTube video transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 30000)}`
+    );
+    res.json({ summary: result.response.text() });
   } catch (err) {
     res.status(500).json({ error: 'Failed to summarize', details: err.message });
   }
@@ -338,33 +336,19 @@ app.post('/api/chapters', async (req, res) => {
   const { transcript, segments } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
-  if (!process.env.GROQ_API_KEY)
-    return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY)' });
+  if (!process.env.GEMINI_API_KEY)
+    return res.status(503).json({ error: 'AI not configured (missing GEMINI_API_KEY)' });
 
   try {
-    const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
     const segmentsHint = Array.isArray(segments) && segments.length > 0
       ? `\n\nTimestamp reference (seconds → text snippet):\n${segments.slice(0, 60).map(s => `${s.seconds}s: ${s.text.slice(0, 80)}`).join('\n')}`
       : '';
 
-    const completion = await client.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
-      max_tokens: 512,
-      messages: [
-        {
-          role: 'system',
-          content: 'You detect natural chapter breaks in YouTube video transcripts. Return ONLY a valid JSON array of chapter objects with "seconds" (integer, must match one of the provided timestamps) and "title" (short, 2-6 words). No explanation, no markdown, just the JSON array.',
-        },
-        {
-          role: 'user',
-          content: `Detect 3-8 natural chapter breaks in this transcript. Use the timestamp reference to assign accurate seconds values.\n\nTranscript:\n${transcript.slice(0, 18000)}${segmentsHint}\n\nReturn JSON array only: [{"seconds": 0, "title": "Introduction"}, ...]`,
-        },
-      ],
-    });
-
-    const raw = completion.choices[0]?.message?.content || '[]';
-    // Extract JSON array from response (model may add extra text)
+    const model = geminiClient();
+    const result = await model.generateContent(
+      `You detect natural chapter breaks in YouTube video transcripts. Return ONLY a valid JSON array of chapter objects with "seconds" (integer, must match one of the provided timestamps) and "title" (short, 2-6 words). No explanation, no markdown, just the JSON array.\n\nDetect 3-8 natural chapter breaks in this transcript. Use the timestamp reference to assign accurate seconds values.\n\nTranscript:\n${transcript.slice(0, 30000)}${segmentsHint}\n\nReturn JSON array only: [{"seconds": 0, "title": "Introduction"}, ...]`
+    );
+    const raw = result.response.text();
     const match = raw.match(/\[[\s\S]*\]/);
     const chapters = match ? JSON.parse(match[0]) : [];
     res.json({ chapters });
@@ -378,26 +362,15 @@ app.post('/api/quotes', async (req, res) => {
   const { transcript } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
-  if (!process.env.GROQ_API_KEY)
-    return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY)' });
+  if (!process.env.GEMINI_API_KEY)
+    return res.status(503).json({ error: 'AI not configured (missing GEMINI_API_KEY)' });
 
   try {
-    const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
-    const completion = await client.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
-      max_tokens: 512,
-      messages: [
-        {
-          role: 'system',
-          content: 'You extract memorable, insightful, or impactful quotes from YouTube video transcripts. Return ONLY a valid JSON array of strings — each string is a direct, verbatim quote from the transcript. No explanation, no markdown, no attribution, just the JSON array of quote strings.',
-        },
-        {
-          role: 'user',
-          content: `Extract 4-7 of the most memorable or insightful quotes from this transcript. Each quote should be a complete sentence or phrase, taken verbatim.\n\nTranscript:\n${transcript.slice(0, 18000)}\n\nReturn JSON array only: ["quote one", "quote two", ...]`,
-        },
-      ],
-    });
-    const raw = completion.choices[0]?.message?.content || '[]';
+    const model = geminiClient();
+    const result = await model.generateContent(
+      `You extract memorable, insightful, or impactful quotes from YouTube video transcripts. Return ONLY a valid JSON array of strings — each string is a direct, verbatim quote from the transcript. No explanation, no markdown, no attribution, just the JSON array of quote strings.\n\nExtract 4-7 of the most memorable or insightful quotes from this transcript. Each quote should be a complete sentence or phrase, taken verbatim.\n\nTranscript:\n${transcript.slice(0, 30000)}\n\nReturn JSON array only: ["quote one", "quote two", ...]`
+    );
+    const raw = result.response.text();
     const match = raw.match(/\[[\s\S]*\]/);
     const quotes = match ? JSON.parse(match[0]) : [];
     res.json({ quotes });
@@ -413,26 +386,15 @@ app.post('/api/ask', async (req, res) => {
     return res.status(400).json({ error: 'Missing transcript or question' });
   if (question.length > 500)
     return res.status(400).json({ error: 'Question too long' });
-  if (!process.env.GROQ_API_KEY)
-    return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY)' });
+  if (!process.env.GEMINI_API_KEY)
+    return res.status(503).json({ error: 'AI not configured (missing GEMINI_API_KEY)' });
 
   try {
-    const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
-    const completion = await client.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
-      max_tokens: 512,
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a helpful assistant that answers questions about YouTube video transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.',
-        },
-        {
-          role: 'user',
-          content: `Transcript:\n${transcript.slice(0, 18000)}\n\nQuestion: ${question}`,
-        },
-      ],
-    });
-    res.json({ answer: completion.choices[0]?.message?.content || '' });
+    const model = geminiClient();
+    const result = await model.generateContent(
+      `You are a helpful assistant that answers questions about YouTube video transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.\n\nTranscript:\n${transcript.slice(0, 30000)}\n\nQuestion: ${question}`
+    );
+    res.json({ answer: result.response.text() });
   } catch (err) {
     res.status(500).json({ error: 'Failed to answer', details: err.message });
   }
