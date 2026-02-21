@@ -208,7 +208,13 @@ app.get('/api/transcript', async (req, res) => {
     }
 
     // ── Stage 2: download audio ───────────────────────────────────────────────
-    send('progress', { stage: 'audio', message: 'No subtitles found — downloading audio…', percent: 30 });
+    if (!process.env.GROQ_API_KEY) {
+      send('error', { error: 'No captions found for this video and AI transcription is not configured.' });
+      res.end();
+      return;
+    }
+
+    send('progress', { stage: 'audio', message: 'No captions found — downloading audio for AI transcription…', percent: 30 });
 
     const audioBase = path.join(tmpDir, `${videoId}_audio`);
     await execFileAsync('yt-dlp', [
@@ -221,28 +227,40 @@ app.get('/api/transcript', async (req, res) => {
       `https://www.youtube.com/watch?v=${videoId}`
     ], { timeout: 300000 });
 
-    // ── Stage 3: Whisper ──────────────────────────────────────────────────────
-    send('progress', { stage: 'whisper', message: 'Transcribing with AI — this may take a few minutes…', percent: 60 });
+    // ── Stage 3: Groq Whisper API ─────────────────────────────────────────────
+    send('progress', { stage: 'whisper', message: 'Transcribing with Groq Whisper AI…', percent: 60 });
 
     const audioFile = `${audioBase}.mp3`;
-    await execFileAsync('whisper', [
-      audioFile,
-      '--model', 'base',
-      '--output_format', 'vtt',
-      '--output_dir', tmpDir,
-      '--language', toWhisperLang(safeLang)
-    ], { timeout: 600000 });
+    const audioStat = await fsPromises.stat(audioFile);
+    if (audioStat.size > 24 * 1024 * 1024) {
+      await fsPromises.unlink(audioFile).catch(() => {});
+      send('error', { error: 'Audio file too large for AI transcription (max 24 MB). Try a shorter video.' });
+      res.end();
+      return;
+    }
+
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    const { createReadStream } = require('fs');
+    const transcription = await groq.audio.transcriptions.create({
+      file: createReadStream(audioFile),
+      model: 'whisper-large-v3-turbo',
+      response_format: 'verbose_json',
+      timestamp_granularities: ['segment'],
+      language: toWhisperLang(safeLang),
+    });
+
+    await fsPromises.unlink(audioFile).catch(() => {});
 
     send('progress', { stage: 'whisper', message: 'Finalising transcript…', percent: 95 });
 
-    const whisperVtt = path.join(tmpDir, `${videoId}_audio.vtt`);
-    const whisperContent = await fsPromises.readFile(whisperVtt, 'utf-8');
-    const result = parseVTT(whisperContent);
+    const rawSegments = transcription.segments || [];
+    const seen = new Set();
+    const segments = rawSegments
+      .map(s => ({ seconds: Math.floor(s.start), text: s.text.trim() }))
+      .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
+    const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
 
-    await fsPromises.unlink(audioFile).catch(() => {});
-    await fsPromises.unlink(whisperVtt).catch(() => {});
-
-    send('done', { transcript: result.transcript, segments: result.segments, source: 'whisper' });
+    send('done', { transcript, segments, source: 'whisper' });
     res.end();
 
   } catch (error) {
