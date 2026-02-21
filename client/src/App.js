@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
+import { supabase } from './supabase';
 
 // ── Palette ────────────────────────────────────────────────────────────────────
 const P = {
@@ -232,8 +233,244 @@ const CreditsWidget = ({ credits }) => {
   );
 };
 
+// ── AuthModal ─────────────────────────────────────────────────────────────────
+const AuthModal = ({ onClose, onAuthSuccess }) => {
+  const [tab, setTab]           = React.useState('signin'); // 'signin' | 'signup'
+  const [email, setEmail]       = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [loading, setLoading]   = React.useState(false);
+  const [error, setError]       = React.useState('');
+  const [message, setMessage]   = React.useState('');
+  const overlayRef              = React.useRef(null);
+
+  // Close on Escape
+  React.useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(''); setMessage(''); setLoading(true);
+    try {
+      if (tab === 'signup') {
+        const { error: err } = await supabase.auth.signUp({ email, password });
+        if (err) throw err;
+        setMessage('Check your email to confirm your account!');
+      } else {
+        const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
+        if (err) throw err;
+        if (data?.user) { onAuthSuccess(data.user); onClose(); }
+      }
+    } catch (err) {
+      setError(err.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inputStyle = {
+    width: '100%', padding: '10px 13px', borderRadius: 10,
+    border: `1px solid ${P.border}`, background: P.paper,
+    fontSize: 14, color: P.ink, outline: 'none', transition: 'border-color 0.15s',
+    fontFamily: 'inherit',
+  };
+
+  return (
+    <div
+      ref={overlayRef}
+      onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(28,25,23,0.45)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 24,
+      }}
+    >
+      <div className="fade-up" style={{
+        width: '100%', maxWidth: 400,
+        background: P.surface, borderRadius: 18,
+        border: `1px solid ${P.border}`,
+        boxShadow: '0 24px 64px rgba(28,25,23,0.18)',
+        padding: '32px 32px 28px',
+        position: 'relative',
+      }}>
+        {/* Close */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute', top: 16, right: 16,
+            width: 28, height: 28, borderRadius: 7,
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: P.muted, fontSize: 18, lineHeight: 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+        >×</button>
+
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 24 }}>
+          <div style={{ width: 30, height: 30, borderRadius: 8, background: '#FF0000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </div>
+          <span style={{ fontSize: 15, fontWeight: 700, color: P.ink, letterSpacing: '-0.03em' }}>TranscriptBot</span>
+        </div>
+
+        {/* Tabs */}
+        <div style={{
+          display: 'flex', marginBottom: 24,
+          background: P.paper, borderRadius: 10, padding: 3,
+          border: `1px solid ${P.border}`,
+        }}>
+          {[['signin', 'Sign in'], ['signup', 'Create account']].map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => { setTab(key); setError(''); setMessage(''); }}
+              style={{
+                flex: 1, padding: '7px 0', borderRadius: 8, border: 'none',
+                background: tab === key ? P.surface : 'transparent',
+                color: tab === key ? P.ink : P.muted,
+                fontSize: 13, fontWeight: tab === key ? 600 : 400,
+                cursor: 'pointer', transition: 'all 0.15s',
+                boxShadow: tab === key ? '0 1px 4px rgba(28,25,23,0.08)' : 'none',
+              }}
+            >{label}</button>
+          ))}
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Email</label>
+            <input
+              type="email" required value={email} onChange={e => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              style={inputStyle}
+              onFocus={e => { e.target.style.borderColor = P.accent; }}
+              onBlur={e => { e.target.style.borderColor = P.border; }}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Password</label>
+            <input
+              type="password" required value={password} onChange={e => setPassword(e.target.value)}
+              placeholder={tab === 'signup' ? 'Min. 6 characters' : '••••••••'}
+              style={inputStyle}
+              onFocus={e => { e.target.style.borderColor = P.accent; }}
+              onBlur={e => { e.target.style.borderColor = P.border; }}
+            />
+          </div>
+
+          {error && (
+            <div style={{ padding: '9px 12px', borderRadius: 8, background: 'rgba(180,35,24,0.07)', border: `1px solid rgba(180,35,24,0.2)`, fontSize: 13, color: P.error }}>
+              {error}
+            </div>
+          )}
+          {message && (
+            <div style={{ padding: '9px 12px', borderRadius: 8, background: 'rgba(15,118,110,0.07)', border: `1px solid rgba(15,118,110,0.2)`, fontSize: 13, color: P.success }}>
+              {message}
+            </div>
+          )}
+
+          <button
+            type="submit" disabled={loading}
+            style={{
+              marginTop: 4, padding: '11px 0', borderRadius: 10, border: 'none',
+              background: loading ? 'rgba(45,108,223,0.6)' : P.accent,
+              color: 'white', fontSize: 14, fontWeight: 600,
+              cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.15s',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            }}
+            onMouseEnter={e => { if (!loading) e.currentTarget.style.background = P.accentHover; }}
+            onMouseLeave={e => { if (!loading) e.currentTarget.style.background = P.accent; }}
+          >
+            {loading && <SpinnerIcon size={14} />}
+            {tab === 'signup' ? 'Create account' : 'Sign in'}
+          </button>
+        </form>
+
+        <p style={{ textAlign: 'center', fontSize: 12, color: P.muted, marginTop: 16, marginBottom: 0 }}>
+          {tab === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+          <button
+            onClick={() => { setTab(tab === 'signin' ? 'signup' : 'signin'); setError(''); setMessage(''); }}
+            style={{ background: 'none', border: 'none', color: P.accent, fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0 }}
+          >{tab === 'signin' ? 'Create one' : 'Sign in'}</button>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ── UserMenu ──────────────────────────────────────────────────────────────────
+const UserMenu = ({ user, onSignOut }) => {
+  const [open, setOpen] = React.useState(false);
+  const ref = React.useRef(null);
+  const initial = (user.email || '?')[0].toUpperCase();
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        title={user.email}
+        style={{
+          width: 32, height: 32, borderRadius: '50%',
+          background: P.accent, border: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 13, fontWeight: 700, color: 'white',
+          transition: 'background 0.15s',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = P.accentHover; }}
+        onMouseLeave={e => { e.currentTarget.style.background = P.accent; }}
+      >{initial}</button>
+
+      {open && (
+        <div className="fade-up" style={{
+          position: 'absolute', right: 0, top: 'calc(100% + 8px)',
+          width: 210, background: P.surface, border: `1px solid ${P.border}`,
+          borderRadius: 14, boxShadow: '0 8px 32px rgba(28,25,23,0.12)',
+          padding: '12px 0', zIndex: 200,
+        }}>
+          <div style={{ padding: '4px 16px 12px', borderBottom: `1px solid ${P.border}` }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 3 }}>Signed in as</div>
+            <div style={{ fontSize: 13, color: P.ink, fontWeight: 500, wordBreak: 'break-all' }}>{user.email}</div>
+          </div>
+          <button
+            onClick={() => { setOpen(false); onSignOut(); }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              width: '100%', padding: '9px 16px',
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontSize: 13, color: P.muted, textAlign: 'left',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.error; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Sign out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ── Navbar ────────────────────────────────────────────────────────────────────
-const Navbar = ({ onAskAI, hasTranscript, credits }) => (
+const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut }) => (
   <nav style={{
     position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
     height: 56, display: 'flex', alignItems: 'center',
@@ -267,19 +504,21 @@ const Navbar = ({ onAskAI, hasTranscript, credits }) => (
         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; }}
         title="GitHub"
       ><GitHubIcon /></a>
-      <button
-        onClick={onAskAI}
-        style={{
-          marginLeft: 2, padding: '7px 16px', borderRadius: 8, border: 'none',
-          background: P.accent, color: 'white',
-          fontSize: 13, fontWeight: 600, cursor: 'pointer',
-          transition: 'background 0.15s',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.background = P.accentHover; }}
-        onMouseLeave={e => { e.currentTarget.style.background = P.accent; }}
-      >
-        {hasTranscript ? 'Ask AI' : 'Try it'}
-      </button>
+      {user ? (
+        <UserMenu user={user} onSignOut={onSignOut} />
+      ) : (
+        <button
+          onClick={onSignIn}
+          style={{
+            marginLeft: 2, padding: '7px 16px', borderRadius: 8, border: 'none',
+            background: P.accent, color: 'white',
+            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = P.accentHover; }}
+          onMouseLeave={e => { e.currentTarget.style.background = P.accent; }}
+        >Sign in</button>
+      )}
     </div>
   </nav>
 );
@@ -307,6 +546,8 @@ const App = () => {
   });
   const [credits, setCredits] = useState(initCredits);
   const [showBookmarkBanner, setShowBookmarkBanner] = useState(false);
+  const [user, setUser]           = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [summary, setSummary]             = useState('');
   const [summarizing, setSummarizing]     = useState(false);
   const [summaryCopied, setSummaryCopied] = useState(false);
@@ -342,6 +583,22 @@ const App = () => {
     const t = setTimeout(() => setShowBookmarkBanner(true), 4000);
     return () => clearTimeout(t);
   }, []);
+
+  // ── Supabase auth session ──────────────────────────────────────────────────
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   const dismissBookmarkBanner = () => {
     setShowBookmarkBanner(false);
@@ -644,7 +901,20 @@ const App = () => {
         .bookmark-banner { animation: slideDown 0.3s ease forwards; }
       `}</style>
 
-      <Navbar onAskAI={onNavAskAI} hasTranscript={!!transcript} credits={credits} />
+      <Navbar
+        onAskAI={onNavAskAI}
+        hasTranscript={!!transcript}
+        credits={credits}
+        user={user}
+        onSignIn={() => setShowAuthModal(true)}
+        onSignOut={handleSignOut}
+      />
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => setShowAuthModal(false)}
+          onAuthSuccess={(u) => setUser(u)}
+        />
+      )}
 
       {showBookmarkBanner && (
         <div className="bookmark-banner" style={{

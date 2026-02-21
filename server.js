@@ -7,6 +7,31 @@ const { execFile } = require('child_process');
 const { promisify } = require('util');
 const Groq = require('groq-sdk');
 const { Supadata } = require('@supadata/js');
+const { createClient } = require('@supabase/supabase-js');
+
+// ── Supabase admin client (server-side only, uses service role key) ───────────
+let supabaseAdmin = null;
+if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  supabaseAdmin = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
+
+// ── requireAuth middleware ─────────────────────────────────────────────────────
+// Validates the Bearer JWT from the client. Attaches req.user if valid.
+// Returns 401 if no valid token. Not applied to any routes yet (future use).
+async function requireAuth(req, res, next) {
+  if (!supabaseAdmin) return res.status(503).json({ error: 'Auth not configured' });
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+  if (error || !user) return res.status(401).json({ error: 'Invalid or expired token' });
+  req.user = user;
+  next();
+}
 
 async function aiComplete(prompt) {
   // Try Groq first
