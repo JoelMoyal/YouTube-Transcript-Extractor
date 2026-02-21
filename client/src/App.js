@@ -192,6 +192,7 @@ const App = () => {
   const [history, setHistory]             = useState(() => {
     try { return JSON.parse(localStorage.getItem('yte_history') || '[]'); } catch { return []; }
   });
+  const [showBookmarkBanner, setShowBookmarkBanner] = useState(false);
   const [summary, setSummary]             = useState('');
   const [summarizing, setSummarizing]     = useState(false);
   const [summaryCopied, setSummaryCopied] = useState(false);
@@ -221,6 +222,17 @@ const App = () => {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  useEffect(() => {
+    if (localStorage.getItem('yte_bookmark_dismissed')) return;
+    const t = setTimeout(() => setShowBookmarkBanner(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const dismissBookmarkBanner = () => {
+    setShowBookmarkBanner(false);
+    localStorage.setItem('yte_bookmark_dismissed', '1');
+  };
 
   const handleInputFocus = async () => {
     if (videoUrl) return;
@@ -493,11 +505,49 @@ const App = () => {
         .feature-card:hover { box-shadow: 0 8px 32px rgba(28,25,23,0.1); transform: translateY(-2px); }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(45,108,223,0.06) !important; }
+        @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+        .bookmark-banner { animation: slideDown 0.3s ease forwards; }
       `}</style>
 
       <Navbar onAskAI={onNavAskAI} hasTranscript={!!transcript} />
 
-      <div style={{ minHeight: '100vh', paddingTop: 56, background: P.paper }}>
+      {showBookmarkBanner && (
+        <div className="bookmark-banner" style={{
+          position: 'fixed', top: 56, left: 0, right: 0, zIndex: 90,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+          padding: '9px 16px',
+          background: P.ink, color: 'rgba(255,255,255,0.92)',
+          fontSize: 13,
+        }}>
+          <span style={{ fontSize: 15 }}>🚀</span>
+          <span>
+            Like this tool? Press{' '}
+            <kbd style={{
+              display: 'inline-flex', alignItems: 'center',
+              padding: '1px 6px', borderRadius: 5,
+              background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
+              fontSize: 12, fontFamily: 'inherit', fontWeight: 600, letterSpacing: '0.01em',
+            }}>
+              {/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? '⌘ D' : 'Ctrl D'}
+            </kbd>
+            {' '}to bookmark us and always have quick access to your transcripts!
+          </span>
+          <button
+            onClick={dismissBookmarkBanner}
+            style={{
+              marginLeft: 8, flexShrink: 0,
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'rgba(255,255,255,0.5)', fontSize: 18, lineHeight: 1, padding: '0 2px',
+              transition: 'color 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'white'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
+            aria-label="Dismiss"
+          >×</button>
+        </div>
+      )}
+
+      <div style={{ minHeight: '100vh', paddingTop: showBookmarkBanner ? 97 : 56, background: P.paper, transition: 'padding-top 0.3s ease' }}>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* LANDING VIEW */}
