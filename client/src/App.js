@@ -1,6 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 
+// ── Palette ────────────────────────────────────────────────────────────────────
+const P = {
+  paper:       '#F6F3EE',
+  surface:     '#FFFEFC',
+  border:      '#E7E1D8',
+  ink:         '#1C1917',
+  muted:       '#6B645C',
+  accent:      '#2D6CDF',
+  accentHover: '#2459B8',
+  success:     '#0F766E',
+  warning:     '#B45309',
+  error:       '#B42318',
+};
+
 const LANGUAGES = [
   { code: 'en',      label: 'English' },
   { code: 'es',      label: 'Spanish' },
@@ -104,10 +118,10 @@ const SpinnerIcon = () => (
 const Footer = () => {
   const iconBtn = {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    width: 32, height: 32, borderRadius: '50%',
-    color: '#64748b', textDecoration: 'none',
-    border: '1.5px solid rgba(255,255,255,0.1)',
-    background: 'rgba(255,255,255,0.05)',
+    width: 30, height: 30, borderRadius: '50%',
+    color: P.muted, textDecoration: 'none',
+    border: `1px solid ${P.border}`,
+    background: 'transparent',
     transition: 'all 0.18s',
     flexShrink: 0,
   };
@@ -116,22 +130,20 @@ const Footer = () => {
       position: 'fixed', bottom: 0, left: 0, right: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '0 24px',
-      height: 56,
-      background: 'rgba(10,15,30,0.97)',
-      backdropFilter: 'blur(12px)',
-      WebkitBackdropFilter: 'blur(12px)',
-      borderTop: '1px solid rgba(255,255,255,0.06)',
+      height: 48,
+      background: P.surface,
+      borderTop: `1px solid ${P.border}`,
       zIndex: 50,
       fontFamily: 'system-ui, sans-serif',
     }}>
-      <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.08))' }} />
+      <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${P.border})` }} />
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '0 28px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 24px', flexShrink: 0 }}>
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-          <span style={{ fontSize: 10, fontWeight: 600, color: '#475569', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>
+          <span style={{ fontSize: 10, fontWeight: 600, color: P.muted, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>
             Built by
           </span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9', letterSpacing: '-0.03em' }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: P.ink, letterSpacing: '-0.02em' }}>
             Joel Moyal
           </span>
         </div>
@@ -139,22 +151,22 @@ const Footer = () => {
         <div style={{ display: 'flex', gap: 6, marginLeft: 4 }}>
           <a href="https://joelmoyal.com/" target="_blank" rel="noopener noreferrer"
             title="Website" style={iconBtn}
-            onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.4)'; e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'none'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.ink; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; e.currentTarget.style.transform = 'none'; }}
           >
             <GlobeIcon />
           </a>
           <a href="https://github.com/joelmoyal" target="_blank" rel="noopener noreferrer"
             title="GitHub" style={iconBtn}
-            onMouseEnter={e => { e.currentTarget.style.color = '#f1f5f9'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#64748b'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.transform = 'none'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.ink; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; e.currentTarget.style.transform = 'none'; }}
           >
             <GitHubIcon />
           </a>
         </div>
       </div>
 
-      <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.08))' }} />
+      <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${P.border})` }} />
     </footer>
   );
 };
@@ -209,7 +221,6 @@ const App = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Auto-paste YouTube URL from clipboard on input focus
   const handleInputFocus = async () => {
     if (videoUrl) return;
     try {
@@ -219,7 +230,7 @@ const App = () => {
         setVideoUrl(cleaned);
         setPreviewId(extractVideoId(cleaned));
       }
-    } catch {} // clipboard permission denied — ignore silently
+    } catch {}
   };
 
   const handleUrlChange = (e) => {
@@ -304,7 +315,6 @@ const App = () => {
 
     const es = new EventSource(`/api/transcript?videoId=${videoId}&lang=${lang}`);
 
-    // 3-minute hard timeout
     const killTimer = setTimeout(() => {
       es.close();
       setError('Request timed out. The video may be too long or unavailable.');
@@ -351,9 +361,8 @@ const App = () => {
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     });
 
-    // EventSource onerror fires on network errors
     es.onerror = () => {
-      if (es.readyState === EventSource.CLOSED) return; // already handled
+      if (es.readyState === EventSource.CLOSED) return;
       clearTimeout(killTimer);
       es.close();
       setError('Connection lost. Please try again.');
@@ -479,7 +488,7 @@ const App = () => {
     const parts = text.split(regex);
     return parts.map((part, i) =>
       regex.test(part)
-        ? <mark key={i} style={{ background: '#fef08a', borderRadius: 2, padding: '0 1px' }}>{part}</mark>
+        ? <mark key={i} style={{ background: '#FEF08A', borderRadius: 2, padding: '0 1px' }}>{part}</mark>
         : part
     );
   };
@@ -492,6 +501,19 @@ const App = () => {
     ? (transcript.match(new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')) || []).length
     : 0;
 
+  // shared style for secondary toggle buttons (chapters, quotes, Q&A, summarize)
+  const toggleBtn = (active, activeColor = P.ink) => ({
+    display: 'flex', alignItems: 'center', gap: 6,
+    width: '100%', justifyContent: 'center',
+    marginTop: 10,
+    background: active ? P.paper : P.surface,
+    border: `1px solid ${P.border}`,
+    borderRadius: 10, padding: '8px 14px',
+    color: active ? activeColor : P.muted,
+    fontSize: 12, fontWeight: 600, cursor: 'pointer',
+    transition: 'all 0.15s',
+  });
+
   return (
     <>
       <style>{`
@@ -500,60 +522,59 @@ const App = () => {
         @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity:0.4; } 40% { transform: scale(1); opacity:1; } }
         .fade-up { animation: fadeUp 0.35s ease forwards; }
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-track { background: ${P.paper}; }
+        ::-webkit-scrollbar-thumb { background: ${P.border}; border-radius: 3px; }
+        body { background: ${P.paper}; }
       `}</style>
 
-      {/* Dark page background */}
-      <div className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center py-16 px-4 pb-24"
-        style={{ background: 'linear-gradient(135deg, #0a0f1e 0%, #111827 50%, #0d1117 100%)' }}>
-
-        {/* Decorative blobs */}
-        <div style={{ position:'absolute', top:-80, right:-80, width:360, height:360,
-          borderRadius:'50%', background:'radial-gradient(circle, rgba(239,68,68,0.18) 0%, transparent 70%)', pointerEvents:'none' }} />
-        <div style={{ position:'absolute', bottom:-60, left:-60, width:280, height:280,
-          borderRadius:'50%', background:'radial-gradient(circle, rgba(99,102,241,0.14) 0%, transparent 70%)', pointerEvents:'none' }} />
+      {/* Page */}
+      <div className="min-h-screen flex flex-col items-center justify-center py-16 px-4 pb-24"
+        style={{ background: P.paper }}>
 
         {/* Card */}
         <div className="w-full max-w-lg relative" style={{ animation: 'fadeUp 0.4s ease' }}>
-          <div className="bg-white rounded-3xl overflow-hidden"
-            style={{ boxShadow: '0 30px 90px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.06) inset' }}>
+          <div style={{
+            background: P.surface,
+            borderRadius: 20,
+            border: `1px solid ${P.border}`,
+            boxShadow: '0 4px 24px rgba(28,25,23,0.07)',
+            overflow: 'hidden',
+          }}>
 
-            {/* Card top accent bar */}
-            <div style={{ height: 4, background: 'linear-gradient(90deg, #ef4444, #f97316)' }} />
+            {/* Top rule */}
+            <div style={{ height: 3, background: P.ink }} />
 
             <div className="p-8">
               {/* ── Header ── */}
               <div className="flex items-center gap-4 mb-8">
                 <div style={{
-                  width: 48, height: 48, borderRadius: 14, flexShrink: 0,
-                  background: 'linear-gradient(135deg, #ef4444, #b91c1c)',
+                  width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                  background: '#FF0000',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(239,68,68,0.35)',
                 }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                   </svg>
                 </div>
                 <div>
-                  <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.03em', lineHeight: 1.2 }}>
+                  <h1 style={{ fontSize: 19, fontWeight: 700, color: P.ink, letterSpacing: '-0.03em', lineHeight: 1.2 }}>
                     Transcript Extractor
                   </h1>
-                  <p style={{ fontSize: 13, color: '#94a3b8', marginTop: 2, fontWeight: 500 }}>
+                  <p style={{ fontSize: 13, color: P.muted, marginTop: 2 }}>
                     Extract any YouTube video transcript instantly
                   </p>
                 </div>
               </div>
 
               {/* ── Form ── */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {/* URL input */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: P.muted, marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                     YouTube URL
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <span style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)', color:'#cbd5e1', pointerEvents:'none' }}>
+                    <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color: P.border, pointerEvents:'none' }}>
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
                         <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
@@ -565,20 +586,21 @@ const App = () => {
                       onChange={handleUrlChange}
                       onFocus={(e) => {
                         handleInputFocus();
-                        e.target.style.borderColor = '#ef4444';
-                        e.target.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.1)';
-                        e.target.style.background = '#fff';
+                        e.target.style.borderColor = P.accent;
+                        e.target.style.boxShadow = `0 0 0 3px rgba(45,108,223,0.1)`;
+                        e.target.style.background = P.surface;
                       }}
-                      onBlur={e => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; e.target.style.background = '#f8fafc'; }}
+                      onBlur={e => { e.target.style.borderColor = P.border; e.target.style.boxShadow = 'none'; e.target.style.background = P.paper; }}
                       onKeyDown={e => e.key === 'Enter' && !loading && getTranscript()}
                       placeholder="https://youtube.com/watch?v=…"
                       style={{
                         width: '100%', boxSizing: 'border-box',
-                        padding: '11px 14px 11px 38px',
-                        fontSize: 14, color: '#0f172a',
-                        border: '1.5px solid #e2e8f0', borderRadius: 12,
-                        outline: 'none', background: '#f8fafc',
-                        transition: 'border-color 0.15s, box-shadow 0.15s',
+                        padding: '10px 12px 10px 36px',
+                        fontSize: 14, color: P.ink,
+                        border: `1.5px solid ${P.border}`, borderRadius: 10,
+                        outline: 'none', background: P.paper,
+                        transition: 'border-color 0.15s, box-shadow 0.15s, background 0.15s',
+                        fontFamily: 'system-ui, sans-serif',
                       }}
                     />
                   </div>
@@ -586,21 +608,21 @@ const App = () => {
                   {/* Enter key hint */}
                   {previewId && !transcript && !loading && (
                     <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <kbd style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '1px 5px', fontSize: 10, fontFamily: 'monospace', fontWeight: 700, color: '#94a3b8', background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: 4, boxShadow: '0 1px 0 #cbd5e1' }}>↵ Enter</kbd>
-                      <span style={{ fontSize: 11, color: '#94a3b8' }}>to extract</span>
+                      <kbd style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '1px 5px', fontSize: 10, fontFamily: 'monospace', fontWeight: 700, color: P.muted, background: P.paper, border: `1px solid ${P.border}`, borderRadius: 4, boxShadow: `0 1px 0 ${P.border}` }}>↵ Enter</kbd>
+                      <span style={{ fontSize: 11, color: P.muted }}>to extract</span>
                     </div>
                   )}
 
                   {/* Video preview thumbnail */}
                   {previewId && !transcript && !loading && (
-                    <div className="fade-up" style={{ marginTop: 10, borderRadius: 10, overflow: 'hidden', border: '1.5px solid #e2e8f0', position: 'relative' }}>
+                    <div className="fade-up" style={{ marginTop: 10, borderRadius: 10, overflow: 'hidden', border: `1px solid ${P.border}`, position: 'relative' }}>
                       <img
                         src={`https://img.youtube.com/vi/${previewId}/mqdefault.jpg`}
                         alt="Video preview"
                         style={{ width: '100%', display: 'block', maxHeight: 160, objectFit: 'cover' }}
                         onError={e => { e.target.parentElement.style.display = 'none'; }}
                       />
-                      <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55) 100%)' }} />
+                      <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(28,25,23,0.5) 100%)' }} />
                       <div style={{ position:'absolute', bottom:8, left:10, fontSize:11, fontWeight:600, color:'rgba(255,255,255,0.85)', fontFamily:'monospace' }}>
                         {previewId}
                       </div>
@@ -610,11 +632,11 @@ const App = () => {
 
                 {/* Language select */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 6, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: P.muted, marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                     Language
                   </label>
                   <div style={{ position: 'relative' }}>
-                    <span style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)', color:'#cbd5e1', pointerEvents:'none' }}>
+                    <span style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color: P.border, pointerEvents:'none' }}>
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
                         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
@@ -625,18 +647,19 @@ const App = () => {
                       onChange={e => setLang(e.target.value)}
                       style={{
                         width: '100%', boxSizing: 'border-box', appearance: 'none', WebkitAppearance: 'none',
-                        padding: '11px 38px 11px 38px',
-                        fontSize: 14, color: '#0f172a',
-                        border: '1.5px solid #e2e8f0', borderRadius: 12,
-                        outline: 'none', background: '#f8fafc', cursor: 'pointer',
+                        padding: '10px 36px 10px 36px',
+                        fontSize: 14, color: P.ink,
+                        border: `1.5px solid ${P.border}`, borderRadius: 10,
+                        outline: 'none', background: P.paper, cursor: 'pointer',
                         transition: 'border-color 0.15s, box-shadow 0.15s',
+                        fontFamily: 'system-ui, sans-serif',
                       }}
-                      onFocus={e => { e.target.style.borderColor = '#ef4444'; e.target.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.1)'; e.target.style.background = '#fff'; }}
-                      onBlur={e  => { e.target.style.borderColor = '#e2e8f0'; e.target.style.boxShadow = 'none'; e.target.style.background = '#f8fafc'; }}
+                      onFocus={e => { e.target.style.borderColor = P.accent; e.target.style.boxShadow = `0 0 0 3px rgba(45,108,223,0.1)`; e.target.style.background = P.surface; }}
+                      onBlur={e  => { e.target.style.borderColor = P.border; e.target.style.boxShadow = 'none'; e.target.style.background = P.paper; }}
                     >
                       {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
                     </select>
-                    <span style={{ position:'absolute', right:14, top:'50%', transform:'translateY(-50%)', color:'#94a3b8', pointerEvents:'none' }}>
+                    <span style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', color: P.muted, pointerEvents:'none' }}>
                       <ChevronIcon />
                     </span>
                   </div>
@@ -648,22 +671,22 @@ const App = () => {
                   disabled={loading}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    width: '100%', padding: '13px 20px',
-                    background: loading ? '#fca5a5' : 'linear-gradient(135deg, #ef4444, #dc2626)',
-                    color: 'white', border: 'none', borderRadius: 12,
-                    fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
+                    width: '100%', padding: '12px 20px',
+                    background: loading ? `rgba(45,108,223,0.5)` : P.accent,
+                    color: 'white', border: 'none', borderRadius: 10,
+                    fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
                     letterSpacing: '-0.01em',
-                    boxShadow: loading ? 'none' : '0 4px 14px rgba(239,68,68,0.4)',
-                    transition: 'opacity 0.15s, box-shadow 0.15s, transform 0.1s',
+                    boxShadow: loading ? 'none' : '0 2px 8px rgba(45,108,223,0.3)',
+                    transition: 'background 0.15s, box-shadow 0.15s, transform 0.1s',
                   }}
-                  onMouseEnter={e => { if (!loading) { e.currentTarget.style.boxShadow='0 6px 20px rgba(239,68,68,0.5)'; e.currentTarget.style.transform='translateY(-1px)'; }}}
-                  onMouseLeave={e => { e.currentTarget.style.boxShadow='0 4px 14px rgba(239,68,68,0.4)'; e.currentTarget.style.transform='translateY(0)'; }}
+                  onMouseEnter={e => { if (!loading) { e.currentTarget.style.background = P.accentHover; e.currentTarget.style.transform = 'translateY(-1px)'; }}}
+                  onMouseLeave={e => { e.currentTarget.style.background = loading ? `rgba(45,108,223,0.5)` : P.accent; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
                   {loading ? (
                     <><SpinnerIcon /><span style={{ fontSize: 13, fontWeight: 500 }}>{loadingMsg || 'Loading…'}</span></>
                   ) : (
                     <>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <polygon points="5 3 19 12 5 21 5 3"/>
                       </svg>
                       Extract Transcript
@@ -676,7 +699,7 @@ const App = () => {
               {loading && loadingPercent > 0 && (
                 <div style={{ marginTop: 14 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <div style={{ display: 'flex', gap: 6 }}>
+                    <div style={{ display: 'flex', gap: 5 }}>
                       {['subtitles', 'audio', 'whisper'].map((stage) => {
                         const labels = { subtitles: 'Subtitles', audio: 'Audio', whisper: 'AI' };
                         const stageOrder = ['subtitles', 'audio', 'whisper'];
@@ -688,8 +711,9 @@ const App = () => {
                           <span key={stage} style={{
                             fontSize: 10, fontWeight: 600, letterSpacing: '0.04em',
                             padding: '2px 7px', borderRadius: 999,
-                            background: isDone ? '#dcfce7' : isActive ? '#fef2f2' : '#f1f5f9',
-                            color: isDone ? '#16a34a' : isActive ? '#ef4444' : '#94a3b8',
+                            background: isDone ? 'rgba(15,118,110,0.1)' : isActive ? 'rgba(45,108,223,0.1)' : P.paper,
+                            color: isDone ? P.success : isActive ? P.accent : P.muted,
+                            border: `1px solid ${isDone ? 'rgba(15,118,110,0.2)' : isActive ? 'rgba(45,108,223,0.2)' : P.border}`,
                             transition: 'all 0.3s',
                           }}>
                             {isDone ? '✓ ' : ''}{labels[stage]}
@@ -697,13 +721,13 @@ const App = () => {
                         );
                       })}
                     </div>
-                    <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{loadingPercent}%</span>
+                    <span style={{ fontSize: 11, color: P.muted, fontWeight: 600 }}>{loadingPercent}%</span>
                   </div>
-                  <div style={{ height: 4, borderRadius: 999, background: '#f1f5f9', overflow: 'hidden' }}>
+                  <div style={{ height: 3, borderRadius: 999, background: P.border, overflow: 'hidden' }}>
                     <div style={{
                       height: '100%',
                       width: `${loadingPercent}%`,
-                      background: 'linear-gradient(90deg, #ef4444, #f97316)',
+                      background: P.accent,
                       borderRadius: 999,
                       transition: 'width 0.6s ease',
                     }} />
@@ -714,18 +738,18 @@ const App = () => {
               {/* ── Error ── */}
               {error && (
                 <div className="fade-up" style={{
-                  marginTop: 16, padding: '12px 16px',
-                  background: '#fef2f2', border: '1px solid #fecaca',
-                  borderRadius: 12, fontSize: 13, color: '#dc2626',
+                  marginTop: 16, padding: '11px 14px',
+                  background: 'rgba(180,35,24,0.06)', border: `1px solid rgba(180,35,24,0.2)`,
+                  borderRadius: 10, fontSize: 13, color: P.error,
                   display: 'flex', gap: 10, alignItems: 'flex-start',
                 }}>
-                  <svg style={{ flexShrink: 0, marginTop: 1 }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg style={{ flexShrink: 0, marginTop: 1 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                   </svg>
                   <span style={{ flex: 1 }}>{error}</span>
                   <button
                     onClick={getTranscript}
-                    style={{ flexShrink: 0, border: '1px solid #fca5a5', background: 'white', borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 600, color: '#dc2626', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    style={{ flexShrink: 0, border: `1px solid rgba(180,35,24,0.25)`, background: 'white', borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 600, color: P.error, cursor: 'pointer', whiteSpace: 'nowrap' }}
                   >
                     Retry
                   </button>
@@ -741,14 +765,14 @@ const App = () => {
                     onClick={resetAll}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 5, marginBottom: 14,
-                      border: '1px solid #e2e8f0', background: '#f8fafc', borderRadius: 8,
-                      padding: '5px 12px', fontSize: 12, fontWeight: 600, color: '#64748b',
+                      border: `1px solid ${P.border}`, background: P.paper, borderRadius: 8,
+                      padding: '5px 11px', fontSize: 12, fontWeight: 600, color: P.muted,
                       cursor: 'pointer', transition: 'all 0.15s',
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#334155'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#64748b'; }}
+                    onMouseEnter={e => { e.currentTarget.style.background = P.border; e.currentTarget.style.color = P.ink; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.muted; }}
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="15 18 9 12 15 6"/>
                     </svg>
                     New Transcript
@@ -757,15 +781,15 @@ const App = () => {
                   {/* Hero thumbnail */}
                   {currentVideoId && (
                     <a href={`https://youtube.com/watch?v=${currentVideoId}`} target="_blank" rel="noopener noreferrer"
-                      style={{ display: 'block', marginBottom: 12, borderRadius: 12, overflow: 'hidden', border: '1.5px solid #e2e8f0', textDecoration: 'none', position: 'relative' }}>
+                      style={{ display: 'block', marginBottom: 12, borderRadius: 10, overflow: 'hidden', border: `1px solid ${P.border}`, textDecoration: 'none', position: 'relative' }}>
                       <img
                         src={`https://img.youtube.com/vi/${currentVideoId}/mqdefault.jpg`}
                         alt="Video thumbnail"
                         style={{ width: '100%', display: 'block' }}
                       />
                       <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                        <div style={{ width:44, height:44, borderRadius:'50%', background:'rgba(0,0,0,0.65)', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)' }}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        <div style={{ width:40, height:40, borderRadius:'50%', background:'rgba(28,25,23,0.6)', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                         </div>
                       </div>
                     </a>
@@ -775,8 +799,8 @@ const App = () => {
                   {isShortTranscript && (
                     <div className="fade-up" style={{
                       marginBottom: 12, padding: '8px 12px',
-                      background: '#fffbeb', border: '1px solid #fde68a',
-                      borderRadius: 8, fontSize: 12, color: '#92400e',
+                      background: 'rgba(180,83,9,0.06)', border: `1px solid rgba(180,83,9,0.2)`,
+                      borderRadius: 8, fontSize: 12, color: P.warning,
                       display: 'flex', alignItems: 'center', gap: 6,
                     }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -788,31 +812,31 @@ const App = () => {
                   )}
 
                   {/* Result card */}
-                  <div style={{ border: '1.5px solid #e2e8f0', borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                  <div style={{ border: `1px solid ${P.border}`, borderRadius: 14, overflow: 'hidden' }}>
 
                     {/* Result header */}
                     <div style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '12px 16px',
-                      background: '#f8fafc',
-                      borderBottom: '1px solid #e2e8f0',
+                      padding: '11px 14px',
+                      background: P.paper,
+                      borderBottom: `1px solid ${P.border}`,
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: '#334155' }}>Transcript</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: P.ink }}>Transcript</span>
                         {transcriptSource === 'whisper' && (
-                          <span style={{ padding: '2px 8px', fontSize: 11, fontWeight: 600, background: '#f3e8ff', color: '#7c3aed', borderRadius: 999 }}>AI generated</span>
+                          <span style={{ padding: '2px 7px', fontSize: 10, fontWeight: 600, background: `rgba(107,100,92,0.1)`, color: P.muted, borderRadius: 999, border: `1px solid ${P.border}` }}>AI generated</span>
                         )}
                         {transcriptSource === 'subtitles' && (
-                          <span style={{ padding: '2px 8px', fontSize: 11, fontWeight: 600, background: '#dcfce7', color: '#16a34a', borderRadius: 999 }}>From subtitles</span>
+                          <span style={{ padding: '2px 7px', fontSize: 10, fontWeight: 600, background: `rgba(15,118,110,0.1)`, color: P.success, borderRadius: 999, border: `1px solid rgba(15,118,110,0.2)` }}>From subtitles</span>
                         )}
-                        <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>{wordCount.toLocaleString()} words</span>
-                        <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 500 }}>·</span>
-                        <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }} title={`${charCount.toLocaleString()} characters`}>{charCount >= 1000 ? `${(charCount / 1000).toFixed(1)}k` : charCount} chars</span>
-                        <span style={{ fontSize: 11, color: '#cbd5e1', fontWeight: 500 }}>·</span>
-                        <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>~{readingMins} min read</span>
+                        <span style={{ fontSize: 11, color: P.muted }}>{wordCount.toLocaleString()} words</span>
+                        <span style={{ fontSize: 11, color: P.border }}>·</span>
+                        <span style={{ fontSize: 11, color: P.muted }} title={`${charCount.toLocaleString()} characters`}>{charCount >= 1000 ? `${(charCount / 1000).toFixed(1)}k` : charCount} chars</span>
+                        <span style={{ fontSize: 11, color: P.border }}>·</span>
+                        <span style={{ fontSize: 11, color: P.muted }}>~{readingMins} min read</span>
                       </div>
 
-                      <div style={{ display: 'flex', gap: 6 }}>
+                      <div style={{ display: 'flex', gap: 5 }}>
                         {/* Timestamps toggle */}
                         {segments.length > 0 && (
                           <button
@@ -820,9 +844,12 @@ const App = () => {
                             title={showTimestamps ? 'Hide timestamps' : 'Show timestamps'}
                             style={{
                               display: 'flex', alignItems: 'center', gap: 4,
-                              padding: '5px 10px', borderRadius: 8, border: '1px solid #e2e8f0',
-                              background: showTimestamps ? '#f0fdf4' : 'white', cursor: 'pointer',
-                              fontSize: 12, fontWeight: 600, color: showTimestamps ? '#16a34a' : '#94a3b8',
+                              padding: '4px 9px', borderRadius: 7,
+                              border: `1px solid ${showTimestamps ? 'rgba(45,108,223,0.25)' : P.border}`,
+                              background: showTimestamps ? 'rgba(45,108,223,0.07)' : P.surface,
+                              cursor: 'pointer',
+                              fontSize: 11, fontWeight: 600,
+                              color: showTimestamps ? P.accent : P.muted,
                               transition: 'all 0.15s',
                             }}
                           >
@@ -838,19 +865,20 @@ const App = () => {
                           onClick={summarize}
                           disabled={summarizing}
                           style={{
-                            display: 'flex', alignItems: 'center', gap: 5,
-                            padding: '5px 10px', borderRadius: 8, border: '1px solid #e2e8f0',
-                            background: summarizing ? '#f5f3ff' : 'white', cursor: summarizing ? 'not-allowed' : 'pointer',
-                            fontSize: 12, fontWeight: 600, color: '#7c3aed',
+                            display: 'flex', alignItems: 'center', gap: 4,
+                            padding: '4px 9px', borderRadius: 7, border: `1px solid ${P.border}`,
+                            background: summarizing ? P.paper : P.surface,
+                            cursor: summarizing ? 'not-allowed' : 'pointer',
+                            fontSize: 11, fontWeight: 600, color: P.muted,
                             transition: 'all 0.15s',
                           }}
-                          onMouseEnter={e => { if (!summarizing) e.currentTarget.style.background = '#f5f3ff'; }}
-                          onMouseLeave={e => { if (!summarizing) e.currentTarget.style.background = 'white'; }}
+                          onMouseEnter={e => { if (!summarizing) e.currentTarget.style.background = P.paper; }}
+                          onMouseLeave={e => { if (!summarizing) e.currentTarget.style.background = P.surface; }}
                         >
                           {summarizing ? (
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                           ) : (
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                           )}
                           {summarizing ? 'Summarizing…' : 'Summarize'}
                         </button>
@@ -859,11 +887,13 @@ const App = () => {
                         <button
                           onClick={copyToClipboard}
                           style={{
-                            display: 'flex', alignItems: 'center', gap: 5,
-                            padding: '5px 10px', borderRadius: 8, border: '1px solid #e2e8f0',
-                            background: copied ? '#f0fdf4' : 'white', cursor: 'pointer',
-                            fontSize: 12, fontWeight: 600,
-                            color: copied ? '#16a34a' : '#475569',
+                            display: 'flex', alignItems: 'center', gap: 4,
+                            padding: '4px 9px', borderRadius: 7,
+                            border: `1px solid ${copied ? 'rgba(15,118,110,0.25)' : P.border}`,
+                            background: copied ? 'rgba(15,118,110,0.07)' : P.surface,
+                            cursor: 'pointer',
+                            fontSize: 11, fontWeight: 600,
+                            color: copied ? P.success : P.muted,
                             transition: 'all 0.15s',
                           }}
                         >
@@ -876,48 +906,49 @@ const App = () => {
                           <button
                             onClick={() => setShowDownloadMenu(v => !v)}
                             style={{
-                              display: 'flex', alignItems: 'center', gap: 5,
-                              padding: '5px 10px', borderRadius: 8, border: 'none',
-                              background: showDownloadMenu ? '#0f172a' : '#1e293b',
+                              display: 'flex', alignItems: 'center', gap: 4,
+                              padding: '4px 9px', borderRadius: 7, border: 'none',
+                              background: P.ink,
                               color: 'white', cursor: 'pointer',
-                              fontSize: 12, fontWeight: 600,
+                              fontSize: 11, fontWeight: 600,
                               transition: 'background 0.15s',
-                              boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
                             }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#2C2926'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = P.ink; }}
                           >
-                            <DownloadIcon size={13} />
+                            <DownloadIcon size={12} />
                             Download
-                            <span style={{ opacity: 0.6, marginLeft: -2 }}><ChevronIcon /></span>
+                            <span style={{ opacity: 0.5 }}><ChevronIcon /></span>
                           </button>
 
                           {showDownloadMenu && (
                             <div className="fade-up" style={{
                               position: 'absolute', right: 0, top: 'calc(100% + 6px)',
-                              width: 188, background: 'white',
-                              border: '1px solid #e2e8f0', borderRadius: 12,
-                              boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+                              width: 186, background: P.surface,
+                              border: `1px solid ${P.border}`, borderRadius: 12,
+                              boxShadow: '0 8px 24px rgba(28,25,23,0.1)',
                               overflow: 'hidden', zIndex: 20,
                             }}>
                               {[
-                                { label: 'Save as TXT', sub: 'Plain text file', color: '#64748b', fn: downloadTxt },
-                                { label: 'Save as PDF', sub: 'Formatted document', color: '#ef4444', fn: downloadPdf },
-                                { label: 'Copy as Markdown', sub: 'With timestamps', color: '#7c3aed', fn: copyAsMarkdown },
+                                { label: 'Save as TXT', sub: 'Plain text file', fn: downloadTxt },
+                                { label: 'Save as PDF', sub: 'Formatted document', fn: downloadPdf },
+                                { label: 'Copy as Markdown', sub: 'With timestamps', fn: copyAsMarkdown },
                               ].map((item, i) => (
                                 <React.Fragment key={item.label}>
-                                  {i > 0 && <div style={{ height: 1, background: '#f1f5f9' }} />}
+                                  {i > 0 && <div style={{ height: 1, background: P.border }} />}
                                   <button onClick={item.fn} style={{
                                     display: 'flex', alignItems: 'center', gap: 10,
                                     width: '100%', padding: '10px 14px',
                                     background: 'none', border: 'none', cursor: 'pointer',
                                     textAlign: 'left', transition: 'background 0.1s',
                                   }}
-                                    onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
+                                    onMouseEnter={e => e.currentTarget.style.background = P.paper}
                                     onMouseLeave={e => e.currentTarget.style.background = 'none'}
                                   >
-                                    <span style={{ color: item.color }}><DownloadIcon size={14} /></span>
+                                    <span style={{ color: P.muted }}><DownloadIcon size={13} /></span>
                                     <div>
-                                      <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>{item.label}</div>
-                                      <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>{item.sub}</div>
+                                      <div style={{ fontSize: 13, fontWeight: 600, color: P.ink }}>{item.label}</div>
+                                      <div style={{ fontSize: 11, color: P.muted, marginTop: 1 }}>{item.sub}</div>
                                     </div>
                                   </button>
                                 </React.Fragment>
@@ -929,29 +960,29 @@ const App = () => {
                     </div>
 
                     {/* Search bar */}
-                    <div style={{ padding: '8px 12px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <div style={{ padding: '7px 12px', background: P.paper, borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                       </svg>
                       <input
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder="Search transcript…"
-                        style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: '#334155' }}
+                        style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: P.ink, fontFamily: 'system-ui, sans-serif' }}
                       />
                       {search && matchCount > 0 && (
-                        <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500, whiteSpace: 'nowrap' }}>{matchCount} match{matchCount !== 1 ? 'es' : ''}</span>
+                        <span style={{ fontSize: 11, color: P.muted, fontWeight: 500, whiteSpace: 'nowrap' }}>{matchCount} match{matchCount !== 1 ? 'es' : ''}</span>
                       )}
                       {search && (
-                        <button onClick={() => setSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0, fontSize: 18, lineHeight: 1 }}>×</button>
+                        <button onClick={() => setSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, padding: 0, fontSize: 18, lineHeight: 1 }}>×</button>
                       )}
                     </div>
 
                     {/* Transcript text */}
                     <div style={{
                       padding: '16px', maxHeight: 320, overflowY: 'auto',
-                      fontSize: 13.5, lineHeight: 1.75, color: '#334155',
-                      background: 'white',
+                      fontSize: 14, lineHeight: 1.8, color: P.ink,
+                      background: P.surface,
                     }}>
                       {segments.length > 0 && showTimestamps ? (
                         segments.map((seg, i) => (
@@ -960,7 +991,7 @@ const App = () => {
                               href={`https://youtube.com/watch?v=${currentVideoId}&t=${seg.seconds}s`}
                               target="_blank" rel="noopener noreferrer"
                               title={`Jump to ${formatTime(seg.seconds)}`}
-                              style={{ color: '#ef4444', fontWeight: 700, fontSize: 11, marginRight: 5, textDecoration: 'none', fontFamily: 'monospace', letterSpacing: '-0.02em', flexShrink: 0 }}
+                              style={{ color: P.accent, fontWeight: 700, fontSize: 11, marginRight: 5, textDecoration: 'none', fontFamily: 'monospace', letterSpacing: '-0.02em', flexShrink: 0 }}
                             >
                               {formatTime(seg.seconds)}
                             </a>
@@ -975,27 +1006,27 @@ const App = () => {
 
                   {/* AI Summary panel */}
                   {summary && (
-                    <div className="fade-up" style={{ marginTop: 12, border: '1.5px solid #e9d5ff', borderRadius: 14, overflow: 'hidden' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#f5f3ff', borderBottom: '1px solid #e9d5ff' }}>
+                    <div className="fade-up" style={{ marginTop: 10, border: `1px solid ${P.border}`, borderRadius: 12, overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: '#7c3aed' }}>AI Summary</span>
-                          <span style={{ fontSize: 11, color: '#a78bfa', fontWeight: 500 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>AI Summary</span>
+                          <span style={{ fontSize: 11, color: P.muted }}>
                             · {summary.trim().split(/\s+/).length.toLocaleString()} words
                           </span>
                         </div>
                         <div style={{ display: 'flex', gap: 6 }}>
                           <button
                             onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
-                            style={{ display: 'flex', alignItems: 'center', gap: 4, border: '1px solid #e9d5ff', background: summaryCopied ? '#ede9fe' : 'white', cursor: 'pointer', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: summaryCopied ? '#7c3aed' : '#a78bfa', transition: 'all 0.15s' }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 4, border: `1px solid ${P.border}`, background: summaryCopied ? P.paper : P.surface, cursor: 'pointer', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: summaryCopied ? P.success : P.muted, transition: 'all 0.15s' }}
                           >
                             {summaryCopied ? <CheckIcon /> : <CopyIcon />}
                             {summaryCopied ? 'Copied!' : 'Copy'}
                           </button>
-                          <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#a78bfa', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
+                          <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
                         </div>
                       </div>
-                      <div style={{ padding: '14px 16px', background: 'white', fontSize: 13, lineHeight: 1.75, color: '#334155', whiteSpace: 'pre-wrap' }}>
+                      <div style={{ padding: '14px 16px', background: P.surface, fontSize: 14, lineHeight: 1.8, color: P.ink, whiteSpace: 'pre-wrap' }}>
                         {summary}
                       </div>
                     </div>
@@ -1005,19 +1036,9 @@ const App = () => {
                   {segments.length > 0 && (
                     <button
                       onClick={() => { if (!showChapters && chapters.length === 0) detectChapters(); else setShowChapters(v => !v); }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 6,
-                        width: '100%', justifyContent: 'center',
-                        marginTop: 10,
-                        background: showChapters ? '#fff7ed' : 'white',
-                        border: `1.5px solid ${showChapters ? '#fed7aa' : '#e2e8f0'}`,
-                        borderRadius: 10, padding: '8px 14px',
-                        color: showChapters ? '#c2410c' : '#64748b',
-                        fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                        transition: 'all 0.15s',
-                      }}
-                      onMouseEnter={e => { if (!showChapters) { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#334155'; } }}
-                      onMouseLeave={e => { if (!showChapters) { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#64748b'; } }}
+                      style={toggleBtn(showChapters)}
+                      onMouseEnter={e => { if (!showChapters) { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; } }}
+                      onMouseLeave={e => { if (!showChapters) { e.currentTarget.style.background = P.surface; e.currentTarget.style.color = P.muted; } }}
                     >
                       {chaptersLoading ? (
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
@@ -1028,35 +1049,35 @@ const App = () => {
                         </svg>
                       )}
                       {chaptersLoading ? 'Detecting chapters…' : showChapters ? 'Hide Chapters' : 'Detect Chapters'}
-                      {!chaptersLoading && <span style={{ opacity: 0.5, transform: showChapters ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>}
+                      {!chaptersLoading && <span style={{ opacity: 0.4, transform: showChapters ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>}
                     </button>
                   )}
 
                   {/* Chapters panel */}
                   {showChapters && chapters.length > 0 && (
-                    <div className="fade-up" style={{ marginTop: 8, border: '1.5px solid #fed7aa', borderRadius: 14, overflow: 'hidden' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 7, padding: '10px 14px', background: '#fff7ed', borderBottom: '1px solid #fed7aa' }}>
+                    <div className="fade-up" style={{ marginTop: 8, border: `1px solid ${P.border}`, borderRadius: 12, overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 7, padding: '10px 14px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c2410c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
                             <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
                           </svg>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: '#c2410c' }}>Chapters</span>
-                          <span style={{ fontSize: 11, color: '#fb923c', fontWeight: 500 }}>· {chapters.filter(c => !c.isError).length} detected · click to jump</span>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>Chapters</span>
+                          <span style={{ fontSize: 11, color: P.muted }}>· {chapters.filter(c => !c.isError).length} detected · click to jump</span>
                         </div>
                         <button
                           onClick={detectChapters}
                           disabled={chaptersLoading}
                           title="Re-detect chapters"
-                          style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#fb923c', fontSize: 11, fontWeight: 600, padding: 0 }}
+                          style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}
                         >
                           Refresh
                         </button>
                       </div>
-                      <div style={{ background: 'white', padding: '8px 0' }}>
+                      <div style={{ background: P.surface, padding: '6px 0' }}>
                         {chapters.map((ch, i) => (
                           ch.isError ? (
-                            <div key={i} style={{ padding: '8px 14px', fontSize: 12, color: '#dc2626' }}>{ch.title}</div>
+                            <div key={i} style={{ padding: '8px 14px', fontSize: 12, color: P.error }}>{ch.title}</div>
                           ) : (
                             <a
                               key={i}
@@ -1067,14 +1088,14 @@ const App = () => {
                                 padding: '9px 14px', textDecoration: 'none',
                                 transition: 'background 0.1s',
                               }}
-                              onMouseEnter={e => e.currentTarget.style.background = '#fff7ed'}
+                              onMouseEnter={e => e.currentTarget.style.background = P.paper}
                               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                             >
-                              <span style={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 700, color: '#ef4444', flexShrink: 0, minWidth: 36 }}>
+                              <span style={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 700, color: P.accent, flexShrink: 0, minWidth: 36 }}>
                                 {formatTime(ch.seconds)}
                               </span>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', lineHeight: 1.3 }}>{ch.title}</span>
-                              <svg style={{ marginLeft: 'auto', flexShrink: 0, color: '#cbd5e1' }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <span style={{ fontSize: 13, fontWeight: 600, color: P.ink, lineHeight: 1.3 }}>{ch.title}</span>
+                              <svg style={{ marginLeft: 'auto', flexShrink: 0, color: P.border }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
                               </svg>
                             </a>
@@ -1087,19 +1108,9 @@ const App = () => {
                   {/* Key Quotes toggle button */}
                   <button
                     onClick={() => { if (!showQuotes && quotes.length === 0) extractQuotes(); else setShowQuotes(v => !v); }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 6,
-                      width: '100%', justifyContent: 'center',
-                      marginTop: 10,
-                      background: showQuotes ? '#fdf2f8' : 'white',
-                      border: `1.5px solid ${showQuotes ? '#f9a8d4' : '#e2e8f0'}`,
-                      borderRadius: 10, padding: '8px 14px',
-                      color: showQuotes ? '#be185d' : '#64748b',
-                      fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                      transition: 'all 0.15s',
-                    }}
-                    onMouseEnter={e => { if (!showQuotes) { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#334155'; } }}
-                    onMouseLeave={e => { if (!showQuotes) { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#64748b'; } }}
+                    style={toggleBtn(showQuotes)}
+                    onMouseEnter={e => { if (!showQuotes) { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; } }}
+                    onMouseLeave={e => { if (!showQuotes) { e.currentTarget.style.background = P.surface; e.currentTarget.style.color = P.muted; } }}
                   >
                     {quotesLoading ? (
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
@@ -1110,45 +1121,45 @@ const App = () => {
                       </svg>
                     )}
                     {quotesLoading ? 'Extracting quotes…' : showQuotes ? 'Hide Key Quotes' : 'Extract Key Quotes'}
-                    {!quotesLoading && <span style={{ opacity: 0.5, transform: showQuotes ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>}
+                    {!quotesLoading && <span style={{ opacity: 0.4, transform: showQuotes ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>}
                   </button>
 
                   {/* Key Quotes panel */}
                   {showQuotes && quotes.length > 0 && (
-                    <div className="fade-up" style={{ marginTop: 8, border: '1.5px solid #f9a8d4', borderRadius: 14, overflow: 'hidden' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#fdf2f8', borderBottom: '1px solid #f9a8d4' }}>
+                    <div className="fade-up" style={{ marginTop: 8, border: `1px solid ${P.border}`, borderRadius: 12, overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#be185d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
                             <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
                           </svg>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: '#be185d' }}>Key Quotes</span>
-                          <span style={{ fontSize: 11, color: '#f472b6', fontWeight: 500 }}>· {quotes.filter(q => !q.startsWith('Error:')).length} quotes</span>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>Key Quotes</span>
+                          <span style={{ fontSize: 11, color: P.muted }}>· {quotes.filter(q => !q.startsWith('Error:')).length} quotes</span>
                         </div>
                         <div style={{ display: 'flex', gap: 6 }}>
                           <button
                             onClick={() => { navigator.clipboard.writeText(quotes.map(q => `"${q}"`).join('\n\n')).then(() => { setQuotesCopied(true); setTimeout(() => setQuotesCopied(false), 2000); }); }}
-                            style={{ display: 'flex', alignItems: 'center', gap: 4, border: '1px solid #f9a8d4', background: quotesCopied ? '#fce7f3' : 'white', cursor: 'pointer', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: quotesCopied ? '#be185d' : '#f472b6', transition: 'all 0.15s' }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 4, border: `1px solid ${P.border}`, background: quotesCopied ? P.paper : P.surface, cursor: 'pointer', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: quotesCopied ? P.success : P.muted, transition: 'all 0.15s' }}
                           >
                             {quotesCopied ? <CheckIcon /> : <CopyIcon />}
                             {quotesCopied ? 'Copied!' : 'Copy all'}
                           </button>
-                          <button onClick={extractQuotes} disabled={quotesLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#f472b6', fontSize: 11, fontWeight: 600, padding: 0 }}>Refresh</button>
+                          <button onClick={extractQuotes} disabled={quotesLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Refresh</button>
                         </div>
                       </div>
-                      <div style={{ background: 'white', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div style={{ background: P.surface, padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                         {quotes.map((q, i) => (
                           q.startsWith('Error:') ? (
-                            <div key={i} style={{ fontSize: 12, color: '#dc2626' }}>{q}</div>
+                            <div key={i} style={{ fontSize: 12, color: P.error }}>{q}</div>
                           ) : (
                             <div key={i} style={{
-                              position: 'relative', padding: '10px 14px 10px 18px',
-                              background: '#fdf2f8', borderRadius: 10,
-                              borderLeft: '3px solid #f9a8d4',
-                              fontSize: 13, lineHeight: 1.6, color: '#334155',
+                              position: 'relative', padding: '10px 14px 10px 20px',
+                              background: P.paper, borderRadius: 8,
+                              borderLeft: `3px solid ${P.border}`,
+                              fontSize: 13.5, lineHeight: 1.7, color: P.ink,
                               fontStyle: 'italic',
                             }}>
-                              <span style={{ position: 'absolute', top: 8, left: -2, fontSize: 24, color: '#f9a8d4', fontStyle: 'normal', lineHeight: 1 }}>"</span>
+                              <span style={{ position: 'absolute', top: 6, left: -1, fontSize: 22, color: P.border, fontStyle: 'normal', lineHeight: 1 }}>"</span>
                               {q}
                             </div>
                           )
@@ -1161,18 +1172,12 @@ const App = () => {
                   <button
                     onClick={() => { setShowQA(v => !v); setTimeout(() => qaInputRef.current?.focus(), 80); }}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: 6,
-                      width: '100%', justifyContent: 'center',
-                      marginTop: 10,
-                      background: showQA ? '#eff6ff' : 'white',
-                      border: `1.5px solid ${showQA ? '#bfdbfe' : '#e2e8f0'}`,
-                      borderRadius: 10, padding: '8px 14px',
-                      color: showQA ? '#2563eb' : '#64748b',
-                      fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                      transition: 'all 0.15s',
+                      ...toggleBtn(showQA, P.accent),
+                      border: `1px solid ${showQA ? 'rgba(45,108,223,0.25)' : P.border}`,
+                      background: showQA ? 'rgba(45,108,223,0.06)' : P.surface,
                     }}
-                    onMouseEnter={e => { if (!showQA) { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#334155'; } }}
-                    onMouseLeave={e => { if (!showQA) { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#64748b'; } }}
+                    onMouseEnter={e => { if (!showQA) { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; } }}
+                    onMouseLeave={e => { if (!showQA) { e.currentTarget.style.background = P.surface; e.currentTarget.style.color = P.muted; } }}
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10"/>
@@ -1180,25 +1185,25 @@ const App = () => {
                       <line x1="12" y1="17" x2="12.01" y2="17"/>
                     </svg>
                     {showQA ? 'Hide Q&A' : 'Ask AI about this transcript'}
-                    <span style={{ opacity: 0.5, transform: showQA ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>
+                    <span style={{ opacity: 0.4, transform: showQA ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>
                   </button>
 
                   {/* Q&A panel */}
                   {showQA && (
-                    <div className="fade-up" style={{ marginTop: 8, border: '1.5px solid #bfdbfe', borderRadius: 14, overflow: 'hidden' }}>
+                    <div className="fade-up" style={{ marginTop: 8, border: `1px solid rgba(45,108,223,0.2)`, borderRadius: 12, overflow: 'hidden' }}>
                       {/* Q&A header */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 14px', background: '#eff6ff', borderBottom: '1px solid #bfdbfe' }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 14px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="10"/>
                           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
                           <line x1="12" y1="17" x2="12.01" y2="17"/>
                         </svg>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#2563eb' }}>Ask AI</span>
-                        <span style={{ fontSize: 11, color: '#60a5fa', fontWeight: 500 }}>· answers based on this transcript only</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: P.accent }}>Ask AI</span>
+                        <span style={{ fontSize: 11, color: P.muted }}>· answers based on this transcript only</span>
                         {qaMessages.length > 0 && (
                           <button
                             onClick={() => setQaMessages([])}
-                            style={{ marginLeft: 'auto', border: 'none', background: 'none', cursor: 'pointer', color: '#93c5fd', fontSize: 11, fontWeight: 600, padding: 0 }}
+                            style={{ marginLeft: 'auto', border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}
                           >
                             Clear
                           </button>
@@ -1207,7 +1212,7 @@ const App = () => {
 
                       {/* Messages */}
                       {qaMessages.length > 0 && (
-                        <div style={{ maxHeight: 280, overflowY: 'auto', background: 'white', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ maxHeight: 280, overflowY: 'auto', background: P.surface, padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                           {qaMessages.map((msg, i) => (
                             <div key={i} style={{
                               display: 'flex',
@@ -1217,10 +1222,10 @@ const App = () => {
                                 maxWidth: '82%',
                                 padding: '8px 12px',
                                 borderRadius: msg.role === 'user' ? '12px 12px 3px 12px' : '12px 12px 12px 3px',
-                                background: msg.role === 'user' ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : (msg.isError ? '#fef2f2' : '#f8fafc'),
-                                border: msg.role === 'ai' ? `1px solid ${msg.isError ? '#fecaca' : '#e2e8f0'}` : 'none',
+                                background: msg.role === 'user' ? P.accent : (msg.isError ? 'rgba(180,35,24,0.06)' : P.paper),
+                                border: msg.role === 'ai' ? `1px solid ${msg.isError ? 'rgba(180,35,24,0.2)' : P.border}` : 'none',
                                 fontSize: 13, lineHeight: 1.65,
-                                color: msg.role === 'user' ? 'white' : (msg.isError ? '#dc2626' : '#334155'),
+                                color: msg.role === 'user' ? 'white' : (msg.isError ? P.error : P.ink),
                               }}>
                                 {msg.text}
                               </div>
@@ -1228,9 +1233,9 @@ const App = () => {
                           ))}
                           {qaLoading && (
                             <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                              <div style={{ padding: '8px 14px', borderRadius: '12px 12px 12px 3px', background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', gap: 4, alignItems: 'center' }}>
+                              <div style={{ padding: '8px 14px', borderRadius: '12px 12px 12px 3px', background: P.paper, border: `1px solid ${P.border}`, display: 'flex', gap: 4, alignItems: 'center' }}>
                                 {[0, 1, 2].map(d => (
-                                  <div key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: '#93c5fd', animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />
+                                  <div key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, opacity: 0.5, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />
                                 ))}
                               </div>
                             </div>
@@ -1239,7 +1244,7 @@ const App = () => {
                       )}
 
                       {/* Input */}
-                      <div style={{ display: 'flex', gap: 8, padding: '10px 12px', background: qaMessages.length > 0 ? '#f8fafc' : 'white', borderTop: qaMessages.length > 0 ? '1px solid #e2e8f0' : 'none' }}>
+                      <div style={{ display: 'flex', gap: 8, padding: '10px 12px', background: qaMessages.length > 0 ? P.paper : P.surface, borderTop: qaMessages.length > 0 ? `1px solid ${P.border}` : 'none' }}>
                         <input
                           ref={qaInputRef}
                           value={qaQuestion}
@@ -1248,13 +1253,14 @@ const App = () => {
                           placeholder="Ask anything about this video…"
                           disabled={qaLoading}
                           style={{
-                            flex: 1, border: '1.5px solid #e2e8f0', borderRadius: 9,
-                            padding: '8px 12px', fontSize: 13, color: '#0f172a',
-                            background: 'white', outline: 'none',
+                            flex: 1, border: `1.5px solid ${P.border}`, borderRadius: 9,
+                            padding: '8px 12px', fontSize: 13, color: P.ink,
+                            background: P.surface, outline: 'none',
                             transition: 'border-color 0.15s',
+                            fontFamily: 'system-ui, sans-serif',
                           }}
-                          onFocus={e => { e.target.style.borderColor = '#2563eb'; }}
-                          onBlur={e => { e.target.style.borderColor = '#e2e8f0'; }}
+                          onFocus={e => { e.target.style.borderColor = P.accent; }}
+                          onBlur={e => { e.target.style.borderColor = P.border; }}
                         />
                         <button
                           onClick={askQuestion}
@@ -1263,12 +1269,13 @@ const App = () => {
                             flexShrink: 0, width: 36, height: 36,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             borderRadius: 9, border: 'none',
-                            background: !qaQuestion.trim() || qaLoading ? '#e2e8f0' : 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-                            color: !qaQuestion.trim() || qaLoading ? '#94a3b8' : 'white',
+                            background: !qaQuestion.trim() || qaLoading ? P.border : P.accent,
+                            color: !qaQuestion.trim() || qaLoading ? P.muted : 'white',
                             cursor: !qaQuestion.trim() || qaLoading ? 'not-allowed' : 'pointer',
                             transition: 'all 0.15s',
-                            boxShadow: !qaQuestion.trim() || qaLoading ? 'none' : '0 2px 8px rgba(37,99,235,0.35)',
                           }}
+                          onMouseEnter={e => { if (qaQuestion.trim() && !qaLoading) e.currentTarget.style.background = P.accentHover; }}
+                          onMouseLeave={e => { if (qaQuestion.trim() && !qaLoading) e.currentTarget.style.background = P.accent; }}
                         >
                           {qaLoading ? (
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
@@ -1289,65 +1296,65 @@ const App = () => {
 
           {/* ── History panel ── */}
           {history.length > 0 && (
-            <div style={{ marginTop: 12 }}>
+            <div style={{ marginTop: 10 }}>
               <button
                 onClick={() => setShowHistory(v => !v)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6,
                   width: '100%', justifyContent: 'center',
-                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                  background: 'rgba(28,25,23,0.04)', border: `1px solid ${P.border}`,
                   borderRadius: 10, padding: '7px 14px',
-                  color: '#94a3b8', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  color: P.muted, fontSize: 12, fontWeight: 600, cursor: 'pointer',
                   transition: 'all 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#f1f5f9'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#94a3b8'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(28,25,23,0.07)'; e.currentTarget.style.color = P.ink; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(28,25,23,0.04)'; e.currentTarget.style.color = P.muted; }}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                 </svg>
                 {showHistory ? 'Hide' : 'Recent transcripts'} ({history.length})
-                <span style={{ opacity: 0.5, transform: showHistory ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>
+                <span style={{ opacity: 0.4, transform: showHistory ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>
               </button>
 
               {showHistory && (
                 <div className="fade-up" style={{
                   marginTop: 8,
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 14, overflow: 'hidden',
+                  background: P.surface,
+                  border: `1px solid ${P.border}`,
+                  borderRadius: 12, overflow: 'hidden',
                 }}>
                   {history.map((h, i) => (
                     <React.Fragment key={h.id}>
-                      {i > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />}
+                      {i > 0 && <div style={{ height: 1, background: P.border }} />}
                       <button
                         onClick={() => loadFromHistory(h)}
                         style={{
                           display: 'flex', alignItems: 'center', gap: 12,
-                          width: '100%', padding: '12px 16px',
+                          width: '100%', padding: '11px 14px',
                           background: 'none', border: 'none', cursor: 'pointer',
                           textAlign: 'left', transition: 'background 0.1s',
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                        onMouseEnter={e => e.currentTarget.style.background = P.paper}
                         onMouseLeave={e => e.currentTarget.style.background = 'none'}
                       >
                         <img
                           src={h.thumbnail} alt=""
-                          style={{ width: 64, height: 36, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }}
+                          style={{ width: 60, height: 34, objectFit: 'cover', borderRadius: 5, flexShrink: 0, border: `1px solid ${P.border}` }}
                           onError={e => { e.target.style.display = 'none'; }}
                         />
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0', fontFamily: 'monospace' }}>{h.id}</div>
-                          <div style={{ fontSize: 11, color: '#64748b', marginTop: 3 }}>
-                            {h.source === 'whisper' ? '🤖 AI' : '📝 Subtitles'} · {new Date(h.date).toLocaleDateString()} · {h.transcript.trim().split(/\s+/).length.toLocaleString()} words
+                          <div style={{ fontSize: 12, fontWeight: 600, color: P.ink, fontFamily: 'monospace' }}>{h.id}</div>
+                          <div style={{ fontSize: 11, color: P.muted, marginTop: 3 }}>
+                            {h.source === 'whisper' ? 'AI transcribed' : 'Subtitles'} · {new Date(h.date).toLocaleDateString()} · {h.transcript.trim().split(/\s+/).length.toLocaleString()} words
                           </div>
                         </div>
                         <button
                           onClick={(e) => deleteFromHistory(h.id, e)}
                           title="Remove from history"
-                          style={{ flexShrink: 0, border: 'none', background: 'none', cursor: 'pointer', color: '#475569', fontSize: 16, lineHeight: 1, padding: '4px 6px', borderRadius: 6, transition: 'all 0.1s' }}
-                          onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.background = 'none'; }}
+                          style={{ flexShrink: 0, border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 16, lineHeight: 1, padding: '4px 6px', borderRadius: 6, transition: 'all 0.1s' }}
+                          onMouseEnter={e => { e.currentTarget.style.color = P.error; e.currentTarget.style.background = 'rgba(180,35,24,0.07)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.background = 'none'; }}
                         >×</button>
                       </button>
                     </React.Fragment>
