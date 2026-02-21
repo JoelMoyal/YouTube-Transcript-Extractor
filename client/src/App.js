@@ -497,7 +497,7 @@ const App = () => {
 
       <Navbar onAskAI={onNavAskAI} hasTranscript={!!transcript} />
 
-      <div style={{ minHeight: '100vh', paddingTop: 56, paddingBottom: 56, background: P.paper }}>
+      <div style={{ minHeight: '100vh', paddingTop: 56, background: P.paper }}>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* LANDING VIEW */}
@@ -1177,24 +1177,85 @@ const App = () => {
 
       {/* Footer */}
       <footer style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, height: 44, zIndex: 50,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
         background: P.surface, borderTop: `1px solid ${P.border}`,
-        fontSize: 12, color: P.muted,
+        padding: '40px 24px 32px',
+        marginTop: 24,
       }}>
-        <span>Built by</span>
-        <a href="https://joelmoyal.com" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 700, color: P.ink, textDecoration: 'none' }}
-          onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
-          onMouseLeave={e => { e.currentTarget.style.color = P.ink; }}
-        >Joel Moyal</a>
-        <span style={{ color: P.border }}>·</span>
-        <a href="https://github.com/joelmoyal/YouTube-Transcript-Extractor" target="_blank" rel="noopener noreferrer"
-          style={{ color: P.muted, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}
-          onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
-          onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
-        >
-          <GitHubIcon /> Open source
-        </a>
+        <div style={{ maxWidth: 820, margin: '0 auto' }}>
+          {/* Top row */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 32, marginBottom: 32 }}>
+            {/* Brand */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: '#FF0000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
+                </div>
+                <span style={{ fontSize: 15, fontWeight: 700, color: P.ink, letterSpacing: '-0.03em' }}>TranscriptBot</span>
+              </div>
+              <p style={{ fontSize: 13, color: P.muted, lineHeight: 1.6, maxWidth: 260, margin: 0 }}>
+                Extract transcripts from any YouTube video and ask AI questions — free, no account needed.
+              </p>
+            </div>
+
+            {/* Links */}
+            <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: P.ink, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 12 }}>Product</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                  {[
+                    { label: 'Extract Transcript', href: '#' },
+                    { label: 'AI Summaries', href: '#' },
+                    { label: 'Q&A', href: '#' },
+                  ].map(l => (
+                    <a key={l.label} href={l.href} style={{ fontSize: 13, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+                    >{l.label}</a>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: P.ink, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 12 }}>Connect</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                  {[
+                    { label: 'GitHub', href: 'https://github.com/joelmoyal/YouTube-Transcript-Extractor' },
+                    { label: 'joelmoyal.com', href: 'https://joelmoyal.com' },
+                  ].map(l => (
+                    <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 13, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+                    >{l.label}</a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div style={{ height: 1, background: P.border, marginBottom: 20 }} />
+
+          {/* Bottom row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <span style={{ fontSize: 12, color: P.muted }}>
+              © {new Date().getFullYear()} TranscriptBot · Built by{' '}
+              <a href="https://joelmoyal.com" target="_blank" rel="noopener noreferrer"
+                style={{ color: P.ink, fontWeight: 600, textDecoration: 'none' }}
+                onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
+                onMouseLeave={e => { e.currentTarget.style.color = P.ink; }}
+              >Joel Moyal</a>
+            </span>
+            <a href="https://github.com/joelmoyal/YouTube-Transcript-Extractor" target="_blank" rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
+              onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+            >
+              <GitHubIcon /> Open source on GitHub
+            </a>
+          </div>
+        </div>
       </footer>
     </>
   );
