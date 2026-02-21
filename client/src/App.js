@@ -188,6 +188,9 @@ const App = () => {
   const [qaQuestion, setQaQuestion]       = useState('');
   const [qaMessages, setQaMessages]       = useState([]);
   const [qaLoading, setQaLoading]         = useState(false);
+  const [chapters, setChapters]           = useState([]);
+  const [chaptersLoading, setChaptersLoading] = useState(false);
+  const [showChapters, setShowChapters]   = useState(false);
 
   const downloadMenuRef = useRef(null);
   const qaInputRef = useRef(null);
@@ -255,6 +258,7 @@ const App = () => {
     setTranscriptSource(''); setCurrentVideoId(null); setError(''); setSearch('');
     setSummary(''); setShowTimestamps(true); setShowQA(false);
     setQaQuestion(''); setQaMessages([]);
+    setChapters([]); setShowChapters(false);
   };
 
   const askQuestion = async () => {
@@ -410,6 +414,31 @@ const App = () => {
       setSummary(`Error: ${err.message}`);
     } finally {
       setSummarizing(false);
+    }
+  };
+
+  const detectChapters = async () => {
+    if (chaptersLoading) return;
+    setChaptersLoading(true); setChapters([]);
+    try {
+      const res = await fetch('/api/chapters', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript, segments }),
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch {
+        throw new Error(res.ok ? 'Unexpected server response' : `Server error ${res.status}`);
+      }
+      if (!res.ok) throw new Error(data.error || 'Failed to detect chapters');
+      setChapters(data.chapters || []);
+      setShowChapters(true);
+    } catch (err) {
+      setChapters([{ seconds: 0, title: `Error: ${err.message}`, isError: true }]);
+      setShowChapters(true);
+    } finally {
+      setChaptersLoading(false);
     }
   };
 
@@ -938,6 +967,89 @@ const App = () => {
                       </div>
                       <div style={{ padding: '14px 16px', background: 'white', fontSize: 13, lineHeight: 1.75, color: '#334155', whiteSpace: 'pre-wrap' }}>
                         {summary}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Chapters toggle button */}
+                  {segments.length > 0 && (
+                    <button
+                      onClick={() => { if (!showChapters && chapters.length === 0) detectChapters(); else setShowChapters(v => !v); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 6,
+                        width: '100%', justifyContent: 'center',
+                        marginTop: 10,
+                        background: showChapters ? '#fff7ed' : 'white',
+                        border: `1.5px solid ${showChapters ? '#fed7aa' : '#e2e8f0'}`,
+                        borderRadius: 10, padding: '8px 14px',
+                        color: showChapters ? '#c2410c' : '#64748b',
+                        fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                        transition: 'all 0.15s',
+                      }}
+                      onMouseEnter={e => { if (!showChapters) { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#334155'; } }}
+                      onMouseLeave={e => { if (!showChapters) { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#64748b'; } }}
+                    >
+                      {chaptersLoading ? (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                      ) : (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                        </svg>
+                      )}
+                      {chaptersLoading ? 'Detecting chapters…' : showChapters ? 'Hide Chapters' : 'Detect Chapters'}
+                      {!chaptersLoading && <span style={{ opacity: 0.5, transform: showChapters ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>}
+                    </button>
+                  )}
+
+                  {/* Chapters panel */}
+                  {showChapters && chapters.length > 0 && (
+                    <div className="fade-up" style={{ marginTop: 8, border: '1.5px solid #fed7aa', borderRadius: 14, overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 7, padding: '10px 14px', background: '#fff7ed', borderBottom: '1px solid #fed7aa' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c2410c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                          </svg>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: '#c2410c' }}>Chapters</span>
+                          <span style={{ fontSize: 11, color: '#fb923c', fontWeight: 500 }}>· {chapters.filter(c => !c.isError).length} detected · click to jump</span>
+                        </div>
+                        <button
+                          onClick={detectChapters}
+                          disabled={chaptersLoading}
+                          title="Re-detect chapters"
+                          style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#fb923c', fontSize: 11, fontWeight: 600, padding: 0 }}
+                        >
+                          Refresh
+                        </button>
+                      </div>
+                      <div style={{ background: 'white', padding: '8px 0' }}>
+                        {chapters.map((ch, i) => (
+                          ch.isError ? (
+                            <div key={i} style={{ padding: '8px 14px', fontSize: 12, color: '#dc2626' }}>{ch.title}</div>
+                          ) : (
+                            <a
+                              key={i}
+                              href={`https://youtube.com/watch?v=${currentVideoId}&t=${ch.seconds}s`}
+                              target="_blank" rel="noopener noreferrer"
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: 12,
+                                padding: '9px 14px', textDecoration: 'none',
+                                transition: 'background 0.1s',
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.background = '#fff7ed'}
+                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <span style={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 700, color: '#ef4444', flexShrink: 0, minWidth: 36 }}>
+                                {formatTime(ch.seconds)}
+                              </span>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', lineHeight: 1.3 }}>{ch.title}</span>
+                              <svg style={{ marginLeft: 'auto', flexShrink: 0, color: '#cbd5e1' }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                              </svg>
+                            </a>
+                          )
+                        ))}
                       </div>
                     </div>
                   )}

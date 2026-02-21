@@ -267,6 +267,46 @@ app.post('/api/summarize', async (req, res) => {
   }
 });
 
+// ── Chapters endpoint ─────────────────────────────────────────────────────────
+app.post('/api/chapters', async (req, res) => {
+  const { transcript, segments } = req.body;
+  if (!transcript || typeof transcript !== 'string')
+    return res.status(400).json({ error: 'Missing transcript' });
+  if (!process.env.GROQ_API_KEY)
+    return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY)' });
+
+  try {
+    const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+    const segmentsHint = Array.isArray(segments) && segments.length > 0
+      ? `\n\nTimestamp reference (seconds → text snippet):\n${segments.slice(0, 60).map(s => `${s.seconds}s: ${s.text.slice(0, 80)}`).join('\n')}`
+      : '';
+
+    const completion = await client.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      max_tokens: 512,
+      messages: [
+        {
+          role: 'system',
+          content: 'You detect natural chapter breaks in YouTube video transcripts. Return ONLY a valid JSON array of chapter objects with "seconds" (integer, must match one of the provided timestamps) and "title" (short, 2-6 words). No explanation, no markdown, just the JSON array.',
+        },
+        {
+          role: 'user',
+          content: `Detect 3-8 natural chapter breaks in this transcript. Use the timestamp reference to assign accurate seconds values.\n\nTranscript:\n${transcript.slice(0, 60000)}${segmentsHint}\n\nReturn JSON array only: [{"seconds": 0, "title": "Introduction"}, ...]`,
+        },
+      ],
+    });
+
+    const raw = completion.choices[0]?.message?.content || '[]';
+    // Extract JSON array from response (model may add extra text)
+    const match = raw.match(/\[[\s\S]*\]/);
+    const chapters = match ? JSON.parse(match[0]) : [];
+    res.json({ chapters });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to detect chapters', details: err.message });
+  }
+});
+
 // ── Q&A endpoint ─────────────────────────────────────────────────────────────
 app.post('/api/ask', async (req, res) => {
   const { transcript, question } = req.body;
