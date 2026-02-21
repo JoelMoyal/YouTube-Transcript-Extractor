@@ -1,2 +1,38 @@
-node_modules
+# Dependencies
+node_modules/
+client/node_modules/
+
+# Environment variables — NEVER commit these
 .env
+.env.*
+.env.local
+.env.*.local
+client/.env
+client/.env.*
+client/.env.local
+client/.env.*.local
+
+# Cookies (may contain auth tokens)
+cookies.txt
+*.cookie
+
+# Build artifacts (client/build IS committed intentionally for Railway)
+# client/build/  ← kept tracked for Railway deployment
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editor history
+.history/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temp / audio files
+/tmp/
+*.mp3
+*.mp4
+*.webm
+*.m4a
