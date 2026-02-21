@@ -1245,7 +1245,7 @@ const App = () => {
                 style={{ color: P.ink, fontWeight: 600, textDecoration: 'none' }}
                 onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
                 onMouseLeave={e => { e.currentTarget.style.color = P.ink; }}
-              >Joel Moyal</a>
+              >Joël Moyal</a>
             </span>
             <a href="https://github.com/joelmoyal/YouTube-Transcript-Extractor" target="_blank" rel="noopener noreferrer"
               style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
