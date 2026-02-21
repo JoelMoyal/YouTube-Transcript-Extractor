@@ -191,6 +191,10 @@ const App = () => {
   const [chapters, setChapters]           = useState([]);
   const [chaptersLoading, setChaptersLoading] = useState(false);
   const [showChapters, setShowChapters]   = useState(false);
+  const [quotes, setQuotes]               = useState([]);
+  const [quotesLoading, setQuotesLoading] = useState(false);
+  const [showQuotes, setShowQuotes]       = useState(false);
+  const [quotesCopied, setQuotesCopied]   = useState(false);
 
   const downloadMenuRef = useRef(null);
   const qaInputRef = useRef(null);
@@ -259,6 +263,7 @@ const App = () => {
     setSummary(''); setShowTimestamps(true); setShowQA(false);
     setQaQuestion(''); setQaMessages([]);
     setChapters([]); setShowChapters(false);
+    setQuotes([]); setShowQuotes(false);
   };
 
   const askQuestion = async () => {
@@ -439,6 +444,31 @@ const App = () => {
       setShowChapters(true);
     } finally {
       setChaptersLoading(false);
+    }
+  };
+
+  const extractQuotes = async () => {
+    if (quotesLoading) return;
+    setQuotesLoading(true); setQuotes([]);
+    try {
+      const res = await fetch('/api/quotes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript }),
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch {
+        throw new Error(res.ok ? 'Unexpected server response' : `Server error ${res.status}`);
+      }
+      if (!res.ok) throw new Error(data.error || 'Failed to extract quotes');
+      setQuotes(data.quotes || []);
+      setShowQuotes(true);
+    } catch (err) {
+      setQuotes([`Error: ${err.message}`]);
+      setShowQuotes(true);
+    } finally {
+      setQuotesLoading(false);
     }
   };
 
@@ -1048,6 +1078,79 @@ const App = () => {
                                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
                               </svg>
                             </a>
+                          )
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Key Quotes toggle button */}
+                  <button
+                    onClick={() => { if (!showQuotes && quotes.length === 0) extractQuotes(); else setShowQuotes(v => !v); }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      width: '100%', justifyContent: 'center',
+                      marginTop: 10,
+                      background: showQuotes ? '#fdf2f8' : 'white',
+                      border: `1.5px solid ${showQuotes ? '#f9a8d4' : '#e2e8f0'}`,
+                      borderRadius: 10, padding: '8px 14px',
+                      color: showQuotes ? '#be185d' : '#64748b',
+                      fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => { if (!showQuotes) { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#334155'; } }}
+                    onMouseLeave={e => { if (!showQuotes) { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#64748b'; } }}
+                  >
+                    {quotesLoading ? (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    ) : (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                        <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                      </svg>
+                    )}
+                    {quotesLoading ? 'Extracting quotes…' : showQuotes ? 'Hide Key Quotes' : 'Extract Key Quotes'}
+                    {!quotesLoading && <span style={{ opacity: 0.5, transform: showQuotes ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>}
+                  </button>
+
+                  {/* Key Quotes panel */}
+                  {showQuotes && quotes.length > 0 && (
+                    <div className="fade-up" style={{ marginTop: 8, border: '1.5px solid #f9a8d4', borderRadius: 14, overflow: 'hidden' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: '#fdf2f8', borderBottom: '1px solid #f9a8d4' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#be185d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                          </svg>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: '#be185d' }}>Key Quotes</span>
+                          <span style={{ fontSize: 11, color: '#f472b6', fontWeight: 500 }}>· {quotes.filter(q => !q.startsWith('Error:')).length} quotes</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button
+                            onClick={() => { navigator.clipboard.writeText(quotes.map(q => `"${q}"`).join('\n\n')).then(() => { setQuotesCopied(true); setTimeout(() => setQuotesCopied(false), 2000); }); }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 4, border: '1px solid #f9a8d4', background: quotesCopied ? '#fce7f3' : 'white', cursor: 'pointer', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: quotesCopied ? '#be185d' : '#f472b6', transition: 'all 0.15s' }}
+                          >
+                            {quotesCopied ? <CheckIcon /> : <CopyIcon />}
+                            {quotesCopied ? 'Copied!' : 'Copy all'}
+                          </button>
+                          <button onClick={extractQuotes} disabled={quotesLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#f472b6', fontSize: 11, fontWeight: 600, padding: 0 }}>Refresh</button>
+                        </div>
+                      </div>
+                      <div style={{ background: 'white', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {quotes.map((q, i) => (
+                          q.startsWith('Error:') ? (
+                            <div key={i} style={{ fontSize: 12, color: '#dc2626' }}>{q}</div>
+                          ) : (
+                            <div key={i} style={{
+                              position: 'relative', padding: '10px 14px 10px 18px',
+                              background: '#fdf2f8', borderRadius: 10,
+                              borderLeft: '3px solid #f9a8d4',
+                              fontSize: 13, lineHeight: 1.6, color: '#334155',
+                              fontStyle: 'italic',
+                            }}>
+                              <span style={{ position: 'absolute', top: 8, left: -2, fontSize: 24, color: '#f9a8d4', fontStyle: 'normal', lineHeight: 1 }}>"</span>
+                              {q}
+                            </div>
                           )
                         ))}
                       </div>

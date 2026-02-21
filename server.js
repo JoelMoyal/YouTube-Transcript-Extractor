@@ -307,6 +307,39 @@ app.post('/api/chapters', async (req, res) => {
   }
 });
 
+// ── Key quotes endpoint ───────────────────────────────────────────────────────
+app.post('/api/quotes', async (req, res) => {
+  const { transcript } = req.body;
+  if (!transcript || typeof transcript !== 'string')
+    return res.status(400).json({ error: 'Missing transcript' });
+  if (!process.env.GROQ_API_KEY)
+    return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY)' });
+
+  try {
+    const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    const completion = await client.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      max_tokens: 512,
+      messages: [
+        {
+          role: 'system',
+          content: 'You extract memorable, insightful, or impactful quotes from YouTube video transcripts. Return ONLY a valid JSON array of strings — each string is a direct, verbatim quote from the transcript. No explanation, no markdown, no attribution, just the JSON array of quote strings.',
+        },
+        {
+          role: 'user',
+          content: `Extract 4-7 of the most memorable or insightful quotes from this transcript. Each quote should be a complete sentence or phrase, taken verbatim.\n\nTranscript:\n${transcript.slice(0, 80000)}\n\nReturn JSON array only: ["quote one", "quote two", ...]`,
+        },
+      ],
+    });
+    const raw = completion.choices[0]?.message?.content || '[]';
+    const match = raw.match(/\[[\s\S]*\]/);
+    const quotes = match ? JSON.parse(match[0]) : [];
+    res.json({ quotes });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to extract quotes', details: err.message });
+  }
+});
+
 // ── Q&A endpoint ─────────────────────────────────────────────────────────────
 app.post('/api/ask', async (req, res) => {
   const { transcript, question } = req.body;
