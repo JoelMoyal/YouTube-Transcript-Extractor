@@ -11,7 +11,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 function geminiClient() {
   return new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-    .getGenerativeModel({ model: 'gemini-2.0-flash' });
+    .getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
 }
 
 const execFileAsync = promisify(execFile);
