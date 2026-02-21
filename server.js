@@ -181,16 +181,32 @@ async function cleanup(tmpDir, prefix) {
   } catch {}
 }
 
+// ── Shared Whisper transcription helper ───────────────────────────────────────
+async function whisperTranscribe(audioFile, safeLang) {
+  const { createReadStream } = require('fs');
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  const transcription = await groq.audio.transcriptions.create({
+    file: createReadStream(audioFile),
+    model: 'whisper-large-v3-turbo',
+    response_format: 'verbose_json',
+    timestamp_granularities: ['segment'],
+    language: toWhisperLang(safeLang),
+  });
+  await fsPromises.unlink(audioFile).catch(() => {});
+  const rawSegments = transcription.segments || [];
+  const seen = new Set();
+  const segments = rawSegments
+    .map(s => ({ seconds: Math.floor(s.start), text: s.text.trim() }))
+    .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
+  const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
+  return { transcript, segments };
+}
+
 // ── SSE transcript endpoint ───────────────────────────────────────────────────
 app.get('/api/transcript', async (req, res) => {
-  const { videoId, lang } = req.query;
-  if (!videoId) return res.status(400).json({ error: 'Missing videoId parameter' });
-  if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId))
-    return res.status(400).json({ error: 'Invalid videoId format' });
-
+  const { videoId, url, platform = 'youtube', lang } = req.query;
   const safeLang = lang && /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,10})?$/.test(lang) ? lang : 'en';
   const tmpDir = os.tmpdir();
-  const outputTemplate = path.join(tmpDir, videoId);
 
   // Set up SSE
   res.setHeader('Content-Type', 'text/event-stream');
@@ -201,6 +217,108 @@ app.get('/api/transcript', async (req, res) => {
   const send = (event, data) => {
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // VIMEO
+  // ══════════════════════════════════════════════════════════════════════════
+  if (platform === 'vimeo') {
+    const vimeoMatch = (url || '').match(/vimeo\.com\/(\d+)/);
+    if (!vimeoMatch) { send('error', { error: 'Invalid Vimeo URL' }); res.end(); return; }
+    const vimeoId = vimeoMatch[1];
+    const filePrefix = `vimeo_${vimeoId}`;
+    const outputTemplate = path.join(tmpDir, filePrefix);
+    const vimeoUrl = `https://vimeo.com/${vimeoId}`;
+
+    // Start thumbnail fetch in background
+    const thumbnailPromise = fetch(`https://vimeo.com/api/oembed.json?url=${encodeURIComponent(vimeoUrl)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d?.thumbnail_url?.replace(/(_\d+)?(\.\w+)$/, '_640$2') || null)
+      .catch(() => null);
+
+    try {
+      // ── Stage 1: yt-dlp subtitles ─────────────────────────────────────────
+      send('progress', { stage: 'subtitles', message: 'Looking for Vimeo captions…', percent: 15 });
+      try {
+        await execFileAsync('yt-dlp', [
+          '--skip-download', '--write-subs', '--write-auto-sub',
+          ...jsRuntimeArgs,
+          '-o', outputTemplate,
+          vimeoUrl,
+        ], { timeout: 45000 });
+      } catch {}
+
+      const subFile = (await fsPromises.readdir(tmpDir)).find(
+        f => f.startsWith(filePrefix) && (f.endsWith('.vtt') || f.endsWith('.srt'))
+      );
+
+      if (subFile) {
+        send('progress', { stage: 'subtitles', message: 'Parsing captions…', percent: 80 });
+        const content = await fsPromises.readFile(path.join(tmpDir, subFile), 'utf-8');
+        await fsPromises.unlink(path.join(tmpDir, subFile)).catch(() => {});
+        const result = parseVTT(content);
+        const thumbnail = await thumbnailPromise;
+        send('done', { transcript: result.transcript, segments: result.segments, source: 'subtitles', thumbnail });
+        res.end();
+        return;
+      }
+
+      // ── Stage 2: Audio download ───────────────────────────────────────────
+      if (!process.env.GROQ_API_KEY) {
+        send('error', { error: 'No captions found for this Vimeo video and AI transcription is not configured.' });
+        res.end();
+        return;
+      }
+
+      send('progress', { stage: 'audio', message: 'No captions — downloading audio for AI transcription…', percent: 30 });
+      const audioBase = path.join(tmpDir, `${filePrefix}_audio`);
+
+      try {
+        await execFileAsync('yt-dlp', [
+          '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '5',
+          ...jsRuntimeArgs,
+          '-o', audioBase,
+          vimeoUrl,
+        ], { timeout: 300000 });
+      } catch (err) {
+        const friendly = classifyYtdlpError(err);
+        send('error', { error: friendly || 'Failed to download Vimeo audio', details: friendly ? undefined : err.message });
+        res.end();
+        return;
+      }
+
+      // ── Stage 3: Groq Whisper ─────────────────────────────────────────────
+      send('progress', { stage: 'whisper', message: 'Transcribing with Groq Whisper AI…', percent: 60 });
+      const audioFile = `${audioBase}.mp3`;
+      const audioStat = await fsPromises.stat(audioFile).catch(() => null);
+      if (!audioStat || audioStat.size > 24 * 1024 * 1024) {
+        await fsPromises.unlink(audioFile).catch(() => {});
+        send('error', { error: 'Audio file too large for AI transcription (max ~25 min). Try a shorter video.' });
+        res.end();
+        return;
+      }
+
+      send('progress', { stage: 'whisper', message: 'Finalising transcript…', percent: 90 });
+      const { transcript, segments } = await whisperTranscribe(audioFile, safeLang);
+      const thumbnail = await thumbnailPromise;
+      send('done', { transcript, segments, source: 'whisper', thumbnail });
+      res.end();
+
+    } catch (error) {
+      await cleanup(tmpDir, filePrefix);
+      send('error', { error: 'Failed to fetch Vimeo transcript', details: error.message });
+      res.end();
+    }
+    return;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // YOUTUBE
+  // ══════════════════════════════════════════════════════════════════════════
+  if (!videoId) return res.status(400).json({ error: 'Missing videoId parameter' });
+  if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId))
+    return res.status(400).json({ error: 'Invalid videoId format' });
+
+  const outputTemplate = path.join(tmpDir, videoId);
 
   try {
     // ── Stage 1a: Supadata (no cookies needed) ────────────────────────────────
@@ -237,31 +355,23 @@ app.get('/api/transcript', async (req, res) => {
       }
     }
 
-    // ── Stage 1b: yt-dlp subtitles (needs cookies on Railway) ─────────────────
+    // ── Stage 1b: yt-dlp subtitles ────────────────────────────────────────────
     send('progress', { stage: 'subtitles', message: 'Looking for subtitles…', percent: 10 });
-
     let lastSubError = null;
 
     for (const langArgs of [['--sub-lang', safeLang], []]) {
       try {
         await execFileAsync('yt-dlp', [
-          '--skip-download',
-          '--write-auto-sub',
-          '--write-subs',
-          ...jsRuntimeArgs,
-          ...cookieArgs,
-          ...langArgs,
+          '--skip-download', '--write-auto-sub', '--write-subs',
+          ...jsRuntimeArgs, ...cookieArgs, ...langArgs,
           '-o', outputTemplate,
           `https://www.youtube.com/watch?v=${videoId}`
         ], { timeout: 45000 });
-      } catch (err) {
-        lastSubError = err;
-      }
+      } catch (err) { lastSubError = err; }
 
       const files = await fsPromises.readdir(tmpDir);
       if (files.find(f => f.startsWith(videoId) && (f.endsWith('.vtt') || f.endsWith('.json3') || f.endsWith('.srt')))) {
-        lastSubError = null;
-        break;
+        lastSubError = null; break;
       }
     }
 
@@ -293,21 +403,16 @@ app.get('/api/transcript', async (req, res) => {
     }
 
     send('progress', { stage: 'audio', message: 'No captions found — downloading audio for AI transcription…', percent: 30 });
-
     const audioBase = path.join(tmpDir, `${videoId}_audio`);
     await execFileAsync('yt-dlp', [
-      '--extract-audio',
-      '--audio-format', 'mp3',
-      '--audio-quality', '5',
-      ...jsRuntimeArgs,
-      ...cookieArgs,
+      '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '5',
+      ...jsRuntimeArgs, ...cookieArgs,
       '-o', audioBase,
       `https://www.youtube.com/watch?v=${videoId}`
     ], { timeout: 300000 });
 
-    // ── Stage 3: Groq Whisper API ─────────────────────────────────────────────
+    // ── Stage 3: Groq Whisper ─────────────────────────────────────────────────
     send('progress', { stage: 'whisper', message: 'Transcribing with Groq Whisper AI…', percent: 60 });
-
     const audioFile = `${audioBase}.mp3`;
     const audioStat = await fsPromises.stat(audioFile);
     if (audioStat.size > 24 * 1024 * 1024) {
@@ -317,27 +422,8 @@ app.get('/api/transcript', async (req, res) => {
       return;
     }
 
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-    const { createReadStream } = require('fs');
-    const transcription = await groq.audio.transcriptions.create({
-      file: createReadStream(audioFile),
-      model: 'whisper-large-v3-turbo',
-      response_format: 'verbose_json',
-      timestamp_granularities: ['segment'],
-      language: toWhisperLang(safeLang),
-    });
-
-    await fsPromises.unlink(audioFile).catch(() => {});
-
     send('progress', { stage: 'whisper', message: 'Finalising transcript…', percent: 95 });
-
-    const rawSegments = transcription.segments || [];
-    const seen = new Set();
-    const segments = rawSegments
-      .map(s => ({ seconds: Math.floor(s.start), text: s.text.trim() }))
-      .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
-    const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-
+    const { transcript, segments } = await whisperTranscribe(audioFile, safeLang);
     send('done', { transcript, segments, source: 'whisper' });
     res.end();
 
@@ -432,7 +518,7 @@ app.post('/api/ask', async (req, res) => {
 });
 
 // Handle all other requests with React app
-app.get('*', (req, res) => {
+app.get('*', (_req, res) => {
   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
 

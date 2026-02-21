@@ -43,20 +43,38 @@ const DEMO_CHIPS = [
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function extractVideoId(input) {
+// Returns { platform: 'youtube'|'vimeo', id, url } or null
+function parseVideoUrl(input) {
   if (!input) return null;
   const trimmed = input.trim();
-  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) return trimmed;
+
+  // Vimeo
   try {
-    const url = new URL(trimmed);
-    let id = url.searchParams.get('v');
-    if (!id && url.hostname === 'youtu.be') id = url.pathname.slice(1).split('?')[0];
+    const u = new URL(trimmed);
+    if (u.hostname.includes('vimeo.com')) {
+      const m = u.pathname.match(/\/(\d+)/);
+      if (m) return { platform: 'vimeo', id: m[1], url: `https://vimeo.com/${m[1]}` };
+    }
+  } catch {}
+
+  // YouTube bare ID
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed))
+    return { platform: 'youtube', id: trimmed, url: `https://youtube.com/watch?v=${trimmed}` };
+
+  // YouTube URL
+  try {
+    const u = new URL(trimmed);
+    let id = u.searchParams.get('v');
+    if (!id && u.hostname === 'youtu.be') id = u.pathname.slice(1).split('?')[0];
     if (!id) {
-      const m = url.pathname.match(/\/(shorts|embed|v)\/([a-zA-Z0-9_-]{11})/);
+      const m = u.pathname.match(/\/(shorts|embed|v)\/([a-zA-Z0-9_-]{11})/);
       if (m) id = m[2];
     }
-    return id && /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
-  } catch { return null; }
+    if (id && /^[a-zA-Z0-9_-]{11}$/.test(id))
+      return { platform: 'youtube', id, url: `https://youtube.com/watch?v=${id}` };
+  } catch {}
+
+  return null;
 }
 
 function formatTime(seconds) {
@@ -109,6 +127,11 @@ const SpinnerIcon = ({ size = 16 }) => (
 const YouTubeIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="#FF0000">
     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+  </svg>
+);
+const VimeoIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="#1AB7EA">
+    <path d="M23.977 6.416c-.105 2.338-1.739 5.543-4.894 9.609-3.268 4.247-6.026 6.37-8.29 6.37-1.409 0-2.578-1.294-3.553-3.881L5.322 11.4C4.603 8.816 3.834 7.522 3.01 7.522c-.179 0-.806.378-1.881 1.132L0 7.197c1.185-1.044 2.351-2.084 3.501-3.128C5.08 2.701 6.266 1.984 7.055 1.91c1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.507.539 2.45 1.131 3.674 1.776 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.868 3.434-5.757 6.762-5.637 2.473.06 3.628 1.664 3.48 4.807z"/>
   </svg>
 );
 const GlobeIcon = () => (
@@ -181,6 +204,8 @@ const App = () => {
   const [segments, setSegments]           = useState([]);
   const [transcriptSource, setTranscriptSource] = useState('');
   const [currentVideoId, setCurrentVideoId] = useState(null);
+  const [currentPlatform, setCurrentPlatform] = useState('youtube');
+  const [currentThumbnail, setCurrentThumbnail] = useState(null);
   const [loading, setLoading]             = useState(false);
   const [loadingMsg, setLoadingMsg]       = useState('');
   const [loadingPercent, setLoadingPercent] = useState(0);
@@ -262,17 +287,20 @@ const App = () => {
   };
 
   const loadFromHistory = (entry) => {
-    setVideoUrl(`https://youtube.com/watch?v=${entry.id}`);
+    const platform = entry.platform || 'youtube';
+    setVideoUrl(platform === 'vimeo' ? `https://vimeo.com/${entry.id}` : `https://youtube.com/watch?v=${entry.id}`);
     setTranscript(entry.transcript);
     setSegments(entry.segments || []);
     setTranscriptSource(entry.source || '');
     setCurrentVideoId(entry.id);
+    setCurrentPlatform(platform);
+    setCurrentThumbnail(entry.thumbnail || null);
     setError(''); setSearch('');
   };
 
   const resetAll = () => {
     setVideoUrl(''); setTranscript(''); setSegments([]);
-    setTranscriptSource(''); setCurrentVideoId(null); setError(''); setSearch('');
+    setTranscriptSource(''); setCurrentVideoId(null); setCurrentPlatform('youtube'); setCurrentThumbnail(null); setError(''); setSearch('');
     setSummary(''); setShowTimestamps(true); setShowQA(false);
     setQaQuestion(''); setQaMessages([]);
     setChapters([]); setShowChapters(false);
@@ -308,17 +336,21 @@ const App = () => {
   };
 
   const getTranscript = () => {
-    const videoId = extractVideoId(videoUrl);
-    if (!videoId) { setError('Please enter a valid YouTube URL'); return; }
+    const parsed = parseVideoUrl(videoUrl);
+    if (!parsed) { setError('Please enter a valid YouTube or Vimeo URL'); return; }
+    const { platform, id: videoId, url: videoCanonical } = parsed;
 
     setError(''); setTranscript(''); setTranscriptSource('');
-    setSegments([]); setCurrentVideoId(null); setSearch('');
+    setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
     setSummary(''); setChapters([]); setShowChapters(false);
     setQuotes([]); setShowQuotes(false); setQaMessages([]); setShowQA(false);
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
 
-    const es = new EventSource(`/api/transcript?videoId=${videoId}&lang=${lang}`);
+    const apiUrl = platform === 'vimeo'
+      ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${lang}`
+      : `/api/transcript?videoId=${videoId}&lang=${lang}`;
+    const es = new EventSource(apiUrl);
     const killTimer = setTimeout(() => {
       es.close();
       setError('Request timed out. The video may be too long or unavailable.');
@@ -333,15 +365,17 @@ const App = () => {
     es.addEventListener('done', (e) => {
       clearTimeout(killTimer); es.close();
       const data = JSON.parse(e.data);
+      const thumb = data.thumbnail || (platform === 'youtube' ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
       setTranscript(data.transcript);
       setSegments(data.segments || []);
       setTranscriptSource(data.source || '');
       setCurrentVideoId(videoId);
+      setCurrentThumbnail(thumb);
       setLoadingPercent(100);
       saveToHistory({
-        id: videoId, transcript: data.transcript, segments: data.segments || [],
+        id: videoId, platform, transcript: data.transcript, segments: data.segments || [],
         source: data.source || '', date: new Date().toISOString(),
-        thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+        thumbnail: thumb,
       });
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     });
@@ -382,8 +416,11 @@ const App = () => {
   };
 
   const copyAsMarkdown = () => {
+    const tsLink = (s) => currentPlatform === 'vimeo'
+      ? `https://vimeo.com/${currentVideoId}#t=${s.seconds}s`
+      : `https://youtube.com/watch?v=${currentVideoId}&t=${s.seconds}s`;
     const md = segments.length > 0
-      ? segments.map(s => `**[${formatTime(s.seconds)}](https://youtube.com/watch?v=${currentVideoId}&t=${s.seconds}s)** ${s.text}`).join('\n\n')
+      ? segments.map(s => `**[${formatTime(s.seconds)}](${tsLink(s)})** ${s.text}`).join('\n\n')
       : transcript;
     navigator.clipboard.writeText(md).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
     setShowDownloadMenu(false);
@@ -570,7 +607,7 @@ const App = () => {
                 fontSize: 12, fontWeight: 600, color: P.accent,
               }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
-                Free · No account required
+                YouTube · Vimeo · Free · No account required
               </div>
 
               <h1 style={{
@@ -591,7 +628,7 @@ const App = () => {
               }}>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: P.paper, borderRadius: 12, border: `1px solid ${P.border}` }}>
-                    <YouTubeIcon />
+                    {parseVideoUrl(videoUrl)?.platform === 'vimeo' ? <VimeoIcon /> : <YouTubeIcon />}
                     <input
                       ref={urlInputRef}
                       type="text"
@@ -599,7 +636,7 @@ const App = () => {
                       onChange={e => setVideoUrl(e.target.value)}
                       onFocus={handleInputFocus}
                       onKeyDown={e => e.key === 'Enter' && !loading && getTranscript()}
-                      placeholder="Paste a YouTube URL…"
+                      placeholder="Paste a YouTube or Vimeo URL…"
                       style={{
                         flex: 1, border: 'none', background: 'transparent', outline: 'none',
                         fontSize: 16, color: P.ink,
@@ -631,8 +668,9 @@ const App = () => {
 
                 {/* Hint row */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px 5px' }}>
-                  <span style={{ fontSize: 12, color: P.muted }}>
-                    Supports <code style={{ fontFamily: 'monospace', background: P.paper, padding: '1px 4px', borderRadius: 4, fontSize: 11 }}>youtube.com</code> and <code style={{ fontFamily: 'monospace', background: P.paper, padding: '1px 4px', borderRadius: 4, fontSize: 11 }}>youtu.be</code>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: P.muted }}>
+                    <YouTubeIcon /> <VimeoIcon size={13} />
+                    <span>YouTube &amp; Vimeo supported</span>
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ fontSize: 11, color: P.muted }}>Language:</span>
@@ -748,7 +786,7 @@ const App = () => {
                   ),
                   bg: 'rgba(45,108,223,0.07)',
                   label: 'Instant Transcript',
-                  desc: 'Extract complete transcripts with timestamps in seconds — no login needed',
+                  desc: 'Extract complete transcripts from YouTube & Vimeo with timestamps in seconds — no login needed',
                 },
                 {
                   icon: (
@@ -823,7 +861,7 @@ const App = () => {
                           <img src={h.thumbnail} alt="" style={{ width: 72, height: 40, objectFit: 'cover', borderRadius: 7, border: `1px solid ${P.border}`, display: 'block' }}
                             onError={e => { e.target.style.display = 'none'; }} />
                           <div style={{ position: 'absolute', bottom: 3, right: 3, background: 'rgba(28,25,23,0.75)', color: 'white', fontSize: 9, fontWeight: 700, fontFamily: 'monospace', padding: '1px 3px', borderRadius: 3 }}>
-                            {h.source === 'whisper' ? 'AI' : 'SUB'}
+                            {h.platform === 'vimeo' ? 'VIM' : h.source === 'whisper' ? 'AI' : 'YT'}
                           </div>
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -886,15 +924,28 @@ const App = () => {
 
             {/* Video thumbnail */}
             {currentVideoId && (
-              <a href={`https://youtube.com/watch?v=${currentVideoId}`} target="_blank" rel="noopener noreferrer"
+              <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}` : `https://youtube.com/watch?v=${currentVideoId}`}
+                target="_blank" rel="noopener noreferrer"
                 style={{ display: 'block', marginBottom: 16, borderRadius: 14, overflow: 'hidden', border: `1px solid ${P.border}`, textDecoration: 'none', position: 'relative' }}>
-                <img src={`https://img.youtube.com/vi/${currentVideoId}/mqdefault.jpg`} alt="Video thumbnail" style={{ width: '100%', display: 'block', maxHeight: 240, objectFit: 'cover' }} />
+                {(currentThumbnail || currentPlatform === 'youtube') && (
+                  <img
+                    src={currentThumbnail || `https://img.youtube.com/vi/${currentVideoId}/mqdefault.jpg`}
+                    alt="Video thumbnail"
+                    style={{ width: '100%', display: 'block', maxHeight: 240, objectFit: 'cover' }}
+                    onError={e => { e.target.style.display = 'none'; }}
+                  />
+                )}
                 <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background: 'rgba(28,25,23,0.15)' }}>
                   <div style={{ width:48, height:48, borderRadius:'50%', background:'rgba(28,25,23,0.65)', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    {currentPlatform === 'vimeo'
+                      ? <VimeoIcon size={22} />
+                      : <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
                   </div>
                 </div>
-                <div style={{ position:'absolute', bottom:10, left:14, fontSize:11, fontFamily:'monospace', fontWeight:700, color:'rgba(255,255,255,0.9)', background:'rgba(28,25,23,0.5)', padding:'2px 6px', borderRadius:4 }}>{currentVideoId}</div>
+                <div style={{ position:'absolute', bottom:10, left:14, display:'flex', alignItems:'center', gap:5, background:'rgba(28,25,23,0.5)', padding:'2px 8px', borderRadius:4 }}>
+                  {currentPlatform === 'vimeo' ? <VimeoIcon size={11} /> : <YouTubeIcon />}
+                  <span style={{ fontSize:11, fontFamily:'monospace', fontWeight:700, color:'rgba(255,255,255,0.9)' }}>{currentVideoId}</span>
+                </div>
               </a>
             )}
 
@@ -1002,7 +1053,7 @@ const App = () => {
                 {segments.length > 0 && showTimestamps ? (
                   segments.map((seg, i) => (
                     <span key={i}>
-                      <a href={`https://youtube.com/watch?v=${currentVideoId}&t=${seg.seconds}s`} target="_blank" rel="noopener noreferrer"
+                      <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}#t=${seg.seconds}s` : `https://youtube.com/watch?v=${currentVideoId}&t=${seg.seconds}s`} target="_blank" rel="noopener noreferrer"
                         title={`Jump to ${formatTime(seg.seconds)}`}
                         style={{ color: P.accent, fontWeight: 700, fontSize: 11, marginRight: 5, textDecoration: 'none', fontFamily: 'monospace' }}>
                         {formatTime(seg.seconds)}
