@@ -267,6 +267,38 @@ app.post('/api/summarize', async (req, res) => {
   }
 });
 
+// ── Q&A endpoint ─────────────────────────────────────────────────────────────
+app.post('/api/ask', async (req, res) => {
+  const { transcript, question } = req.body;
+  if (!transcript || typeof transcript !== 'string' || !question || typeof question !== 'string')
+    return res.status(400).json({ error: 'Missing transcript or question' });
+  if (question.length > 500)
+    return res.status(400).json({ error: 'Question too long' });
+  if (!process.env.GROQ_API_KEY)
+    return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY)' });
+
+  try {
+    const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    const completion = await client.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      max_tokens: 512,
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a helpful assistant that answers questions about YouTube video transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.',
+        },
+        {
+          role: 'user',
+          content: `Transcript:\n${transcript.slice(0, 80000)}\n\nQuestion: ${question}`,
+        },
+      ],
+    });
+    res.json({ answer: completion.choices[0]?.message?.content || '' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to answer', details: err.message });
+  }
+});
+
 // Handle all other requests with React app
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client/build', 'index.html'));

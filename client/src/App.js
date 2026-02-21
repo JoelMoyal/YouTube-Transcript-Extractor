@@ -184,8 +184,13 @@ const App = () => {
   const [summarizing, setSummarizing]     = useState(false);
   const [summaryCopied, setSummaryCopied] = useState(false);
   const [showTimestamps, setShowTimestamps] = useState(true);
+  const [showQA, setShowQA]               = useState(false);
+  const [qaQuestion, setQaQuestion]       = useState('');
+  const [qaMessages, setQaMessages]       = useState([]);
+  const [qaLoading, setQaLoading]         = useState(false);
 
   const downloadMenuRef = useRef(null);
+  const qaInputRef = useRef(null);
   const resultRef = useRef(null);
 
   useEffect(() => {
@@ -248,7 +253,35 @@ const App = () => {
   const resetAll = () => {
     setVideoUrl(''); setPreviewId(null); setTranscript(''); setSegments([]);
     setTranscriptSource(''); setCurrentVideoId(null); setError(''); setSearch('');
-    setSummary(''); setShowTimestamps(true);
+    setSummary(''); setShowTimestamps(true); setShowQA(false);
+    setQaQuestion(''); setQaMessages([]);
+  };
+
+  const askQuestion = async () => {
+    const q = qaQuestion.trim();
+    if (!q || qaLoading) return;
+    setQaMessages(prev => [...prev, { role: 'user', text: q }]);
+    setQaQuestion('');
+    setQaLoading(true);
+    try {
+      const res = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript, question: q }),
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch {
+        throw new Error(res.ok ? 'Unexpected server response' : `Server error ${res.status}`);
+      }
+      if (!res.ok) throw new Error(data.error || 'Failed to get answer');
+      setQaMessages(prev => [...prev, { role: 'ai', text: data.answer }]);
+    } catch (err) {
+      setQaMessages(prev => [...prev, { role: 'ai', text: `Error: ${err.message}`, isError: true }]);
+    } finally {
+      setQaLoading(false);
+      setTimeout(() => qaInputRef.current?.focus(), 50);
+    }
   };
 
   const getTranscript = () => {
@@ -405,6 +438,7 @@ const App = () => {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity:0.4; } 40% { transform: scale(1); opacity:1; } }
         .fade-up { animation: fadeUp 0.35s ease forwards; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -904,6 +938,132 @@ const App = () => {
                       </div>
                       <div style={{ padding: '14px 16px', background: 'white', fontSize: 13, lineHeight: 1.75, color: '#334155', whiteSpace: 'pre-wrap' }}>
                         {summary}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Q&A toggle button */}
+                  <button
+                    onClick={() => { setShowQA(v => !v); setTimeout(() => qaInputRef.current?.focus(), 80); }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6,
+                      width: '100%', justifyContent: 'center',
+                      marginTop: 10,
+                      background: showQA ? '#eff6ff' : 'white',
+                      border: `1.5px solid ${showQA ? '#bfdbfe' : '#e2e8f0'}`,
+                      borderRadius: 10, padding: '8px 14px',
+                      color: showQA ? '#2563eb' : '#64748b',
+                      fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => { if (!showQA) { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#334155'; } }}
+                    onMouseLeave={e => { if (!showQA) { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#64748b'; } }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                      <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    {showQA ? 'Hide Q&A' : 'Ask AI about this transcript'}
+                    <span style={{ opacity: 0.5, transform: showQA ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>
+                  </button>
+
+                  {/* Q&A panel */}
+                  {showQA && (
+                    <div className="fade-up" style={{ marginTop: 8, border: '1.5px solid #bfdbfe', borderRadius: 14, overflow: 'hidden' }}>
+                      {/* Q&A header */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 14px', background: '#eff6ff', borderBottom: '1px solid #bfdbfe' }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                          <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#2563eb' }}>Ask AI</span>
+                        <span style={{ fontSize: 11, color: '#60a5fa', fontWeight: 500 }}>· answers based on this transcript only</span>
+                        {qaMessages.length > 0 && (
+                          <button
+                            onClick={() => setQaMessages([])}
+                            style={{ marginLeft: 'auto', border: 'none', background: 'none', cursor: 'pointer', color: '#93c5fd', fontSize: 11, fontWeight: 600, padding: 0 }}
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Messages */}
+                      {qaMessages.length > 0 && (
+                        <div style={{ maxHeight: 280, overflowY: 'auto', background: 'white', padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                          {qaMessages.map((msg, i) => (
+                            <div key={i} style={{
+                              display: 'flex',
+                              justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                            }}>
+                              <div style={{
+                                maxWidth: '82%',
+                                padding: '8px 12px',
+                                borderRadius: msg.role === 'user' ? '12px 12px 3px 12px' : '12px 12px 12px 3px',
+                                background: msg.role === 'user' ? 'linear-gradient(135deg, #2563eb, #1d4ed8)' : (msg.isError ? '#fef2f2' : '#f8fafc'),
+                                border: msg.role === 'ai' ? `1px solid ${msg.isError ? '#fecaca' : '#e2e8f0'}` : 'none',
+                                fontSize: 13, lineHeight: 1.65,
+                                color: msg.role === 'user' ? 'white' : (msg.isError ? '#dc2626' : '#334155'),
+                              }}>
+                                {msg.text}
+                              </div>
+                            </div>
+                          ))}
+                          {qaLoading && (
+                            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                              <div style={{ padding: '8px 14px', borderRadius: '12px 12px 12px 3px', background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', gap: 4, alignItems: 'center' }}>
+                                {[0, 1, 2].map(d => (
+                                  <div key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: '#93c5fd', animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Input */}
+                      <div style={{ display: 'flex', gap: 8, padding: '10px 12px', background: qaMessages.length > 0 ? '#f8fafc' : 'white', borderTop: qaMessages.length > 0 ? '1px solid #e2e8f0' : 'none' }}>
+                        <input
+                          ref={qaInputRef}
+                          value={qaQuestion}
+                          onChange={e => setQaQuestion(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
+                          placeholder="Ask anything about this video…"
+                          disabled={qaLoading}
+                          style={{
+                            flex: 1, border: '1.5px solid #e2e8f0', borderRadius: 9,
+                            padding: '8px 12px', fontSize: 13, color: '#0f172a',
+                            background: 'white', outline: 'none',
+                            transition: 'border-color 0.15s',
+                          }}
+                          onFocus={e => { e.target.style.borderColor = '#2563eb'; }}
+                          onBlur={e => { e.target.style.borderColor = '#e2e8f0'; }}
+                        />
+                        <button
+                          onClick={askQuestion}
+                          disabled={!qaQuestion.trim() || qaLoading}
+                          style={{
+                            flexShrink: 0, width: 36, height: 36,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            borderRadius: 9, border: 'none',
+                            background: !qaQuestion.trim() || qaLoading ? '#e2e8f0' : 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                            color: !qaQuestion.trim() || qaLoading ? '#94a3b8' : 'white',
+                            cursor: !qaQuestion.trim() || qaLoading ? 'not-allowed' : 'pointer',
+                            transition: 'all 0.15s',
+                            boxShadow: !qaQuestion.trim() || qaLoading ? 'none' : '0 2px 8px rgba(37,99,235,0.35)',
+                          }}
+                        >
+                          {qaLoading ? (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 0.8s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                          ) : (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="22" y1="2" x2="11" y2="13"/>
+                              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                          )}
+                        </button>
                       </div>
                     </div>
                   )}
