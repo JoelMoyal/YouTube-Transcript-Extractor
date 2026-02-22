@@ -307,15 +307,25 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
 
   const handleSignUp = async (e) => {
     e.preventDefault(); setError('');
-    if (!username.trim()) { setError('Please choose a username.'); return; }
-    if (username.trim().length < 2) { setError('Username must be at least 2 characters.'); return; }
+    const trimmedUser = username.trim();
+    if (!trimmedUser) { setError('Please choose a username.'); return; }
+    if (trimmedUser.length < 2) { setError('Username must be at least 2 characters.'); return; }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(trimmedUser)) { setError('Username can only contain letters, numbers, _, . and -'); return; }
     if (password !== confirm) { setError('Passwords do not match.'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     setLoading(true);
     try {
+      // Check username availability against profiles table
+      const { data: existing } = await supabase
+        .from('profiles')
+        .select('id')
+        .ilike('username', trimmedUser)
+        .maybeSingle();
+      if (existing) { setError('Username already taken. Please choose another.'); return; }
+
       const { error: err } = await supabase.auth.signUp({
         email, password,
-        options: { data: { full_name: username.trim(), username: username.trim() } },
+        options: { data: { full_name: trimmedUser, username: trimmedUser.toLowerCase() } },
       });
       if (err) { setError(friendlyError(err.message)); return; }
       setScreen('pending');
@@ -489,6 +499,15 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
             <input type="password" required value={password} onChange={e => setPassword(e.target.value)}
               placeholder={isSignUp ? 'Min. 6 characters' : '••••••••'} style={inputStyle}
               onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
+            {isSignUp && (
+              <div style={{ marginTop: 5, textAlign: 'right' }}>
+                <a href="https://pwasecurity.org/" target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: 11, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+                >🔐 Generate a secure password</a>
+              </div>
+            )}
           </div>
           {isSignUp && (
             <div>
