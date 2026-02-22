@@ -273,6 +273,8 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
   const [screen, setScreen]     = React.useState(initialTab); // 'signin'|'signup'|'forgot'|'pending'
   const [email, setEmail]       = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [confirm, setConfirm]   = React.useState('');
+  const [username, setUsername] = React.useState('');
   const [loading, setLoading]   = React.useState(false);
   const [error, setError]       = React.useState('');
   const [resendLoading, setResendLoading] = React.useState(false);
@@ -304,9 +306,17 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
   };
 
   const handleSignUp = async (e) => {
-    e.preventDefault(); setError(''); setLoading(true);
+    e.preventDefault(); setError('');
+    if (!username.trim()) { setError('Please choose a username.'); return; }
+    if (username.trim().length < 2) { setError('Username must be at least 2 characters.'); return; }
+    if (password !== confirm) { setError('Passwords do not match.'); return; }
+    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    setLoading(true);
     try {
-      const { error: err } = await supabase.auth.signUp({ email, password });
+      const { error: err } = await supabase.auth.signUp({
+        email, password,
+        options: { data: { full_name: username.trim(), username: username.trim() } },
+      });
       if (err) { setError(friendlyError(err.message)); return; }
       setScreen('pending');
     } finally { setLoading(false); }
@@ -453,6 +463,13 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
         </div>
 
         <form onSubmit={isSignUp ? handleSignUp : handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {isSignUp && (
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Username</label>
+              <input type="text" required value={username} onChange={e => setUsername(e.target.value)} placeholder="yourname" style={inputStyle}
+                onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
+            </div>
+          )}
           <div>
             <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Email</label>
             <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" style={inputStyle}
@@ -473,6 +490,13 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
               placeholder={isSignUp ? 'Min. 6 characters' : '••••••••'} style={inputStyle}
               onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
           </div>
+          {isSignUp && (
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Repeat password</label>
+              <input type="password" required value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repeat your password" style={inputStyle}
+                onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
+            </div>
+          )}
           <ErrorBox msg={error} />
           <SubmitBtn label={isSignUp ? 'Create account' : 'Sign in'} />
         </form>
@@ -651,7 +675,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           }}>{initial}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: P.ink, marginBottom: 3 }}>
-              {user.user_metadata?.full_name || user.email?.split('@')[0]}
+              {user.user_metadata?.username || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]}
             </div>
             <div style={{ fontSize: 13, color: P.muted }}>{user.email}</div>
           </div>
