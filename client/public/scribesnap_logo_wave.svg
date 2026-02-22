@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="400" viewBox="0 0 1400 400">
+  <defs>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7BD3FF"/>
+      <stop offset="55%" stop-color="#3C8CFF"/>
+      <stop offset="100%" stop-color="#1F6BFF"/>
+    </linearGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0 0 0 0 0.20
+                0 0 0 0 0.55
+                0 0 0 0 1.00
+                0 0 0 0.55 0" result="blueBlur"/>
+      <feMerge>
+        <feMergeNode in="blueBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background (matches your site vibe); delete this rect if you want fully transparent -->
+  <rect width="1400" height="400" fill="#F6F2EA"/>
+
+  <!-- Wave icon -->
+  <g transform="translate(140,200)" filter="url(#softGlow)">
+    <path d="M -110 0
+             C -92 0, -92 -28, -74 -28
+             C -56 -28, -56 42, -38 42
+             C -20 42, -20 -70, -2 -70
+             C 16 -70, 16 86, 34 86
+             C 52 86, 52 -38, 70 -38
+             C 88 -38, 88 0, 106 0"
+          fill="none" stroke="url(#blueGrad)" stroke-width="18"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- tiny end caps for a slightly more "audio" feel -->
+    <circle cx="-120" cy="0" r="7" fill="url(#blueGrad)"/>
+    <circle cx="116" cy="0" r="7" fill="url(#blueGrad)"/>
+  </g>
+
+  <!-- Wordmark -->
+  <g transform="translate(320,210)">
+    <text x="0" y="0"
+          font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+          font-size="92" font-weight="800" fill="#1D1D1F" letter-spacing="-1">
+      ScribeSnap
+    </text>
+    <text x="560" y="0"
+          font-family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+          font-size="92" font-weight="800" fill="#3C8CFF" letter-spacing="-1">
+      .ai
+    </text>
+  </g>
+</svg>

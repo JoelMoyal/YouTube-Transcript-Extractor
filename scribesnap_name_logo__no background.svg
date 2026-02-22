@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 1400 400">
+  <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: url(#linear-gradient2);
+      }
+
+      .st1 {
+        fill: url(#linear-gradient1);
+      }
+
+      .st2 {
+        fill: #1d1d1f;
+      }
+
+      .st2, .st3 {
+        font-family: Helvetica-Bold, Helvetica;
+        font-size: 92px;
+        font-weight: 700;
+        isolation: isolate;
+      }
+
+      .st4 {
+        fill: none;
+        stroke: url(#linear-gradient);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 18px;
+      }
+
+      .st3 {
+        fill: #3c8cff;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="400.19" y1="619.52" x2="401.19" y2="618.52" gradientTransform="translate(-86400 96767.81) scale(216 -156)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7bd3ff"/>
+      <stop offset=".55" stop-color="#3c8cff"/>
+      <stop offset="1" stop-color="#1f6bff"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient1" x1="373.29" y1="605.1" x2="374.29" y2="604.1" gradientTransform="translate(-5213 8664.46) scale(14 -14)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7bd3ff"/>
+      <stop offset=".55" stop-color="#3c8cff"/>
+      <stop offset="1" stop-color="#1f6bff"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient2" x1="373.29" y1="605.1" x2="374.29" y2="604.1" gradientTransform="translate(-4977 8664.46) scale(14 -14)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7bd3ff"/>
+      <stop offset=".55" stop-color="#3c8cff"/>
+      <stop offset="1" stop-color="#1f6bff"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <path class="st4" d="M30,200c18,0,18-28,36-28s18,70,36,70,18-112,36-112,18,156,36,156,18-124,36-124,18,38,36,38"/>
+    <circle class="st1" cx="20" cy="200" r="7"/>
+    <circle class="st0" cx="256" cy="200" r="7"/>
+  </g>
+  <g>
+    <text class="st2" transform="translate(320 210)"><tspan x="0" y="0">ScribeSnap</tspan></text>
+    <text class="st3" transform="translate(880 210)"><tspan x="0" y="0">.ai</tspan></text>
+  </g>
+</svg>

@@ -1,12 +1,12 @@
 <div align="center" id="top"> 
-  <img src="./.github/app.gif" alt="Youtube Transcript Extractor" />
+  <img src="./.github/app.gif" alt="ScribeSnap" />
 
   &#xa0;
 
   <!-- <a href="https://youtubetranscriptextractor.netlify.app">Demo</a> -->
 </div>
 
-<h1 align="center">Youtube Transcript Extractor</h1>
+<h1 align="center">ScribeSnap</h1>
 
 <p align="center">
   <img alt="Github top language" src="https://img.shields.io/github/languages/top/{{YOUR_GITHUB_USERNAME}}/youtube-transcript-extractor?color=56BEB8">
@@ -27,7 +27,7 @@
 <!-- Status -->
 
 <!-- <h4 align="center"> 
-	🚧  Youtube Transcript Extractor 🚀 Under construction...  🚧
+	🚧  ScribeSnap 🚀 Under construction...  🚧
 </h4> 
 
 <hr> -->
