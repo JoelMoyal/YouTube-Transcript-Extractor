@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 1400 400">
+  <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: url(#linear-gradient2);
+      }
+
+      .st1 {
+        fill: url(#linear-gradient1);
+      }
+
+      .st2 {
+        fill: #1d1d1f;
+      }
+
+      .st2, .st3 {
+        font-family: Helvetica-Bold, Helvetica;
+        font-size: 137.23px;
+        font-weight: 700;
+        isolation: isolate;
+      }
+
+      .st4 {
+        fill: none;
+        stroke: url(#linear-gradient);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 18px;
+      }
+
+      .st3 {
+        fill: #3c8cff;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="400.41" y1="619.57" x2="401.44" y2="618.55" gradientTransform="translate(-86400 96767.81) scale(216 -156)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7bd3ff"/>
+      <stop offset=".55" stop-color="#3c8cff"/>
+      <stop offset="1" stop-color="#1f6bff"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient1" x1="372.35" y1="605.9" x2="373.82" y2="604.43" gradientTransform="translate(-5213 8664.46) scale(14 -14)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7bd3ff"/>
+      <stop offset=".55" stop-color="#3c8cff"/>
+      <stop offset="1" stop-color="#1f6bff"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient2" x1="379.93" y1="605.9" x2="381.4" y2="604.43" gradientTransform="translate(-4977 8664.46) scale(14 -14)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7bd3ff"/>
+      <stop offset=".55" stop-color="#3c8cff"/>
+      <stop offset="1" stop-color="#1f6bff"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <path class="st4" d="M24.64,192.16c26.09,0,26.09-41.77,52.18-41.77s26.09,104.42,52.18,104.42,26.09-167.07,52.18-167.07,26.09,232.7,52.18,232.7,26.09-184.97,52.18-184.97,26.09,56.68,52.18,56.68"/>
+    <ellipse class="st1" cx="10.15" cy="192.16" rx="10.15" ry="10.44"/>
+    <ellipse class="st0" cx="352.25" cy="192.16" rx="10.15" ry="10.44"/>
+  </g>
+  <g>
+    <text class="st2" transform="translate(445.02 207.08) scale(.97 1)"><tspan x="0" y="0">ScribeSnap</tspan></text>
+    <text class="st3" transform="translate(1256.79 207.08) scale(.97 1)"><tspan x="0" y="0">.ai</tspan></text>
+  </g>
+</svg>
