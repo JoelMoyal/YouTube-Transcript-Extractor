@@ -297,9 +297,11 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
   const switchScreen = (s) => { setScreen(s); setError(''); setResendDone(false); };
 
   const handleSignIn = async (e) => {
-    e.preventDefault(); setError(''); setLoading(true);
+    e.preventDefault(); setError('');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) { setError('Please enter a valid email address.'); return; }
+    setLoading(true);
     try {
-      const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error: err } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (err) { setError(friendlyError(err.message)); return; }
       if (data?.user) { onAuthSuccess(data.user); onClose(); }
     } finally { setLoading(false); }
@@ -308,6 +310,14 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
   const handleSignUp = async (e) => {
     e.preventDefault(); setError('');
     const trimmedUser = username.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(trimmedEmail)) { setError('Please enter a valid email address (e.g. you@example.com).'); return; }
+    // Block obvious disposable/fake domains
+    const blockedDomains = ['mailinator.com','guerrillamail.com','trashmail.com','tempmail.com','yopmail.com','sharklasers.com','throwam.com','dispostable.com','maildrop.cc','fakeinbox.com'];
+    const emailDomain = trimmedEmail.split('@')[1] || '';
+    if (blockedDomains.includes(emailDomain)) { setError('Please use a real email address.'); return; }
     if (!trimmedUser) { setError('Please choose a username.'); return; }
     if (trimmedUser.length < 2) { setError('Username must be at least 2 characters.'); return; }
     if (!/^[a-zA-Z0-9_.-]+$/.test(trimmedUser)) { setError('Username can only contain letters, numbers, _, . and -'); return; }
