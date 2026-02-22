@@ -43,6 +43,10 @@ const DEMO_CHIPS = [
   'What is the main argument?',
 ];
 
+const BRAND_NAME = 'ScribeSnap';
+const BRAND_LOGO_SRC = '/scribesnap_wordmark.svg';
+const FOOTER_LOGO_SRC = '/scribesnap_wordmark_footer.svg';
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 // Returns { platform: 'youtube'|'vimeo', id, url } or null
 function parseVideoUrl(input) {
@@ -146,6 +150,13 @@ const GitHubIcon = () => (
     <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
   </svg>
 );
+const BrandLogo = ({ height = 36 }) => (
+  <img
+    src={BRAND_LOGO_SRC}
+    alt={BRAND_NAME}
+    style={{ height, width: 'auto', display: 'block' }}
+  />
+);
 
 // ── Credits ───────────────────────────────────────────────────────────────────
 const CREDITS_MAX = 20;
@@ -235,13 +246,8 @@ const CreditsWidget = ({ credits }) => {
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 const AuthLogo = () => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 24 }}>
-    <div style={{ width: 30, height: 30, borderRadius: 8, background: '#FF0000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-      </svg>
-    </div>
-    <span style={{ fontSize: 15, fontWeight: 700, color: P.ink, letterSpacing: '-0.03em' }}>TranscriptBot</span>
+  <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
+    <BrandLogo height={44} />
   </div>
 );
 
@@ -1012,12 +1018,11 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, on
     borderBottom: `1px solid ${P.border}`,
   }}>
     <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-      <div style={{ width: 30, height: 30, borderRadius: 8, background: '#FF0000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-        </svg>
-      </div>
-      <span style={{ fontSize: 15, fontWeight: 700, color: P.ink, letterSpacing: '-0.03em' }}>TranscriptBot</span>
+      <img
+        src={FOOTER_LOGO_SRC}
+        alt={BRAND_NAME}
+        style={{ height: 40, width: 'auto', display: 'block' }}
+      />
     </div>
 
     <div style={{ flex: 1 }} />
@@ -1098,6 +1103,7 @@ const App = () => {
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [showQuotes, setShowQuotes]       = useState(false);
   const [quotesCopied, setQuotesCopied]   = useState(false);
+  const [activeTab, setActiveTab]         = useState('transcript'); // 'transcript' | 'chapters'
 
   const downloadMenuRef = useRef(null);
   const qaInputRef      = useRef(null);
@@ -1219,6 +1225,7 @@ const App = () => {
     setQaQuestion(''); setQaMessages([]);
     setChapters([]); setShowChapters(false);
     setQuotes([]); setShowQuotes(false);
+    setActiveTab('transcript');
   };
 
   const askQuestion = async (overrideQ) => {
@@ -2239,16 +2246,15 @@ const App = () => {
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 32, marginBottom: 32 }}>
             {/* Brand */}
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: '#FF0000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                  </svg>
-                </div>
-                <span style={{ fontSize: 15, fontWeight: 700, color: P.ink, letterSpacing: '-0.03em' }}>TranscriptBot</span>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+                <img
+                  src={FOOTER_LOGO_SRC}
+                  alt={BRAND_NAME}
+                  style={{ height: 44, width: 'auto', display: 'block' }}
+                />
               </div>
               <p style={{ fontSize: 13, color: P.muted, lineHeight: 1.6, maxWidth: 260, margin: 0 }}>
-                Extract transcripts from any YouTube video and ask AI questions — free, no account needed.
+                Extract transcripts from YouTube and Vimeo videos and ask AI questions — free, no account needed.
               </p>
             </div>
 
@@ -2293,7 +2299,7 @@ const App = () => {
           {/* Bottom row */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <span style={{ fontSize: 12, color: P.muted }}>
-              © {new Date().getFullYear()} TranscriptBot · Built by{' '}
+              © {new Date().getFullYear()} {BRAND_NAME} · Built by{' '}
               <a href="https://joelmoyal.com" target="_blank" rel="noopener noreferrer"
                 style={{ color: P.ink, fontWeight: 600, textDecoration: 'none' }}
                 onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
