@@ -323,6 +323,9 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
     if (!/^[a-zA-Z0-9_.-]+$/.test(trimmedUser)) { setError('Username can only contain letters, numbers, _, . and -'); return; }
     if (password !== confirm) { setError('Passwords do not match.'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    // Require at least "Fair" strength
+    const pwScore = [password.length>=8, password.length>=12, /[A-Z]/.test(password), /[a-z]/.test(password), /[0-9]/.test(password), /[^A-Za-z0-9]/.test(password)].filter(Boolean).length;
+    if (pwScore <= 2) { setError('Password is too weak. Add uppercase letters, numbers, or symbols.'); return; }
     setLoading(true);
     try {
       // Check username availability against profiles table
@@ -509,13 +512,44 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
             <input type="password" required value={password} onChange={e => setPassword(e.target.value)}
               placeholder={isSignUp ? 'Min. 6 characters' : '••••••••'} style={inputStyle}
               onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
-            {isSignUp && (
+            {isSignUp && password.length > 0 && (() => {
+              // Strength scoring
+              let score = 0;
+              if (password.length >= 8)  score++;
+              if (password.length >= 12) score++;
+              if (/[A-Z]/.test(password)) score++;
+              if (/[a-z]/.test(password)) score++;
+              if (/[0-9]/.test(password)) score++;
+              if (/[^A-Za-z0-9]/.test(password)) score++;
+              const level = score <= 2 ? 0 : score <= 3 ? 1 : score <= 4 ? 2 : 3;
+              const labels  = ['Weak',   'Fair',    'Good',    'Strong'];
+              const colors  = ['#B42318','#B45309', '#0F766E', '#166534'];
+              const widths  = ['25%',    '50%',     '75%',     '100%'];
+              return (
+                <div style={{ marginTop: 8 }}>
+                  {/* Bar */}
+                  <div style={{ height: 4, borderRadius: 999, background: P.border, overflow: 'hidden', marginBottom: 5 }}>
+                    <div style={{ height: '100%', width: widths[level], borderRadius: 999, background: colors[level], transition: 'width 0.3s ease, background 0.3s ease' }} />
+                  </div>
+                  {/* Label + generator link */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: colors[level] }}>{labels[level]} password</span>
+                    <a href="https://pwasecurity.org/" target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 11, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+                    >🔐 Generate secure password</a>
+                  </div>
+                </div>
+              );
+            })()}
+            {isSignUp && password.length === 0 && (
               <div style={{ marginTop: 5, textAlign: 'right' }}>
                 <a href="https://pwasecurity.org/" target="_blank" rel="noopener noreferrer"
                   style={{ fontSize: 11, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
                   onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
                   onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
-                >🔐 Generate a secure password</a>
+                >🔐 Generate secure password</a>
               </div>
             )}
           </div>
