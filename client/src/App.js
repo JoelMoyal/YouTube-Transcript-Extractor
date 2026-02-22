@@ -486,13 +486,32 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
         </div>
 
         <form onSubmit={isSignUp ? handleSignUp : handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {isSignUp && (
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Username</label>
-              <input type="text" required value={username} onChange={e => setUsername(e.target.value)} placeholder="yourname" style={inputStyle}
-                onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
-            </div>
-          )}
+          {isSignUp && (() => {
+            const adjs = ['swift','dark','silent','bright','wild','bold','calm','sharp','keen','cool','neo','cyber','solar','lunar','nova','prime','pixel','sonic','turbo','neon','royal','iron','ghost','storm','vivid'];
+            const nouns = ['eagle','wolf','fox','panda','tiger','hawk','coder','ninja','rider','blade','spark','pulse','drift','nexus','orbit','vault','scout','pilot','forge','creek','peak','comet','flare','prism','craft'];
+            const seps = ['_','.',''];
+            const generateUsername = () => {
+              const adj  = adjs[Math.floor(Math.random() * adjs.length)];
+              const noun = nouns[Math.floor(Math.random() * nouns.length)];
+              const sep  = seps[Math.floor(Math.random() * seps.length)];
+              const num  = Math.random() > 0.5 ? Math.floor(Math.random() * 90 + 10) : '';
+              return `${adj}${sep}${noun}${num}`;
+            };
+            return (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: P.ink }}>Username</label>
+                  <button type="button" onClick={() => setUsername(generateUsername())}
+                    style={{ background: 'none', border: 'none', fontSize: 11, color: P.muted, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 4, transition: 'color 0.15s' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+                  >🎲 Random username</button>
+                </div>
+                <input type="text" required value={username} onChange={e => setUsername(e.target.value)} placeholder="yourname" style={inputStyle}
+                  onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
+              </div>
+            );
+          })()}
           <div>
             <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Email</label>
             <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" style={inputStyle}
