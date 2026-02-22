@@ -233,42 +233,57 @@ const CreditsWidget = ({ credits }) => {
   );
 };
 
+// ── Shared helpers ────────────────────────────────────────────────────────────
+const AuthLogo = () => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 24 }}>
+    <div style={{ width: 30, height: 30, borderRadius: 8, background: '#FF0000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+      </svg>
+    </div>
+    <span style={{ fontSize: 15, fontWeight: 700, color: P.ink, letterSpacing: '-0.03em' }}>TranscriptBot</span>
+  </div>
+);
+
+const modalOverlay = {
+  position: 'fixed', inset: 0, zIndex: 1000,
+  background: 'rgba(28,25,23,0.5)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+};
+const modalCard = {
+  width: '100%', maxWidth: 420,
+  background: P.surface, borderRadius: 20,
+  border: `1px solid ${P.border}`,
+  boxShadow: '0 24px 80px rgba(28,25,23,0.2)',
+  padding: '32px 32px 28px',
+  position: 'relative',
+};
+const friendlyError = (msg = '') => {
+  if (msg.includes('Email not confirmed')) return 'Please confirm your email first. Check your inbox for the confirmation link.';
+  if (msg.includes('Invalid login credentials')) return 'Incorrect email or password. Please try again.';
+  if (msg.includes('User already registered')) return 'An account with this email already exists. Try signing in instead.';
+  if (msg.includes('Password should be at least')) return 'Password must be at least 6 characters.';
+  if (msg.includes('rate limit') || msg.includes('too many')) return 'Too many attempts. Please wait a moment and try again.';
+  if (msg.includes('network') || msg.includes('fetch')) return 'Network error. Please check your connection.';
+  return msg || 'Something went wrong. Please try again.';
+};
+
 // ── AuthModal ─────────────────────────────────────────────────────────────────
-const AuthModal = ({ onClose, onAuthSuccess }) => {
-  const [tab, setTab]           = React.useState('signin'); // 'signin' | 'signup'
+const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
+  const [screen, setScreen]     = React.useState(initialTab); // 'signin'|'signup'|'forgot'|'pending'
   const [email, setEmail]       = React.useState('');
   const [password, setPassword] = React.useState('');
   const [loading, setLoading]   = React.useState(false);
   const [error, setError]       = React.useState('');
-  const [message, setMessage]   = React.useState('');
-  const overlayRef              = React.useRef(null);
+  const [resendLoading, setResendLoading] = React.useState(false);
+  const [resendDone, setResendDone]       = React.useState(false);
+  const overlayRef = React.useRef(null);
 
-  // Close on Escape
   React.useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(''); setMessage(''); setLoading(true);
-    try {
-      if (tab === 'signup') {
-        const { error: err } = await supabase.auth.signUp({ email, password });
-        if (err) throw err;
-        setMessage('Check your email to confirm your account!');
-      } else {
-        const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
-        if (err) throw err;
-        if (data?.user) { onAuthSuccess(data.user); onClose(); }
-      }
-    } catch (err) {
-      setError(err.message || 'Something went wrong');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const inputStyle = {
     width: '100%', padding: '10px 13px', borderRadius: 10,
@@ -277,137 +292,505 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
     fontFamily: 'inherit',
   };
 
-  return (
-    <div
-      ref={overlayRef}
-      onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 1000,
-        background: 'rgba(28,25,23,0.45)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 24,
-      }}
-    >
-      <div className="fade-up" style={{
-        width: '100%', maxWidth: 400,
-        background: P.surface, borderRadius: 18,
-        border: `1px solid ${P.border}`,
-        boxShadow: '0 24px 64px rgba(28,25,23,0.18)',
-        padding: '32px 32px 28px',
-        position: 'relative',
-      }}>
-        {/* Close */}
-        <button
-          onClick={onClose}
-          style={{
-            position: 'absolute', top: 16, right: 16,
-            width: 28, height: 28, borderRadius: 7,
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: P.muted, fontSize: 18, lineHeight: 1,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.15s',
-          }}
-          onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
-        >×</button>
+  const switchScreen = (s) => { setScreen(s); setError(''); setResendDone(false); };
 
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 24 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 8, background: '#FF0000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-            </svg>
+  const handleSignIn = async (e) => {
+    e.preventDefault(); setError(''); setLoading(true);
+    try {
+      const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
+      if (err) { setError(friendlyError(err.message)); return; }
+      if (data?.user) { onAuthSuccess(data.user); onClose(); }
+    } finally { setLoading(false); }
+  };
+
+  const handleSignUp = async (e) => {
+    e.preventDefault(); setError(''); setLoading(true);
+    try {
+      const { error: err } = await supabase.auth.signUp({ email, password });
+      if (err) { setError(friendlyError(err.message)); return; }
+      setScreen('pending');
+    } finally { setLoading(false); }
+  };
+
+  const handleForgot = async (e) => {
+    e.preventDefault(); setError(''); setLoading(true);
+    try {
+      const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin,
+      });
+      if (err) { setError(friendlyError(err.message)); return; }
+      setScreen('forgotSent');
+    } finally { setLoading(false); }
+  };
+
+  const handleResend = async () => {
+    setResendLoading(true);
+    try {
+      await supabase.auth.resend({ type: 'signup', email });
+      setResendDone(true);
+    } finally { setResendLoading(false); }
+  };
+
+  const CloseBtn = () => (
+    <button onClick={onClose} style={{
+      position: 'absolute', top: 16, right: 16, width: 28, height: 28,
+      borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer',
+      color: P.muted, fontSize: 20, lineHeight: 1,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s',
+    }}
+      onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+    >×</button>
+  );
+
+  const SubmitBtn = ({ label }) => (
+    <button type="submit" disabled={loading} style={{
+      marginTop: 4, padding: '11px 0', borderRadius: 10, border: 'none',
+      background: loading ? 'rgba(45,108,223,0.55)' : P.accent,
+      color: 'white', fontSize: 14, fontWeight: 600,
+      cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.15s',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%',
+    }}
+      onMouseEnter={e => { if (!loading) e.currentTarget.style.background = P.accentHover; }}
+      onMouseLeave={e => { if (!loading) e.currentTarget.style.background = P.accent; }}
+    >{loading && <SpinnerIcon size={14} />}{label}</button>
+  );
+
+  const ErrorBox = ({ msg }) => msg ? (
+    <div style={{ padding: '9px 12px', borderRadius: 8, background: 'rgba(180,35,24,0.07)', border: `1px solid rgba(180,35,24,0.18)`, fontSize: 13, color: P.error, lineHeight: 1.5 }}>{msg}</div>
+  ) : null;
+
+  // ── Email pending screen ───────────────────────────────────────────────────
+  if (screen === 'pending') return (
+    <div ref={overlayRef} onClick={e => { if (e.target === overlayRef.current) onClose(); }} style={modalOverlay}>
+      <div className="fade-up" style={modalCard}>
+        <CloseBtn />
+        <AuthLogo />
+        <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>📬</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: P.ink, marginBottom: 8 }}>Check your inbox</div>
+          <div style={{ fontSize: 13, color: P.muted, lineHeight: 1.6, marginBottom: 20 }}>
+            We sent a confirmation link to <strong style={{ color: P.ink }}>{email}</strong>.<br />
+            Click it to activate your account, then come back and sign in.
           </div>
-          <span style={{ fontSize: 15, fontWeight: 700, color: P.ink, letterSpacing: '-0.03em' }}>TranscriptBot</span>
+          {resendDone
+            ? <div style={{ fontSize: 13, color: P.success, marginBottom: 12 }}>Resent! Check your spam folder if needed.</div>
+            : <button onClick={handleResend} disabled={resendLoading} style={{ background: 'none', border: 'none', cursor: resendLoading ? 'default' : 'pointer', fontSize: 13, color: P.accent, fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6, margin: '0 auto 12px' }}>
+                {resendLoading && <SpinnerIcon size={12} />} Didn't get it? Resend
+              </button>
+          }
+          <button onClick={() => switchScreen('signin')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: P.muted }}>
+            ← Back to sign in
+          </button>
         </div>
+      </div>
+    </div>
+  );
+
+  // ── Forgot sent screen ────────────────────────────────────────────────────
+  if (screen === 'forgotSent') return (
+    <div ref={overlayRef} onClick={e => { if (e.target === overlayRef.current) onClose(); }} style={modalOverlay}>
+      <div className="fade-up" style={modalCard}>
+        <CloseBtn />
+        <AuthLogo />
+        <div style={{ textAlign: 'center', padding: '8px 0 4px' }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>🔑</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: P.ink, marginBottom: 8 }}>Reset link sent</div>
+          <div style={{ fontSize: 13, color: P.muted, lineHeight: 1.6, marginBottom: 20 }}>
+            We sent a password reset link to <strong style={{ color: P.ink }}>{email}</strong>.<br />
+            Click it to set a new password.
+          </div>
+          <button onClick={() => switchScreen('signin')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: P.muted }}>← Back to sign in</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── Forgot password screen ────────────────────────────────────────────────
+  if (screen === 'forgot') return (
+    <div ref={overlayRef} onClick={e => { if (e.target === overlayRef.current) onClose(); }} style={modalOverlay}>
+      <div className="fade-up" style={modalCard}>
+        <CloseBtn />
+        <AuthLogo />
+        <div style={{ fontSize: 18, fontWeight: 700, color: P.ink, marginBottom: 4 }}>Reset password</div>
+        <div style={{ fontSize: 13, color: P.muted, marginBottom: 20 }}>Enter your email and we'll send you a reset link.</div>
+        <form onSubmit={handleForgot} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Email</label>
+            <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" style={inputStyle}
+              onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
+          </div>
+          <ErrorBox msg={error} />
+          <SubmitBtn label="Send reset link" />
+        </form>
+        <p style={{ textAlign: 'center', fontSize: 12, color: P.muted, marginTop: 16, marginBottom: 0 }}>
+          <button onClick={() => switchScreen('signin')} style={{ background: 'none', border: 'none', color: P.accent, fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0 }}>← Back to sign in</button>
+        </p>
+      </div>
+    </div>
+  );
+
+  // ── Sign in / Sign up screen ──────────────────────────────────────────────
+  const isSignUp = screen === 'signup';
+  return (
+    <div ref={overlayRef} onClick={e => { if (e.target === overlayRef.current) onClose(); }} style={modalOverlay}>
+      <div className="fade-up" style={modalCard}>
+        <CloseBtn />
+        <AuthLogo />
 
         {/* Tabs */}
-        <div style={{
-          display: 'flex', marginBottom: 24,
-          background: P.paper, borderRadius: 10, padding: 3,
-          border: `1px solid ${P.border}`,
-        }}>
+        <div style={{ display: 'flex', marginBottom: 24, background: P.paper, borderRadius: 10, padding: 3, border: `1px solid ${P.border}` }}>
           {[['signin', 'Sign in'], ['signup', 'Create account']].map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => { setTab(key); setError(''); setMessage(''); }}
-              style={{
-                flex: 1, padding: '7px 0', borderRadius: 8, border: 'none',
-                background: tab === key ? P.surface : 'transparent',
-                color: tab === key ? P.ink : P.muted,
-                fontSize: 13, fontWeight: tab === key ? 600 : 400,
-                cursor: 'pointer', transition: 'all 0.15s',
-                boxShadow: tab === key ? '0 1px 4px rgba(28,25,23,0.08)' : 'none',
-              }}
-            >{label}</button>
+            <button key={key} onClick={() => switchScreen(key)} style={{
+              flex: 1, padding: '7px 0', borderRadius: 8, border: 'none',
+              background: screen === key ? P.surface : 'transparent',
+              color: screen === key ? P.ink : P.muted,
+              fontSize: 13, fontWeight: screen === key ? 600 : 400,
+              cursor: 'pointer', transition: 'all 0.15s',
+              boxShadow: screen === key ? '0 1px 4px rgba(28,25,23,0.08)' : 'none',
+            }}>{label}</button>
           ))}
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <form onSubmit={isSignUp ? handleSignUp : handleSignIn} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
             <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Email</label>
-            <input
-              type="email" required value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              style={inputStyle}
-              onFocus={e => { e.target.style.borderColor = P.accent; }}
-              onBlur={e => { e.target.style.borderColor = P.border; }}
-            />
+            <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" style={inputStyle}
+              onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
           </div>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Password</label>
-            <input
-              type="password" required value={password} onChange={e => setPassword(e.target.value)}
-              placeholder={tab === 'signup' ? 'Min. 6 characters' : '••••••••'}
-              style={inputStyle}
-              onFocus={e => { e.target.style.borderColor = P.accent; }}
-              onBlur={e => { e.target.style.borderColor = P.border; }}
-            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: P.ink }}>Password</label>
+              {!isSignUp && (
+                <button type="button" onClick={() => switchScreen('forgot')}
+                  style={{ background: 'none', border: 'none', fontSize: 12, color: P.muted, cursor: 'pointer', padding: 0, transition: 'color 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+                >Forgot password?</button>
+              )}
+            </div>
+            <input type="password" required value={password} onChange={e => setPassword(e.target.value)}
+              placeholder={isSignUp ? 'Min. 6 characters' : '••••••••'} style={inputStyle}
+              onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
           </div>
-
-          {error && (
-            <div style={{ padding: '9px 12px', borderRadius: 8, background: 'rgba(180,35,24,0.07)', border: `1px solid rgba(180,35,24,0.2)`, fontSize: 13, color: P.error }}>
-              {error}
-            </div>
-          )}
-          {message && (
-            <div style={{ padding: '9px 12px', borderRadius: 8, background: 'rgba(15,118,110,0.07)', border: `1px solid rgba(15,118,110,0.2)`, fontSize: 13, color: P.success }}>
-              {message}
-            </div>
-          )}
-
-          <button
-            type="submit" disabled={loading}
-            style={{
-              marginTop: 4, padding: '11px 0', borderRadius: 10, border: 'none',
-              background: loading ? 'rgba(45,108,223,0.6)' : P.accent,
-              color: 'white', fontSize: 14, fontWeight: 600,
-              cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.15s',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            }}
-            onMouseEnter={e => { if (!loading) e.currentTarget.style.background = P.accentHover; }}
-            onMouseLeave={e => { if (!loading) e.currentTarget.style.background = P.accent; }}
-          >
-            {loading && <SpinnerIcon size={14} />}
-            {tab === 'signup' ? 'Create account' : 'Sign in'}
-          </button>
+          <ErrorBox msg={error} />
+          <SubmitBtn label={isSignUp ? 'Create account' : 'Sign in'} />
         </form>
 
         <p style={{ textAlign: 'center', fontSize: 12, color: P.muted, marginTop: 16, marginBottom: 0 }}>
-          {tab === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-          <button
-            onClick={() => { setTab(tab === 'signin' ? 'signup' : 'signin'); setError(''); setMessage(''); }}
+          {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
+          <button onClick={() => switchScreen(isSignUp ? 'signin' : 'signup')}
             style={{ background: 'none', border: 'none', color: P.accent, fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0 }}
-          >{tab === 'signin' ? 'Create one' : 'Sign in'}</button>
+          >{isSignUp ? 'Sign in' : 'Create one'}</button>
         </p>
       </div>
     </div>
   );
 };
 
+// ── PasswordResetModal ────────────────────────────────────────────────────────
+const PasswordResetModal = ({ onClose }) => {
+  const [password, setPassword] = React.useState('');
+  const [confirm, setConfirm]   = React.useState('');
+  const [loading, setLoading]   = React.useState(false);
+  const [error, setError]       = React.useState('');
+  const [done, setDone]         = React.useState(false);
+
+  const inputStyle = {
+    width: '100%', padding: '10px 13px', borderRadius: 10,
+    border: `1px solid ${P.border}`, background: P.paper,
+    fontSize: 14, color: P.ink, outline: 'none', transition: 'border-color 0.15s', fontFamily: 'inherit',
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); setError('');
+    if (password !== confirm) { setError('Passwords do not match.'); return; }
+    if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
+    setLoading(true);
+    try {
+      const { error: err } = await supabase.auth.updateUser({ password });
+      if (err) { setError(err.message); return; }
+      setDone(true);
+      setTimeout(onClose, 2000);
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <div style={modalOverlay}>
+      <div className="fade-up" style={modalCard}>
+        <AuthLogo />
+        {done ? (
+          <div style={{ textAlign: 'center', padding: '8px 0' }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>✅</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Password updated!</div>
+            <div style={{ fontSize: 13, color: P.muted, marginTop: 8 }}>Redirecting you back…</div>
+          </div>
+        ) : (
+          <>
+            <div style={{ fontSize: 18, fontWeight: 700, color: P.ink, marginBottom: 4 }}>Set new password</div>
+            <div style={{ fontSize: 13, color: P.muted, marginBottom: 20 }}>Choose a new password for your account.</div>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>New password</label>
+                <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 6 characters" style={inputStyle}
+                  onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Confirm password</label>
+                <input type="password" required value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repeat new password" style={inputStyle}
+                  onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
+              </div>
+              {error && <div style={{ padding: '9px 12px', borderRadius: 8, background: 'rgba(180,35,24,0.07)', border: `1px solid rgba(180,35,24,0.18)`, fontSize: 13, color: P.error }}>{error}</div>}
+              <button type="submit" disabled={loading} style={{
+                marginTop: 4, padding: '11px 0', borderRadius: 10, border: 'none',
+                background: loading ? 'rgba(45,108,223,0.55)' : P.accent,
+                color: 'white', fontSize: 14, fontWeight: 600,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}
+                onMouseEnter={e => { if (!loading) e.currentTarget.style.background = P.accentHover; }}
+                onMouseLeave={e => { if (!loading) e.currentTarget.style.background = P.accent; }}
+              >{loading && <SpinnerIcon size={14} />}Update password</button>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript, onChangePassword }) => {
+  const [tab, setTab] = React.useState('overview');
+  const used      = credits?.used ?? 0;
+  const resetAt   = credits?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS);
+  const daysLeft  = Math.max(0, Math.ceil((resetAt - Date.now()) / 86400000));
+  const pct       = Math.min(100, (used / CREDITS_MAX) * 100);
+  const memberSince = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—';
+  const initial   = (user.email || '?')[0].toUpperCase();
+
+  const tabStyle = (active) => ({
+    padding: '8px 18px', borderRadius: 8, border: 'none',
+    background: active ? P.surface : 'transparent',
+    color: active ? P.ink : P.muted,
+    fontSize: 13, fontWeight: active ? 600 : 400,
+    cursor: 'pointer', transition: 'all 0.15s',
+    boxShadow: active ? '0 1px 4px rgba(28,25,23,0.08)' : 'none',
+  });
+
+  const ytCount = history.filter(h => (h.platform || 'youtube') === 'youtube').length;
+  const viCount = history.filter(h => h.platform === 'vimeo').length;
+
+  return (
+    <div style={{ minHeight: '100vh', background: P.paper, paddingTop: 56 }}>
+      <div style={{ maxWidth: 820, margin: '0 auto', padding: '40px 24px 60px' }}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+          <button onClick={onBack} style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 13, color: P.muted, padding: 0, transition: 'color 0.15s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
+            onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+          >
+            <ChevronIcon size={13} dir="left" /> Back
+          </button>
+          <div style={{ flex: 1 }} />
+        </div>
+
+        {/* Profile hero */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 18, marginBottom: 32,
+          padding: '24px 28px', background: P.surface,
+          border: `1px solid ${P.border}`, borderRadius: 18,
+        }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: '50%',
+            background: P.accent, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 22, fontWeight: 700, color: 'white', flexShrink: 0,
+          }}>{initial}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: P.ink, marginBottom: 3 }}>
+              {user.user_metadata?.full_name || user.email?.split('@')[0]}
+            </div>
+            <div style={{ fontSize: 13, color: P.muted }}>{user.email}</div>
+          </div>
+          <div style={{ textAlign: 'right', flexShrink: 0 }}>
+            <div style={{ fontSize: 11, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Member since</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: P.ink }}>{memberSince}</div>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 4, marginBottom: 28, background: P.paper, borderRadius: 10, padding: 3, border: `1px solid ${P.border}`, width: 'fit-content' }}>
+          {[['overview', 'Overview'], ['history', 'History'], ['settings', 'Settings']].map(([key, label]) => (
+            <button key={key} onClick={() => setTab(key)} style={tabStyle(tab === key)}>{label}</button>
+          ))}
+        </div>
+
+        {/* ── Overview tab ────────────────────────────────────────────────── */}
+        {tab === 'overview' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Stats row */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14 }}>
+              {[
+                { label: 'Credits used', value: `${used} / ${CREDITS_MAX}`, sub: `Resets in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`, color: used >= CREDITS_MAX * 0.8 ? P.warning : P.accent },
+                { label: 'Total transcripts', value: history.length, sub: 'All time', color: P.success },
+                { label: 'YouTube', value: ytCount, sub: 'videos', color: '#FF0000' },
+                { label: 'Vimeo', value: viCount, sub: 'videos', color: '#1AB7EA' },
+              ].map(stat => (
+                <div key={stat.label} style={{ padding: '18px 20px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{stat.label}</div>
+                  <div style={{ fontSize: 26, fontWeight: 800, color: stat.color, letterSpacing: '-0.02em', marginBottom: 2 }}>{stat.value}</div>
+                  <div style={{ fontSize: 12, color: P.muted }}>{stat.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Credits bar card */}
+            <div style={{ padding: '20px 22px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: P.ink }}>Weekly credit usage</div>
+                <div style={{ fontSize: 12, color: P.muted }}>Resets in <strong style={{ color: P.ink }}>{daysLeft}d</strong></div>
+              </div>
+              <div style={{ height: 8, borderRadius: 999, background: P.border, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct > 80 ? P.warning : P.accent, transition: 'width 0.5s ease' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+                <div style={{ fontSize: 12, color: P.muted }}><strong style={{ color: P.ink }}>{used}</strong> used</div>
+                <div style={{ fontSize: 12, color: P.muted }}><strong style={{ color: P.ink }}>{CREDITS_MAX - used}</strong> remaining</div>
+              </div>
+            </div>
+
+            {/* Recent transcripts preview */}
+            {history.length > 0 && (
+              <div style={{ padding: '20px 22px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, marginBottom: 14 }}>Recent transcripts</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {history.slice(0, 4).map(h => (
+                    <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper }}>
+                      <div style={{ width: 28, height: 28, borderRadius: 7, background: h.platform === 'vimeo' ? 'rgba(26,183,234,0.12)' : 'rgba(255,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {h.platform === 'vimeo' ? <VimeoIcon size={14} /> : <YouTubeIcon />}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.id}</div>
+                        <div style={{ fontSize: 11, color: P.muted }}>{timeAgo(h.date)}</div>
+                      </div>
+                      <button onClick={() => { onLoadTranscript(h); onBack(); }}
+                        style={{ fontSize: 12, color: P.accent, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6, transition: 'all 0.15s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+                      >Open →</button>
+                    </div>
+                  ))}
+                </div>
+                {history.length > 4 && (
+                  <button onClick={() => setTab('history')} style={{ marginTop: 12, fontSize: 12, color: P.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
+                    View all {history.length} transcripts →
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── History tab ─────────────────────────────────────────────────── */}
+        {tab === 'history' && (
+          <div>
+            {history.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '60px 0', color: P.muted }}>
+                <div style={{ fontSize: 36, marginBottom: 12 }}>📄</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: P.ink, marginBottom: 6 }}>No transcripts yet</div>
+                <div style={{ fontSize: 13 }}>Extract your first transcript to see it here.</div>
+                <button onClick={onBack} style={{ marginTop: 16, padding: '9px 20px', borderRadius: 10, border: 'none', background: P.accent, color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Extract a transcript</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {history.map(h => {
+                  const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
+                  return (
+                    <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 9, background: h.platform === 'vimeo' ? 'rgba(26,183,234,0.1)' : 'rgba(255,0,0,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {h.platform === 'vimeo' ? <VimeoIcon size={16} /> : <YouTubeIcon />}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 3 }}>{h.id}</div>
+                        <div style={{ display: 'flex', gap: 10 }}>
+                          <span style={{ fontSize: 12, color: P.muted }}>{timeAgo(h.date)}</span>
+                          {wc > 0 && <span style={{ fontSize: 12, color: P.muted }}>· {wc.toLocaleString()} words</span>}
+                          {h.source && <span style={{ fontSize: 12, color: P.muted }}>· {h.source}</span>}
+                        </div>
+                      </div>
+                      <button onClick={() => { onLoadTranscript(h); onBack(); }}
+                        style={{ padding: '7px 14px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, fontSize: 12, fontWeight: 600, color: P.ink, cursor: 'pointer', transition: 'all 0.15s', flexShrink: 0 }}
+                        onMouseEnter={e => { e.currentTarget.style.background = P.accent; e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = P.accent; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.border; }}
+                      >Open</button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Settings tab ────────────────────────────────────────────────── */}
+        {tab === 'settings' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 500 }}>
+            {/* Account info */}
+            <div style={{ padding: '20px 22px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, marginBottom: 14 }}>Account</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 13, color: P.muted }}>Email</span>
+                  <span style={{ fontSize: 13, color: P.ink, fontWeight: 500 }}>{user.email}</span>
+                </div>
+                <div style={{ height: 1, background: P.border }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 13, color: P.muted }}>Member since</span>
+                  <span style={{ fontSize: 13, color: P.ink, fontWeight: 500 }}>{memberSince}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Security */}
+            <div style={{ padding: '20px 22px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, marginBottom: 14 }}>Security</div>
+              <button onClick={onChangePassword}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', transition: 'all 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.borderColor = P.accent; }}
+                onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.borderColor = P.border; }}
+              >
+                <span style={{ fontSize: 13, fontWeight: 500, color: P.ink }}>Change password</span>
+                <ChevronIcon size={13} dir="right" />
+              </button>
+            </div>
+
+            {/* Danger zone */}
+            <div style={{ padding: '20px 22px', background: P.surface, border: `1px solid rgba(180,35,24,0.2)`, borderRadius: 14 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: P.error, marginBottom: 14 }}>Sign out</div>
+              <button onClick={onSignOut}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: `1px solid rgba(180,35,24,0.2)`, background: 'rgba(180,35,24,0.04)', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: P.error, transition: 'all 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,35,24,0.1)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(180,35,24,0.04)'; }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Sign out of account
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // ── UserMenu ──────────────────────────────────────────────────────────────────
-const UserMenu = ({ user, onSignOut }) => {
+const UserMenu = ({ user, onSignOut, onDashboard }) => {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
   const initial = (user.email || '?')[0].toUpperCase();
@@ -419,18 +802,25 @@ const UserMenu = ({ user, onSignOut }) => {
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
+  const menuItem = (icon, label, onClick, danger = false) => (
+    <button onClick={() => { setOpen(false); onClick(); }} style={{
+      display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 16px',
+      background: 'none', border: 'none', cursor: 'pointer',
+      fontSize: 13, color: danger ? P.muted : P.muted, textAlign: 'left', transition: 'all 0.15s',
+    }}
+      onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = danger ? P.error : P.ink; }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+    >{icon}{label}</button>
+  );
+
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button
-        onClick={() => setOpen(v => !v)}
-        title={user.email}
-        style={{
-          width: 32, height: 32, borderRadius: '50%',
-          background: P.accent, border: 'none', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 13, fontWeight: 700, color: 'white',
-          transition: 'background 0.15s',
-        }}
+      <button onClick={() => setOpen(v => !v)} title={user.email} style={{
+        width: 32, height: 32, borderRadius: '50%',
+        background: P.accent, border: 'none', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 13, fontWeight: 700, color: 'white', transition: 'background 0.15s',
+      }}
         onMouseEnter={e => { e.currentTarget.style.background = P.accentHover; }}
         onMouseLeave={e => { e.currentTarget.style.background = P.accent; }}
       >{initial}</button>
@@ -438,31 +828,30 @@ const UserMenu = ({ user, onSignOut }) => {
       {open && (
         <div className="fade-up" style={{
           position: 'absolute', right: 0, top: 'calc(100% + 8px)',
-          width: 210, background: P.surface, border: `1px solid ${P.border}`,
+          width: 220, background: P.surface, border: `1px solid ${P.border}`,
           borderRadius: 14, boxShadow: '0 8px 32px rgba(28,25,23,0.12)',
-          padding: '12px 0', zIndex: 200,
+          padding: '8px 0', zIndex: 200, overflow: 'hidden',
         }}>
-          <div style={{ padding: '4px 16px 12px', borderBottom: `1px solid ${P.border}` }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 3 }}>Signed in as</div>
-            <div style={{ fontSize: 13, color: P.ink, fontWeight: 500, wordBreak: 'break-all' }}>{user.email}</div>
+          {/* User info */}
+          <div style={{ padding: '8px 16px 10px', borderBottom: `1px solid ${P.border}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: P.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>{initial}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email?.split('@')[0]}</div>
+                <div style={{ fontSize: 11, color: P.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+              </div>
+            </div>
           </div>
-          <button
-            onClick={() => { setOpen(false); onSignOut(); }}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              width: '100%', padding: '9px 16px',
-              background: 'none', border: 'none', cursor: 'pointer',
-              fontSize: 13, color: P.muted, textAlign: 'left',
-              transition: 'all 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.error; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-            Sign out
-          </button>
+
+          {menuItem(
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
+            'Dashboard', onDashboard
+          )}
+          <div style={{ height: 1, background: P.border, margin: '4px 0' }} />
+          {menuItem(
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+            'Sign out', onSignOut, true
+          )}
         </div>
       )}
     </div>
@@ -470,7 +859,7 @@ const UserMenu = ({ user, onSignOut }) => {
 };
 
 // ── Navbar ────────────────────────────────────────────────────────────────────
-const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut }) => (
+const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, onDashboard }) => (
   <nav style={{
     position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
     height: 56, display: 'flex', alignItems: 'center',
@@ -505,7 +894,7 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut }) 
         title="GitHub"
       ><GitHubIcon /></a>
       {user ? (
-        <UserMenu user={user} onSignOut={onSignOut} />
+        <UserMenu user={user} onSignOut={onSignOut} onDashboard={onDashboard} />
       ) : (
         <button
           onClick={onSignIn}
@@ -546,8 +935,10 @@ const App = () => {
   });
   const [credits, setCredits] = useState(initCredits);
   const [showBookmarkBanner, setShowBookmarkBanner] = useState(false);
-  const [user, setUser]           = useState(null);
+  const [user, setUser]                   = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [view, setView]                   = useState('app');   // 'app' | 'dashboard'
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [summary, setSummary]             = useState('');
   const [summarizing, setSummarizing]     = useState(false);
   const [summaryCopied, setSummaryCopied] = useState(false);
@@ -589,15 +980,37 @@ const App = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') { setShowPasswordReset(true); return; }
       setUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
   }, []);
 
+  // Re-init credits keyed by user when auth changes
+  useEffect(() => {
+    const key = user ? `yte_credits_${user.id}` : 'yte_credits';
+    try {
+      const stored = JSON.parse(localStorage.getItem(key) || 'null');
+      if (!stored || Date.now() > stored.resetAt) {
+        const fresh = { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
+        localStorage.setItem(key, JSON.stringify(fresh));
+        setCredits(fresh);
+      } else {
+        setCredits(stored);
+      }
+    } catch { setCredits({ used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS }); }
+  }, [user]);
+
+  // Re-init history keyed by user when auth changes
+  useEffect(() => {
+    const key = user ? `yte_history_${user.id}` : 'yte_history';
+    try { setHistory(JSON.parse(localStorage.getItem(key) || '[]')); } catch { setHistory([]); }
+  }, [user]);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    setUser(null);
+    setUser(null); setView('app');
   };
 
   const dismissBookmarkBanner = () => {
@@ -608,7 +1021,8 @@ const App = () => {
   const incrementCredits = () => {
     setCredits(prev => {
       const next = { ...prev, used: prev.used + 1 };
-      localStorage.setItem('yte_credits', JSON.stringify(next));
+      const key = user ? `yte_credits_${user.id}` : 'yte_credits';
+      localStorage.setItem(key, JSON.stringify(next));
       return next;
     });
   };
@@ -626,7 +1040,8 @@ const App = () => {
   const saveToHistory = (entry) => {
     setHistory(prev => {
       const next = [entry, ...prev.filter(h => h.id !== entry.id)].slice(0, 10);
-      localStorage.setItem('yte_history', JSON.stringify(next));
+      const key = user ? `yte_history_${user.id}` : 'yte_history';
+      localStorage.setItem(key, JSON.stringify(next));
       return next;
     });
   };
@@ -635,7 +1050,8 @@ const App = () => {
     e.stopPropagation();
     setHistory(prev => {
       const next = prev.filter(h => h.id !== id);
-      localStorage.setItem('yte_history', JSON.stringify(next));
+      const key = user ? `yte_history_${user.id}` : 'yte_history';
+      localStorage.setItem(key, JSON.stringify(next));
       return next;
     });
   };
@@ -908,12 +1324,18 @@ const App = () => {
         user={user}
         onSignIn={() => setShowAuthModal(true)}
         onSignOut={handleSignOut}
+        onDashboard={() => setView('dashboard')}
       />
+
       {showAuthModal && (
         <AuthModal
           onClose={() => setShowAuthModal(false)}
           onAuthSuccess={(u) => setUser(u)}
         />
+      )}
+
+      {showPasswordReset && (
+        <PasswordResetModal onClose={() => setShowPasswordReset(false)} />
       )}
 
       {showBookmarkBanner && (
@@ -952,7 +1374,25 @@ const App = () => {
         </div>
       )}
 
-      <div style={{ minHeight: '100vh', paddingTop: showBookmarkBanner ? 97 : 56, background: P.paper, transition: 'padding-top 0.3s ease' }}>
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* DASHBOARD VIEW */}
+      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {view === 'dashboard' && user && (
+        <Dashboard
+          user={user}
+          credits={credits}
+          history={history}
+          onBack={() => setView('app')}
+          onSignOut={handleSignOut}
+          onLoadTranscript={loadFromHistory}
+          onChangePassword={async () => {
+            const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: window.location.origin });
+            if (!error) alert('Password reset link sent to ' + user.email);
+          }}
+        />
+      )}
+
+      <div style={{ minHeight: '100vh', paddingTop: showBookmarkBanner ? 97 : 56, background: P.paper, transition: 'padding-top 0.3s ease', display: view === 'dashboard' ? 'none' : 'block' }}>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* LANDING VIEW */}
@@ -1645,7 +2085,7 @@ const App = () => {
       </div>
 
       {/* Footer */}
-      <footer style={{
+      {view !== 'dashboard' && <footer style={{
         background: P.surface, borderTop: `1px solid ${P.border}`,
         padding: '40px 24px 32px',
         marginTop: 24,
@@ -1725,7 +2165,7 @@ const App = () => {
             </a>
           </div>
         </div>
-      </footer>
+      </footer>}
     </>
   );
 };
