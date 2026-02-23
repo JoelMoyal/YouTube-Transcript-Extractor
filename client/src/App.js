@@ -45,7 +45,7 @@ const DEMO_CHIPS = [
 
 const BRAND_NAME = 'ScribeSnap';
 const BRAND_LOGO_SRC = '/logo-wordmark.png';
-const FOOTER_LOGO_SRC = '/logo-wordmark.png';
+const FOOTER_LOGO_SRC = '/scribesnap_wordmark_footer.svg';
 const CANONICAL_APP_ORIGIN = 'https://scribesnap.ai';
 const CANONICAL_APP_HOST = new URL(CANONICAL_APP_ORIGIN).hostname.toLowerCase();
 const LOCAL_DEV_HOSTS = new Set(['localhost', '127.0.0.1']);
