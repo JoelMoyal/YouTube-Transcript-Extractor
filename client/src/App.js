@@ -238,9 +238,10 @@ const CreditsWidget = ({ credits }) => {
   const ref = React.useRef(null);
   const used = credits?.used ?? 0;
   const resetAt = credits?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS);
+  const tierMax = credits?.tierMax || (credits?.userId ? CREDITS_MAX : CREDITS_FREE);
   const daysLeft = Math.max(0, Math.ceil((resetAt - Date.now()) / 86400000));
-  const pct = Math.min(100, (used / CREDITS_MAX) * 100);
-  const nearLimit = used >= CREDITS_MAX * 0.8;
+  const pct = Math.min(100, (used / tierMax) * 100);
+  const nearLimit = used >= tierMax * 0.8;
 
   React.useEffect(() => {
     if (!open) return;
@@ -267,7 +268,7 @@ const CreditsWidget = ({ credits }) => {
           <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
         </svg>
         <span style={{ fontSize: 12, fontWeight: 600, color: nearLimit ? P.warning : P.ink, fontVariantNumeric: 'tabular-nums' }}>
-          {used} / {CREDITS_MAX}
+          {used} / {tierMax}
         </span>
       </button>
 
@@ -290,7 +291,7 @@ const CreditsWidget = ({ credits }) => {
           </div>
 
           <div style={{ fontSize: 12, color: P.muted, marginBottom: 4 }}>
-            <span style={{ color: P.ink, fontWeight: 600 }}>{used} of {CREDITS_MAX}</span> used
+            <span style={{ color: P.ink, fontWeight: 600 }}>{used} of {tierMax}</span> used
           </div>
           <div style={{ fontSize: 11, color: P.muted }}>
             Resets in <span style={{ fontWeight: 600, color: P.ink }}>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</span>
@@ -858,7 +859,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
             {/* Stats row */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14 }}>
               {[
-                { label: 'Credits used', value: `${used} / ${CREDITS_MAX}`, sub: `Resets in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`, color: used >= CREDITS_MAX * 0.8 ? P.warning : P.accent },
+                { label: 'Credits used', value: `${used} / ${tierMax}`, sub: `Resets in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`, color: used >= tierMax * 0.8 ? P.warning : P.accent },
                 { label: 'Total transcripts', value: history.length, sub: 'All time', color: P.success },
                 { label: 'YouTube', value: ytCount, sub: 'videos', color: PLATFORM_BRAND.youtube.stat },
                 { label: 'Vimeo', value: viCount, sub: 'videos', color: PLATFORM_BRAND.vimeo.stat },
@@ -882,7 +883,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
                 <div style={{ fontSize: 12, color: P.muted }}><strong style={{ color: P.ink }}>{used}</strong> used</div>
-                <div style={{ fontSize: 12, color: P.muted }}><strong style={{ color: P.ink }}>{CREDITS_MAX - used}</strong> remaining</div>
+                <div style={{ fontSize: 12, color: P.muted }}><strong style={{ color: P.ink }}>{Math.max(0, tierMax - used)}</strong> remaining</div>
               </div>
             </div>
 
