@@ -48,13 +48,13 @@ const BRAND_LOGO_SRC = '/scribesnap_wordmark.svg';
 const FOOTER_LOGO_SRC = '/scribesnap_wordmark_footer.svg';
 const PLATFORM_BRAND = {
   youtube: {
-    icon: '#3C8CFF',
+    icon: '#FF0000',
     stat: '#1F6BFF',
     bg: 'rgba(123,211,255,0.22)',
     bgSoft: 'rgba(123,211,255,0.18)',
   },
   vimeo: {
-    icon: '#1F6BFF',
+    icon: '#1AB7EA',
     stat: '#3C8CFF',
     bg: 'rgba(60,140,255,0.16)',
     bgSoft: 'rgba(60,140,255,0.14)',
