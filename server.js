@@ -105,7 +105,8 @@ app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
 // Serve static files from React app
-app.use(express.static(path.join(__dirname, 'client/public')));
+// `index: false` prevents `/` from resolving to client/public/index.html (template).
+app.use(express.static(path.join(__dirname, 'client/public'), { index: false }));
 app.use(express.static(path.join(__dirname, 'client/build')));
 
 function parseTimestamp(ts) {
