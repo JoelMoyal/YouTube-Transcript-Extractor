@@ -94,15 +94,17 @@
         <ul>
           <li>Video URL you submit to generate a transcript.</li>
           <li>Auth data if you sign in with Supabase (email, password hash, OAuth profile).</li>
+          <li>Email address and delivery metadata for transactional emails (password reset/confirm) sent via Resend.</li>
           <li>Client-side history stored locally in your browser (`localStorage`), not on our servers.</li>
-          <li>Limited server logs (request time, URL path, success/error) for reliability.</li>
+          <li>Server/edge logs (IP address, user agent, request path, success/error) from our hosting/CDN for reliability and abuse prevention.</li>
         </ul>
 
         <h2>How we use it</h2>
         <ul>
           <li>Generate transcripts and AI responses for the URL you provide.</li>
           <li>Authenticate and manage your ScribeSnap account via Supabase Auth.</li>
-          <li>Improve reliability and prevent abuse (basic operational logs).</li>
+          <li>Send required account emails (e.g., password reset, email confirmation) via Resend.</li>
+          <li>Improve reliability and prevent abuse (basic operational logs from Railway/Cloudflare).</li>
         </ul>
 
         <h2>What we do <em>not</em> do</h2>
@@ -114,21 +116,24 @@
 
         <h2>Data processors</h2>
         <ul>
-          <li>Supabase (auth, optional storage).</li>
+          <li>Supabase (authentication, database, object storage).</li>
           <li>Groq / OpenRouter (LLM processing) — only when AI features are used.</li>
-          <li>Railway / hosting provider (serving the app and logs necessary for operations).</li>
+          <li>Resend (transactional email delivery for auth flows).</li>
+          <li>Railway (application hosting) and Cloudflare (edge/CDN, DNS, security).</li>
         </ul>
 
         <h2>Cookies & local storage</h2>
         <ul>
           <li>Authentication session cookies via Supabase.</li>
           <li>Local storage for transcript history, credits, and UI preferences on your device.</li>
+          <li>Edge/hosting cookies that may be set by Cloudflare/Railway for security and routing (no ad tracking).</li>
         </ul>
 
         <h2>Retention</h2>
         <ul>
           <li>Auth records are retained while your account exists.</li>
           <li>Operational logs are kept for short periods for troubleshooting and security.</li>
+          <li>Email delivery metadata is retained by Resend per their standard retention (no email body content from us beyond what is needed to send the message).</li>
           <li>Client history remains in your browser until you clear it.</li>
         </ul>
 
