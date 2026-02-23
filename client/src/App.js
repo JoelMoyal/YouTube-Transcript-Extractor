@@ -210,14 +210,21 @@ const BrandLogo = ({ height = 36 }) => (
 );
 
 // ── Credits ───────────────────────────────────────────────────────────────────
-const CREDITS_MAX = 20;
+const CREDITS_FREE = 6;   // not signed in
+const CREDITS_MAX  = 20;  // signed in
 const CREDITS_PERIOD_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function initCredits() {
   try {
     let stored = JSON.parse(localStorage.getItem('yte_credits') || 'null');
+    const max = CREDITS_FREE;
     if (!stored || typeof stored.resetAt !== 'number' || Date.now() > stored.resetAt) {
       stored = { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
+      localStorage.setItem('yte_credits', JSON.stringify(stored));
+    }
+    // Clamp to free tier
+    if (stored.used > max) {
+      stored = { ...stored, used: max };
       localStorage.setItem('yte_credits', JSON.stringify(stored));
     }
     return stored;
@@ -1263,7 +1270,8 @@ const App = () => {
 
   const incrementCredits = () => {
     setCredits(prev => {
-      const next = { ...prev, used: prev.used + 1 };
+      const max = user ? CREDITS_MAX : CREDITS_FREE;
+      const next = { ...prev, used: Math.min(max, prev.used + 1) };
       const key = user ? `yte_credits_${user.id}` : 'yte_credits';
       localStorage.setItem(key, JSON.stringify(next));
       return next;
