@@ -1223,16 +1223,26 @@ const App = () => {
 
   // Re-init credits keyed by user when auth changes
   useEffect(() => {
-    const key = user ? `yte_credits_${user.id}` : 'yte_credits';
+    const anonKey = 'yte_credits';
+    const key = user ? `yte_credits_${user.id}` : anonKey;
     try {
-      const stored = JSON.parse(localStorage.getItem(key) || 'null');
-      if (!stored || Date.now() > stored.resetAt) {
-        const fresh = { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
-        localStorage.setItem(key, JSON.stringify(fresh));
-        setCredits(fresh);
-      } else {
-        setCredits(stored);
+      let stored = JSON.parse(localStorage.getItem(key) || 'null');
+
+      // If signed in and no user-specific credits yet, migrate anon credits once
+      if (user && !stored) {
+        const anon = JSON.parse(localStorage.getItem(anonKey) || 'null');
+        if (anon && typeof anon.resetAt === 'number' && Date.now() <= anon.resetAt) {
+          stored = anon;
+          localStorage.setItem(key, JSON.stringify(stored));
+        }
       }
+
+      if (!stored || typeof stored.resetAt !== 'number' || Date.now() > stored.resetAt) {
+        stored = { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
+      }
+
+      localStorage.setItem(key, JSON.stringify(stored));
+      setCredits(stored);
     } catch { setCredits({ used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS }); }
   }, [user]);
 
