@@ -4,14 +4,14 @@ import { supabase } from './supabase';
 
 // ── Palette ────────────────────────────────────────────────────────────────────
 const P = {
-  paper:       '#F6F2EA',
-  surface:     '#FBF7F0',
-  border:      '#E5DDCF',
-  ink:         '#1D1D1F',
-  muted:       '#5A5960',
-  accent:      '#3C8CFF',
-  accentHover: '#1F6BFF',
-  accentLight: 'rgba(123,211,255,0.22)',
+  paper:       '#F6F3EE',
+  surface:     '#FFFEFC',
+  border:      '#E7E1D8',
+  ink:         '#1C1917',
+  muted:       '#6B645C',
+  accent:      '#2D6CDF',
+  accentHover: '#2459B8',
+  accentLight: 'rgba(45,108,223,0.08)',
   success:     '#0F766E',
   warning:     '#B45309',
   error:       '#B42318',
@@ -44,8 +44,8 @@ const DEMO_CHIPS = [
 ];
 
 const BRAND_NAME = 'ScribeSnap';
-const BRAND_LOGO_SRC = '/brand/scribesnap_wordmark.svg';
-const FOOTER_LOGO_SRC = '/brand/scribesnap_wordmark_footer.svg';
+const BRAND_LOGO_SRC = '/scribesnap_wordmark.svg';
+const FOOTER_LOGO_SRC = '/scribesnap_wordmark_footer.svg';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 // Returns { platform: 'youtube'|'vimeo', id, url } or null
@@ -385,7 +385,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
   const SubmitBtn = ({ label }) => (
     <button type="submit" disabled={loading} style={{
       marginTop: 4, padding: '11px 0', borderRadius: 10, border: 'none',
-      background: loading ? 'rgba(60,140,255,0.55)' : P.accent,
+      background: loading ? 'rgba(45,108,223,0.55)' : P.accent,
       color: 'white', fontSize: 14, fontWeight: 600,
       cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.15s',
       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%',
@@ -693,7 +693,7 @@ const PasswordResetModal = ({ onClose }) => {
               {error && <div style={{ padding: '9px 12px', borderRadius: 8, background: 'rgba(180,35,24,0.07)', border: `1px solid rgba(180,35,24,0.18)`, fontSize: 13, color: P.error }}>{error}</div>}
               <button type="submit" disabled={loading} style={{
                 marginTop: 4, padding: '11px 0', borderRadius: 10, border: 'none',
-                background: loading ? 'rgba(60,140,255,0.55)' : P.accent,
+                background: loading ? 'rgba(45,108,223,0.55)' : P.accent,
                 color: 'white', fontSize: 14, fontWeight: 600,
                 cursor: loading ? 'not-allowed' : 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -1457,14 +1457,13 @@ const App = () => {
         ::-webkit-scrollbar-thumb { background: ${P.border}; border-radius: 3px; }
         input, select, textarea { font-family: inherit; }
         .hero-grad {
-          background: radial-gradient(ellipse 85% 55% at 50% -12%, rgba(123,211,255,0.34) 0%, transparent 72%),
-                      linear-gradient(140deg, rgba(123,211,255,0.14) 0%, rgba(60,140,255,0.1) 52%, rgba(31,107,255,0.08) 100%),
+          background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(45,108,223,0.12) 0%, transparent 70%),
                       ${P.paper};
         }
         .feature-card { transition: box-shadow 0.2s, transform 0.2s; }
         .feature-card:hover { box-shadow: 0 8px 32px rgba(28,25,23,0.1); transform: translateY(-2px); }
         .chip-btn { transition: all 0.15s; }
-        .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(123,211,255,0.18) !important; }
+        .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(45,108,223,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
         .bookmark-banner { animation: slideDown 0.3s ease forwards; }
       `}</style>
@@ -1563,7 +1562,7 @@ const App = () => {
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
                 padding: '5px 14px', borderRadius: 999, marginBottom: 28,
-                background: 'rgba(123,211,255,0.22)', border: `1px solid rgba(60,140,255,0.18)`,
+                background: 'rgba(45,108,223,0.08)', border: `1px solid rgba(45,108,223,0.18)`,
                 fontSize: 12, fontWeight: 600, color: P.accent,
               }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
@@ -1608,14 +1607,14 @@ const App = () => {
                     disabled={loading}
                     style={{
                       flexShrink: 0, padding: '0 24px', borderRadius: 12, border: 'none',
-                      background: loading ? `rgba(60,140,255,0.5)` : P.accent,
+                      background: loading ? `rgba(45,108,223,0.5)` : P.accent,
                       color: 'white', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
                       display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap',
                       transition: 'background 0.15s',
                       minWidth: 130,
                     }}
                     onMouseEnter={e => { if (!loading) e.currentTarget.style.background = P.accentHover; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = loading ? `rgba(60,140,255,0.5)` : P.accent; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = loading ? `rgba(45,108,223,0.5)` : P.accent; }}
                   >
                     {loading ? <SpinnerIcon /> : (
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1663,7 +1662,7 @@ const App = () => {
                             fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 999,
                             background: isDone ? 'rgba(15,118,110,0.1)' : isActive ? P.accentLight : P.paper,
                             color: isDone ? P.success : isActive ? P.accent : P.muted,
-                            border: `1px solid ${isDone ? 'rgba(15,118,110,0.2)' : isActive ? 'rgba(60,140,255,0.2)' : P.border}`,
+                            border: `1px solid ${isDone ? 'rgba(15,118,110,0.2)' : isActive ? 'rgba(45,108,223,0.2)' : P.border}`,
                           }}>{isDone ? '✓ ' : ''}{labels[stage]}</span>
                         );
                       })}
@@ -1744,7 +1743,7 @@ const App = () => {
                       <polyline points="10 9 9 9 8 9"/>
                     </svg>
                   ),
-                  bg: 'rgba(123,211,255,0.2)',
+                  bg: 'rgba(45,108,223,0.07)',
                   label: 'Instant Transcript',
                   desc: 'Extract complete transcripts from YouTube & Vimeo with timestamps in seconds — no login needed',
                 },
@@ -1760,11 +1759,11 @@ const App = () => {
                 },
                 {
                   icon: (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F6BFF" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                     </svg>
                   ),
-                  bg: 'rgba(123,211,255,0.2)',
+                  bg: 'rgba(124,58,237,0.07)',
                   label: 'Ask Anything',
                   desc: 'Chat with the transcript — get precise answers from AI in seconds',
                 },
@@ -1929,7 +1928,7 @@ const App = () => {
                   {segments.length > 0 && (
                     <button onClick={() => setShowTimestamps(v => !v)} style={{
                       display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', borderRadius: 7,
-                      border: `1px solid ${showTimestamps ? 'rgba(60,140,255,0.25)' : P.border}`,
+                      border: `1px solid ${showTimestamps ? 'rgba(45,108,223,0.25)' : P.border}`,
                       background: showTimestamps ? P.accentLight : P.surface, cursor: 'pointer',
                       fontSize: 11, fontWeight: 600, color: showTimestamps ? P.accent : P.muted, transition: 'all 0.15s',
                     }}>
@@ -2140,7 +2139,7 @@ const App = () => {
               onClick={() => { setShowQA(v => !v); setTimeout(() => { qaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); qaInputRef.current?.focus(); }, 80); }}
               style={{
                 ...pillBtn(showQA),
-                border: `1px solid ${showQA ? 'rgba(60,140,255,0.25)' : P.border}`,
+                border: `1px solid ${showQA ? 'rgba(45,108,223,0.25)' : P.border}`,
                 background: showQA ? P.accentLight : P.surface,
                 color: showQA ? P.accent : P.muted,
               }}
@@ -2154,7 +2153,7 @@ const App = () => {
 
             {/* Q&A panel */}
             {showQA && (
-              <div ref={qaRef} className="fade-up" style={{ marginTop: 8, border: `1px solid rgba(60,140,255,0.2)`, borderRadius: 14, overflow: 'hidden' }}>
+              <div ref={qaRef} className="fade-up" style={{ marginTop: 8, border: `1px solid rgba(45,108,223,0.2)`, borderRadius: 14, overflow: 'hidden' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '11px 16px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                   <span style={{ fontSize: 12, fontWeight: 700, color: P.accent }}>Ask AI</span>
