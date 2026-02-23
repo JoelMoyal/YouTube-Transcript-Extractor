@@ -554,6 +554,11 @@ app.all('/api/*', (_req, res) => {
   res.status(404).json({ error: 'API route not found' });
 });
 
+// Privacy policy static route
+app.get('/privacy', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build', 'privacy.html'));
+});
+
 // Unknown web routes get branded 404 page
 app.get('*', (_req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'client/build', '404.html'));

@@ -2427,6 +2427,10 @@ const App = () => {
                 onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
                 onMouseLeave={e => { e.currentTarget.style.color = P.ink; }}
               >Joël Moyal</a>
+              {' '}· <a href="/privacy" style={{ color: P.muted, textDecoration: 'none' }}
+                onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
+                onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+              >Privacy Policy</a>
             </span>
             <a href="https://github.com/joelmoyal/YouTube-Transcript-Extractor" target="_blank" rel="noopener noreferrer"
               style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}

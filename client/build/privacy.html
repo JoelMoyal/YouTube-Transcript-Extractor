@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ScribeSnap.ai | Privacy Policy</title>
+    <meta name="description" content="Privacy Policy for ScribeSnap.ai" />
+    <style>
+      :root {
+        --bg: #F6F2EA;
+        --surface: #FBF7F0;
+        --ink: #1D1D1F;
+        --muted: #5A5960;
+        --border: #E5DDCF;
+        --accent: #3C8CFF;
+        --accent2: #1F6BFF;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(ellipse 70% 45% at 50% -6%, rgba(123,211,255,0.18) 0%, rgba(123,211,255,0) 70%), var(--bg);
+      }
+      header {
+        padding: 24px 24px 0;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        max-width: 980px;
+        margin: 0 auto;
+      }
+      header img { height: 44px; }
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 12px 24px 56px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 28px;
+        box-shadow: 0 12px 36px rgba(29,29,31,0.06);
+      }
+      h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: -0.02em; }
+      h2 {
+        margin: 26px 0 10px;
+        font-size: 18px;
+        letter-spacing: -0.01em;
+      }
+      p, li {
+        color: var(--muted);
+        font-size: 14.5px;
+        line-height: 1.6;
+        margin: 0 0 10px;
+      }
+      ul { padding-left: 18px; margin: 0 0 12px; }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { color: var(--accent2); }
+      .meta {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .pill {
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(60,140,255,0.1);
+        color: var(--accent2);
+        border: 1px solid rgba(60,140,255,0.25);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="/" aria-label="Back to ScribeSnap">
+        <img src="/logo-wordmark.png" alt="ScribeSnap" />
+      </a>
+    </header>
+    <main>
+      <div class="card">
+        <h1>Privacy Policy</h1>
+        <div class="meta">
+          <span class="pill">Updated: February 23, 2026</span>
+          <span>ScribeSnap.ai (YouTube-Transcript-Extractor)</span>
+        </div>
+
+        <h2>What we collect</h2>
+        <ul>
+          <li>Video URL you submit to generate a transcript.</li>
+          <li>Auth data if you sign in with Supabase (email, password hash, OAuth profile).</li>
+          <li>Client-side history stored locally in your browser (`localStorage`), not on our servers.</li>
+          <li>Limited server logs (request time, URL path, success/error) for reliability.</li>
+        </ul>
+
+        <h2>How we use it</h2>
+        <ul>
+          <li>Generate transcripts and AI responses for the URL you provide.</li>
+          <li>Authenticate and manage your ScribeSnap account via Supabase Auth.</li>
+          <li>Improve reliability and prevent abuse (basic operational logs).</li>
+        </ul>
+
+        <h2>What we do <em>not</em> do</h2>
+        <ul>
+          <li>No sale of personal data.</li>
+          <li>No ad tracking pixels.</li>
+          <li>No server-side storage of your transcripts or questions; history is local on your device unless you clear it.</li>
+        </ul>
+
+        <h2>Data processors</h2>
+        <ul>
+          <li>Supabase (auth, optional storage).</li>
+          <li>Groq / OpenRouter (LLM processing) — only when AI features are used.</li>
+          <li>Railway / hosting provider (serving the app and logs necessary for operations).</li>
+        </ul>
+
+        <h2>Cookies & local storage</h2>
+        <ul>
+          <li>Authentication session cookies via Supabase.</li>
+          <li>Local storage for transcript history, credits, and UI preferences on your device.</li>
+        </ul>
+
+        <h2>Retention</h2>
+        <ul>
+          <li>Auth records are retained while your account exists.</li>
+          <li>Operational logs are kept for short periods for troubleshooting and security.</li>
+          <li>Client history remains in your browser until you clear it.</li>
+        </ul>
+
+        <h2>Security</h2>
+        <ul>
+          <li>Transport encryption (HTTPS) for all requests.</li>
+          <li>Passwords handled by Supabase Auth; we never see raw passwords.</li>
+          <li>Least-privilege service keys and environment-variable isolation on the server.</li>
+        </ul>
+
+        <h2>Your choices</h2>
+        <ul>
+          <li>Clear local history in the app (Clear all).</li>
+          <li>Request account deletion via support; we will remove Supabase auth data.</li>
+          <li>Opt out of AI features by not using the “Ask AI” actions.</li>
+        </ul>
+
+        <h2>Contact</h2>
+        <p>Email: <a href="mailto:contact@scribesnap.ai">contact@scribesnap.ai</a></p>
+      </div>
+    </main>
+  </body>
+</html>
