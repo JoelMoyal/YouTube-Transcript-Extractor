@@ -239,6 +239,7 @@ const CreditsWidget = ({ credits }) => {
   const daysLeft = Math.max(0, Math.ceil((resetAt - Date.now()) / 86400000));
   const pct = Math.min(100, (used / tierMax) * 100);
   const nearLimit = used >= tierMax * 0.8;
+  const isGuest = !credits?.userId;
 
   React.useEffect(() => {
     if (!open) return;
@@ -276,7 +277,9 @@ const CreditsWidget = ({ credits }) => {
           borderRadius: 14, boxShadow: '0 8px 32px rgba(28,25,23,0.12)',
           padding: '14px 16px', zIndex: 200,
         }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: P.ink, marginBottom: 10 }}>Free Credits</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: P.ink, marginBottom: 6 }}>
+            Free Credits
+          </div>
 
           {/* Progress bar */}
           <div style={{ height: 5, borderRadius: 999, background: P.border, overflow: 'hidden', marginBottom: 8 }}>
@@ -293,6 +296,11 @@ const CreditsWidget = ({ credits }) => {
           <div style={{ fontSize: 11, color: P.muted }}>
             Resets in <span style={{ fontWeight: 600, color: P.ink }}>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</span>
           </div>
+          {isGuest && (
+            <div style={{ marginTop: 10, fontSize: 11, color: P.muted }}>
+              Sign in to get <strong style={{ color: P.ink }}>20 credits</strong> per 7-day period.
+            </div>
+          )}
         </div>
       )}
     </div>
