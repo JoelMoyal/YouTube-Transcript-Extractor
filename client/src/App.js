@@ -230,7 +230,7 @@ function initCredits() {
   }
 }
 
-const CreditsWidget = ({ credits }) => {
+const CreditsWidget = ({ credits, onUpgrade }) => {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
   const used = credits?.used ?? 0;
@@ -297,8 +297,28 @@ const CreditsWidget = ({ credits }) => {
             Resets in <span style={{ fontWeight: 600, color: P.ink }}>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</span>
           </div>
           {isGuest && (
-            <div style={{ marginTop: 10, fontSize: 11, color: P.muted }}>
-              Sign in to get <strong style={{ color: P.ink }}>20 credits</strong> per 7-day period.
+            <div style={{ marginTop: 10, fontSize: 11, color: P.muted, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <span>Sign in to get <strong style={{ color: P.ink }}>20 credits</strong> per 7-day period.</span>
+              {used >= tierMax && (
+                <button
+                  onClick={onUpgrade}
+                  style={{
+                    alignSelf: 'flex-start',
+                    padding: '6px 10px',
+                    borderRadius: 8,
+                    border: `1px solid ${P.accent}`,
+                    background: P.accent,
+                    color: 'white',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = P.accentHover; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = P.accent; }}
+                >
+                  Create free account for 20 credits
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -1117,7 +1137,7 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, on
     <div style={{ flex: 1 }} />
 
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <CreditsWidget credits={credits} />
+      <CreditsWidget credits={credits} onUpgrade={() => onSignIn('signup')} />
       <div style={{ width: 1, height: 18, background: P.border }} />
       <a href="https://joelmoyal.com" target="_blank" rel="noopener noreferrer"
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: 7, color: P.muted, textDecoration: 'none', transition: 'all 0.15s' }}
@@ -1175,6 +1195,7 @@ const App = () => {
   const [showBookmarkBanner, setShowBookmarkBanner] = useState(false);
   const [user, setUser]                   = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authInitialTab, setAuthInitialTab] = useState('signin');
   const [view, setView]                   = useState('app');   // 'app' | 'dashboard'
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [summary, setSummary]             = useState('');
@@ -1603,7 +1624,7 @@ const App = () => {
         hasTranscript={!!transcript}
         credits={credits}
         user={user}
-        onSignIn={() => setShowAuthModal(true)}
+        onSignIn={(tab = 'signin') => { setAuthInitialTab(tab); setShowAuthModal(true); }}
         onSignOut={handleSignOut}
         onDashboard={() => setView('dashboard')}
         onHome={goHome}
@@ -1613,6 +1634,7 @@ const App = () => {
         <AuthModal
           onClose={() => setShowAuthModal(false)}
           onAuthSuccess={(u) => setUser(u)}
+          initialTab={authInitialTab}
         />
       )}
 
