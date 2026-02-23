@@ -215,11 +215,10 @@ const CREDITS_PERIOD_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function initCredits() {
   try {
-    const stored = JSON.parse(localStorage.getItem('yte_credits') || 'null');
-    if (!stored || Date.now() > stored.resetAt) {
-      const fresh = { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
-      localStorage.setItem('yte_credits', JSON.stringify(fresh));
-      return fresh;
+    let stored = JSON.parse(localStorage.getItem('yte_credits') || 'null');
+    if (!stored || typeof stored.resetAt !== 'number' || Date.now() > stored.resetAt) {
+      stored = { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
+      localStorage.setItem('yte_credits', JSON.stringify(stored));
     }
     return stored;
   } catch {
