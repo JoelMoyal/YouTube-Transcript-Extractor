@@ -46,6 +46,9 @@ const DEMO_CHIPS = [
 const BRAND_NAME = 'ScribeSnap';
 const BRAND_LOGO_SRC = '/scribesnap_wordmark.svg';
 const FOOTER_LOGO_SRC = '/scribesnap_wordmark_footer.svg';
+const CANONICAL_APP_ORIGIN = 'https://scribesnap.ai';
+const CANONICAL_APP_HOST = new URL(CANONICAL_APP_ORIGIN).hostname.toLowerCase();
+const LOCAL_DEV_HOSTS = new Set(['localhost', '127.0.0.1']);
 const PLATFORM_BRAND = {
   youtube: {
     icon: '#FF0000',
@@ -60,6 +63,13 @@ const PLATFORM_BRAND = {
     bgSoft: 'rgba(60,140,255,0.14)',
   },
 };
+
+function getAuthRedirectUrl() {
+  if (typeof window === 'undefined') return CANONICAL_APP_ORIGIN;
+  const { hostname, origin } = window.location;
+  if (LOCAL_DEV_HOSTS.has(hostname.toLowerCase())) return origin;
+  return CANONICAL_APP_ORIGIN;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 // Returns { platform: 'youtube'|'vimeo', id, url } or null
@@ -112,6 +122,33 @@ function timeAgo(dateStr) {
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
   return `${Math.floor(hrs / 24)}d ago`;
+}
+
+async function fetchVideoMeta(platform, canonicalUrl) {
+  const endpoints = platform === 'vimeo'
+    ? [
+        `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(canonicalUrl)}`,
+        `https://noembed.com/embed?url=${encodeURIComponent(canonicalUrl)}`,
+      ]
+    : [
+        `https://www.youtube.com/oembed?url=${encodeURIComponent(canonicalUrl)}&format=json`,
+        `https://noembed.com/embed?url=${encodeURIComponent(canonicalUrl)}`,
+      ];
+
+  for (const endpoint of endpoints) {
+    try {
+      const res = await fetch(endpoint);
+      if (!res.ok) continue;
+      const data = await res.json();
+      return {
+        title: (data.title || '').trim(),
+        channel: (data.author_name || '').trim(),
+        thumbnail: data.thumbnail_url || null,
+      };
+    } catch {}
+  }
+
+  return { title: '', channel: '', thumbnail: null };
 }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -369,7 +406,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
     e.preventDefault(); setError(''); setLoading(true);
     try {
       const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin,
+        redirectTo: getAuthRedirectUrl(),
       });
       if (err) { setError(friendlyError(err.message)); return; }
       setScreen('forgotSent');
@@ -616,7 +653,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
             setError('');
             const { error: err } = await supabase.auth.signInWithOAuth({
               provider: 'google',
-              options: { redirectTo: window.location.origin },
+              options: { redirectTo: getAuthRedirectUrl() },
             });
             if (err) setError(friendlyError(err.message));
           }}
@@ -848,14 +885,17 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
               <div style={{ padding: '20px 22px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, marginBottom: 14 }}>Recent transcripts</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {history.slice(0, 4).map(h => (
+                  {history.slice(0, 4).map(h => {
+                    const displayTitle = h.title || h.id;
+                    const displayChannel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
+                    return (
                     <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper }}>
                       <div style={{ width: 28, height: 28, borderRadius: 7, background: h.platform === 'vimeo' ? PLATFORM_BRAND.vimeo.bg : PLATFORM_BRAND.youtube.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {h.platform === 'vimeo' ? <VimeoIcon size={14} /> : <YouTubeIcon />}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 500, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{h.id}</div>
-                        <div style={{ fontSize: 11, color: P.muted }}>{timeAgo(h.date)}</div>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayTitle}</div>
+                        <div style={{ fontSize: 11, color: P.muted }}>{displayChannel} · {timeAgo(h.date)}</div>
                       </div>
                       <button onClick={() => { onLoadTranscript(h); onBack(); }}
                         style={{ fontSize: 12, color: P.accent, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6, transition: 'all 0.15s' }}
@@ -863,7 +903,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                         onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
                       >Open →</button>
                     </div>
-                  ))}
+                  )})}
                 </div>
                 {history.length > 4 && (
                   <button onClick={() => setTab('history')} style={{ marginTop: 12, fontSize: 12, color: P.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
@@ -889,14 +929,17 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {history.map(h => {
                   const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
+                  const displayTitle = h.title || h.id;
+                  const displayChannel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
                   return (
                     <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
                       <div style={{ width: 36, height: 36, borderRadius: 9, background: h.platform === 'vimeo' ? PLATFORM_BRAND.vimeo.bgSoft : PLATFORM_BRAND.youtube.bgSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {h.platform === 'vimeo' ? <VimeoIcon size={16} /> : <YouTubeIcon />}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 3 }}>{h.id}</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 3 }}>{displayTitle}</div>
                         <div style={{ display: 'flex', gap: 10 }}>
+                          <span style={{ fontSize: 12, color: P.muted }}>{displayChannel}</span>
                           <span style={{ fontSize: 12, color: P.muted }}>{timeAgo(h.date)}</span>
                           {wc > 0 && <span style={{ fontSize: 12, color: P.muted }}>· {wc.toLocaleString()} words</span>}
                           {h.source && <span style={{ fontSize: 12, color: P.muted }}>· {h.source}</span>}
@@ -1132,12 +1175,19 @@ const App = () => {
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [showQuotes, setShowQuotes]       = useState(false);
   const [quotesCopied, setQuotesCopied]   = useState(false);
-  const [activeTab, setActiveTab]         = useState('transcript'); // 'transcript' | 'chapters'
 
   const downloadMenuRef = useRef(null);
   const qaInputRef      = useRef(null);
   const urlInputRef     = useRef(null);
   const qaRef           = useRef(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const host = window.location.hostname.toLowerCase();
+    if (host !== `www.${CANONICAL_APP_HOST}`) return;
+    const target = `${CANONICAL_APP_ORIGIN}${window.location.pathname}${window.location.search}${window.location.hash}`;
+    window.location.replace(target);
+  }, []);
 
   useEffect(() => {
     const handler = (e) => {
@@ -1254,7 +1304,6 @@ const App = () => {
     setQaQuestion(''); setQaMessages([]);
     setChapters([]); setShowChapters(false);
     setQuotes([]); setShowQuotes(false);
-    setActiveTab('transcript');
   };
 
   const askQuestion = async (overrideQ) => {
@@ -1312,23 +1361,32 @@ const App = () => {
       setLoadingMsg(message); setLoadingPercent(percent || 0); setLoadingStage(stage || '');
     });
 
-    es.addEventListener('done', (e) => {
+    es.addEventListener('done', async (e) => {
       clearTimeout(killTimer); es.close();
-      const data = JSON.parse(e.data);
-      const thumb = data.thumbnail || (platform === 'youtube' ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
-      setTranscript(data.transcript);
-      setSegments(data.segments || []);
-      setTranscriptSource(data.source || '');
-      setCurrentVideoId(videoId);
-      setCurrentThumbnail(thumb);
-      setLoadingPercent(100);
-      incrementCredits();
-      saveToHistory({
-        id: videoId, platform, transcript: data.transcript, segments: data.segments || [],
-        source: data.source || '', date: new Date().toISOString(),
-        thumbnail: thumb,
-      });
-      setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+      try {
+        const data = JSON.parse(e.data);
+        const meta = await fetchVideoMeta(platform, videoCanonical);
+        const title = meta.title || data.title || videoId;
+        const channel = meta.channel || data.channel || (platform === 'vimeo' ? 'Vimeo' : 'YouTube');
+        const thumb = data.thumbnail || meta.thumbnail || (platform === 'youtube' ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
+
+        setTranscript(data.transcript);
+        setSegments(data.segments || []);
+        setTranscriptSource(data.source || '');
+        setCurrentVideoId(videoId);
+        setCurrentThumbnail(thumb);
+        setLoadingPercent(100);
+        incrementCredits();
+        saveToHistory({
+          id: videoId, platform, transcript: data.transcript, segments: data.segments || [],
+          source: data.source || '', date: new Date().toISOString(),
+          thumbnail: thumb, title, channel, url: videoCanonical,
+        });
+      } catch {
+        setError('Failed to process transcript response.');
+      } finally {
+        setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+      }
     });
 
     es.addEventListener('error', (e) => {
@@ -1566,7 +1624,7 @@ const App = () => {
           onSignOut={handleSignOut}
           onLoadTranscript={loadFromHistory}
           onChangePassword={async () => {
-            const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: window.location.origin });
+            const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: getAuthRedirectUrl() });
             if (!error) alert('Password reset link sent to ' + user.email);
           }}
         />
@@ -1838,7 +1896,11 @@ const App = () => {
                       Clear all
                     </button>
                   </div>
-                  {history.map((h, i) => (
+                  {history.map((h, i) => {
+                    const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
+                    const displayTitle = h.title || h.id;
+                    const displayChannel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
+                    return (
                     <div key={h.id}>
                       {i > 0 && <div style={{ height: 1, background: P.border }} />}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px', transition: 'background 0.1s' }}
@@ -1853,11 +1915,11 @@ const App = () => {
                           </div>
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, fontFamily: 'monospace', marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {h.id}
+                          <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {displayTitle}
                           </div>
                           <div style={{ fontSize: 11, color: P.muted }}>
-                            {h.transcript.trim().split(/\s+/).length.toLocaleString()} words · {timeAgo(h.date)}
+                            {displayChannel} · {wc.toLocaleString()} words · {timeAgo(h.date)}
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
@@ -1880,7 +1942,7 @@ const App = () => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               </div>
             )}
