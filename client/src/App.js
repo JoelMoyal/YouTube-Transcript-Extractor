@@ -1819,10 +1819,11 @@ const App = () => {
               maxWidth: 760,
               margin: '0 auto',
               padding: '10px 24px 44px',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              display: 'flex',
               gap: 14,
-              justifyItems: 'center'
+              justifyContent: 'center',
+              alignItems: 'stretch',
+              flexWrap: 'wrap'
             }}>
               {[
                 { num: '1', label: 'Paste a YouTube URL' },
@@ -1830,24 +1831,24 @@ const App = () => {
                 { num: '3', label: 'Ask AI anything about it' },
               ].map(step => (
                 <div key={step.num} style={{
-                  width: '100%',
+                  minWidth: 200,
                   background: P.surface,
                   border: `1px solid ${P.border}`,
                   borderRadius: 14,
                   padding: '14px 16px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 12,
-                  boxShadow: '0 6px 24px rgba(28,25,23,0.06)'
+                  gap: 10,
+                  boxShadow: '0 8px 28px rgba(28,25,23,0.06)'
                 }}>
                   <div style={{
-                    width: 34, height: 34, borderRadius: 10,
-                    background: P.accentLight,
+                    width: 30, height: 30, borderRadius: 9,
+                    background: 'linear-gradient(135deg, rgba(123,211,255,0.35), rgba(60,140,255,0.35))',
                     border: `1px solid ${P.border}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 14, fontWeight: 800, color: P.accent, flexShrink: 0
+                    fontSize: 13, fontWeight: 800, color: P.accent, flexShrink: 0
                   }}>{step.num}</div>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: P.ink, letterSpacing: '-0.01em' }}>
+                  <span style={{ fontSize: 13.5, fontWeight: 600, color: P.ink, letterSpacing: '-0.01em' }}>
                     {step.label}
                   </span>
                 </div>
