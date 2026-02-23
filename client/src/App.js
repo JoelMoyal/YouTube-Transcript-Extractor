@@ -298,7 +298,7 @@ const CreditsWidget = ({ credits }) => {
 // ── Shared helpers ────────────────────────────────────────────────────────────
 const AuthLogo = () => (
   <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
-    <BrandLogo height={44} />
+    <BrandLogo height={40} />
   </div>
 );
 
