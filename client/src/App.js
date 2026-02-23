@@ -796,6 +796,7 @@ const PasswordResetModal = ({ onClose }) => {
 const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript, onChangePassword }) => {
   const [tab, setTab] = React.useState('overview');
   const [usageRange, setUsageRange] = React.useState('this');
+  const [passwordResetState, setPasswordResetState] = React.useState({ type: 'idle', message: '' });
 
   const used = credits?.used ?? 0;
   const tierMax = credits?.tierMax || CREDITS_MAX;
@@ -816,6 +817,30 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
     if (!entry) return;
     onLoadTranscript(entry);
     onBack();
+  };
+
+  const triggerPasswordReset = async () => {
+    if (passwordResetState.type === 'loading') return;
+    setPasswordResetState({ type: 'loading', message: `Sending reset link to ${user.email}...` });
+    try {
+      const result = await onChangePassword?.();
+      if (result?.ok) {
+        setPasswordResetState({
+          type: 'success',
+          message: `Reset link sent to ${user.email}. Check inbox/spam and open the link to set your new password.`,
+        });
+      } else {
+        setPasswordResetState({
+          type: 'error',
+          message: result?.error || 'Could not send reset email right now. Please try again.',
+        });
+      }
+    } catch (err) {
+      setPasswordResetState({
+        type: 'error',
+        message: err?.message || 'Could not send reset email right now. Please try again.',
+      });
+    }
   };
 
   const statCards = [
@@ -1481,6 +1506,35 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-settings-btn.danger:hover {
           background: rgba(180,35,24,0.12);
         }
+        .ds-settings-help {
+          margin: -2px 0 4px;
+          font-size: 12px;
+          line-height: 1.45;
+          color: #666470;
+        }
+        .ds-security-feedback {
+          margin-top: 2px;
+          border-radius: 10px;
+          padding: 10px 12px;
+          font-size: 12px;
+          line-height: 1.45;
+          border: 1px solid transparent;
+        }
+        .ds-security-feedback.loading {
+          color: #1F6BFF;
+          background: rgba(123,211,255,0.2);
+          border-color: rgba(60,140,255,0.28);
+        }
+        .ds-security-feedback.success {
+          color: #0F766E;
+          background: rgba(15,118,110,0.1);
+          border-color: rgba(15,118,110,0.26);
+        }
+        .ds-security-feedback.error {
+          color: #B42318;
+          background: rgba(180,35,24,0.08);
+          border-color: rgba(180,35,24,0.24);
+        }
         @media (max-width: 1130px) {
           .ds-grid { grid-template-columns: 1fr; }
           .ds-side { order: 2; }
@@ -1728,7 +1782,21 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
 
                 <div className="ds-card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <h3 className="ds-settings-title" style={{ marginBottom: 2 }}>Security</h3>
-                  <button className="ds-settings-btn" onClick={onChangePassword}>Change password</button>
+                  <p className="ds-settings-help">
+                    Change password sends a secure reset link to your account email.
+                  </p>
+                  <button
+                    className="ds-settings-btn"
+                    onClick={triggerPasswordReset}
+                    disabled={passwordResetState.type === 'loading'}
+                  >
+                    {passwordResetState.type === 'loading' ? 'Sending reset link...' : 'Change password'}
+                  </button>
+                  {passwordResetState.type !== 'idle' && (
+                    <div className={`ds-security-feedback ${passwordResetState.type}`}>
+                      {passwordResetState.message}
+                    </div>
+                  )}
                   <button className="ds-settings-btn danger" onClick={onSignOut}>Sign out of account</button>
                 </div>
               </section>
@@ -2458,7 +2526,8 @@ const App = () => {
           onLoadTranscript={loadFromHistory}
           onChangePassword={async () => {
             const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: getAuthRedirectUrl() });
-            if (!error) alert('Password reset link sent to ' + user.email);
+            if (error) return { ok: false, error: friendlyError(error.message) };
+            return { ok: true };
           }}
         />
       )}
