@@ -46,6 +46,20 @@ const DEMO_CHIPS = [
 const BRAND_NAME = 'ScribeSnap';
 const BRAND_LOGO_SRC = '/scribesnap_wordmark.svg';
 const FOOTER_LOGO_SRC = '/scribesnap_wordmark_footer.svg';
+const PLATFORM_BRAND = {
+  youtube: {
+    icon: '#3C8CFF',
+    stat: '#1F6BFF',
+    bg: 'rgba(123,211,255,0.22)',
+    bgSoft: 'rgba(123,211,255,0.18)',
+  },
+  vimeo: {
+    icon: '#1F6BFF',
+    stat: '#3C8CFF',
+    bg: 'rgba(60,140,255,0.16)',
+    bgSoft: 'rgba(60,140,255,0.14)',
+  },
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 // Returns { platform: 'youtube'|'vimeo', id, url } or null
@@ -129,13 +143,13 @@ const SpinnerIcon = ({ size = 16 }) => (
     <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
   </svg>
 );
-const YouTubeIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="#FF0000">
+const YouTubeIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.youtube.icon}>
     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
   </svg>
 );
 const VimeoIcon = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="#1AB7EA">
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.vimeo.icon}>
     <path d="M23.977 6.416c-.105 2.338-1.739 5.543-4.894 9.609-3.268 4.247-6.026 6.37-8.29 6.37-1.409 0-2.578-1.294-3.553-3.881L5.322 11.4C4.603 8.816 3.834 7.522 3.01 7.522c-.179 0-.806.378-1.881 1.132L0 7.197c1.185-1.044 2.351-2.084 3.501-3.128C5.08 2.701 6.266 1.984 7.055 1.91c1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.507.539 2.45 1.131 3.674 1.776 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.868 3.434-5.757 6.762-5.637 2.473.06 3.628 1.664 3.48 4.807z"/>
   </svg>
 );
@@ -803,8 +817,8 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
               {[
                 { label: 'Credits used', value: `${used} / ${CREDITS_MAX}`, sub: `Resets in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`, color: used >= CREDITS_MAX * 0.8 ? P.warning : P.accent },
                 { label: 'Total transcripts', value: history.length, sub: 'All time', color: P.success },
-                { label: 'YouTube', value: ytCount, sub: 'videos', color: '#FF0000' },
-                { label: 'Vimeo', value: viCount, sub: 'videos', color: '#1AB7EA' },
+                { label: 'YouTube', value: ytCount, sub: 'videos', color: PLATFORM_BRAND.youtube.stat },
+                { label: 'Vimeo', value: viCount, sub: 'videos', color: PLATFORM_BRAND.vimeo.stat },
               ].map(stat => (
                 <div key={stat.label} style={{ padding: '18px 20px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{stat.label}</div>
@@ -836,7 +850,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {history.slice(0, 4).map(h => (
                     <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 7, background: h.platform === 'vimeo' ? 'rgba(26,183,234,0.12)' : 'rgba(255,0,0,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div style={{ width: 28, height: 28, borderRadius: 7, background: h.platform === 'vimeo' ? PLATFORM_BRAND.vimeo.bg : PLATFORM_BRAND.youtube.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {h.platform === 'vimeo' ? <VimeoIcon size={14} /> : <YouTubeIcon />}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
@@ -877,7 +891,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                   const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
                   return (
                     <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
-                      <div style={{ width: 36, height: 36, borderRadius: 9, background: h.platform === 'vimeo' ? 'rgba(26,183,234,0.1)' : 'rgba(255,0,0,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 9, background: h.platform === 'vimeo' ? PLATFORM_BRAND.vimeo.bgSoft : PLATFORM_BRAND.youtube.bgSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {h.platform === 'vimeo' ? <VimeoIcon size={16} /> : <YouTubeIcon />}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>

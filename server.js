@@ -232,6 +232,17 @@ app.get('/api/transcript', async (req, res) => {
   const { videoId, url, platform = 'youtube', lang } = req.query;
   const safeLang = lang && /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,10})?$/.test(lang) ? lang : 'en';
   const tmpDir = os.tmpdir();
+  const isVimeo = platform === 'vimeo';
+  const vimeoMatch = isVimeo ? (url || '').match(/vimeo\.com\/(\d+)/) : null;
+
+  // Validate inputs before starting SSE response to avoid headers-sent crashes.
+  if (isVimeo) {
+    if (!vimeoMatch) return res.status(400).json({ error: 'Invalid Vimeo URL' });
+  } else {
+    if (!videoId) return res.status(400).json({ error: 'Missing videoId parameter' });
+    if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId))
+      return res.status(400).json({ error: 'Invalid videoId format' });
+  }
 
   // Set up SSE
   res.setHeader('Content-Type', 'text/event-stream');
@@ -246,9 +257,7 @@ app.get('/api/transcript', async (req, res) => {
   // ══════════════════════════════════════════════════════════════════════════
   // VIMEO
   // ══════════════════════════════════════════════════════════════════════════
-  if (platform === 'vimeo') {
-    const vimeoMatch = (url || '').match(/vimeo\.com\/(\d+)/);
-    if (!vimeoMatch) { send('error', { error: 'Invalid Vimeo URL' }); res.end(); return; }
+  if (isVimeo) {
     const vimeoId = vimeoMatch[1];
     const filePrefix = `vimeo_${vimeoId}`;
     const outputTemplate = path.join(tmpDir, filePrefix);
@@ -339,10 +348,6 @@ app.get('/api/transcript', async (req, res) => {
   // ══════════════════════════════════════════════════════════════════════════
   // YOUTUBE
   // ══════════════════════════════════════════════════════════════════════════
-  if (!videoId) return res.status(400).json({ error: 'Missing videoId parameter' });
-  if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId))
-    return res.status(400).json({ error: 'Invalid videoId format' });
-
   const outputTemplate = path.join(tmpDir, videoId);
 
   try {
