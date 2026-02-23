@@ -794,251 +794,1017 @@ const PasswordResetModal = ({ onClose }) => {
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript, onChangePassword }) => {
-  // Keep the dashboard on the updated ScribeSnap brand palette
-  const P = {
-    paper:       '#F6F2EA',
-    surface:     '#FBF7F0',
-    border:      '#E5DDCF',
-    ink:         '#1D1D1F',
-    muted:       '#5A5960',
-    accent:      '#3C8CFF',
-    accentHover: '#1F6BFF',
-    accentLight: 'rgba(123,211,255,0.22)',
-    success:     '#0F766E',
-    warning:     '#B45309',
-    error:       '#B42318',
-  };
-
   const [tab, setTab] = React.useState('overview');
-  const used      = credits?.used ?? 0;
-  const tierMax   = CREDITS_MAX; // Dashboard is only for signed-in users
-  const resetAt   = credits?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS);
-  const daysLeft  = Math.max(0, Math.ceil((resetAt - Date.now()) / 86400000));
-  const pct       = Math.min(100, (used / tierMax) * 100);
-  const memberSince = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—';
-  const initial   = (user.email || '?')[0].toUpperCase();
+  const [usageRange, setUsageRange] = React.useState('this');
 
-  const tabStyle = (active) => ({
-    padding: '8px 18px', borderRadius: 8, border: 'none',
-    background: active ? P.surface : 'transparent',
-    color: active ? P.ink : P.muted,
-    fontSize: 13, fontWeight: active ? 600 : 400,
-    cursor: 'pointer', transition: 'all 0.15s',
-    boxShadow: active ? '0 1px 4px rgba(28,25,23,0.08)' : 'none',
-  });
-
+  const used = credits?.used ?? 0;
+  const tierMax = credits?.tierMax || CREDITS_MAX;
+  const resetAt = credits?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS);
+  const daysLeft = Math.max(0, Math.ceil((resetAt - Date.now()) / 86400000));
+  const pct = Math.min(100, (used / tierMax) * 100);
+  const remaining = Math.max(0, tierMax - used);
   const ytCount = history.filter(h => (h.platform || 'youtube') === 'youtube').length;
   const viCount = history.filter(h => h.platform === 'vimeo').length;
+  const memberSince = user.created_at
+    ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : '—';
+  const initial = (user.email || '?')[0].toUpperCase();
+  const displayName = user.user_metadata?.username || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User';
+  const latest = history[0] || null;
+
+  const openTranscript = (entry) => {
+    if (!entry) return;
+    onLoadTranscript(entry);
+    onBack();
+  };
+
+  const statCards = [
+    {
+      key: 'credits',
+      icon: (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      ),
+      value: `${used} / ${tierMax}`,
+      label: 'Credits Used',
+      sub: `Resets in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`,
+      className: 'ds-stat-primary',
+    },
+    {
+      key: 'total',
+      icon: (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="4" y="3" width="16" height="18" rx="2"/>
+          <line x1="8" y1="8" x2="16" y2="8"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+      ),
+      value: history.length,
+      label: 'Total Transcripts',
+      sub: 'All time',
+      className: 'ds-stat-neutral',
+    },
+    {
+      key: 'yt',
+      icon: <YouTubeIcon size={14} />,
+      value: ytCount,
+      label: 'YouTube Videos',
+      sub: 'Connected',
+      className: 'ds-stat-youtube',
+    },
+    {
+      key: 'vimeo',
+      icon: <VimeoIcon size={14} />,
+      value: viCount,
+      label: 'Vimeo Videos',
+      sub: 'Connected',
+      className: 'ds-stat-vimeo',
+    },
+  ];
+
+  const weekSegments = Array.from({ length: 7 }, (_, i) => i);
+  const activeDay = Math.min(6, Math.round((pct / 100) * 6));
 
   return (
-    <div style={{ minHeight: '100vh', background: P.paper, paddingTop: 56 }}>
-      <div style={{ maxWidth: 820, margin: '0 auto', padding: '40px 24px 60px' }}>
+    <div className="ds-shell">
+      <style>{`
+        .ds-shell {
+          min-height: 100vh;
+          padding-top: 56px;
+          background: radial-gradient(70% 50% at 16% 14%, rgba(123,211,255,0.4) 0%, rgba(123,211,255,0.1) 30%, transparent 64%), #F6F2EA;
+          position: relative;
+          overflow: hidden;
+        }
+        .ds-shell::before {
+          content: '';
+          position: absolute;
+          inset: 36px auto auto -220px;
+          width: 760px;
+          height: 760px;
+          background:
+            radial-gradient(circle at center, rgba(123,211,255,0.25) 0%, rgba(123,211,255,0.05) 54%, transparent 68%),
+            conic-gradient(from 210deg, rgba(123,211,255,0) 0deg, rgba(60,140,255,0.14) 200deg, rgba(123,211,255,0) 360deg);
+          border-radius: 50%;
+          pointer-events: none;
+        }
+        .ds-shell::after {
+          content: '';
+          position: absolute;
+          inset: auto -160px -260px auto;
+          width: 620px;
+          height: 620px;
+          border-radius: 50%;
+          background: radial-gradient(circle at center, rgba(60,140,255,0.16) 0%, rgba(60,140,255,0) 72%);
+          pointer-events: none;
+        }
+        .ds-wrap {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 34px 24px 56px;
+          position: relative;
+          z-index: 1;
+        }
+        .ds-back {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          border: none;
+          background: none;
+          color: #5A5960;
+          font-size: 15px;
+          cursor: pointer;
+          padding: 2px 0;
+          margin-bottom: 10px;
+          transition: color 0.15s ease;
+        }
+        .ds-back:hover { color: #1D1D1F; }
+        .ds-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.85fr) minmax(318px, 1fr);
+          gap: 18px;
+          align-items: start;
+        }
+        .ds-card {
+          background: rgba(251,247,240,0.72);
+          border: 1px solid rgba(229,221,207,0.9);
+          border-radius: 18px;
+          box-shadow: 0 12px 34px rgba(31,53,95,0.08);
+          backdrop-filter: blur(4px);
+        }
+        .ds-profile {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          padding: 24px 28px;
+          margin-bottom: 14px;
+        }
+        .ds-avatar {
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 46px;
+          font-weight: 700;
+          color: #EAF2FF;
+          background: linear-gradient(145deg, #7BD3FF 0%, #3C8CFF 52%, #1F6BFF 100%);
+          box-shadow: 0 12px 26px rgba(60,140,255,0.3);
+        }
+        .ds-profile-name {
+          font-size: clamp(28px, 3.2vw, 42px);
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          color: #1D1D1F;
+          margin: 0 0 2px;
+        }
+        .ds-profile-email {
+          font-size: 17px;
+          color: #5A5960;
+          margin: 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .ds-profile-meta {
+          margin-left: auto;
+          text-align: right;
+          flex-shrink: 0;
+        }
+        .ds-profile-meta-label {
+          margin: 0 0 4px;
+          font-size: 12px;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          color: #6E6A76;
+          font-weight: 600;
+        }
+        .ds-profile-meta-value {
+          margin: 0;
+          font-size: 18px;
+          color: #1D1D1F;
+          font-weight: 700;
+        }
+        .ds-control-row {
+          display: grid;
+          grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+          gap: 12px;
+          margin-bottom: 14px;
+        }
+        .ds-extract-btn {
+          height: 58px;
+          border-radius: 15px;
+          border: 1px solid rgba(60,140,255,0.35);
+          background: linear-gradient(130deg, #7BD3FF 0%, #3C8CFF 50%, #1F6BFF 100%);
+          color: white;
+          font-size: 24px;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+          cursor: pointer;
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+          box-shadow: 0 10px 22px rgba(31,107,255,0.28);
+          transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .ds-extract-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 14px 24px rgba(31,107,255,0.36);
+        }
+        .ds-tabs {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 5px;
+        }
+        .ds-tab {
+          flex: 1;
+          min-width: 0;
+          border: none;
+          border-radius: 12px;
+          padding: 10px 10px;
+          background: transparent;
+          color: #6E6A76;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .ds-tab:hover { color: #1D1D1F; }
+        .ds-tab.is-active {
+          color: #1D1D1F;
+          background: rgba(255,255,255,0.72);
+          box-shadow: 0 8px 20px rgba(29,29,31,0.08);
+        }
+        .ds-overview-col {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+        .ds-stats {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+        }
+        .ds-stat {
+          position: relative;
+          overflow: hidden;
+          padding: 16px 16px 14px;
+          border-radius: 16px;
+          border: 1px solid rgba(229,221,207,0.9);
+          background: rgba(251,247,240,0.8);
+          box-shadow: 0 9px 26px rgba(31,53,95,0.07);
+        }
+        .ds-stat::before {
+          content: '';
+          position: absolute;
+          inset: -16px;
+          opacity: 0.7;
+          pointer-events: none;
+        }
+        .ds-stat.ds-stat-primary::before {
+          background: linear-gradient(130deg, rgba(123,211,255,0.4) 0%, rgba(60,140,255,0.35) 48%, rgba(31,107,255,0.3) 100%);
+        }
+        .ds-stat.ds-stat-neutral::before {
+          background: linear-gradient(140deg, rgba(123,211,255,0.22) 0%, rgba(60,140,255,0.08) 100%);
+        }
+        .ds-stat.ds-stat-youtube::before {
+          background: linear-gradient(145deg, rgba(255,0,0,0.08) 0%, rgba(123,211,255,0.18) 48%, rgba(60,140,255,0.12) 100%);
+        }
+        .ds-stat.ds-stat-vimeo::before {
+          background: linear-gradient(140deg, rgba(26,183,234,0.12) 0%, rgba(123,211,255,0.2) 56%, rgba(31,107,255,0.08) 100%);
+        }
+        .ds-stat-head {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: #3C8CFF;
+          margin-bottom: 8px;
+        }
+        .ds-stat-value {
+          position: relative;
+          z-index: 1;
+          margin: 0 0 2px;
+          font-size: 28px;
+          line-height: 1.05;
+          letter-spacing: -0.02em;
+          color: #1D1D1F;
+          font-weight: 700;
+        }
+        .ds-stat-label {
+          position: relative;
+          z-index: 1;
+          margin: 0 0 7px;
+          font-size: 13px;
+          color: #2E2D34;
+          font-weight: 600;
+        }
+        .ds-stat-sub {
+          position: relative;
+          z-index: 1;
+          margin: 0;
+          font-size: 13px;
+          color: #6E6A76;
+        }
+        .ds-usage {
+          padding: 16px 18px 14px;
+        }
+        .ds-usage-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+          gap: 10px;
+        }
+        .ds-usage-title {
+          margin: 0;
+          font-size: 16px;
+          color: #1D1D1F;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+        }
+        .ds-usage-switch {
+          display: inline-flex;
+          border-radius: 10px;
+          padding: 3px;
+          background: rgba(123,211,255,0.18);
+          border: 1px solid rgba(123,211,255,0.35);
+          gap: 3px;
+        }
+        .ds-usage-switch button {
+          border: none;
+          border-radius: 8px;
+          padding: 5px 10px;
+          background: transparent;
+          color: #666470;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .ds-usage-switch button.is-active {
+          background: rgba(255,255,255,0.72);
+          color: #1D1D1F;
+        }
+        .ds-usage-track {
+          height: 9px;
+          border-radius: 999px;
+          background: rgba(229,221,207,0.95);
+          overflow: hidden;
+        }
+        .ds-usage-bar {
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #7BD3FF 0%, #3C8CFF 60%, #1F6BFF 100%);
+          transition: width 0.45s ease;
+        }
+        .ds-usage-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-top: 12px;
+        }
+        .ds-usage-meta strong {
+          color: #1D1D1F;
+          font-size: 26px;
+        }
+        .ds-usage-days {
+          display: flex;
+          align-items: end;
+          gap: 7px;
+        }
+        .ds-usage-day {
+          width: 13px;
+          border-radius: 4px 4px 3px 3px;
+          background: rgba(123,211,255,0.24);
+          transition: all 0.2s ease;
+        }
+        .ds-usage-day.is-active {
+          background: linear-gradient(180deg, #7BD3FF 0%, #3C8CFF 100%);
+        }
+        .ds-list-card { padding: 14px 0 6px; overflow: hidden; }
+        .ds-list-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 0 18px 10px;
+        }
+        .ds-list-title {
+          margin: 0;
+          font-size: 17px;
+          color: #1D1D1F;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+        }
+        .ds-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 18px;
+          border-top: 1px solid rgba(229,221,207,0.75);
+          transition: background 0.15s ease;
+        }
+        .ds-row:first-of-type {
+          border-top: 1px solid rgba(60,140,255,0.32);
+          box-shadow: inset 2px 0 0 rgba(60,140,255,0.45);
+        }
+        .ds-row:hover { background: rgba(255,255,255,0.42); }
+        .ds-thumb {
+          width: 124px;
+          height: 70px;
+          border-radius: 11px;
+          overflow: hidden;
+          flex-shrink: 0;
+          background: rgba(123,211,255,0.16);
+          border: 1px solid rgba(60,140,255,0.16);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .ds-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .ds-row-title {
+          margin: 0 0 4px;
+          font-size: 16px;
+          color: #1D1D1F;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .ds-row-meta {
+          margin: 0;
+          font-size: 13px;
+          color: #666470;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+        .ds-row-actions {
+          margin-left: auto;
+          display: inline-flex;
+          gap: 7px;
+          flex-shrink: 0;
+        }
+        .ds-row-btn {
+          border: 1px solid rgba(60,140,255,0.25);
+          border-radius: 10px;
+          padding: 8px 16px;
+          min-width: 78px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .ds-row-btn.primary {
+          background: linear-gradient(130deg, #7BD3FF 0%, #3C8CFF 48%, #1F6BFF 100%);
+          color: white;
+          border-color: rgba(60,140,255,0.4);
+        }
+        .ds-row-btn.primary:hover { filter: brightness(0.96); }
+        .ds-row-btn.ghost {
+          background: rgba(255,255,255,0.72);
+          color: #2E2D34;
+          border-color: rgba(229,221,207,0.95);
+        }
+        .ds-row-btn.ghost:hover {
+          border-color: rgba(60,140,255,0.32);
+          color: #1F6BFF;
+        }
+        .ds-list-footer {
+          border-top: 1px solid rgba(229,221,207,0.75);
+          padding: 12px 18px 10px;
+        }
+        .ds-link-btn {
+          border: none;
+          background: none;
+          color: #3C8CFF;
+          font-size: 15px;
+          font-weight: 600;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 0;
+        }
+        .ds-link-btn:hover { color: #1F6BFF; }
+        .ds-side {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+        .ds-side-main {
+          padding: 20px 18px 14px;
+        }
+        .ds-side-title {
+          margin: 0 0 5px;
+          font-size: 20px;
+          line-height: 1.2;
+          color: #1D1D1F;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+        }
+        .ds-side-subtitle {
+          margin: 0;
+          font-size: 14px;
+          line-height: 1.45;
+          color: #666470;
+        }
+        .ds-side-safe {
+          margin: 12px 0 0;
+          font-size: 13px;
+          color: #666470;
+        }
+        .ds-side-safe strong { color: #1D1D1F; }
+        .ds-side-action {
+          margin-top: 12px;
+          padding: 14px;
+          border-radius: 14px;
+          border: 1px solid rgba(229,221,207,0.95);
+          background: rgba(255,255,255,0.58);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+        }
+        .ds-side-action + .ds-side-action { margin-top: 10px; }
+        .ds-side-action-head {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 6px;
+        }
+        .ds-side-action-title {
+          margin: 0;
+          font-size: 20px;
+          color: #1D1D1F;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+        }
+        .ds-side-action-desc {
+          margin: 0;
+          font-size: 15px;
+          line-height: 1.4;
+          color: #666470;
+        }
+        .ds-side-pills {
+          margin-top: 11px;
+          display: flex;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+        .ds-side-pill {
+          border-radius: 999px;
+          padding: 3px 9px;
+          font-size: 12px;
+          border: 1px solid rgba(123,211,255,0.45);
+          color: #1F6BFF;
+          background: rgba(123,211,255,0.18);
+        }
+        .ds-side-btn {
+          margin-top: 11px;
+          width: 100%;
+          border: none;
+          border-radius: 10px;
+          background: linear-gradient(135deg, #7BD3FF 0%, #3C8CFF 52%, #1F6BFF 100%);
+          color: white;
+          font-size: 16px;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+          padding: 10px 12px;
+          cursor: pointer;
+          transition: transform 0.15s ease, filter 0.15s ease;
+        }
+        .ds-side-btn:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+        .ds-side-btn:not(:disabled):hover {
+          transform: translateY(-1px);
+          filter: brightness(0.97);
+        }
+        .ds-empty {
+          text-align: center;
+          padding: 42px 18px;
+          color: #666470;
+        }
+        .ds-empty h3 {
+          margin: 0 0 8px;
+          color: #1D1D1F;
+          font-size: 20px;
+        }
+        .ds-empty p {
+          margin: 0;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+        .ds-empty button {
+          margin-top: 14px;
+          border: none;
+          border-radius: 10px;
+          background: #3C8CFF;
+          color: white;
+          font-size: 14px;
+          font-weight: 600;
+          padding: 10px 18px;
+          cursor: pointer;
+        }
+        .ds-settings {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 14px;
+        }
+        .ds-settings .ds-card {
+          padding: 18px;
+        }
+        .ds-settings-title {
+          margin: 0 0 13px;
+          font-size: 17px;
+          color: #1D1D1F;
+          font-weight: 700;
+        }
+        .ds-setting-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(229,221,207,0.8);
+        }
+        .ds-setting-row:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
+        }
+        .ds-setting-label { color: #666470; font-size: 13px; }
+        .ds-setting-value {
+          color: #1D1D1F;
+          font-size: 13px;
+          font-weight: 600;
+          text-align: right;
+          max-width: 66%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .ds-settings-btn {
+          width: 100%;
+          border-radius: 10px;
+          padding: 9px 11px;
+          border: 1px solid rgba(229,221,207,0.95);
+          background: rgba(255,255,255,0.7);
+          color: #1D1D1F;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .ds-settings-btn:hover {
+          border-color: rgba(60,140,255,0.34);
+          background: rgba(123,211,255,0.12);
+        }
+        .ds-settings-btn.danger {
+          border-color: rgba(180,35,24,0.26);
+          color: #B42318;
+          background: rgba(180,35,24,0.06);
+        }
+        .ds-settings-btn.danger:hover {
+          background: rgba(180,35,24,0.12);
+        }
+        @media (max-width: 1130px) {
+          .ds-grid { grid-template-columns: 1fr; }
+          .ds-side { order: 2; }
+        }
+        @media (max-width: 930px) {
+          .ds-control-row { grid-template-columns: 1fr; }
+          .ds-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .ds-settings { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 760px) {
+          .ds-wrap { padding: 24px 14px 44px; }
+          .ds-profile {
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+          }
+          .ds-profile-meta {
+            margin-left: 0;
+            width: 100%;
+            text-align: center;
+          }
+          .ds-profile-email {
+            white-space: normal;
+            overflow-wrap: anywhere;
+          }
+          .ds-tabs { flex-wrap: wrap; }
+          .ds-tab { flex: 1 1 calc(50% - 6px); }
+          .ds-stats { grid-template-columns: 1fr; }
+          .ds-usage-head { flex-wrap: wrap; }
+          .ds-row {
+            flex-wrap: wrap;
+            align-items: flex-start;
+          }
+          .ds-thumb {
+            width: 100%;
+            height: 168px;
+          }
+          .ds-row-main {
+            width: 100%;
+          }
+          .ds-row-actions {
+            width: 100%;
+            margin-left: 0;
+          }
+          .ds-row-btn { flex: 1; }
+        }
+      `}</style>
 
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
-          <button onClick={onBack} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontSize: 13, color: P.muted, padding: 0, transition: 'color 0.15s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
-            onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
-          >
-            <ChevronIcon size={13} dir="left" /> Back
-          </button>
-          <div style={{ flex: 1 }} />
-        </div>
+      <div className="ds-wrap">
+        <button className="ds-back" onClick={onBack}>
+          <ChevronIcon size={14} dir="left" /> Back
+        </button>
 
-        {/* Profile hero */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 18, marginBottom: 32,
-          padding: '24px 28px', background: P.surface,
-          border: `1px solid ${P.border}`, borderRadius: 18,
-        }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: '50%',
-            background: P.accent, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22, fontWeight: 700, color: 'white', flexShrink: 0,
-          }}>{initial}</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: P.ink, marginBottom: 3 }}>
-              {user.user_metadata?.username || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]}
-            </div>
-            <div style={{ fontSize: 13, color: P.muted }}>{user.email}</div>
-          </div>
-          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <div style={{ fontSize: 11, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Member since</div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: P.ink }}>{memberSince}</div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: 4, marginBottom: 28, background: P.paper, borderRadius: 10, padding: 3, border: `1px solid ${P.border}`, width: 'fit-content' }}>
-          {[['overview', 'Overview'], ['history', 'History'], ['settings', 'Settings']].map(([key, label]) => (
-            <button key={key} onClick={() => setTab(key)} style={tabStyle(tab === key)}>{label}</button>
-          ))}
-        </div>
-
-        {/* ── Overview tab ────────────────────────────────────────────────── */}
-        {tab === 'overview' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* Stats row */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14 }}>
-              {[
-                { label: 'Credits used', value: `${used} / ${tierMax}`, sub: `Resets in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`, color: used >= tierMax * 0.8 ? P.warning : P.accent },
-                { label: 'Total transcripts', value: history.length, sub: 'All time', color: P.success },
-                { label: 'YouTube', value: ytCount, sub: 'videos', color: PLATFORM_BRAND.youtube.stat },
-                { label: 'Vimeo', value: viCount, sub: 'videos', color: PLATFORM_BRAND.vimeo.stat },
-              ].map(stat => (
-                <div key={stat.label} style={{ padding: '18px 20px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>{stat.label}</div>
-                  <div style={{ fontSize: 26, fontWeight: 800, color: stat.color, letterSpacing: '-0.02em', marginBottom: 2 }}>{stat.value}</div>
-                  <div style={{ fontSize: 12, color: P.muted }}>{stat.sub}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Credits bar card */}
-            <div style={{ padding: '20px 22px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: P.ink }}>Weekly credit usage</div>
-                <div style={{ fontSize: 12, color: P.muted }}>Resets in <strong style={{ color: P.ink }}>{daysLeft}d</strong></div>
+        <div className="ds-grid">
+          <main>
+            <section className="ds-card ds-profile">
+              <div className="ds-avatar">{initial}</div>
+              <div style={{ minWidth: 0 }}>
+                <h1 className="ds-profile-name">{displayName}</h1>
+                <p className="ds-profile-email">{user.email}</p>
               </div>
-              <div style={{ height: 8, borderRadius: 999, background: P.border, overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct > 80 ? P.warning : P.accent, transition: 'width 0.5s ease' }} />
+              <div className="ds-profile-meta">
+                <p className="ds-profile-meta-label">Member since</p>
+                <p className="ds-profile-meta-value">{memberSince}</p>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-                <div style={{ fontSize: 12, color: P.muted }}><strong style={{ color: P.ink }}>{used}</strong> used</div>
-                <div style={{ fontSize: 12, color: P.muted }}><strong style={{ color: P.ink }}>{Math.max(0, tierMax - used)}</strong> remaining</div>
-              </div>
-            </div>
+            </section>
 
-            {/* Recent transcripts preview */}
-            {history.length > 0 && (
-              <div style={{ padding: '20px 22px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, marginBottom: 14 }}>Recent transcripts</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {history.slice(0, 4).map(h => {
-                    const displayTitle = h.title || h.id;
-                    const displayChannel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
-                    return (
-                    <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 7, background: h.platform === 'vimeo' ? PLATFORM_BRAND.vimeo.bg : PLATFORM_BRAND.youtube.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        {h.platform === 'vimeo' ? <VimeoIcon size={14} /> : <YouTubeIcon />}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 500, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayTitle}</div>
-                        <div style={{ fontSize: 11, color: P.muted }}>{displayChannel} · {timeAgo(h.date)}</div>
-                      </div>
-                      <button onClick={() => { onLoadTranscript(h); onBack(); }}
-                        style={{ fontSize: 12, color: P.accent, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: 6, transition: 'all 0.15s' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
-                      >Open →</button>
-                    </div>
-                  )})}
-                </div>
-                {history.length > 4 && (
-                  <button onClick={() => setTab('history')} style={{ marginTop: 12, fontSize: 12, color: P.muted, background: 'none', border: 'none', cursor: 'pointer' }}>
-                    View all {history.length} transcripts →
+            <section className="ds-control-row">
+              <button className="ds-extract-btn" onClick={onBack}>
+                <span style={{ fontSize: 20, lineHeight: 1 }}>+</span> Extract new transcript
+              </button>
+              <div className="ds-card ds-tabs">
+                {[['overview', 'Overview'], ['history', 'History'], ['settings', 'Settings']].map(([key, label]) => (
+                  <button key={key} className={`ds-tab ${tab === key ? 'is-active' : ''}`} onClick={() => setTab(key)}>
+                    {label}
                   </button>
-                )}
+                ))}
               </div>
-            )}
-          </div>
-        )}
+            </section>
 
-        {/* ── History tab ─────────────────────────────────────────────────── */}
-        {tab === 'history' && (
-          <div>
-            {history.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '60px 0', color: P.muted }}>
-                <div style={{ fontSize: 36, marginBottom: 12 }}>📄</div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: P.ink, marginBottom: 6 }}>No transcripts yet</div>
-                <div style={{ fontSize: 13 }}>Extract your first transcript to see it here.</div>
-                <button onClick={onBack} style={{ marginTop: 16, padding: '9px 20px', borderRadius: 10, border: 'none', background: P.accent, color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Extract a transcript</button>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {history.map(h => {
-                  const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
-                  const displayTitle = h.title || h.id;
-                  const displayChannel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
-                  return (
-                    <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
-                      <div style={{ width: 36, height: 36, borderRadius: 9, background: h.platform === 'vimeo' ? PLATFORM_BRAND.vimeo.bgSoft : PLATFORM_BRAND.youtube.bgSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        {h.platform === 'vimeo' ? <VimeoIcon size={16} /> : <YouTubeIcon />}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 3 }}>{displayTitle}</div>
-                        <div style={{ display: 'flex', gap: 10 }}>
-                          <span style={{ fontSize: 12, color: P.muted }}>{displayChannel}</span>
-                          <span style={{ fontSize: 12, color: P.muted }}>{timeAgo(h.date)}</span>
-                          {wc > 0 && <span style={{ fontSize: 12, color: P.muted }}>· {wc.toLocaleString()} words</span>}
-                          {h.source && <span style={{ fontSize: 12, color: P.muted }}>· {h.source}</span>}
-                        </div>
-                      </div>
-                      <button onClick={() => { onLoadTranscript(h); onBack(); }}
-                        style={{ padding: '7px 14px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, fontSize: 12, fontWeight: 600, color: P.ink, cursor: 'pointer', transition: 'all 0.15s', flexShrink: 0 }}
-                        onMouseEnter={e => { e.currentTarget.style.background = P.accent; e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = P.accent; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.border; }}
-                      >Open</button>
+            {tab === 'overview' && (
+              <div className="ds-overview-col">
+                <section className="ds-stats">
+                  {statCards.map(stat => (
+                    <article key={stat.key} className={`ds-stat ${stat.className}`}>
+                      <div className="ds-stat-head">{stat.icon}</div>
+                      <p className="ds-stat-value">{stat.value}</p>
+                      <p className="ds-stat-label">{stat.label}</p>
+                      <p className="ds-stat-sub">{stat.sub}</p>
+                    </article>
+                  ))}
+                </section>
+
+                <section className="ds-card ds-usage">
+                  <div className="ds-usage-head">
+                    <h2 className="ds-usage-title">Weekly Usage</h2>
+                    <div className="ds-usage-switch">
+                      <button className={usageRange === 'this' ? 'is-active' : ''} onClick={() => setUsageRange('this')}>This week</button>
+                      <button className={usageRange === 'past' ? 'is-active' : ''} onClick={() => setUsageRange('past')}>Past</button>
                     </div>
-                  );
-                })}
+                  </div>
+                  <div className="ds-usage-track">
+                    <div className="ds-usage-bar" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="ds-usage-meta">
+                    <div>
+                      <strong>{used} / {tierMax}</strong>{' '}
+                      <span style={{ color: '#666470', fontSize: 14 }}>Credits Used</span>
+                    </div>
+                    <div className="ds-usage-days">
+                      {weekSegments.map(i => (
+                        <span
+                          key={i}
+                          className={`ds-usage-day ${i <= activeDay ? 'is-active' : ''}`}
+                          style={{ height: `${8 + (i === activeDay ? 18 : i <= activeDay ? 12 : 6)}px` }}
+                        />
+                      ))}
+                      <span style={{ marginLeft: 6, fontSize: 14, color: '#666470' }}>{remaining} remaining</span>
+                    </div>
+                  </div>
+                  <p style={{ margin: '10px 0 0', fontSize: 13, color: '#666470' }}>
+                    Resets in <strong style={{ color: '#1D1D1F' }}>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong>
+                  </p>
+                </section>
+
+                <section className="ds-card ds-list-card">
+                  <div className="ds-list-head">
+                    <h2 className="ds-list-title">Recent Transcripts</h2>
+                    <span style={{ color: '#C6BCC9', letterSpacing: 2, fontWeight: 700 }}>•••</span>
+                  </div>
+
+                  {history.length === 0 ? (
+                    <div className="ds-empty">
+                      <h3>No transcripts yet</h3>
+                      <p>Extract your first transcript and it will appear here.</p>
+                      <button onClick={onBack}>Extract transcript</button>
+                    </div>
+                  ) : (
+                    <>
+                      {history.slice(0, 4).map((h, idx) => {
+                        const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
+                        const title = h.title || h.id;
+                        const channel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
+                        return (
+                          <div key={`${h.id}-${idx}`} className="ds-row">
+                            <div className="ds-thumb">
+                              {h.thumbnail ? (
+                                <img src={h.thumbnail} alt={title} loading="lazy" />
+                              ) : (
+                                h.platform === 'vimeo' ? <VimeoIcon size={30} /> : <YouTubeIcon size={30} />
+                              )}
+                            </div>
+                            <div className="ds-row-main" style={{ minWidth: 0 }}>
+                              <p className="ds-row-title">{title}</p>
+                              <p className="ds-row-meta">
+                                {h.platform === 'vimeo' ? <VimeoIcon size={13} /> : <YouTubeIcon size={13} />}
+                                {channel}
+                                {wc > 0 ? `${wc.toLocaleString()} words` : null}
+                                {timeAgo(h.date)}
+                              </p>
+                            </div>
+                            <div className="ds-row-actions">
+                              <button className="ds-row-btn primary" onClick={() => openTranscript(h)}>View</button>
+                              <button className="ds-row-btn ghost" onClick={() => setTab('history')}>More</button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div className="ds-list-footer">
+                        <button className="ds-link-btn" onClick={() => setTab('history')}>
+                          + View all transcripts <ChevronIcon size={11} />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </section>
               </div>
             )}
-          </div>
-        )}
 
-        {/* ── Settings tab ────────────────────────────────────────────────── */}
-        {tab === 'settings' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 500 }}>
-            {/* Account info */}
-            <div style={{ padding: '20px 22px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, marginBottom: 14 }}>Account</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 13, color: P.muted }}>Email</span>
-                  <span style={{ fontSize: 13, color: P.ink, fontWeight: 500 }}>{user.email}</span>
+            {tab === 'history' && (
+              <section className="ds-card ds-list-card">
+                <div className="ds-list-head">
+                  <h2 className="ds-list-title">Transcript History</h2>
                 </div>
-                <div style={{ height: 1, background: P.border }} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 13, color: P.muted }}>Member since</span>
-                  <span style={{ fontSize: 13, color: P.ink, fontWeight: 500 }}>{memberSince}</span>
+                {history.length === 0 ? (
+                  <div className="ds-empty">
+                    <h3>No history found</h3>
+                    <p>Extract your first video transcript to start your library.</p>
+                    <button onClick={onBack}>Extract transcript</button>
+                  </div>
+                ) : (
+                  <>
+                    {history.map((h, idx) => {
+                      const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
+                      const title = h.title || h.id;
+                      const channel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
+                      return (
+                        <div key={`${h.id}-${idx}`} className="ds-row">
+                          <div className="ds-thumb">
+                            {h.thumbnail ? (
+                              <img src={h.thumbnail} alt={title} loading="lazy" />
+                            ) : (
+                              h.platform === 'vimeo' ? <VimeoIcon size={30} /> : <YouTubeIcon size={30} />
+                            )}
+                          </div>
+                          <div className="ds-row-main" style={{ minWidth: 0 }}>
+                            <p className="ds-row-title">{title}</p>
+                            <p className="ds-row-meta">
+                              {h.platform === 'vimeo' ? <VimeoIcon size={13} /> : <YouTubeIcon size={13} />}
+                              {channel}
+                              {wc > 0 ? `${wc.toLocaleString()} words` : null}
+                              {timeAgo(h.date)}
+                              {h.source ? h.source : null}
+                            </p>
+                          </div>
+                          <div className="ds-row-actions">
+                            <button className="ds-row-btn primary" onClick={() => openTranscript(h)}>Open</button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
+              </section>
+            )}
+
+            {tab === 'settings' && (
+              <section className="ds-settings">
+                <div className="ds-card">
+                  <h3 className="ds-settings-title">Account</h3>
+                  <div className="ds-setting-row">
+                    <span className="ds-setting-label">Email</span>
+                    <span className="ds-setting-value">{user.email}</span>
+                  </div>
+                  <div className="ds-setting-row">
+                    <span className="ds-setting-label">Member since</span>
+                    <span className="ds-setting-value">{memberSince}</span>
+                  </div>
+                  <div className="ds-setting-row">
+                    <span className="ds-setting-label">Current plan</span>
+                    <span className="ds-setting-value">Free · {tierMax} credits / 7 days</span>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Security */}
-            <div style={{ padding: '20px 22px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, marginBottom: 14 }}>Security</div>
-              <button onClick={onChangePassword}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '10px 14px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', transition: 'all 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.borderColor = P.accent; }}
-                onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.borderColor = P.border; }}
-              >
-                <span style={{ fontSize: 13, fontWeight: 500, color: P.ink }}>Change password</span>
-                <ChevronIcon size={13} dir="right" />
-              </button>
-            </div>
+                <div className="ds-card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <h3 className="ds-settings-title" style={{ marginBottom: 2 }}>Security</h3>
+                  <button className="ds-settings-btn" onClick={onChangePassword}>Change password</button>
+                  <button className="ds-settings-btn danger" onClick={onSignOut}>Sign out of account</button>
+                </div>
+              </section>
+            )}
+          </main>
 
-            {/* Danger zone */}
-            <div style={{ padding: '20px 22px', background: P.surface, border: `1px solid rgba(180,35,24,0.2)`, borderRadius: 14 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: P.error, marginBottom: 14 }}>Sign out</div>
-              <button onClick={onSignOut}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: `1px solid rgba(180,35,24,0.2)`, background: 'rgba(180,35,24,0.04)', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: P.error, transition: 'all 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,35,24,0.1)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(180,35,24,0.04)'; }}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-                Sign out of account
+          {tab === 'overview' && (
+            <aside className="ds-side">
+              <section className="ds-card ds-side-main">
+                <h2 className="ds-side-title">Do something with your last transcript</h2>
+                <p className="ds-side-subtitle">
+                  Pick one and we&apos;ll open your most recent video transcript so you can continue right away.
+                </p>
+                <p className="ds-side-safe"><strong>Safe:</strong> actions open your saved transcript and keep your source unchanged.</p>
+
+                <article className="ds-side-action">
+                  <div className="ds-side-action-head">
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(123,211,255,0.22)', color: '#3C8CFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                      </svg>
+                    </div>
+                    <h3 className="ds-side-action-title">AI Summary</h3>
+                  </div>
+                  <p className="ds-side-action-desc">Generate a TLDR, key points, and chapter ideas for your latest transcript.</p>
+                  <div className="ds-side-pills">
+                    <span className="ds-side-pill">TLDR</span>
+                    <span className="ds-side-pill">Key points</span>
+                    <span className="ds-side-pill">Chapters</span>
+                  </div>
+                  <button className="ds-side-btn" disabled={!latest} onClick={() => openTranscript(latest)}>Generate summary</button>
+                </article>
+
+                <article className="ds-side-action">
+                  <div className="ds-side-action-head">
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(123,211,255,0.22)', color: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                      </svg>
+                    </div>
+                    <h3 className="ds-side-action-title">Ask AI (Chat)</h3>
+                  </div>
+                  <p className="ds-side-action-desc">Start chat with transcript context and ask focused questions instantly.</p>
+                  <div className="ds-side-pills">
+                    <span className="ds-side-pill">Transcript-aware</span>
+                    <span className="ds-side-pill">Fast answers</span>
+                  </div>
+                  <button className="ds-side-btn" disabled={!latest} onClick={() => openTranscript(latest)}>Start chat</button>
+                </article>
+
+                <article className="ds-side-action">
+                  <div className="ds-side-action-head">
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(123,211,255,0.22)', color: '#0F766E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <DownloadIcon size={18} />
+                    </div>
+                    <h3 className="ds-side-action-title">Export</h3>
+                  </div>
+                  <p className="ds-side-action-desc">Download transcript content in the format you need.</p>
+                  <div className="ds-side-pills">
+                    <span className="ds-side-pill">TXT</span>
+                    <span className="ds-side-pill">PDF</span>
+                    <span className="ds-side-pill">Markdown</span>
+                  </div>
+                  <button className="ds-side-btn" disabled={!latest} onClick={() => openTranscript(latest)}>Download</button>
+                </article>
+              </section>
+
+              <button className="ds-link-btn" onClick={() => setTab('history')} style={{ alignSelf: 'center' }}>
+                + View all transcripts <ChevronIcon size={11} />
               </button>
-            </div>
-          </div>
-        )}
+            </aside>
+          )}
+        </div>
       </div>
     </div>
   );
