@@ -1081,7 +1081,7 @@ const UserMenu = ({ user, onSignOut, onDashboard }) => {
 };
 
 // ── Navbar ────────────────────────────────────────────────────────────────────
-const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, onDashboard }) => (
+const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, onDashboard, onHome }) => (
   <nav style={{
     position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
     height: 56, display: 'flex', alignItems: 'center',
@@ -1089,13 +1089,18 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, on
     background: P.surface,
     borderBottom: `1px solid ${P.border}`,
   }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+    <a
+      href="/"
+      onClick={(e) => { e.preventDefault(); onHome?.(); }}
+      aria-label={`Go to ${BRAND_NAME} home`}
+      style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}
+    >
       <img
         src={FOOTER_LOGO_SRC}
         alt={BRAND_NAME}
         style={{ height: 40, width: 'auto', display: 'block' }}
       />
-    </div>
+    </a>
 
     <div style={{ flex: 1 }} />
 
@@ -1304,6 +1309,14 @@ const App = () => {
     setQaQuestion(''); setQaMessages([]);
     setChapters([]); setShowChapters(false);
     setQuotes([]); setShowQuotes(false);
+  };
+
+  const goHome = () => {
+    setView('app');
+    setShowAuthModal(false);
+    setShowPasswordReset(false);
+    resetAll();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const askQuestion = async (overrideQ) => {
@@ -1563,6 +1576,7 @@ const App = () => {
         onSignIn={() => setShowAuthModal(true)}
         onSignOut={handleSignOut}
         onDashboard={() => setView('dashboard')}
+        onHome={goHome}
       />
 
       {showAuthModal && (
