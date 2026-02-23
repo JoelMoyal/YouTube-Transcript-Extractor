@@ -811,9 +811,10 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
 
   const [tab, setTab] = React.useState('overview');
   const used      = credits?.used ?? 0;
+  const tierMax   = CREDITS_MAX; // Dashboard is only for signed-in users
   const resetAt   = credits?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS);
   const daysLeft  = Math.max(0, Math.ceil((resetAt - Date.now()) / 86400000));
-  const pct       = Math.min(100, (used / CREDITS_MAX) * 100);
+  const pct       = Math.min(100, (used / tierMax) * 100);
   const memberSince = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—';
   const initial   = (user.email || '?')[0].toUpperCase();
 
