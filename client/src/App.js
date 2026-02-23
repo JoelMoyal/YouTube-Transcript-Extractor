@@ -216,20 +216,17 @@ const CREDITS_PERIOD_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 function initCredits() {
   try {
-    let stored = JSON.parse(localStorage.getItem('yte_credits') || 'null');
     const max = CREDITS_FREE;
+    let stored = JSON.parse(localStorage.getItem('yte_credits') || 'null');
     if (!stored || typeof stored.resetAt !== 'number' || Date.now() > stored.resetAt) {
       stored = { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
-      localStorage.setItem('yte_credits', JSON.stringify(stored));
     }
-    // Clamp to free tier
-    if (stored.used > max) {
-      stored = { ...stored, used: max };
-      localStorage.setItem('yte_credits', JSON.stringify(stored));
-    }
+    if (stored.used > max) stored = { ...stored, used: max };
+    stored = { ...stored, tierMax: max, userId: null };
+    localStorage.setItem('yte_credits', JSON.stringify(stored));
     return stored;
   } catch {
-    return { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
+    return { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS, tierMax: CREDITS_FREE, userId: null };
   }
 }
 
@@ -1244,13 +1241,20 @@ const App = () => {
         }
       }
 
+      const tierMax = user ? CREDITS_MAX : CREDITS_FREE;
+
       if (!stored || typeof stored.resetAt !== 'number' || Date.now() > stored.resetAt) {
         stored = { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
       }
 
+      if (stored.used > tierMax) stored = { ...stored, used: tierMax };
+
+      stored = { ...stored, tierMax, userId: user ? user.id : null };
       localStorage.setItem(key, JSON.stringify(stored));
       setCredits(stored);
-    } catch { setCredits({ used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS }); }
+    } catch {
+      setCredits({ used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS, tierMax: user ? CREDITS_MAX : CREDITS_FREE, userId: user ? user.id : null });
+    }
   }, [user]);
 
   // Re-init history keyed by user when auth changes
@@ -1272,7 +1276,7 @@ const App = () => {
   const incrementCredits = () => {
     setCredits(prev => {
       const max = user ? CREDITS_MAX : CREDITS_FREE;
-      const next = { ...prev, used: Math.min(max, prev.used + 1) };
+      const next = { ...prev, used: Math.min(max, prev.used + 1), tierMax: max, userId: user?.id ?? null };
       const key = user ? `yte_credits_${user.id}` : 'yte_credits';
       localStorage.setItem(key, JSON.stringify(next));
       return next;
