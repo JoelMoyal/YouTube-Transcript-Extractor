@@ -711,6 +711,21 @@ const PasswordResetModal = ({ onClose }) => {
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript, onChangePassword }) => {
+  // Keep the dashboard on the updated ScribeSnap brand palette
+  const P = {
+    paper:       '#F6F2EA',
+    surface:     '#FBF7F0',
+    border:      '#E5DDCF',
+    ink:         '#1D1D1F',
+    muted:       '#5A5960',
+    accent:      '#3C8CFF',
+    accentHover: '#1F6BFF',
+    accentLight: 'rgba(123,211,255,0.22)',
+    success:     '#0F766E',
+    warning:     '#B45309',
+    error:       '#B42318',
+  };
+
   const [tab, setTab] = React.useState('overview');
   const used      = credits?.used ?? 0;
   const resetAt   = credits?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS);
