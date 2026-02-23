@@ -1815,19 +1815,42 @@ const App = () => {
             </div>{/* end hero-grad */}
 
             {/* How it works */}
-            <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 24px 40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, flexWrap: 'wrap' }}>
+            <div style={{
+              maxWidth: 760,
+              margin: '0 auto',
+              padding: '10px 24px 44px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: 14,
+              justifyItems: 'center'
+            }}>
               {[
                 { num: '1', label: 'Paste a YouTube URL' },
                 { num: '2', label: 'Get the transcript instantly' },
                 { num: '3', label: 'Ask AI anything about it' },
-              ].map((step, i) => (
-                <React.Fragment key={step.num}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: '50%', border: `1.5px solid ${P.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: P.accent, background: P.surface, flexShrink: 0 }}>{step.num}</div>
-                    <span style={{ fontSize: 13.5, fontWeight: 500, color: P.ink }}>{step.label}</span>
-                  </div>
-                  {i < 2 && <div style={{ width: 32, height: 1, background: P.border, margin: '0 8px', flexShrink: 0 }} />}
-                </React.Fragment>
+              ].map(step => (
+                <div key={step.num} style={{
+                  width: '100%',
+                  background: P.surface,
+                  border: `1px solid ${P.border}`,
+                  borderRadius: 14,
+                  padding: '14px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  boxShadow: '0 6px 24px rgba(28,25,23,0.06)'
+                }}>
+                  <div style={{
+                    width: 34, height: 34, borderRadius: 10,
+                    background: P.accentLight,
+                    border: `1px solid ${P.border}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 14, fontWeight: 800, color: P.accent, flexShrink: 0
+                  }}>{step.num}</div>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: P.ink, letterSpacing: '-0.01em' }}>
+                    {step.label}
+                  </span>
+                </div>
               ))}
             </div>
 
