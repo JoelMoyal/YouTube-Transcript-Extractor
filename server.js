@@ -549,9 +549,14 @@ app.post('/api/ask', async (req, res) => {
   }
 });
 
-// Handle all other requests with React app
+// Unknown API routes should return JSON 404
+app.all('/api/*', (_req, res) => {
+  res.status(404).json({ error: 'API route not found' });
+});
+
+// Unknown web routes get branded 404 page
 app.get('*', (_req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+  res.status(404).sendFile(path.join(__dirname, 'client/build', '404.html'));
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
