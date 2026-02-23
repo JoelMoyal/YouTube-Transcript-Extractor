@@ -14,6 +14,7 @@ RUN npm ci --only=production
 
 # Copy server and pre-built React app
 COPY server.js ./
+COPY client/public ./client/public
 COPY client/build ./client/build
 
 EXPOSE 3000
