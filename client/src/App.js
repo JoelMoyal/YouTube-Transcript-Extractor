@@ -91,28 +91,41 @@ const AUTH_URL_KEYS = [
   'provider_token',
   'provider_refresh_token',
   'code',
+  'token_hash',
   'type',
   'mode',
+  'action',
   'reset',
   'error',
   'error_code',
   'error_description',
   'state',
+  'sb',
 ];
 
 function getAuthUrlState() {
-  if (typeof window === 'undefined') return { hasAuthParams: false, isRecovery: false };
+  if (typeof window === 'undefined') return { hasAuthParams: false, isRecovery: false, tokenHash: '' };
   const searchParams = new URLSearchParams(window.location.search);
   const hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+  const getParam = (key) => searchParams.get(key) || hashParams.get(key) || '';
 
   const hasAuthParams = AUTH_URL_KEYS.some((k) => searchParams.has(k) || hashParams.has(k));
-  const type = (searchParams.get('type') || hashParams.get('type') || '').toLowerCase();
-  const mode = (searchParams.get('mode') || hashParams.get('mode') || '').toLowerCase();
-  const action = (searchParams.get('action') || hashParams.get('action') || '').toLowerCase();
-  const resetFlag = (searchParams.get('reset') || hashParams.get('reset') || '').toLowerCase();
+  const hasBlockingAuthParams = [
+    'access_token',
+    'refresh_token',
+    'code',
+    'token_hash',
+    'provider_token',
+    'provider_refresh_token',
+  ].some((k) => searchParams.has(k) || hashParams.has(k));
+  const type = getParam('type').toLowerCase();
+  const mode = getParam('mode').toLowerCase();
+  const action = getParam('action').toLowerCase();
+  const resetFlag = getParam('reset').toLowerCase();
+  const tokenHash = getParam('token_hash');
   const isRecovery = type === 'recovery' || mode === 'recovery' || mode === 'reset' || action === 'reset_password' || resetFlag === '1' || resetFlag === 'true';
 
-  return { hasAuthParams, isRecovery };
+  return { hasAuthParams, hasBlockingAuthParams, isRecovery, tokenHash };
 }
 
 function cleanupAuthUrl() {
@@ -2148,16 +2161,39 @@ const App = () => {
 
   // ── Supabase auth session ──────────────────────────────────────────────────
   useEffect(() => {
-    recoveryIntentRef.current = getAuthUrlState().isRecovery;
+    const authState = getAuthUrlState();
+    recoveryIntentRef.current = authState.isRecovery;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    let mounted = true;
+    const bootstrapAuth = async () => {
+      // Handle recovery links that arrive as token_hash + type=recovery.
+      if (authState.isRecovery && authState.tokenHash) {
+        const { data, error } = await supabase.auth.verifyOtp({
+          type: 'recovery',
+          token_hash: authState.tokenHash,
+        });
+        if (!error && data?.session?.user) {
+          if (!mounted) return;
+          setUser(data.session.user);
+          setShowPasswordReset(true);
+          recoveryIntentRef.current = false;
+          cleanupAuthUrl();
+          return;
+        }
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!mounted) return;
       setUser(session?.user ?? null);
       if (recoveryIntentRef.current && session?.user) {
         setShowPasswordReset(true);
         recoveryIntentRef.current = false;
       }
-      cleanupAuthUrl();
-    });
+      // Avoid stripping auth callback params before session exchange finishes.
+      if (session?.user || !authState.hasBlockingAuthParams) cleanupAuthUrl();
+    };
+    bootstrapAuth();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setShowPasswordReset(true);
@@ -2176,9 +2212,12 @@ const App = () => {
         setShowPasswordReset(true);
         recoveryIntentRef.current = false;
       }
-      cleanupAuthUrl();
+      if (session?.user || !getAuthUrlState().hasBlockingAuthParams) cleanupAuthUrl();
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Re-init credits keyed by user when auth changes
