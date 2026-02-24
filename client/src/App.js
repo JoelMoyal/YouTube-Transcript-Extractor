@@ -71,6 +71,36 @@ function getAuthRedirectUrl() {
   return CANONICAL_APP_ORIGIN;
 }
 
+function cleanupAuthHash() {
+  if (typeof window === 'undefined') return;
+  const hash = window.location.hash;
+  if (!hash || hash.length < 2) return;
+
+  const params = new URLSearchParams(hash.slice(1));
+  const authKeys = [
+    'access_token',
+    'refresh_token',
+    'expires_at',
+    'expires_in',
+    'token_type',
+    'provider_token',
+    'provider_refresh_token',
+    'code',
+    'error',
+    'error_code',
+    'error_description',
+    'state',
+  ];
+
+  const hasAuthParams = authKeys.some((k) => params.has(k));
+  if (!hasAuthParams) return;
+
+  authKeys.forEach((k) => params.delete(k));
+  const leftover = params.toString();
+  const nextUrl = `${window.location.pathname}${window.location.search}${leftover ? `#${leftover}` : ''}`;
+  window.history.replaceState({}, document.title, nextUrl);
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 // Returns { platform: 'youtube'|'vimeo', id, url } or null
 function parseVideoUrl(input) {
@@ -2081,10 +2111,16 @@ const App = () => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      cleanupAuthHash();
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') { setShowPasswordReset(true); return; }
+      if (event === 'PASSWORD_RECOVERY') {
+        setShowPasswordReset(true);
+        cleanupAuthHash();
+        return;
+      }
       setUser(session?.user ?? null);
+      cleanupAuthHash();
     });
     return () => subscription.unsubscribe();
   }, []);
