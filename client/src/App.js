@@ -71,6 +71,17 @@ function getAuthRedirectUrl() {
   return CANONICAL_APP_ORIGIN;
 }
 
+function getPasswordResetRedirectUrl() {
+  const base = getAuthRedirectUrl();
+  try {
+    const u = new URL(base);
+    u.searchParams.set('reset', '1');
+    return u.toString();
+  } catch {
+    return `${base}?reset=1`;
+  }
+}
+
 const AUTH_URL_KEYS = [
   'access_token',
   'refresh_token',
@@ -82,6 +93,7 @@ const AUTH_URL_KEYS = [
   'code',
   'type',
   'mode',
+  'reset',
   'error',
   'error_code',
   'error_description',
@@ -97,7 +109,8 @@ function getAuthUrlState() {
   const type = (searchParams.get('type') || hashParams.get('type') || '').toLowerCase();
   const mode = (searchParams.get('mode') || hashParams.get('mode') || '').toLowerCase();
   const action = (searchParams.get('action') || hashParams.get('action') || '').toLowerCase();
-  const isRecovery = type === 'recovery' || mode === 'recovery' || mode === 'reset' || action === 'reset_password';
+  const resetFlag = (searchParams.get('reset') || hashParams.get('reset') || '').toLowerCase();
+  const isRecovery = type === 'recovery' || mode === 'recovery' || mode === 'reset' || action === 'reset_password' || resetFlag === '1' || resetFlag === 'true';
 
   return { hasAuthParams, isRecovery };
 }
@@ -493,7 +506,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
     e.preventDefault(); setError(''); setLoading(true);
     try {
       const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: getAuthRedirectUrl(),
+        redirectTo: getPasswordResetRedirectUrl(),
       });
       if (err) { setError(friendlyError(err.message)); return; }
       setScreen('forgotSent');
@@ -2604,7 +2617,7 @@ const App = () => {
           onSignOut={handleSignOut}
           onLoadTranscript={loadFromHistory}
           onChangePassword={async () => {
-            const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: getAuthRedirectUrl() });
+            const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: getPasswordResetRedirectUrl() });
             if (error) return { ok: false, error: friendlyError(error.message) };
             return { ok: true };
           }}
