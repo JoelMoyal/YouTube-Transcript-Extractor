@@ -3007,317 +3007,360 @@ const App = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* TRANSCRIPT VIEW */}
+        {/* TRANSCRIPT VIEW — 3-column layout                               */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {transcript && (
-          <div className="fade-up" style={{ maxWidth: 760, margin: '0 auto', padding: '24px 20px 32px' }}>
+          <div className="fade-up" style={{
+            maxWidth: 1300, margin: '0 auto', padding: '20px 20px 48px',
+            display: 'grid',
+            gridTemplateColumns: '210px 1fr 290px',
+            gap: 16, alignItems: 'start',
+          }}>
 
-            {/* Back button */}
-            <button
-              onClick={resetAll}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                marginBottom: 20, border: `1px solid ${P.border}`,
-                background: P.surface, borderRadius: 8,
-                padding: '6px 12px', fontSize: 13, fontWeight: 600, color: P.muted,
-                cursor: 'pointer', transition: 'all 0.15s',
+            {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'sticky', top: 72 }}>
+
+              {/* Back button */}
+              <button onClick={resetAll} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                border: `1px solid ${P.border}`, background: P.surface, borderRadius: 9,
+                padding: '8px 12px', fontSize: 13, fontWeight: 600, color: P.muted,
+                cursor: 'pointer', transition: 'all 0.15s', width: '100%',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
-              onMouseLeave={e => { e.currentTarget.style.background = P.surface; e.currentTarget.style.color = P.muted; }}
-            >
-              <ChevronIcon dir="left" size={12} />
-              New search
-            </button>
-
-            {/* Video thumbnail */}
-            {currentVideoId && (
-              <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}` : `https://youtube.com/watch?v=${currentVideoId}`}
-                target="_blank" rel="noopener noreferrer"
-                style={{ display: 'block', marginBottom: 16, borderRadius: 14, overflow: 'hidden', border: `1px solid ${P.border}`, textDecoration: 'none', position: 'relative' }}>
-                {(currentThumbnail || currentPlatform === 'youtube') && (
-                  <img
-                    src={currentThumbnail || `https://img.youtube.com/vi/${currentVideoId}/mqdefault.jpg`}
-                    alt="Video thumbnail"
-                    style={{ width: '100%', display: 'block', maxHeight: 240, objectFit: 'cover' }}
-                    onError={e => { e.target.style.display = 'none'; }}
-                  />
-                )}
-                <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background: 'rgba(28,25,23,0.15)' }}>
-                  <div style={{ width:48, height:48, borderRadius:'50%', background:'rgba(28,25,23,0.65)', display:'flex', alignItems:'center', justifyContent:'center', backdropFilter:'blur(4px)' }}>
-                    {currentPlatform === 'vimeo'
-                      ? <VimeoIcon size={22} />
-                      : <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
-                  </div>
-                </div>
-                <div style={{ position:'absolute', bottom:10, left:14, display:'flex', alignItems:'center', gap:5, background:'rgba(28,25,23,0.5)', padding:'2px 8px', borderRadius:4 }}>
-                  {currentPlatform === 'vimeo' ? <VimeoIcon size={11} /> : <YouTubeIcon />}
-                  <span style={{ fontSize:11, fontFamily:'monospace', fontWeight:700, color:'rgba(255,255,255,0.9)' }}>{currentVideoId}</span>
-                </div>
-              </a>
-            )}
-
-            {/* Transcript card */}
-            <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 16, overflow: 'hidden', marginBottom: 10 }}>
-
-              {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: P.paper, borderBottom: `1px solid ${P.border}`, flexWrap: 'wrap', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: P.ink }}>Transcript</span>
-                  {transcriptSource === 'whisper' && (
-                    <span style={{ padding: '2px 7px', fontSize: 10, fontWeight: 600, background: `rgba(107,100,92,0.1)`, color: P.muted, borderRadius: 999, border: `1px solid ${P.border}` }}>AI generated</span>
-                  )}
-                  {transcriptSource === 'subtitles' && (
-                    <span style={{ padding: '2px 7px', fontSize: 10, fontWeight: 600, background: `rgba(15,118,110,0.1)`, color: P.success, borderRadius: 999, border: `1px solid rgba(15,118,110,0.2)` }}>From subtitles</span>
-                  )}
-                  <span style={{ fontSize: 11, color: P.muted }}>{wordCount.toLocaleString()} words · {charCount >= 1000 ? `${(charCount/1000).toFixed(1)}k` : charCount} chars · ~{readingMins} min read</span>
-                </div>
-                <div style={{ display: 'flex', gap: 5 }}>
-                  {/* Timestamps toggle */}
-                  {segments.length > 0 && (
-                    <button onClick={() => setShowTimestamps(v => !v)} style={{
-                      display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', borderRadius: 7,
-                      border: `1px solid ${showTimestamps ? 'rgba(45,108,223,0.25)' : P.border}`,
-                      background: showTimestamps ? P.accentLight : P.surface, cursor: 'pointer',
-                      fontSize: 11, fontWeight: 600, color: showTimestamps ? P.accent : P.muted, transition: 'all 0.15s',
-                    }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                      {showTimestamps ? 'TS on' : 'TS off'}
-                    </button>
-                  )}
-                  {/* Summarize */}
-                  <button onClick={summarize} disabled={summarizing} style={{
-                    display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', borderRadius: 7,
-                    border: `1px solid ${P.border}`, background: summarizing ? P.paper : P.surface,
-                    cursor: summarizing ? 'not-allowed' : 'pointer', fontSize: 11, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
-                  }}
-                    onMouseEnter={e => { if (!summarizing) e.currentTarget.style.background = P.paper; }}
-                    onMouseLeave={e => { if (!summarizing) e.currentTarget.style.background = P.surface; }}
-                  >
-                    {summarizing ? <SpinnerIcon size={11} /> : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>}
-                    {summarizing ? 'Summarizing…' : 'Summarize'}
-                  </button>
-                  {/* Copy */}
-                  <button onClick={copyToClipboard} style={{
-                    display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', borderRadius: 7,
-                    border: `1px solid ${copied ? 'rgba(15,118,110,0.25)' : P.border}`,
-                    background: copied ? 'rgba(15,118,110,0.07)' : P.surface,
-                    cursor: 'pointer', fontSize: 11, fontWeight: 600,
-                    color: copied ? P.success : P.muted, transition: 'all 0.15s',
-                  }}>
-                    {copied ? <CheckIcon /> : <CopyIcon />}
-                    {copied ? 'Copied!' : 'Copy'}
-                  </button>
-                  {/* Download */}
-                  <div style={{ position: 'relative' }} ref={downloadMenuRef}>
-                    <button onClick={() => setShowDownloadMenu(v => !v)} style={{
-                      display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', borderRadius: 7,
-                      border: 'none', background: P.ink, color: 'white', cursor: 'pointer',
-                      fontSize: 11, fontWeight: 600, transition: 'background 0.15s',
-                    }}
-                      onMouseEnter={e => { e.currentTarget.style.background = '#2C2926'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = P.ink; }}
-                    >
-                      <DownloadIcon size={11} /> Download <span style={{ opacity: 0.5 }}><ChevronIcon size={11} /></span>
-                    </button>
-                    {showDownloadMenu && (
-                      <div className="fade-up" style={{ position: 'absolute', right: 0, top: 'calc(100% + 6px)', width: 182, background: P.surface, border: `1px solid ${P.border}`, borderRadius: 12, boxShadow: '0 8px 24px rgba(28,25,23,0.1)', overflow: 'hidden', zIndex: 20 }}>
-                        {[
-                          { label: 'Save as TXT', sub: 'Plain text file', fn: downloadTxt },
-                          { label: 'Save as PDF', sub: 'Formatted document', fn: downloadPdf },
-                          { label: 'Copy as Markdown', sub: 'With timestamps', fn: copyAsMarkdown },
-                        ].map((item, i) => (
-                          <React.Fragment key={item.label}>
-                            {i > 0 && <div style={{ height: 1, background: P.border }} />}
-                            <button onClick={item.fn} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 14px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background 0.1s' }}
-                              onMouseEnter={e => e.currentTarget.style.background = P.paper}
-                              onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                            >
-                              <span style={{ color: P.muted }}><DownloadIcon /></span>
-                              <div>
-                                <div style={{ fontSize: 13, fontWeight: 600, color: P.ink }}>{item.label}</div>
-                                <div style={{ fontSize: 11, color: P.muted, marginTop: 1 }}>{item.sub}</div>
-                              </div>
-                            </button>
-                          </React.Fragment>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Search */}
-              <div style={{ padding: '7px 14px', background: P.paper, borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search transcript…"
-                  style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: P.ink }} />
-                {search && matchCount > 0 && <span style={{ fontSize: 11, color: P.muted }}>{matchCount} match{matchCount !== 1 ? 'es' : ''}</span>}
-                {search && <button onClick={() => setSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
-              </div>
-
-              {/* Transcript text */}
-              <div style={{ padding: '18px', maxHeight: 340, overflowY: 'auto', fontSize: 14, lineHeight: 1.85, color: P.ink, background: P.surface }}>
-                {segments.length > 0 && showTimestamps ? (
-                  segments.map((seg, i) => (
-                    <span key={i}>
-                      <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}#t=${seg.seconds}s` : `https://youtube.com/watch?v=${currentVideoId}&t=${seg.seconds}s`} target="_blank" rel="noopener noreferrer"
-                        title={`Jump to ${formatTime(seg.seconds)}`}
-                        style={{ color: P.accent, fontWeight: 700, fontSize: 11, marginRight: 5, textDecoration: 'none', fontFamily: 'monospace' }}>
-                        {formatTime(seg.seconds)}
-                      </a>
-                      {highlightText(seg.text)}{' '}
-                    </span>
-                  ))
-                ) : (
-                  <span>{highlightText(transcript)}</span>
-                )}
-              </div>
-            </div>
-
-            {/* AI Summary panel */}
-            {summary && (
-              <div className="fade-up" style={{ marginBottom: 10, border: `1px solid ${P.border}`, borderRadius: 14, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>AI Summary</span>
-                    <span style={{ fontSize: 11, color: P.muted }}>· {summary.trim().split(/\s+/).length.toLocaleString()} words</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4, border: `1px solid ${P.border}`, background: summaryCopied ? P.paper : P.surface, cursor: 'pointer', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: summaryCopied ? P.success : P.muted, transition: 'all 0.15s' }}>
-                      {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
-                    </button>
-                    <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
-                  </div>
-                </div>
-                <div style={{ padding: '16px 18px', background: P.surface, fontSize: 14, lineHeight: 1.8, color: P.ink, whiteSpace: 'pre-wrap' }}>{summary}</div>
-              </div>
-            )}
-
-            {/* Chapters toggle */}
-            {segments.length > 0 && (
-              <button onClick={() => { if (!showChapters && chapters.length === 0) detectChapters(); else setShowChapters(v => !v); }}
-                style={pillBtn(showChapters)}
-                onMouseEnter={e => { if (!showChapters) { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; } }}
-                onMouseLeave={e => { if (!showChapters) { e.currentTarget.style.background = P.surface; e.currentTarget.style.color = P.muted; } }}
+                onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+                onMouseLeave={e => { e.currentTarget.style.background = P.surface; e.currentTarget.style.color = P.muted; }}
               >
-                {chaptersLoading ? <SpinnerIcon size={12} /> : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>}
-                {chaptersLoading ? 'Detecting chapters…' : showChapters ? 'Hide Chapters' : 'Detect Chapters'}
-                {!chaptersLoading && <span style={{ opacity: 0.4, transform: showChapters ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>}
+                <ChevronIcon dir="left" size={12} /> New search
               </button>
-            )}
 
-            {/* Chapters panel */}
-            {showChapters && chapters.length > 0 && (
-              <div className="fade-up" style={{ marginTop: 8, marginBottom: 2, border: `1px solid ${P.border}`, borderRadius: 14, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>Chapters</span>
-                    <span style={{ fontSize: 11, color: P.muted }}>· {chapters.filter(c => !c.isError).length} detected · click to jump</span>
-                  </div>
-                  <button onClick={detectChapters} disabled={chaptersLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Refresh</button>
+              {/* Export card */}
+              <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 12, overflow: 'hidden' }}>
+                <div style={{ padding: '9px 13px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Export</span>
                 </div>
-                <div style={{ background: P.surface, padding: '6px 0' }}>
-                  {chapters.map((ch, i) => (
-                    ch.isError ? (
-                      <div key={i} style={{ padding: '8px 16px', fontSize: 12, color: P.error }}>{ch.title}</div>
-                    ) : (
-                      <a key={i} href={`https://youtube.com/watch?v=${currentVideoId}&t=${ch.seconds}s`} target="_blank" rel="noopener noreferrer"
-                        style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 16px', textDecoration: 'none', transition: 'background 0.1s' }}
+                <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {[
+                    { label: 'Save as TXT', icon: <DownloadIcon size={12} />, fn: downloadTxt },
+                    { label: 'Save as PDF', icon: <DownloadIcon size={12} />, fn: downloadPdf },
+                    { label: 'Copy as Markdown', icon: <CopyIcon />, fn: copyAsMarkdown },
+                    { label: copied ? 'Copied!' : 'Copy text', icon: copied ? <CheckIcon /> : <CopyIcon />, fn: copyToClipboard },
+                  ].map(item => (
+                    <button key={item.label} onClick={item.fn} style={{
+                      display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px',
+                      borderRadius: 7, border: `1px solid ${P.border}`, background: P.paper,
+                      cursor: 'pointer', fontSize: 12, fontWeight: 500, color: P.muted,
+                      transition: 'all 0.15s', textAlign: 'left', width: '100%',
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.25)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}
+                    >
+                      <span style={{ color: 'inherit', flexShrink: 0 }}>{item.icon}</span>
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* History card */}
+              {history.length > 0 && (
+                <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 12, overflow: 'hidden' }}>
+                  <div style={{ padding: '9px 13px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>History</span>
+                  </div>
+                  <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+                    {history.map((entry, idx) => (
+                      <div key={entry.id}
+                        onClick={() => loadFromHistory(entry)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
+                          cursor: 'pointer', transition: 'background 0.1s',
+                          borderBottom: idx < history.length - 1 ? `1px solid ${P.border}` : 'none',
+                        }}
                         onMouseEnter={e => e.currentTarget.style.background = P.paper}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
-                        <span style={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 700, color: P.accent, flexShrink: 0, minWidth: 36 }}>{formatTime(ch.seconds)}</span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: P.ink }}>{ch.title}</span>
-                        <svg style={{ marginLeft: 'auto', color: P.border, flexShrink: 0 }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                      </a>
-                    )
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Quotes toggle */}
-            <button onClick={() => { if (!showQuotes && quotes.length === 0) extractQuotes(); else setShowQuotes(v => !v); }}
-              style={pillBtn(showQuotes)}
-              onMouseEnter={e => { if (!showQuotes) { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; } }}
-              onMouseLeave={e => { if (!showQuotes) { e.currentTarget.style.background = P.surface; e.currentTarget.style.color = P.muted; } }}
-            >
-              {quotesLoading ? <SpinnerIcon size={12} /> : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>}
-              {quotesLoading ? 'Extracting quotes…' : showQuotes ? 'Hide Key Quotes' : 'Extract Key Quotes'}
-              {!quotesLoading && <span style={{ opacity: 0.4, transform: showQuotes ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>}
-            </button>
-
-            {/* Quotes panel */}
-            {showQuotes && quotes.length > 0 && (
-              <div className="fade-up" style={{ marginTop: 8, marginBottom: 2, border: `1px solid ${P.border}`, borderRadius: 14, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>Key Quotes</span>
-                    <span style={{ fontSize: 11, color: P.muted }}>· {quotes.filter(q => !q.startsWith('Error:')).length} quotes</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button onClick={() => { navigator.clipboard.writeText(quotes.map(q => `"${q}"`).join('\n\n')).then(() => { setQuotesCopied(true); setTimeout(() => setQuotesCopied(false), 2000); }); }}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4, border: `1px solid ${P.border}`, background: quotesCopied ? P.paper : P.surface, cursor: 'pointer', borderRadius: 6, padding: '3px 8px', fontSize: 11, fontWeight: 600, color: quotesCopied ? P.success : P.muted, transition: 'all 0.15s' }}>
-                      {quotesCopied ? <CheckIcon /> : <CopyIcon />} {quotesCopied ? 'Copied!' : 'Copy all'}
-                    </button>
-                    <button onClick={extractQuotes} disabled={quotesLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Refresh</button>
-                  </div>
-                </div>
-                <div style={{ background: P.surface, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {quotes.map((q, i) => (
-                    q.startsWith('Error:') ? (
-                      <div key={i} style={{ fontSize: 12, color: P.error }}>{q}</div>
-                    ) : (
-                      <div key={i} style={{ position: 'relative', padding: '10px 14px 10px 20px', background: P.paper, borderRadius: 8, borderLeft: `3px solid ${P.border}`, fontSize: 14, lineHeight: 1.7, color: P.ink, fontStyle: 'italic' }}>
-                        <span style={{ position: 'absolute', top: 6, left: -1, fontSize: 22, color: P.border, fontStyle: 'normal', lineHeight: 1 }}>"</span>
-                        {q}
+                        {entry.thumbnail ? (
+                          <img src={entry.thumbnail} alt="" style={{ width: 46, height: 30, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} onError={e => { e.target.style.display = 'none'; }} />
+                        ) : (
+                          <div style={{ width: 46, height: 30, borderRadius: 4, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <YouTubeIcon />
+                          </div>
+                        )}
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: P.ink, fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.id}</div>
+                          <div style={{ fontSize: 10, color: P.muted }}>{timeAgo(entry.date)}</div>
+                        </div>
                       </div>
-                    )
-                  ))}
+                    ))}
+                  </div>
                 </div>
+              )}
+            </div>
+
+            {/* ── CENTER MAIN ───────────────────────────────────────────────────── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+
+              {/* Video thumbnail */}
+              {currentVideoId && (
+                <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}` : `https://youtube.com/watch?v=${currentVideoId}`}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{ display: 'block', borderRadius: 14, overflow: 'hidden', border: `1px solid ${P.border}`, textDecoration: 'none', position: 'relative' }}>
+                  {(currentThumbnail || currentPlatform === 'youtube') && (
+                    <img
+                      src={currentThumbnail || `https://img.youtube.com/vi/${currentVideoId}/mqdefault.jpg`}
+                      alt="Video thumbnail"
+                      style={{ width: '100%', display: 'block', maxHeight: 220, objectFit: 'cover' }}
+                      onError={e => { e.target.style.display = 'none'; }}
+                    />
+                  )}
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(28,25,23,0.15)' }}>
+                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(28,25,23,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>
+                      {currentPlatform === 'vimeo'
+                        ? <VimeoIcon size={20} />
+                        : <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
+                    </div>
+                  </div>
+                  <div style={{ position: 'absolute', bottom: 8, left: 12, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(28,25,23,0.5)', padding: '2px 8px', borderRadius: 4 }}>
+                    {currentPlatform === 'vimeo' ? <VimeoIcon size={11} /> : <YouTubeIcon />}
+                    <span style={{ fontSize: 11, fontFamily: 'monospace', fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>{currentVideoId}</span>
+                  </div>
+                </a>
+              )}
+
+              {/* Stats + controls bar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 13px', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 10, flexWrap: 'wrap' }}>
+                {transcriptSource === 'whisper' && (
+                  <span style={{ padding: '2px 7px', fontSize: 10, fontWeight: 600, background: 'rgba(107,100,92,0.1)', color: P.muted, borderRadius: 999, border: `1px solid ${P.border}` }}>AI generated</span>
+                )}
+                {transcriptSource === 'subtitles' && (
+                  <span style={{ padding: '2px 7px', fontSize: 10, fontWeight: 600, background: 'rgba(15,118,110,0.1)', color: P.success, borderRadius: 999, border: `1px solid rgba(15,118,110,0.2)` }}>From subtitles</span>
+                )}
+                <span style={{ fontSize: 12, color: P.muted }}>{wordCount.toLocaleString()} words</span>
+                <span style={{ color: P.border, fontSize: 11 }}>·</span>
+                <span style={{ fontSize: 12, color: P.muted }}>{charCount >= 1000 ? `${(charCount / 1000).toFixed(1)}k` : charCount} chars</span>
+                <span style={{ color: P.border, fontSize: 11 }}>·</span>
+                <span style={{ fontSize: 12, color: P.muted }}>~{readingMins} min read</span>
+                {segments.length > 0 && (
+                  <button onClick={() => setShowTimestamps(v => !v)} style={{
+                    marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 6,
+                    border: `1px solid ${showTimestamps ? 'rgba(45,108,223,0.25)' : P.border}`,
+                    background: showTimestamps ? P.accentLight : P.surface, cursor: 'pointer',
+                    fontSize: 11, fontWeight: 600, color: showTimestamps ? P.accent : P.muted, transition: 'all 0.15s',
+                  }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Timestamps
+                  </button>
+                )}
               </div>
-            )}
 
-            {/* Q&A toggle */}
-            <button
-              onClick={() => { setShowQA(v => !v); setTimeout(() => { qaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); qaInputRef.current?.focus(); }, 80); }}
-              style={{
-                ...pillBtn(showQA),
-                border: `1px solid ${showQA ? 'rgba(45,108,223,0.25)' : P.border}`,
-                background: showQA ? P.accentLight : P.surface,
-                color: showQA ? P.accent : P.muted,
-              }}
-              onMouseEnter={e => { if (!showQA) { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; } }}
-              onMouseLeave={e => { if (!showQA) { e.currentTarget.style.background = P.surface; e.currentTarget.style.color = P.muted; } }}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              {showQA ? 'Hide Q&A' : 'Ask AI about this transcript'}
-              <span style={{ opacity: 0.4, transform: showQA ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><ChevronIcon /></span>
-            </button>
+              {/* Tab bar: Transcript | Chapters */}
+              <div style={{ display: 'flex', background: P.paper, borderRadius: 10, padding: 3, border: `1px solid ${P.border}`, gap: 2 }}>
+                {[
+                  { key: 'transcript', label: 'Transcript' },
+                  { key: 'chapters', label: chapters.length > 0 ? `Chapters (${chapters.filter(c => !c.isError).length})` : 'Chapters' },
+                ].map(tab => (
+                  <button key={tab.key} onClick={() => {
+                    setActiveTab(tab.key);
+                    if (tab.key === 'chapters' && chapters.length === 0 && !chaptersLoading) detectChapters();
+                  }} style={{
+                    flex: 1, padding: '7px 0', borderRadius: 8, border: 'none',
+                    background: activeTab === tab.key ? P.surface : 'transparent',
+                    color: activeTab === tab.key ? P.ink : P.muted,
+                    fontSize: 13, fontWeight: activeTab === tab.key ? 600 : 400,
+                    cursor: 'pointer', transition: 'all 0.15s',
+                    boxShadow: activeTab === tab.key ? '0 1px 4px rgba(28,25,23,0.08)' : 'none',
+                  }}>{tab.label}</button>
+                ))}
+              </div>
 
-            {/* Q&A panel */}
-            {showQA && (
-              <div ref={qaRef} className="fade-up" style={{ marginTop: 8, border: `1px solid rgba(45,108,223,0.2)`, borderRadius: 14, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '11px 16px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: P.accent }}>Ask AI</span>
-                  <span style={{ fontSize: 11, color: P.muted }}>· answers based on this transcript only</span>
+              {/* Transcript tab */}
+              {activeTab === 'transcript' && (
+                <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14, overflow: 'hidden' }}>
+                  <div style={{ padding: '7px 14px', background: P.paper, borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search transcript…"
+                      style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12, color: P.ink }} />
+                    {search && matchCount > 0 && <span style={{ fontSize: 11, color: P.muted }}>{matchCount} match{matchCount !== 1 ? 'es' : ''}</span>}
+                    {search && <button onClick={() => setSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
+                  </div>
+                  <div style={{ padding: '18px', maxHeight: 480, overflowY: 'auto', fontSize: 14, lineHeight: 1.85, color: P.ink, background: P.surface }}>
+                    {segments.length > 0 && showTimestamps ? (
+                      segments.map((seg, i) => (
+                        <span key={i}>
+                          <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}#t=${seg.seconds}s` : `https://youtube.com/watch?v=${currentVideoId}&t=${seg.seconds}s`}
+                            target="_blank" rel="noopener noreferrer"
+                            title={`Jump to ${formatTime(seg.seconds)}`}
+                            style={{ color: P.accent, fontWeight: 700, fontSize: 11, marginRight: 5, textDecoration: 'none', fontFamily: 'monospace' }}>
+                            {formatTime(seg.seconds)}
+                          </a>
+                          {highlightText(seg.text)}{' '}
+                        </span>
+                      ))
+                    ) : (
+                      <span>{highlightText(transcript)}</span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Chapters tab */}
+              {activeTab === 'chapters' && (
+                <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14, overflow: 'hidden' }}>
+                  {chaptersLoading ? (
+                    <div style={{ padding: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: P.muted, fontSize: 13 }}>
+                      <SpinnerIcon size={14} /> Detecting chapters…
+                    </div>
+                  ) : chapters.length > 0 ? (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>{chapters.filter(c => !c.isError).length} chapters · click to jump</span>
+                        <button onClick={detectChapters} disabled={chaptersLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Refresh</button>
+                      </div>
+                      <div style={{ padding: '4px 0' }}>
+                        {chapters.map((ch, i) => (
+                          ch.isError ? (
+                            <div key={i} style={{ padding: '8px 16px', fontSize: 12, color: P.error }}>{ch.title}</div>
+                          ) : (
+                            <a key={i} href={`https://youtube.com/watch?v=${currentVideoId}&t=${ch.seconds}s`} target="_blank" rel="noopener noreferrer"
+                              style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '11px 16px', textDecoration: 'none', transition: 'background 0.1s', borderBottom: `1px solid ${P.border}` }}
+                              onMouseEnter={e => e.currentTarget.style.background = P.paper}
+                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                            >
+                              <span style={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 700, color: P.accent, flexShrink: 0, minWidth: 36 }}>{formatTime(ch.seconds)}</span>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: P.ink }}>{ch.title}</span>
+                              <svg style={{ marginLeft: 'auto', color: P.border, flexShrink: 0 }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            </a>
+                          )
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 13, color: P.muted }}>No chapters detected yet.</span>
+                      <button onClick={detectChapters} style={{
+                        padding: '8px 18px', borderRadius: 8, border: `1px solid ${P.border}`,
+                        background: P.paper, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: P.ink, transition: 'all 0.15s',
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.25)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.border; }}
+                      >Detect Chapters</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* ── RIGHT SIDEBAR — Insights + Ask Anything ───────────────────────── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'sticky', top: 72 }}>
+
+              <div style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.07em', paddingLeft: 2 }}>Insights</div>
+
+              {/* AI Summary card */}
+              <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 12, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 13px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>AI Summary</span>
+                    {summary && <span style={{ fontSize: 10, color: P.muted }}>· {summary.trim().split(/\s+/).length} words</span>}
+                  </div>
+                  {summary && (
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 3, border: `1px solid ${P.border}`, background: summaryCopied ? P.paper : P.surface, cursor: 'pointer', borderRadius: 5, padding: '2px 7px', fontSize: 10, fontWeight: 600, color: summaryCopied ? P.success : P.muted, transition: 'all 0.15s' }}>
+                        {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
+                      </button>
+                      <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 16, lineHeight: 1, padding: '0 2px' }}>×</button>
+                    </div>
+                  )}
+                </div>
+                {summary ? (
+                  <div style={{ padding: '12px 13px', background: P.surface, fontSize: 12.5, lineHeight: 1.75, color: P.ink, maxHeight: 220, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>{summary}</div>
+                ) : (
+                  <div style={{ padding: '10px 12px' }}>
+                    <button onClick={summarize} disabled={summarizing} style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%',
+                      padding: '8px 14px', borderRadius: 8,
+                      border: `1px solid ${summarizing ? P.border : 'rgba(45,108,223,0.25)'}`,
+                      background: summarizing ? P.paper : P.accentLight,
+                      color: summarizing ? P.muted : P.accent,
+                      cursor: summarizing ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 600, transition: 'all 0.15s',
+                    }}
+                      onMouseEnter={e => { if (!summarizing) e.currentTarget.style.background = 'rgba(45,108,223,0.14)'; }}
+                      onMouseLeave={e => { if (!summarizing) e.currentTarget.style.background = P.accentLight; }}
+                    >
+                      {summarizing ? <SpinnerIcon size={11} /> : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>}
+                      {summarizing ? 'Summarizing…' : 'Generate Summary'}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Key Quotes card */}
+              <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 12, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 13px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>Key Quotes</span>
+                    {quotes.filter(q => !q.startsWith('Error:')).length > 0 && <span style={{ fontSize: 10, color: P.muted }}>· {quotes.filter(q => !q.startsWith('Error:')).length}</span>}
+                  </div>
+                  {quotes.length > 0 && (
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button onClick={() => { navigator.clipboard.writeText(quotes.map(q => `"${q}"`).join('\n\n')).then(() => { setQuotesCopied(true); setTimeout(() => setQuotesCopied(false), 2000); }); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 3, border: `1px solid ${P.border}`, background: quotesCopied ? P.paper : P.surface, cursor: 'pointer', borderRadius: 5, padding: '2px 7px', fontSize: 10, fontWeight: 600, color: quotesCopied ? P.success : P.muted, transition: 'all 0.15s' }}>
+                        {quotesCopied ? <CheckIcon /> : <CopyIcon />} {quotesCopied ? 'Copied!' : 'Copy all'}
+                      </button>
+                      <button onClick={extractQuotes} disabled={quotesLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 10, fontWeight: 600, padding: 0 }}>Refresh</button>
+                    </div>
+                  )}
+                </div>
+                {quotes.length > 0 ? (
+                  <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 200, overflowY: 'auto' }}>
+                    {quotes.map((q, i) => (
+                      q.startsWith('Error:') ? (
+                        <div key={i} style={{ fontSize: 11, color: P.error }}>{q}</div>
+                      ) : (
+                        <div key={i} style={{ position: 'relative', padding: '8px 10px 8px 16px', background: P.paper, borderRadius: 7, borderLeft: `2px solid ${P.border}`, fontSize: 12, lineHeight: 1.6, color: P.ink, fontStyle: 'italic' }}>
+                          <span style={{ position: 'absolute', top: 4, left: -1, fontSize: 18, color: P.border, fontStyle: 'normal', lineHeight: 1 }}>"</span>
+                          {q}
+                        </div>
+                      )
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ padding: '10px 12px' }}>
+                    <button onClick={extractQuotes} disabled={quotesLoading} style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%',
+                      padding: '8px 14px', borderRadius: 8, border: `1px solid ${P.border}`,
+                      background: quotesLoading ? P.paper : P.surface, color: P.muted,
+                      cursor: quotesLoading ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 600, transition: 'all 0.15s',
+                    }}
+                      onMouseEnter={e => { if (!quotesLoading) { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; } }}
+                      onMouseLeave={e => { if (!quotesLoading) { e.currentTarget.style.background = P.surface; e.currentTarget.style.color = P.muted; } }}
+                    >
+                      {quotesLoading ? <SpinnerIcon size={11} /> : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>}
+                      {quotesLoading ? 'Extracting…' : 'Extract Key Quotes'}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Ask Anything / Q&A card */}
+              <div ref={qaRef} style={{ background: P.surface, border: `1px solid rgba(45,108,223,0.22)`, borderRadius: 12, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 13px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: P.accent }}>Ask Anything</span>
                   {qaMessages.length > 0 && (
                     <button onClick={() => setQaMessages([])} style={{ marginLeft: 'auto', border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Clear</button>
                   )}
                 </div>
 
-                {/* Question chips in Q&A */}
+                {/* Suggestion chips */}
                 {qaMessages.length === 0 && (
-                  <div style={{ padding: '12px 14px', background: P.surface, borderBottom: `1px solid ${P.border}`, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  <div style={{ padding: '8px 10px', background: P.surface, borderBottom: `1px solid ${P.border}`, display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                     {DEMO_CHIPS.map(chip => (
                       <button key={chip} onClick={() => askQuestion(chip)} style={{
-                        padding: '5px 12px', borderRadius: 999, border: `1px solid ${P.border}`,
-                        background: P.paper, fontSize: 12, color: P.muted, cursor: 'pointer', transition: 'all 0.15s',
+                        padding: '4px 9px', borderRadius: 999, border: `1px solid ${P.border}`,
+                        background: P.paper, fontSize: 11, color: P.muted, cursor: 'pointer', transition: 'all 0.15s',
                       }}
                         onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.color = P.accent; e.currentTarget.style.background = P.accentLight; }}
                         onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = P.muted; e.currentTarget.style.background = P.paper; }}
@@ -3326,43 +3369,43 @@ const App = () => {
                   </div>
                 )}
 
-                {/* Messages */}
+                {/* Chat messages */}
                 {qaMessages.length > 0 && (
-                  <div style={{ maxHeight: 300, overflowY: 'auto', background: P.surface, padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ maxHeight: 260, overflowY: 'auto', background: P.surface, padding: '10px 11px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {qaMessages.map((msg, i) => (
                       <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                         <div style={{
-                          maxWidth: '82%', padding: '9px 13px',
-                          borderRadius: msg.role === 'user' ? '12px 12px 3px 12px' : '12px 12px 12px 3px',
+                          maxWidth: '90%', padding: '8px 11px',
+                          borderRadius: msg.role === 'user' ? '10px 10px 3px 10px' : '10px 10px 10px 3px',
                           background: msg.role === 'user' ? P.accent : (msg.isError ? 'rgba(180,35,24,0.06)' : P.paper),
                           border: msg.role === 'ai' ? `1px solid ${msg.isError ? 'rgba(180,35,24,0.2)' : P.border}` : 'none',
-                          fontSize: 13.5, lineHeight: 1.65,
+                          fontSize: 12.5, lineHeight: 1.6,
                           color: msg.role === 'user' ? 'white' : (msg.isError ? P.error : P.ink),
                         }}>{msg.text}</div>
                       </div>
                     ))}
                     {qaLoading && (
                       <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                        <div style={{ padding: '9px 14px', borderRadius: '12px 12px 12px 3px', background: P.paper, border: `1px solid ${P.border}`, display: 'flex', gap: 4, alignItems: 'center' }}>
-                          {[0, 1, 2].map(d => <div key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, opacity: 0.5, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}
+                        <div style={{ padding: '8px 12px', borderRadius: '10px 10px 10px 3px', background: P.paper, border: `1px solid ${P.border}`, display: 'flex', gap: 4, alignItems: 'center' }}>
+                          {[0, 1, 2].map(d => <div key={d} style={{ width: 5, height: 5, borderRadius: '50%', background: P.accent, opacity: 0.5, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}
                         </div>
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Input */}
-                <div style={{ display: 'flex', gap: 8, padding: '10px 12px', background: qaMessages.length > 0 ? P.paper : P.surface, borderTop: qaMessages.length > 0 ? `1px solid ${P.border}` : 'none' }}>
+                {/* Input row */}
+                <div style={{ display: 'flex', gap: 6, padding: '8px 10px', background: qaMessages.length > 0 ? P.paper : P.surface, borderTop: qaMessages.length > 0 ? `1px solid ${P.border}` : 'none' }}>
                   <input ref={qaInputRef} value={qaQuestion} onChange={e => setQaQuestion(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
                     placeholder="Ask anything about this video…" disabled={qaLoading}
-                    style={{ flex: 1, border: `1.5px solid ${P.border}`, borderRadius: 9, padding: '9px 13px', fontSize: 13, color: P.ink, background: P.surface, outline: 'none', transition: 'border-color 0.15s' }}
+                    style={{ flex: 1, border: `1.5px solid ${P.border}`, borderRadius: 8, padding: '7px 11px', fontSize: 12, color: P.ink, background: P.surface, outline: 'none', transition: 'border-color 0.15s' }}
                     onFocus={e => { e.target.style.borderColor = P.accent; }}
                     onBlur={e => { e.target.style.borderColor = P.border; }}
                   />
                   <button onClick={() => askQuestion()} disabled={!qaQuestion.trim() || qaLoading} style={{
-                    flexShrink: 0, width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    borderRadius: 9, border: 'none',
+                    flexShrink: 0, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    borderRadius: 8, border: 'none',
                     background: !qaQuestion.trim() || qaLoading ? P.border : P.accent,
                     color: !qaQuestion.trim() || qaLoading ? P.muted : 'white',
                     cursor: !qaQuestion.trim() || qaLoading ? 'not-allowed' : 'pointer',
@@ -3372,13 +3415,14 @@ const App = () => {
                     onMouseLeave={e => { if (qaQuestion.trim() && !qaLoading) e.currentTarget.style.background = P.accent; }}
                   >
                     {qaLoading
-                      ? <SpinnerIcon size={14} />
-                      : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      ? <SpinnerIcon size={12} />
+                      : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     }
                   </button>
                 </div>
               </div>
-            )}
+
+            </div>
           </div>
         )}
       </div>
