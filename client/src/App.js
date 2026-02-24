@@ -842,14 +842,7 @@ const PasswordResetModal = ({ onClose }) => {
         ) : (
           <>
             <div style={{ fontSize: 18, fontWeight: 700, color: P.ink, marginBottom: 4 }}>Set new password</div>
-            <div style={{ fontSize: 13, color: P.muted, marginBottom: 6 }}>Choose a new password for your account.</div>
-            <div style={{ marginBottom: 16, textAlign: 'right' }}>
-              <a href="https://pwasecurity.org/#" target="_blank" rel="noopener noreferrer"
-                style={{ fontSize: 11, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
-                onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
-              >🔐 Generate secure password</a>
-            </div>
+            <div style={{ fontSize: 13, color: P.muted, marginBottom: 18 }}>Choose a new password for your account.</div>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>New password</label>
@@ -860,6 +853,13 @@ const PasswordResetModal = ({ onClose }) => {
                 <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>Confirm password</label>
                 <input type="password" required value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repeat new password" style={inputStyle}
                   onFocus={e => { e.target.style.borderColor = P.accent; }} onBlur={e => { e.target.style.borderColor = P.border; }} />
+              </div>
+              <div style={{ marginTop: -2, textAlign: 'right' }}>
+                <a href="https://pwasecurity.org/#" target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: 11, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+                >🔐 Generate secure password</a>
               </div>
               {error && <div style={{ padding: '9px 12px', borderRadius: 8, background: 'rgba(180,35,24,0.07)', border: `1px solid rgba(180,35,24,0.18)`, fontSize: 13, color: P.error }}>{error}</div>}
               <button type="submit" disabled={loading} style={{
