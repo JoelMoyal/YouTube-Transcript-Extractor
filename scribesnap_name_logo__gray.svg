@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 1400 400">
+  <!-- Generator: Adobe Illustrator 30.2.1, SVG Export Plug-In . SVG Version: 2.1.1 Build 1)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: url(#linear-gradient2);
+      }
+
+      .st1 {
+        fill: url(#linear-gradient1);
+      }
+
+      .st2 {
+        fill: #3c8cff;
+      }
+
+      .st2, .st3, .st4 {
+        isolation: isolate;
+      }
+
+      .st2, .st4 {
+        font-family: Helvetica-Bold, Helvetica;
+        font-size: 147.7px;
+        font-weight: 700;
+      }
+
+      .st4 {
+        fill: #717171;
+        stroke: #6b7280;
+        stroke-miterlimit: 10;
+      }
+
+      .st5 {
+        fill: none;
+        stroke: url(#linear-gradient);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 18px;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="1042.5" y1="-365.46" x2="1043.53" y2="-364.43" gradientTransform="translate(-225075 57132.81) scale(216 156)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7bd3ff"/>
+      <stop offset=".55" stop-color="#3c8cff"/>
+      <stop offset="1" stop-color="#1f6bff"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient1" x1="971.28" y1="-360.85" x2="972.86" y2="-359.27" gradientTransform="translate(-13598 5239.46) scale(14)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7bd3ff"/>
+      <stop offset=".55" stop-color="#3c8cff"/>
+      <stop offset="1" stop-color="#1f6bff"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient2" x1="980.72" y1="-360.86" x2="982.3" y2="-359.28" gradientTransform="translate(-13362 5239.46) scale(14)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7bd3ff"/>
+      <stop offset=".55" stop-color="#3c8cff"/>
+      <stop offset="1" stop-color="#1f6bff"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <path class="st5" d="M26.52,198.55c28.08,0,28.08-44.95,56.16-44.95s28.08,112.38,56.16,112.38,28.08-179.8,56.16-179.8,28.08,250.44,56.16,250.44,28.08-199.07,56.16-199.07,28.08,61,56.16,61"/>
+    <ellipse class="st1" cx="10.92" cy="198.55" rx="10.92" ry="11.24"/>
+    <ellipse class="st0" cx="379.1" cy="198.55" rx="10.92" ry="11.24"/>
+  </g>
+  <g>
+    <g class="st3">
+      <text class="st4" transform="translate(447.73 244.74) scale(.97 1)"><tspan x="0" y="0">ScribeSnap</tspan></text>
+    </g>
+    <g class="st3">
+      <text class="st2" transform="translate(1249.27 244.74) scale(.97 1)"><tspan x="0" y="0">.ai</tspan></text>
+    </g>
+  </g>
+</svg>

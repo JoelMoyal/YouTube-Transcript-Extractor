@@ -71,33 +71,58 @@ function getAuthRedirectUrl() {
   return CANONICAL_APP_ORIGIN;
 }
 
-function cleanupAuthHash() {
+const AUTH_URL_KEYS = [
+  'access_token',
+  'refresh_token',
+  'expires_at',
+  'expires_in',
+  'token_type',
+  'provider_token',
+  'provider_refresh_token',
+  'code',
+  'type',
+  'mode',
+  'error',
+  'error_code',
+  'error_description',
+  'state',
+];
+
+function getAuthUrlState() {
+  if (typeof window === 'undefined') return { hasAuthParams: false, isRecovery: false };
+  const searchParams = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+
+  const hasAuthParams = AUTH_URL_KEYS.some((k) => searchParams.has(k) || hashParams.has(k));
+  const type = (searchParams.get('type') || hashParams.get('type') || '').toLowerCase();
+  const mode = (searchParams.get('mode') || hashParams.get('mode') || '').toLowerCase();
+  const action = (searchParams.get('action') || hashParams.get('action') || '').toLowerCase();
+  const isRecovery = type === 'recovery' || mode === 'recovery' || mode === 'reset' || action === 'reset_password';
+
+  return { hasAuthParams, isRecovery };
+}
+
+function cleanupAuthUrl() {
   if (typeof window === 'undefined') return;
-  const hash = window.location.hash;
-  if (!hash || hash.length < 2) return;
+  const url = new URL(window.location.href);
+  const hashParams = new URLSearchParams((url.hash || '').replace(/^#/, ''));
 
-  const params = new URLSearchParams(hash.slice(1));
-  const authKeys = [
-    'access_token',
-    'refresh_token',
-    'expires_at',
-    'expires_in',
-    'token_type',
-    'provider_token',
-    'provider_refresh_token',
-    'code',
-    'error',
-    'error_code',
-    'error_description',
-    'state',
-  ];
+  let changed = false;
+  AUTH_URL_KEYS.forEach((k) => {
+    if (url.searchParams.has(k)) {
+      url.searchParams.delete(k);
+      changed = true;
+    }
+    if (hashParams.has(k)) {
+      hashParams.delete(k);
+      changed = true;
+    }
+  });
+  if (!changed) return;
 
-  const hasAuthParams = authKeys.some((k) => params.has(k));
-  if (!hasAuthParams) return;
-
-  authKeys.forEach((k) => params.delete(k));
-  const leftover = params.toString();
-  const nextUrl = `${window.location.pathname}${window.location.search}${leftover ? `#${leftover}` : ''}`;
+  const search = url.searchParams.toString();
+  const hash = hashParams.toString();
+  const nextUrl = `${url.pathname}${search ? `?${search}` : ''}${hash ? `#${hash}` : ''}`;
   window.history.replaceState({}, document.title, nextUrl);
 }
 
@@ -2083,6 +2108,7 @@ const App = () => {
   const qaInputRef      = useRef(null);
   const urlInputRef     = useRef(null);
   const qaRef           = useRef(null);
+  const recoveryIntentRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -2109,18 +2135,35 @@ const App = () => {
 
   // ── Supabase auth session ──────────────────────────────────────────────────
   useEffect(() => {
+    recoveryIntentRef.current = getAuthUrlState().isRecovery;
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      cleanupAuthHash();
+      if (recoveryIntentRef.current && session?.user) {
+        setShowPasswordReset(true);
+        recoveryIntentRef.current = false;
+      }
+      cleanupAuthUrl();
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setShowPasswordReset(true);
-        cleanupAuthHash();
+        recoveryIntentRef.current = false;
+        cleanupAuthUrl();
         return;
       }
+
+      const shouldOpenRecoveryModal = (
+        recoveryIntentRef.current &&
+        !!session?.user &&
+        (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')
+      );
       setUser(session?.user ?? null);
-      cleanupAuthHash();
+      if (shouldOpenRecoveryModal) {
+        setShowPasswordReset(true);
+        recoveryIntentRef.current = false;
+      }
+      cleanupAuthUrl();
     });
     return () => subscription.unsubscribe();
   }, []);
