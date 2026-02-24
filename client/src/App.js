@@ -2136,6 +2136,7 @@ const App = () => {
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [showQuotes, setShowQuotes]       = useState(false);
   const [quotesCopied, setQuotesCopied]   = useState(false);
+  const [activeTab, setActiveTab]         = useState('transcript'); // 'transcript' | 'chapters'
 
   const downloadMenuRef = useRef(null);
   const qaInputRef      = useRef(null);
@@ -2333,6 +2334,7 @@ const App = () => {
     setQaQuestion(''); setQaMessages([]);
     setChapters([]); setShowChapters(false);
     setQuotes([]); setShowQuotes(false);
+    setActiveTab('transcript');
   };
 
   const goHome = () => {
