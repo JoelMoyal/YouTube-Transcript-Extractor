@@ -12,21 +12,26 @@
       }
 
       .st2 {
-        fill: #1d1d1f;
-      }
-
-      .st2, .st3 {
-        font-family: Helvetica-Bold, Helvetica;
-        font-size: 147.7px;
-        font-weight: 700;
-        isolation: isolate;
-      }
-
-      .st3 {
         fill: #3c8cff;
       }
 
+      .st2, .st3, .st4 {
+        isolation: isolate;
+      }
+
+      .st2, .st4 {
+        font-family: Helvetica-Bold, Helvetica;
+        font-size: 147.7px;
+        font-weight: 700;
+      }
+
       .st4 {
+        fill: #717171;
+        stroke: #6b7280;
+        stroke-miterlimit: 10;
+      }
+
+      .st5 {
         fill: none;
         stroke: url(#linear-gradient);
         stroke-linecap: round;
@@ -34,29 +39,33 @@
         stroke-width: 18px;
       }
     </style>
-    <linearGradient id="linear-gradient" x1="400.48" y1="619.53" x2="401.51" y2="618.5" gradientTransform="translate(-86400 96767.81) scale(216 -156)" gradientUnits="userSpaceOnUse">
+    <linearGradient id="linear-gradient" x1="1042.5" y1="-365.46" x2="1043.53" y2="-364.43" gradientTransform="translate(-225075 57132.81) scale(216 156)" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#7bd3ff"/>
       <stop offset=".55" stop-color="#3c8cff"/>
       <stop offset="1" stop-color="#1f6bff"/>
     </linearGradient>
-    <linearGradient id="linear-gradient1" x1="372.35" y1="605.5" x2="373.93" y2="603.92" gradientTransform="translate(-5213 8664.46) scale(14 -14)" gradientUnits="userSpaceOnUse">
+    <linearGradient id="linear-gradient1" x1="971.28" y1="-360.85" x2="972.86" y2="-359.27" gradientTransform="translate(-13598 5239.46) scale(14)" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#7bd3ff"/>
       <stop offset=".55" stop-color="#3c8cff"/>
       <stop offset="1" stop-color="#1f6bff"/>
     </linearGradient>
-    <linearGradient id="linear-gradient2" x1="381.79" y1="605.5" x2="383.37" y2="603.92" gradientTransform="translate(-4977 8664.46) scale(14 -14)" gradientUnits="userSpaceOnUse">
+    <linearGradient id="linear-gradient2" x1="980.72" y1="-360.86" x2="982.3" y2="-359.28" gradientTransform="translate(-13362 5239.46) scale(14)" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#7bd3ff"/>
       <stop offset=".55" stop-color="#3c8cff"/>
       <stop offset="1" stop-color="#1f6bff"/>
     </linearGradient>
   </defs>
   <g>
-    <path class="st4" d="M26.52,198.55c28.08,0,28.08-44.95,56.16-44.95s28.08,112.38,56.16,112.38,28.08-179.8,56.16-179.8,28.08,250.44,56.16,250.44,28.08-199.07,56.16-199.07,28.08,61,56.16,61"/>
+    <path class="st5" d="M26.52,198.55c28.08,0,28.08-44.95,56.16-44.95s28.08,112.38,56.16,112.38,28.08-179.8,56.16-179.8,28.08,250.44,56.16,250.44,28.08-199.07,56.16-199.07,28.08,61,56.16,61"/>
     <ellipse class="st1" cx="10.92" cy="198.55" rx="10.92" ry="11.24"/>
     <ellipse class="st0" cx="379.1" cy="198.55" rx="10.92" ry="11.24"/>
   </g>
   <g>
-    <text class="st2" transform="translate(447.73 244.74) scale(.97 1)"><tspan x="0" y="0">ScribeSnap</tspan></text>
-    <text class="st3" transform="translate(1249.27 244.74) scale(.97 1)"><tspan x="0" y="0">.ai</tspan></text>
+    <g class="st3">
+      <text class="st4" transform="translate(447.73 244.74) scale(.97 1)"><tspan x="0" y="0">ScribeSnap</tspan></text>
+    </g>
+    <g class="st3">
+      <text class="st2" transform="translate(1249.27 244.74) scale(.97 1)"><tspan x="0" y="0">.ai</tspan></text>
+    </g>
   </g>
 </svg>
