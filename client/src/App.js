@@ -842,7 +842,14 @@ const PasswordResetModal = ({ onClose }) => {
         ) : (
           <>
             <div style={{ fontSize: 18, fontWeight: 700, color: P.ink, marginBottom: 4 }}>Set new password</div>
-            <div style={{ fontSize: 13, color: P.muted, marginBottom: 20 }}>Choose a new password for your account.</div>
+            <div style={{ fontSize: 13, color: P.muted, marginBottom: 6 }}>Choose a new password for your account.</div>
+            <div style={{ marginBottom: 16, textAlign: 'right' }}>
+              <a href="https://pwasecurity.org/#" target="_blank" rel="noopener noreferrer"
+                style={{ fontSize: 11, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
+                onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+              >🔐 Generate secure password</a>
+            </div>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
                 <label style={{ fontSize: 12, fontWeight: 600, color: P.ink, display: 'block', marginBottom: 5 }}>New password</label>
