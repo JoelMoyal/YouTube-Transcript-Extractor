@@ -2203,10 +2203,18 @@ const App = () => {
     }
 
     const createPlayer = () => {
-      const container = ytPlayerDivRef.current;
-      if (!container || !window.YT?.Player) return;
-      ytPlayerRef.current = new window.YT.Player(container, {
+      const wrapper = ytPlayerDivRef.current;
+      if (!wrapper || !window.YT?.Player) return;
+      // YT.Player replaces its target element with an <iframe>.
+      // We must give it an inner div (not the React-managed wrapper) so React
+      // doesn't destroy the iframe on the next re-render (e.g. when playingSegment updates).
+      wrapper.innerHTML = '';
+      const innerDiv = document.createElement('div');
+      wrapper.appendChild(innerDiv);
+      ytPlayerRef.current = new window.YT.Player(innerDiv, {
         videoId: currentVideoId,
+        width: '100%',
+        height: '100%',
         playerVars: { rel: 0, modestbranding: 1 },
         events: {
           onStateChange: (e) => {
@@ -2226,10 +2234,10 @@ const App = () => {
                   playingSegmentRef.current = idx;
                   setPlayingSegment(idx);
                   const el = segmentRefs.current[idx];
-                  const container = transcriptListRef.current;
-                  if (el && container) {
-                    const scrollTarget = el.offsetTop - container.clientHeight / 3;
-                    container.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+                  const listEl = transcriptListRef.current;
+                  if (el && listEl) {
+                    const scrollTarget = el.offsetTop - listEl.clientHeight / 3;
+                    listEl.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
                   }
                 }
               }, 500);
@@ -2256,7 +2264,14 @@ const App = () => {
       };
     }
 
-    return () => { clearInterval(timeIntervalRef.current); };
+    return () => {
+      clearInterval(timeIntervalRef.current);
+      if (ytPlayerRef.current) {
+        try { ytPlayerRef.current.destroy(); } catch (e) {}
+        ytPlayerRef.current = null;
+      }
+      if (ytPlayerDivRef.current) ytPlayerDivRef.current.innerHTML = '';
+    };
   }, [currentVideoId, currentPlatform]);
 
   useEffect(() => {
