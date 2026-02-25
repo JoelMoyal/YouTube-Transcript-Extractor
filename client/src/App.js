@@ -2144,6 +2144,7 @@ const App = () => {
 
   const downloadMenuRef = useRef(null);
   const qaInputRef      = useRef(null);
+  const playerRef       = useRef(null);
   const urlInputRef     = useRef(null);
   const qaRef           = useRef(null);
   const recoveryIntentRef = useRef(false);
@@ -2504,6 +2505,13 @@ const App = () => {
       download: 'transcript.srt',
     });
     a.click(); URL.revokeObjectURL(a.href);
+  };
+
+  const seekToTime = (seconds) => {
+    playerRef.current?.contentWindow?.postMessage(
+      JSON.stringify({ event: 'command', func: 'seekTo', args: [seconds, true] }),
+      '*'
+    );
   };
 
   const summarize = async () => {
@@ -3219,49 +3227,40 @@ const App = () => {
             {/* ── CENTER — col 2, row 2 ─────────────────────────────────────────── */}
             <div style={{ gridColumn: 2, gridRow: 2, display: 'flex', flexDirection: 'column', gap: 14, padding: '16px', overflowY: 'auto', background: P.paper, borderRight: `1px solid ${P.border}` }}>
 
-              {/* Video preview card */}
+              {/* Video player card */}
               {currentVideoId && (
-                <div style={{ background: '#FFFFFF', borderRadius: 16, boxShadow: '0 2px 12px rgba(28,25,23,0.07)', border: `1px solid ${P.border}`, overflow: 'hidden' }}>
-                  {/* Thumbnail */}
-                  <div style={{ position: 'relative', background: '#000' }}>
-                    <img
-                      src={currentThumbnail || `https://img.youtube.com/vi/${currentVideoId}/mqdefault.jpg`}
-                      alt="Video thumbnail"
-                      style={{ width: '100%', display: 'block', maxHeight: 230, objectFit: 'cover', opacity: 0.9 }}
-                      onError={e => { e.target.style.display = 'none'; }}
+                <div style={{ background: '#000', borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}` }}>
+                  {/* Embedded player */}
+                  {currentPlatform === 'vimeo' ? (
+                    <iframe
+                      ref={playerRef}
+                      src={`https://player.vimeo.com/video/${currentVideoId}?api=1`}
+                      style={{ width: '100%', height: 230, border: 'none', display: 'block' }}
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      title="Video player"
                     />
-                    {/* Big red YouTube-style play button */}
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}` : `https://youtube.com/watch?v=${currentVideoId}`}
-                        target="_blank" rel="noopener noreferrer"
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 62, height: 44, borderRadius: 12, background: currentPlatform === 'vimeo' ? '#1AB7EA' : '#FF0000', textDecoration: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.35)', transition: 'transform 0.15s' }}
-                        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                      </a>
-                    </div>
-                    {/* "Watch on YouTube" pill at bottom left */}
-                    <div style={{ position: 'absolute', bottom: 10, left: 12 }}>
-                      <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}` : `https://youtube.com/watch?v=${currentVideoId}`}
-                        target="_blank" rel="noopener noreferrer"
-                        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 999, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', textDecoration: 'none', fontSize: 11, fontWeight: 600, color: 'white' }}>
-                        {currentPlatform === 'vimeo' ? <VimeoIcon size={11} /> : <YouTubeIcon />}
-                        Watch on {currentPlatform === 'vimeo' ? 'Vimeo' : 'YouTube'}
-                      </a>
-                    </div>
-                  </div>
-                  {/* Metadata row */}
-                  <div style={{ padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  ) : (
+                    <iframe
+                      ref={playerRef}
+                      src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&rel=0&modestbranding=1`}
+                      style={{ width: '100%', height: 230, border: 'none', display: 'block' }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title="Video player"
+                    />
+                  )}
+                  {/* Slim meta bar */}
+                  <div style={{ padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 10, background: '#FFFFFF' }}>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentTitle || currentChannel || currentVideoId}</div>
-                      <div style={{ fontSize: 11, color: P.muted, marginTop: 2 }}>
-                        Word Count: <strong style={{ color: P.ink }}>{wordCount.toLocaleString()}</strong>
-                        &nbsp;&nbsp;Character Count: <strong style={{ color: P.ink }}>{charCount.toLocaleString()}</strong>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {currentTitle || currentChannel || currentVideoId}
                       </div>
+                      {currentChannel && <div style={{ fontSize: 11, color: P.muted, marginTop: 1 }}>{currentChannel}</div>}
                     </div>
                     <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                       <button onClick={copyToClipboard} style={{
-                        display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20,
+                        display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 20,
                         border: `1px solid ${P.border}`, background: 'transparent', cursor: 'pointer',
                         fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
                       }}
@@ -3270,7 +3269,7 @@ const App = () => {
                         {copied ? <CheckIcon /> : <CopyIcon />} {copied ? 'Copied' : 'Copy'}
                       </button>
                       <button onClick={downloadTxt} style={{
-                        display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20,
+                        display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 20,
                         border: `1px solid ${P.border}`, background: 'transparent', cursor: 'pointer',
                         fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
                       }}
@@ -3351,7 +3350,7 @@ const App = () => {
                       {segments.length > 0 && showTimestamps ? (
                         segments.map((seg, i) => (
                           <div key={i}
-                            onClick={() => setSelectedSegment(selectedSegment === i ? null : i)}
+                            onClick={() => { setSelectedSegment(selectedSegment === i ? null : i); seekToTime(seg.seconds); }}
                             style={{
                               display: 'grid', gridTemplateColumns: '54px 1fr',
                               gap: 0, padding: '0',
@@ -3362,12 +3361,11 @@ const App = () => {
                             onMouseEnter={e => { if (selectedSegment !== i) e.currentTarget.style.background = 'rgba(45,108,223,0.03)'; }}
                             onMouseLeave={e => { if (selectedSegment !== i) e.currentTarget.style.background = i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'; }}
                           >
-                            <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}#t=${seg.seconds}s` : `https://youtube.com/watch?v=${currentVideoId}&t=${seg.seconds}s`}
-                              target="_blank" rel="noopener noreferrer"
-                              onClick={e => e.stopPropagation()}
-                              style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '10px 6px 10px 0', textDecoration: 'none', color: selectedSegment === i ? P.accent : '#999', fontWeight: 600, fontSize: 10.5, fontFamily: 'monospace', flexShrink: 0 }}>
+                            <button
+                              onClick={e => { e.stopPropagation(); seekToTime(seg.seconds); setSelectedSegment(i); }}
+                              style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '10px 6px 10px 0', background: 'none', border: 'none', cursor: 'pointer', color: selectedSegment === i ? P.accent : '#999', fontWeight: 600, fontSize: 10.5, fontFamily: 'monospace', flexShrink: 0 }}>
                               {formatTime(seg.seconds)}
-                            </a>
+                            </button>
                             <div style={{ padding: '10px 14px 10px 8px', fontSize: 13.5, lineHeight: 1.7, color: selectedSegment === i ? P.ink : P.ink, fontWeight: selectedSegment === i ? 500 : 400 }}>
                               {highlightText(seg.text)}
                             </div>
