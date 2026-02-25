@@ -3700,7 +3700,7 @@ const App = () => {
               <div style={{ height: 1, background: P.border, margin: '0 18px' }} />
 
               {/* ScribeSnap AI Chat */}
-              <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
 
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '13px 18px 11px', borderBottom: `1px solid ${P.border}` }}>
@@ -3750,7 +3750,7 @@ const App = () => {
 
                 {/* Chat messages */}
                 {qaMessages.length > 0 && (
-                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, padding: '14px 18px 8px', maxHeight: 340 }}>
+                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, padding: '14px 18px 8px' }}>
                     {qaMessages.map((msg, i) => (
                       <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                         {msg.role === 'ai' ? (
@@ -3806,7 +3806,7 @@ const App = () => {
                 )}
 
                 {/* Composer */}
-                <div style={{ padding: '10px 18px 14px', marginTop: qaMessages.length === 0 ? 'auto' : 0, borderTop: `1px solid ${P.border}` }}>
+                <div style={{ padding: '10px 18px 14px', borderTop: `1px solid ${P.border}` }}>
                   {/* Unified pill — input + button in one container */}
                   <div
                     data-composer="true"
