@@ -2236,7 +2236,10 @@ const App = () => {
                   const el = segmentRefs.current[idx];
                   const listEl = transcriptListRef.current;
                   if (el && listEl) {
-                    const scrollTarget = el.offsetTop - listEl.clientHeight / 3;
+                    const elRect = el.getBoundingClientRect();
+                    const listRect = listEl.getBoundingClientRect();
+                    const relativeTop = elRect.top - listRect.top + listEl.scrollTop;
+                    const scrollTarget = relativeTop - listEl.clientHeight / 3;
                     listEl.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
                   }
                 }
