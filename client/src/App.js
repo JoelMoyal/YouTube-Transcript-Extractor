@@ -888,6 +888,14 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
   const [passwordResetState, setPasswordResetState] = React.useState({ type: 'idle', message: '' });
   const [prefLangSaved, setPrefLangSaved] = React.useState(false);
   const [copyLinkDone, setCopyLinkDone] = React.useState(false);
+  const [copyRefDone, setCopyRefDone] = React.useState(false);
+  const refLink = `${window.location.origin}?ref=${user.id}`;
+  const copyRefLink = () => {
+    navigator.clipboard.writeText(refLink).then(() => {
+      setCopyRefDone(true);
+      setTimeout(() => setCopyRefDone(false), 2000);
+    });
+  };
   const saveLangPref = (newLang) => {
     const key = user ? `yte_lang_${user.id}` : 'yte_lang';
     localStorage.setItem(key, newLang);
@@ -1533,6 +1541,65 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           flex-shrink: 0; color: #6B645C;
         }
         .ds-share-item:hover .ds-share-item-icon { color: #2D6CDF; background: rgba(45,108,223,0.08); }
+        /* ── Referral card ── */
+        .ds-referral {
+          padding: 16px 18px 18px;
+          background: linear-gradient(135deg, rgba(45,108,223,0.06) 0%, rgba(45,108,223,0.02) 100%);
+        }
+        .ds-referral-head {
+          display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+        }
+        .ds-referral-icon {
+          width: 32px; height: 32px; border-radius: 9px;
+          background: rgba(45,108,223,0.12); color: #2D6CDF;
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .ds-referral-title {
+          margin: 0; font-size: 15px; font-weight: 700; color: #1C1917; letter-spacing: -0.01em;
+        }
+        .ds-referral-desc {
+          margin: 0 0 12px; font-size: 13px; color: #6B645C; line-height: 1.45;
+        }
+        .ds-referral-badge {
+          display: inline-flex; align-items: center; gap: 5px;
+          background: rgba(45,108,223,0.1); color: #2D6CDF;
+          border: 1px solid rgba(45,108,223,0.2);
+          border-radius: 999px; padding: 3px 10px 3px 6px;
+          font-size: 12px; font-weight: 700; margin-bottom: 12px;
+        }
+        .ds-referral-link-row {
+          display: flex; gap: 7px; align-items: stretch;
+        }
+        .ds-referral-link-box {
+          flex: 1; min-width: 0;
+          background: white; border: 1px solid #E7E1D8; border-radius: 9px;
+          padding: 8px 11px; font-size: 12px; color: #6B645C;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+          font-family: monospace; letter-spacing: -0.01em;
+        }
+        .ds-referral-copy-btn {
+          border: none; border-radius: 9px;
+          background: #2D6CDF; color: white;
+          font-size: 12px; font-weight: 700;
+          padding: 8px 14px; cursor: pointer; flex-shrink: 0;
+          transition: background 0.15s, transform 0.15s;
+          white-space: nowrap;
+        }
+        .ds-referral-copy-btn:hover { background: #2459B8; transform: translateY(-1px); }
+        .ds-referral-copy-btn.done { background: #0F766E; }
+        .ds-referral-stats {
+          display: flex; gap: 10px; margin-top: 12px;
+        }
+        .ds-referral-stat {
+          flex: 1; background: white; border: 1px solid #E7E1D8;
+          border-radius: 9px; padding: 8px 10px; text-align: center;
+        }
+        .ds-referral-stat-value {
+          font-size: 18px; font-weight: 700; color: #2D6CDF; margin: 0 0 1px;
+        }
+        .ds-referral-stat-label {
+          font-size: 11px; color: #6B645C; margin: 0;
+        }
         .ds-empty {
           text-align: center;
           padding: 42px 18px;
@@ -1821,6 +1888,37 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                     </>
                   )}
                 </section>
+
+                {/* ── Referral program ── */}
+                <section className="ds-card ds-referral">
+                  <div className="ds-referral-head">
+                    <div className="ds-referral-icon">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                      </svg>
+                    </div>
+                    <h2 className="ds-referral-title">Invite friends, earn credits</h2>
+                  </div>
+                  <div className="ds-referral-badge">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    +3 free credits per friend who signs up
+                  </div>
+                  <p className="ds-referral-desc">
+                    Share your personal link. Every friend who creates an account using it gets a bonus — and so do you.
+                  </p>
+                  <div className="ds-referral-link-row">
+                    <div className="ds-referral-link-box">{refLink}</div>
+                    <button
+                      className={`ds-referral-copy-btn${copyRefDone ? ' done' : ''}`}
+                      onClick={copyRefLink}
+                    >
+                      {copyRefDone ? '✓ Copied!' : 'Copy link'}
+                    </button>
+                  </div>
+                </section>
               </div>
             )}
 
@@ -2052,15 +2150,6 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                   </span>
                   WhatsApp
                 </a>
-                <button className="ds-share-item" onClick={() => setTab('settings')}>
-                  <span className="ds-share-item-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="3"/>
-                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                    </svg>
-                  </span>
-                  Settings
-                </button>
               </section>
             </aside>
           )}
