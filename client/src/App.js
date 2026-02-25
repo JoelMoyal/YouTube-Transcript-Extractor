@@ -1044,33 +1044,33 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-profile {
           display: flex;
           align-items: center;
-          gap: 20px;
-          padding: 24px 28px;
-          margin-bottom: 14px;
+          gap: 16px;
+          padding: 18px 22px;
+          margin-bottom: 12px;
         }
         .ds-avatar {
-          width: 100px;
-          height: 100px;
+          width: 62px;
+          height: 62px;
           border-radius: 50%;
           flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 46px;
+          font-size: 26px;
           font-weight: 700;
           color: white;
           background: #2D6CDF;
-          box-shadow: 0 8px 20px rgba(45,108,223,0.28);
+          box-shadow: 0 6px 16px rgba(45,108,223,0.25);
         }
         .ds-profile-name {
-          font-size: clamp(28px, 3.2vw, 42px);
+          font-size: clamp(20px, 2.4vw, 30px);
           font-weight: 700;
           letter-spacing: -0.02em;
           color: #1C1917;
           margin: 0 0 2px;
         }
         .ds-profile-email {
-          font-size: 17px;
+          font-size: 14px;
           color: #6B645C;
           margin: 0;
           overflow: hidden;
@@ -1083,8 +1083,8 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           flex-shrink: 0;
         }
         .ds-profile-meta-label {
-          margin: 0 0 4px;
-          font-size: 12px;
+          margin: 0 0 3px;
+          font-size: 11px;
           letter-spacing: 0.05em;
           text-transform: uppercase;
           color: #6B645C;
@@ -1092,7 +1092,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         }
         .ds-profile-meta-value {
           margin: 0;
-          font-size: 18px;
+          font-size: 15px;
           color: #1C1917;
           font-weight: 700;
         }
@@ -1111,11 +1111,11 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-section-tab {
           flex: 1;
           border: none;
-          border-radius: 12px;
-          padding: 10px;
+          border-radius: 11px;
+          padding: 8px;
           background: transparent;
           color: #6B645C;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 500;
           cursor: pointer;
           transition: all 0.15s;
@@ -1261,7 +1261,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         }
         .ds-usage-meta strong {
           color: #1C1917;
-          font-size: 26px;
+          font-size: 22px;
         }
         .ds-usage-days {
           display: flex;
@@ -1287,38 +1287,38 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           font-size: 12px;
           color: #6B645C;
         }
-        .ds-list-card { padding: 14px 0 6px; overflow: hidden; }
+        .ds-list-card { padding: 12px 0 4px; overflow: hidden; }
         .ds-list-head {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 10px;
-          padding: 0 18px 10px;
+          padding: 0 16px 8px;
         }
         .ds-list-title {
           margin: 0;
-          font-size: 17px;
+          font-size: 15px;
           color: #1C1917;
           font-weight: 700;
-          letter-spacing: -0.02em;
+          letter-spacing: -0.01em;
         }
         .ds-row {
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding: 12px 18px;
+          gap: 10px;
+          padding: 10px 16px;
           border-top: 1px solid #E7E1D8;
           transition: background 0.15s ease;
         }
         .ds-row:first-of-type {
-          border-top: 1px solid rgba(45,108,223,0.22);
-          box-shadow: inset 2px 0 0 rgba(45,108,223,0.35);
+          border-top: 1px solid rgba(45,108,223,0.2);
+          box-shadow: inset 2px 0 0 rgba(45,108,223,0.3);
         }
         .ds-row:hover { background: rgba(45,108,223,0.03); }
         .ds-thumb {
-          width: 124px;
-          height: 70px;
-          border-radius: 11px;
+          width: 96px;
+          height: 54px;
+          border-radius: 9px;
           overflow: hidden;
           flex-shrink: 0;
           background: rgba(45,108,223,0.06);
@@ -1334,8 +1334,8 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           display: block;
         }
         .ds-row-title {
-          margin: 0 0 4px;
-          font-size: 16px;
+          margin: 0 0 3px;
+          font-size: 14px;
           color: #1C1917;
           font-weight: 700;
           letter-spacing: -0.01em;
@@ -1345,25 +1345,25 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         }
         .ds-row-meta {
           margin: 0;
-          font-size: 13px;
+          font-size: 12px;
           color: #6B645C;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 5px;
           flex-wrap: wrap;
         }
         .ds-row-actions {
           margin-left: auto;
           display: inline-flex;
-          gap: 7px;
+          gap: 6px;
           flex-shrink: 0;
         }
         .ds-row-btn {
           border: 1px solid #E7E1D8;
-          border-radius: 10px;
-          padding: 8px 16px;
-          min-width: 78px;
-          font-size: 13px;
+          border-radius: 8px;
+          padding: 6px 13px;
+          min-width: 60px;
+          font-size: 12px;
           font-weight: 700;
           cursor: pointer;
           transition: all 0.15s ease;
@@ -1385,33 +1385,33 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         }
         .ds-list-footer {
           border-top: 1px solid #E7E1D8;
-          padding: 12px 18px 10px;
+          padding: 10px 16px 8px;
         }
         .ds-link-btn {
           border: none;
           background: none;
           color: #2D6CDF;
-          font-size: 15px;
+          font-size: 13px;
           font-weight: 600;
           cursor: pointer;
           display: inline-flex;
           align-items: center;
-          gap: 6px;
+          gap: 5px;
           padding: 0;
         }
         .ds-link-btn:hover { color: #2459B8; }
         .ds-side {
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: 10px;
         }
         /* ── Continue where you left off ── */
         .ds-continue { padding: 0; overflow: hidden; }
-        .ds-continue-header { padding: 16px 16px 0; }
-        .ds-continue-body { padding: 12px 16px 16px; }
+        .ds-continue-header { padding: 13px 14px 0; }
+        .ds-continue-body { padding: 9px 14px 13px; }
         .ds-side-title {
-          margin: 0 0 4px;
-          font-size: 16px;
+          margin: 0;
+          font-size: 14px;
           line-height: 1.2;
           color: #1C1917;
           font-weight: 700;
@@ -1440,15 +1440,15 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         }
         .ds-continue-thumb:hover .ds-continue-play { background: rgba(0,0,0,0.4); }
         .ds-continue-play-icon {
-          width: 46px; height: 46px;
+          width: 40px; height: 40px;
           background: rgba(255,255,255,0.92);
           border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+          box-shadow: 0 3px 10px rgba(0,0,0,0.18);
         }
         .ds-continue-video-title {
-          margin: 0 0 3px;
-          font-size: 15px;
+          margin: 0 0 2px;
+          font-size: 14px;
           font-weight: 700;
           color: #1C1917;
           letter-spacing: -0.01em;
@@ -1457,69 +1457,69 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           white-space: nowrap;
         }
         .ds-continue-meta {
-          margin: 0 0 12px;
-          font-size: 13px;
+          margin: 0 0 9px;
+          font-size: 12px;
           color: #6B645C;
-          display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+          display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
         }
         .ds-continue-open-btn {
           width: 100%;
           border: none;
-          border-radius: 10px;
-          background: rgba(45,108,223,0.15);
+          border-radius: 9px;
+          background: rgba(45,108,223,0.13);
           color: #2D6CDF;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 700;
-          padding: 10px 12px;
+          padding: 9px 12px;
           cursor: pointer;
           transition: background 0.15s, transform 0.15s;
-          margin-bottom: 8px;
+          margin-bottom: 7px;
         }
-        .ds-continue-open-btn:hover { background: rgba(45,108,223,0.24); transform: translateY(-1px); }
+        .ds-continue-open-btn:hover { background: rgba(45,108,223,0.22); transform: translateY(-1px); }
         .ds-continue-quick {
           display: flex;
-          gap: 6px;
+          gap: 5px;
         }
         .ds-continue-quick-btn {
           flex: 1;
           border: 1px solid #E7E1D8;
-          border-radius: 8px;
-          padding: 6px 4px;
+          border-radius: 7px;
+          padding: 5px 2px;
           background: white;
-          color: #1C1917;
-          font-size: 12px;
+          color: #6B645C;
+          font-size: 11px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.15s;
           text-align: center;
         }
-        .ds-continue-quick-btn:hover { border-color: rgba(45,108,223,0.35); color: #2D6CDF; background: rgba(45,108,223,0.04); }
+        .ds-continue-quick-btn:hover { border-color: rgba(45,108,223,0.3); color: #2D6CDF; background: rgba(45,108,223,0.04); }
         .ds-continue-empty {
-          padding: 28px 0 10px;
+          padding: 20px 14px 14px;
           text-align: center;
           color: #6B645C;
           font-size: 13px;
         }
         /* ── Share card ── */
-        .ds-share { padding: 18px; }
+        .ds-share { padding: 13px 14px; }
         .ds-share-head {
-          display: flex; align-items: center; gap: 10px; margin-bottom: 5px;
+          display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
         }
         .ds-share-icon {
-          width: 34px; height: 34px; border-radius: 10px;
+          width: 26px; height: 26px; border-radius: 8px;
           background: rgba(45,108,223,0.08); color: #2D6CDF;
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
         }
         .ds-share-title {
-          margin: 0; font-size: 17px; font-weight: 700; color: #1C1917;
+          margin: 0; font-size: 14px; font-weight: 700; color: #1C1917;
         }
         .ds-share-desc {
-          margin: 0 0 10px; font-size: 13px; color: #6B645C; line-height: 1.45;
+          margin: 0 0 8px; font-size: 12px; color: #6B645C; line-height: 1.4;
         }
         .ds-share-item {
-          display: flex; align-items: center; gap: 10px;
-          padding: 9px 0; border: none; border-bottom: 1px solid #E7E1D8;
+          display: flex; align-items: center; gap: 9px;
+          padding: 7px 0; border: none; border-bottom: 1px solid #E7E1D8;
           background: none; width: 100%; text-align: left; cursor: pointer;
           font-size: 13px; color: #1C1917; font-weight: 500;
           transition: color 0.15s;
@@ -1527,12 +1527,12 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-share-item:last-child { border-bottom: none; padding-bottom: 0; }
         .ds-share-item:hover { color: #2D6CDF; }
         .ds-share-item-icon {
-          width: 30px; height: 30px; border-radius: 8px;
-          background: rgba(45,108,223,0.06);
+          width: 26px; height: 26px; border-radius: 7px;
+          background: rgba(28,25,23,0.04);
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0; color: #6B645C;
         }
-        .ds-share-item:hover .ds-share-item-icon { color: #2D6CDF; background: rgba(45,108,223,0.1); }
+        .ds-share-item:hover .ds-share-item-icon { color: #2D6CDF; background: rgba(45,108,223,0.08); }
         .ds-empty {
           text-align: center;
           padding: 42px 18px;
@@ -2038,6 +2038,19 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                     </svg>
                   </span>
                   Share via email
+                </a>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent('Check out ScribeSnap — instant YouTube transcripts + AI tools: ' + window.location.origin)}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="ds-share-item"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <span className="ds-share-item-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                  </span>
+                  WhatsApp
                 </a>
                 <button className="ds-share-item" onClick={() => setTab('settings')}>
                   <span className="ds-share-item-icon">
