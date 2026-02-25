@@ -2157,6 +2157,10 @@ const App = () => {
   const segmentRefs        = useRef({});
   const transcriptListRef  = useRef(null);
   const playingSegmentRef  = useRef(null);
+  const ytPlayerRef        = useRef(null);
+  const ytPlayerDivRef     = useRef(null);
+  const timeIntervalRef    = useRef(null);
+  const segmentsRef        = useRef([]);
   const urlInputRef     = useRef(null);
   const qaRef           = useRef(null);
   const recoveryIntentRef = useRef(false);
@@ -2178,51 +2182,82 @@ const App = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  // Keep segmentsRef in sync so intervals can read latest value without stale closure
+  useEffect(() => { segmentsRef.current = segments; }, [segments]);
+
   // Reset playing segment when transcript changes
   useEffect(() => {
     setPlayingSegment(null);
     playingSegmentRef.current = null;
   }, [segments]);
 
-  // YouTube IFrame API — listen for time updates and auto-scroll transcript
+  // YouTube IFrame API — proper SDK approach for reliable time tracking
   useEffect(() => {
-    const handler = (event) => {
-      if (!playerRef.current) return;
-      try {
-        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-        if (!data || !data.event) return;
-        // When player is ready, subscribe to events
-        if (data.event === 'onReady') {
-          playerRef.current.contentWindow?.postMessage(
-            JSON.stringify({ event: 'listening', id: 1 }), '*'
-          );
-        }
-        // infoDelivery fires ~every 250ms while playing
-        if (data.event === 'infoDelivery' && data.info?.currentTime !== undefined) {
-          const t = data.info.currentTime;
-          if (segments.length > 0) {
-            let idx = 0;
-            for (let i = 0; i < segments.length; i++) {
-              if (segments[i].seconds <= t) idx = i;
-              else break;
+    if (!currentVideoId || currentPlatform === 'vimeo') return;
+
+    // Cleanup previous player + interval
+    clearInterval(timeIntervalRef.current);
+    if (ytPlayerRef.current) {
+      try { ytPlayerRef.current.destroy(); } catch (e) {}
+      ytPlayerRef.current = null;
+    }
+
+    const createPlayer = () => {
+      const container = ytPlayerDivRef.current;
+      if (!container || !window.YT?.Player) return;
+      ytPlayerRef.current = new window.YT.Player(container, {
+        videoId: currentVideoId,
+        playerVars: { rel: 0, modestbranding: 1 },
+        events: {
+          onStateChange: (e) => {
+            clearInterval(timeIntervalRef.current);
+            if (e.data === 1 /* PLAYING */) {
+              timeIntervalRef.current = setInterval(() => {
+                const t = ytPlayerRef.current?.getCurrentTime?.();
+                if (typeof t !== 'number') return;
+                const segs = segmentsRef.current;
+                if (!segs.length) return;
+                let idx = 0;
+                for (let i = 0; i < segs.length; i++) {
+                  if (segs[i].seconds <= t) idx = i;
+                  else break;
+                }
+                if (idx !== playingSegmentRef.current) {
+                  playingSegmentRef.current = idx;
+                  setPlayingSegment(idx);
+                  const el = segmentRefs.current[idx];
+                  const container = transcriptListRef.current;
+                  if (el && container) {
+                    const scrollTarget = el.offsetTop - container.clientHeight / 3;
+                    container.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+                  }
+                }
+              }, 500);
             }
-            if (idx !== playingSegmentRef.current) {
-              playingSegmentRef.current = idx;
-              setPlayingSegment(idx);
-              const el = segmentRefs.current[idx];
-              const container = transcriptListRef.current;
-              if (el && container) {
-                const scrollTarget = el.offsetTop - container.clientHeight / 3;
-                container.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
-              }
-            }
-          }
-        }
-      } catch (e) {}
+          },
+        },
+      });
     };
-    window.addEventListener('message', handler);
-    return () => window.removeEventListener('message', handler);
-  }, [segments]);
+
+    if (window.YT?.Player) {
+      createPlayer();
+    } else {
+      // Load the YouTube IFrame API script once
+      if (!document.getElementById('yt-iframe-api-script')) {
+        const tag = document.createElement('script');
+        tag.id = 'yt-iframe-api-script';
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+      }
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        if (prev) prev();
+        createPlayer();
+      };
+    }
+
+    return () => { clearInterval(timeIntervalRef.current); };
+  }, [currentVideoId, currentPlatform]);
 
   useEffect(() => {
     if (localStorage.getItem('yte_bookmark_dismissed')) return;
@@ -2566,10 +2601,14 @@ const App = () => {
   };
 
   const seekToTime = (seconds) => {
-    playerRef.current?.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: 'seekTo', args: [seconds, true] }),
-      '*'
-    );
+    if (currentPlatform !== 'vimeo' && ytPlayerRef.current?.seekTo) {
+      ytPlayerRef.current.seekTo(seconds, true);
+    } else {
+      playerRef.current?.contentWindow?.postMessage(
+        JSON.stringify({ event: 'command', func: 'seekTo', args: [seconds, true] }),
+        '*'
+      );
+    }
   };
 
   const summarize = async () => {
@@ -3274,14 +3313,7 @@ const App = () => {
                           title="Video player"
                         />
                       ) : (
-                        <iframe
-                          ref={playerRef}
-                          src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&rel=0&modestbranding=1`}
-                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block' }}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          title="Video player"
-                        />
+                        <div ref={ytPlayerDivRef} style={{ width: '100%', aspectRatio: '16/9', display: 'block' }} />
                       )}
                     </div>
                   </div>
