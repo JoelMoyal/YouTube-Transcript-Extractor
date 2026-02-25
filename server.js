@@ -383,11 +383,31 @@ app.get('/api/transcript', async (req, res) => {
           return;
         }
       } catch {
-        // Fall through to yt-dlp
+        // Fall through to youtube-transcript
       }
     }
 
-    // ── Stage 1b: yt-dlp subtitles ────────────────────────────────────────────
+    // ── Stage 1b: youtube-transcript npm (no cookies, uses YT timedtext API) ───
+    try {
+      const { YoutubeTranscript } = require('youtube-transcript');
+      const raw = await YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang }).catch(() =>
+        YoutubeTranscript.fetchTranscript(videoId)
+      );
+      if (raw && raw.length > 0) {
+        const seen = new Set();
+        const segments = raw
+          .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
+          .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
+        const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
+        send('done', { transcript, segments, source: 'subtitles' });
+        res.end();
+        return;
+      }
+    } catch {
+      // Fall through to yt-dlp
+    }
+
+    // ── Stage 1c: yt-dlp subtitles ────────────────────────────────────────────
     send('progress', { stage: 'subtitles', message: 'Looking for subtitles…', percent: 10 });
     let lastSubError = null;
 
