@@ -2704,7 +2704,7 @@ const App = () => {
         />
       )}
 
-      <div style={{ minHeight: '100vh', paddingTop: showBookmarkBanner ? 97 : 56, background: transcript ? 'linear-gradient(180deg, rgba(110,80,220,0.06) 0%, #F6F3EE 35%)' : P.paper, transition: 'padding-top 0.3s ease, background 0.4s ease', display: view === 'dashboard' ? 'none' : 'block' }}>
+      <div style={{ minHeight: '100vh', paddingTop: showBookmarkBanner ? 97 : 56, background: P.paper, transition: 'padding-top 0.3s ease', display: view === 'dashboard' ? 'none' : 'block' }}>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* LANDING VIEW */}
@@ -3044,17 +3044,12 @@ const App = () => {
         {/* TRANSCRIPT VIEW — app shell 3-column layout                     */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {transcript && (
-          <div className="fade-up" style={{ maxWidth: 1400, margin: '0 auto', padding: '20px 20px 48px' }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: 24,
-            boxShadow: '0 8px 48px rgba(28,25,23,0.09), 0 1px 3px rgba(28,25,23,0.04)',
-            border: `1px solid ${P.border}`,
-            overflow: 'hidden',
+          <div className="fade-up" style={{
             display: 'grid',
             gridTemplateColumns: '280px 1fr 360px',
             gridTemplateRows: 'auto 1fr',
-            minHeight: 'calc(100vh - 140px)',
+            height: 'calc(100vh - 56px)',
+            overflow: 'hidden',
           }}>
 
             {/* ── LEFT SIDEBAR — col 1, spans both rows ────────────────────────── */}
@@ -3631,7 +3626,6 @@ const App = () => {
               </div>
 
             </div>
-          </div>
           </div>
         )}
       </div>
