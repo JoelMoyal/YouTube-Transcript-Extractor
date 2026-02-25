@@ -3807,40 +3807,73 @@ const App = () => {
 
                 {/* Composer */}
                 <div style={{ padding: '10px 18px 14px', marginTop: qaMessages.length === 0 ? 'auto' : 0, borderTop: `1px solid ${P.border}` }}>
-                  <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
-                    <div style={{
-                      flex: 1, display: 'flex', alignItems: 'center', gap: 8,
-                      border: `1.5px solid ${P.border}`, borderRadius: 10,
-                      padding: '7px 12px', background: P.surface, transition: 'border-color 0.15s',
-                    }} onClick={() => qaInputRef.current?.focus()}>
-                      <input ref={qaInputRef} value={qaQuestion} onChange={e => setQaQuestion(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
-                        placeholder={qaMessages.length === 0 ? 'Ask something about this video…' : 'Ask a follow-up…'}
-                        disabled={qaLoading}
-                        style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12.5, color: P.ink }}
-                        onFocus={e => { e.currentTarget.closest('div').style.borderColor = P.accent; }}
-                        onBlur={e => { e.currentTarget.closest('div').style.borderColor = P.border; }}
-                      />
-                      {!qaQuestion && <span style={{ fontSize: 10, color: P.muted, flexShrink: 0, letterSpacing: 0.2 }}>↵</span>}
-                    </div>
-                    <button onClick={() => askQuestion()} disabled={!qaQuestion.trim() || qaLoading} style={{
-                      flexShrink: 0, width: 38, height: 38,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      borderRadius: 10, border: 'none',
-                      background: !qaQuestion.trim() || qaLoading ? P.border : P.accent,
-                      color: !qaQuestion.trim() || qaLoading ? P.muted : 'white',
-                      cursor: !qaQuestion.trim() || qaLoading ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.15s',
+                  {/* Unified pill — input + button in one container */}
+                  <div
+                    data-composer="true"
+                    style={{
+                      display: 'flex', alignItems: 'center',
+                      background: P.surface,
+                      border: `1.5px solid ${P.border}`,
+                      borderRadius: 13,
+                      padding: '4px 4px 4px 14px',
+                      transition: 'border-color 0.2s, box-shadow 0.2s',
                     }}
-                      onMouseEnter={e => { if (qaQuestion.trim() && !qaLoading) e.currentTarget.style.background = P.accentHover; }}
-                      onMouseLeave={e => { if (qaQuestion.trim() && !qaLoading) e.currentTarget.style.background = P.accent; }}
+                    onClick={() => qaInputRef.current?.focus()}
+                  >
+                    <input
+                      ref={qaInputRef}
+                      value={qaQuestion}
+                      onChange={e => setQaQuestion(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
+                      placeholder={qaMessages.length === 0 ? 'Ask anything about this video…' : 'Ask a follow-up…'}
+                      disabled={qaLoading}
+                      style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13, color: P.ink, padding: '5px 0' }}
+                      onFocus={e => {
+                        const w = e.currentTarget.closest('[data-composer]');
+                        if (w) { w.style.borderColor = P.accent; w.style.boxShadow = '0 0 0 3px rgba(45,108,223,0.1)'; }
+                      }}
+                      onBlur={e => {
+                        const w = e.currentTarget.closest('[data-composer]');
+                        if (w) { w.style.borderColor = P.border; w.style.boxShadow = 'none'; }
+                      }}
+                    />
+                    <button
+                      onClick={e => { e.stopPropagation(); askQuestion(); }}
+                      disabled={!qaQuestion.trim() || qaLoading}
+                      style={{
+                        flexShrink: 0, width: 36, height: 36,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        borderRadius: 10, border: 'none',
+                        background: qaQuestion.trim() && !qaLoading
+                          ? 'linear-gradient(135deg, #5ba4f5 0%, #2D6CDF 100%)'
+                          : 'transparent',
+                        color: qaQuestion.trim() && !qaLoading ? 'white' : P.muted,
+                        cursor: qaQuestion.trim() && !qaLoading ? 'pointer' : 'default',
+                        transition: 'all 0.2s',
+                        boxShadow: qaQuestion.trim() && !qaLoading ? '0 2px 8px rgba(45,108,223,0.28)' : 'none',
+                      }}
+                      onMouseEnter={e => {
+                        if (qaQuestion.trim() && !qaLoading) {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #6bbcff 0%, #2459B8 100%)';
+                          e.currentTarget.style.boxShadow = '0 3px 12px rgba(45,108,223,0.4)';
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        if (qaQuestion.trim() && !qaLoading) {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #5ba4f5 0%, #2D6CDF 100%)';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(45,108,223,0.28)';
+                        }
+                      }}
                     >
                       {qaLoading
                         ? <SpinnerIcon size={13} />
-                        : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                       }
                     </button>
                   </div>
+                  {qaQuestion.trim() && (
+                    <div style={{ fontSize: 10.5, color: P.muted, marginTop: 5, textAlign: 'right', paddingRight: 2 }}>↵ to send</div>
+                  )}
                 </div>
               </div>
 
