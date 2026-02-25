@@ -3122,8 +3122,8 @@ const App = () => {
                     >
                       <div style={{ position: 'relative', flexShrink: 0 }}>
                         {entry.thumbnail
-                          ? <img src={entry.thumbnail} alt="" style={{ width: 52, height: 33, objectFit: 'cover', borderRadius: 5, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
-                          : <div style={{ width: 52, height: 33, borderRadius: 5, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><YouTubeIcon /></div>
+                          ? <img src={entry.thumbnail} alt="" style={{ width: 76, height: 48, objectFit: 'cover', borderRadius: 6, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+                          : <div style={{ width: 76, height: 48, borderRadius: 6, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><YouTubeIcon /></div>
                         }
                       </div>
                       <div style={{ minWidth: 0, flex: 1 }}>
