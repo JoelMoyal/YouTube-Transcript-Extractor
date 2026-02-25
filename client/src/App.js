@@ -3624,82 +3624,7 @@ const App = () => {
             {/* ── RIGHT SIDEBAR — col 3, row 2 ─────────────────────────────────── */}
             <div style={{ gridColumn: 3, gridRow: 2, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF' }}>
 
-              {/* Insights card */}
-              <div style={{ padding: '10px 18px 12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                  </div>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Insights</span>
-                </div>
-
-                {/* Insight rows */}
-                {[
-                  { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(45,108,223,0.1)',
-                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-                    onClick: summarize, active: !!summary, loading: summarizing },
-                  { title: 'Flash Cards', sub: 'Key concepts as cards', color: P.warning, bg: 'rgba(180,83,9,0.1)',
-                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-                    onClick: extractQuotes, active: quotes.length > 0, loading: quotesLoading },
-                  { title: 'Study Guide', sub: 'Chapters & structure', color: P.success, bg: 'rgba(15,118,110,0.1)',
-                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-                    onClick: () => { detectChapters(); setActiveTab('chapters'); }, active: chapters.length > 0, loading: chaptersLoading },
-                  { title: 'Ask AI', sub: 'Chat about this video', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
-                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="13" y2="14"/></svg>,
-                    onClick: () => { setTimeout(() => qaInputRef.current?.focus(), 50); qaInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, active: qaMessages.length > 0, loading: qaLoading },
-                ].map(item => (
-                  <div key={item.title}
-                    onClick={item.loading ? undefined : item.onClick}
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 8px', borderRadius: 10, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 2 }}
-                    onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: item.active ? item.bg : (item.bg.replace('0.1', '0.07')), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color, transition: 'background 0.15s' }}>
-                      {item.loading ? <SpinnerIcon size={12} /> : item.icon}
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: item.active ? item.color : P.ink }}>{item.title}</div>
-                      <div style={{ fontSize: 11, color: P.muted }}>{item.sub}</div>
-                    </div>
-                    {item.active && <div style={{ marginLeft: 'auto', width: 7, height: 7, borderRadius: '50%', background: item.color, flexShrink: 0 }} />}
-                  </div>
-                ))}
-
-                {/* Flash cards if generated */}
-                {quotes.length > 0 && (
-                  <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    {quotes.filter(q => !q.startsWith('Error:')).map((q, i) => (
-                      <div key={i} style={{ padding: '8px 10px 8px 12px', background: P.paper, borderRadius: 8, borderLeft: `3px solid ${P.warning}`, border: `1px solid ${P.border}`, borderLeftWidth: 3, borderLeftColor: P.warning }}>
-                        <div style={{ fontSize: 9, fontWeight: 700, color: P.warning, letterSpacing: '0.06em', marginBottom: 3, textTransform: 'uppercase' }}>Card {i + 1}</div>
-                        <div style={{ fontSize: 12.5, lineHeight: 1.6, color: P.ink }}>{q}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Summary content if present */}
-                {summary && (
-                  <div style={{ marginTop: 8, background: P.paper, borderRadius: 10, padding: '10px 12px', border: `1px solid ${P.border}` }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Summary</span>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
-                          style={{ display: 'flex', alignItems: 'center', gap: 3, border: `1px solid ${P.border}`, background: P.surface, cursor: 'pointer', borderRadius: 5, padding: '2px 7px', fontSize: 10, fontWeight: 600, color: summaryCopied ? P.success : P.muted, transition: 'all 0.15s' }}>
-                          {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
-                        </button>
-                        <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 16, lineHeight: 1, padding: '0 2px' }}>×</button>
-                      </div>
-                    </div>
-                    <div style={{ fontSize: 12.5, lineHeight: 1.75, color: P.ink, maxHeight: 180, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>{summary}</div>
-                  </div>
-                )}
-
-              </div>
-
-              {/* Divider */}
-              <div style={{ height: 1, background: P.border, margin: '0 18px' }} />
-
-              {/* ScribeSnap AI Chat */}
+              {/* ScribeSnap AI Chat — TOP of sidebar, composer at top */}
               <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
 
                 {/* Header */}
@@ -3728,85 +3653,8 @@ const App = () => {
                   )}
                 </div>
 
-                {/* Empty state — suggestion list */}
-                {qaMessages.length === 0 && (
-                  <div style={{ padding: '12px 18px 10px', flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    {DEMO_CHIPS.map(chip => (
-                      <button key={chip} onClick={() => askQuestion(chip)} style={{
-                        display: 'flex', alignItems: 'center', gap: 10,
-                        padding: '9px 13px', borderRadius: 9, border: `1px solid ${P.border}`,
-                        background: P.paper, fontSize: 12.5, color: P.ink,
-                        cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left', width: '100%',
-                      }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
-                      >
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.4 }}><polyline points="9 18 15 12 9 6"/></svg>
-                        {chip}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Chat messages */}
-                {qaMessages.length > 0 && (
-                  <div ref={chatMessagesRef} style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, padding: '14px 18px 8px' }}>
-                    {qaMessages.map((msg, i) => (
-                      <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                        {msg.role === 'ai' ? (
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, maxWidth: '93%' }}>
-                            {/* AI avatar */}
-                            <div style={{
-                              width: 26, height: 26, borderRadius: 7, flexShrink: 0, marginTop: 1,
-                              background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)',
-                              border: `1.5px solid rgba(45,108,223,0.2)`,
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}>
-                              <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 15, height: 15 }} />
-                            </div>
-                            <div style={{
-                              padding: '9px 13px',
-                              borderRadius: '3px 12px 12px 12px',
-                              background: msg.isError ? 'rgba(180,35,24,0.05)' : P.paper,
-                              border: `1px solid ${msg.isError ? 'rgba(180,35,24,0.2)' : P.border}`,
-                              fontSize: 13, lineHeight: 1.65,
-                              color: msg.isError ? P.error : P.ink,
-                            }}>
-                              {msg.text.split('\n').map((line, li, arr) => (
-                                <React.Fragment key={li}>{line}{li < arr.length - 1 && <br />}</React.Fragment>
-                              ))}
-                            </div>
-                          </div>
-                        ) : (
-                          <div style={{
-                            maxWidth: '86%', padding: '9px 13px',
-                            borderRadius: '12px 12px 3px 12px',
-                            background: P.accent, fontSize: 13, lineHeight: 1.6, color: 'white',
-                          }}>{msg.text}</div>
-                        )}
-                      </div>
-                    ))}
-                    {qaLoading && (
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                        <div style={{
-                          width: 26, height: 26, borderRadius: 7, flexShrink: 0,
-                          background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)',
-                          border: `1.5px solid rgba(45,108,223,0.2)`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 15, height: 15 }} />
-                        </div>
-                        <div style={{ padding: '11px 15px', borderRadius: '3px 12px 12px 12px', background: P.paper, border: `1px solid ${P.border}`, display: 'flex', gap: 4, alignItems: 'center' }}>
-                          {[0, 1, 2].map(d => <div key={d} style={{ width: 5, height: 5, borderRadius: '50%', background: P.accent, opacity: 0.6, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Composer */}
-                <div style={{ padding: '10px 18px 14px', borderTop: `1px solid ${P.border}` }}>
-                  {/* Unified pill — input + button in one container */}
+                {/* Composer — at the TOP, below header */}
+                <div style={{ padding: '10px 18px 10px', borderBottom: `1px solid ${P.border}` }}>
                   <div
                     data-composer="true"
                     style={{
@@ -3874,6 +3722,153 @@ const App = () => {
                     <div style={{ fontSize: 10.5, color: P.muted, marginTop: 5, textAlign: 'right', paddingRight: 2 }}>↵ to send</div>
                   )}
                 </div>
+
+                {/* Empty state — suggestion list */}
+                {qaMessages.length === 0 && (
+                  <div style={{ padding: '12px 18px 10px', flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    {DEMO_CHIPS.map(chip => (
+                      <button key={chip} onClick={() => askQuestion(chip)} style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '9px 13px', borderRadius: 9, border: `1px solid ${P.border}`,
+                        background: P.paper, fontSize: 12.5, color: P.ink,
+                        cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left', width: '100%',
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.4 }}><polyline points="9 18 15 12 9 6"/></svg>
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Chat messages */}
+                {qaMessages.length > 0 && (
+                  <div ref={chatMessagesRef} style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, padding: '14px 18px 8px' }}>
+                    {qaMessages.map((msg, i) => (
+                      <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                        {msg.role === 'ai' ? (
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, maxWidth: '93%' }}>
+                            <div style={{
+                              width: 26, height: 26, borderRadius: 7, flexShrink: 0, marginTop: 1,
+                              background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)',
+                              border: `1.5px solid rgba(45,108,223,0.2)`,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}>
+                              <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 15, height: 15 }} />
+                            </div>
+                            <div style={{
+                              padding: '9px 13px',
+                              borderRadius: '3px 12px 12px 12px',
+                              background: msg.isError ? 'rgba(180,35,24,0.05)' : P.paper,
+                              border: `1px solid ${msg.isError ? 'rgba(180,35,24,0.2)' : P.border}`,
+                              fontSize: 13, lineHeight: 1.65,
+                              color: msg.isError ? P.error : P.ink,
+                            }}>
+                              {msg.text.split('\n').map((line, li, arr) => (
+                                <React.Fragment key={li}>{line}{li < arr.length - 1 && <br />}</React.Fragment>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{
+                            maxWidth: '86%', padding: '9px 13px',
+                            borderRadius: '12px 12px 3px 12px',
+                            background: P.accent, fontSize: 13, lineHeight: 1.6, color: 'white',
+                          }}>{msg.text}</div>
+                        )}
+                      </div>
+                    ))}
+                    {qaLoading && (
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                        <div style={{
+                          width: 26, height: 26, borderRadius: 7, flexShrink: 0,
+                          background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)',
+                          border: `1.5px solid rgba(45,108,223,0.2)`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 15, height: 15 }} />
+                        </div>
+                        <div style={{ padding: '11px 15px', borderRadius: '3px 12px 12px 12px', background: P.paper, border: `1px solid ${P.border}`, display: 'flex', gap: 4, alignItems: 'center' }}>
+                          {[0, 1, 2].map(d => <div key={d} style={{ width: 5, height: 5, borderRadius: '50%', background: P.accent, opacity: 0.6, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: 1, background: P.border, margin: '0 18px' }} />
+
+              {/* Insights card — below chat */}
+              <div style={{ padding: '10px 18px 12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  </div>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Insights</span>
+                </div>
+
+                {[
+                  { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(45,108,223,0.1)',
+                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+                    onClick: summarize, active: !!summary, loading: summarizing },
+                  { title: 'Flash Cards', sub: 'Key concepts as cards', color: P.warning, bg: 'rgba(180,83,9,0.1)',
+                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+                    onClick: extractQuotes, active: quotes.length > 0, loading: quotesLoading },
+                  { title: 'Study Guide', sub: 'Chapters & structure', color: P.success, bg: 'rgba(15,118,110,0.1)',
+                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+                    onClick: () => { detectChapters(); setActiveTab('chapters'); }, active: chapters.length > 0, loading: chaptersLoading },
+                ].map(item => (
+                  <div key={item.title}
+                    onClick={item.loading ? undefined : item.onClick}
+                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 8px', borderRadius: 10, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 2 }}
+                    onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: item.active ? item.bg : (item.bg.replace('0.1', '0.07')), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color, transition: 'background 0.15s' }}>
+                      {item.loading ? <SpinnerIcon size={12} /> : item.icon}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: item.active ? item.color : P.ink }}>{item.title}</div>
+                      <div style={{ fontSize: 11, color: P.muted }}>{item.sub}</div>
+                    </div>
+                    {item.active && <div style={{ marginLeft: 'auto', width: 7, height: 7, borderRadius: '50%', background: item.color, flexShrink: 0 }} />}
+                  </div>
+                ))}
+
+                {/* Flash cards if generated */}
+                {quotes.length > 0 && (
+                  <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    {quotes.filter(q => !q.startsWith('Error:')).map((q, i) => (
+                      <div key={i} style={{ padding: '8px 10px 8px 12px', background: P.paper, borderRadius: 8, borderLeft: `3px solid ${P.warning}`, border: `1px solid ${P.border}`, borderLeftWidth: 3, borderLeftColor: P.warning }}>
+                        <div style={{ fontSize: 9, fontWeight: 700, color: P.warning, letterSpacing: '0.06em', marginBottom: 3, textTransform: 'uppercase' }}>Card {i + 1}</div>
+                        <div style={{ fontSize: 12.5, lineHeight: 1.6, color: P.ink }}>{q}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Summary content if present */}
+                {summary && (
+                  <div style={{ marginTop: 8, background: P.paper, borderRadius: 10, padding: '10px 12px', border: `1px solid ${P.border}` }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Summary</span>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 3, border: `1px solid ${P.border}`, background: P.surface, cursor: 'pointer', borderRadius: 5, padding: '2px 7px', fontSize: 10, fontWeight: 600, color: summaryCopied ? P.success : P.muted, transition: 'all 0.15s' }}>
+                          {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
+                        </button>
+                        <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 16, lineHeight: 1, padding: '0 2px' }}>×</button>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 12.5, lineHeight: 1.75, color: P.ink, maxHeight: 180, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>{summary}</div>
+                  </div>
+                )}
+
               </div>
 
             </div>
