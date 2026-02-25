@@ -2635,6 +2635,7 @@ const App = () => {
   });
   const [credits, setCredits] = useState(initCredits);
   const [showBookmarkBanner, setShowBookmarkBanner] = useState(false);
+  const [showReferralBanner, setShowReferralBanner] = useState(false);
   const [user, setUser]                   = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authInitialTab, setAuthInitialTab] = useState('signin');
@@ -2833,6 +2834,10 @@ const App = () => {
       }
       // Avoid stripping auth callback params before session exchange finishes.
       if (session?.user || !authState.hasBlockingAuthParams) cleanupAuthUrl();
+      // Show referral invite banner if visitor arrived via a ref link and isn't signed in
+      if (!session?.user && localStorage.getItem('yte_pending_ref')) {
+        setShowReferralBanner(true);
+      }
     };
     bootstrapAuth();
 
@@ -2855,6 +2860,9 @@ const App = () => {
         recoveryIntentRef.current = false;
       }
       if (session?.user || !getAuthUrlState().hasBlockingAuthParams) cleanupAuthUrl();
+
+      // Hide referral banner once signed in
+      if (event === 'SIGNED_IN' && session?.user) setShowReferralBanner(false);
 
       // Auto-claim referral bonus on first sign-in
       if (event === 'SIGNED_IN' && session?.user) {
@@ -3375,6 +3383,81 @@ const App = () => {
 
       {showPasswordReset && (
         <PasswordResetModal onClose={() => setShowPasswordReset(false)} />
+      )}
+
+      {showReferralBanner && !user && (
+        <div style={{
+          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 200, width: 'calc(100% - 32px)', maxWidth: 420,
+          background: '#fff', borderRadius: 16,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08)',
+          border: '1px solid rgba(45,108,223,0.15)',
+          overflow: 'hidden', animation: 'fadeUp 0.35s ease',
+        }}>
+          <div style={{ height: 4, background: 'linear-gradient(90deg, #2D6CDF, #5B9FFF)' }} />
+          <div style={{ padding: '16px 18px 18px', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+            <div style={{
+              flexShrink: 0, width: 40, height: 40, borderRadius: 12,
+              background: 'rgba(45,108,223,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D6CDF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 12 20 22 4 22 4 12"/>
+                <rect x="2" y="7" width="20" height="5"/>
+                <line x1="12" y1="22" x2="12" y2="7"/>
+                <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+              </svg>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: '0 0 3px', fontWeight: 700, fontSize: 15, color: '#1a1a2e' }}>
+                You've been invited!
+              </p>
+              <p style={{ margin: '0 0 14px', fontSize: 13, color: '#6b7280', lineHeight: 1.45 }}>
+                Sign up now and <strong style={{ color: '#2D6CDF' }}>both you and your friend get +3 free credits</strong> automatically.
+              </p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => { setShowReferralBanner(false); setAuthInitialTab('signup'); setShowAuthModal(true); }}
+                  style={{
+                    flex: 1, padding: '9px 0', borderRadius: 10, border: 'none',
+                    background: '#2D6CDF', color: '#fff', fontWeight: 600, fontSize: 13,
+                    cursor: 'pointer', transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#2459B8'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#2D6CDF'; }}
+                >
+                  Sign up free →
+                </button>
+                <button
+                  onClick={() => { setShowReferralBanner(false); setAuthInitialTab('signin'); setShowAuthModal(true); }}
+                  style={{
+                    padding: '9px 14px', borderRadius: 10,
+                    border: '1px solid rgba(45,108,223,0.25)', background: 'none',
+                    color: '#2D6CDF', fontWeight: 600, fontSize: 13,
+                    cursor: 'pointer', transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(45,108,223,0.07)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+                >
+                  Sign in
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowReferralBanner(false)}
+              style={{
+                flexShrink: 0, width: 24, height: 24, borderRadius: 6,
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: '#9ca3af', fontSize: 18, lineHeight: 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#374151'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#9ca3af'; }}
+              aria-label="Dismiss"
+            >×</button>
+          </div>
+        </div>
       )}
 
       {showBookmarkBanner && (
