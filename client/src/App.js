@@ -885,9 +885,9 @@ const PasswordResetModal = ({ onClose }) => {
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript, onChangePassword, lang, setLang }) => {
   const [tab, setTab] = React.useState('overview');
-  const [usageRange, setUsageRange] = React.useState('this');
   const [passwordResetState, setPasswordResetState] = React.useState({ type: 'idle', message: '' });
   const [prefLangSaved, setPrefLangSaved] = React.useState(false);
+  const [copyLinkDone, setCopyLinkDone] = React.useState(false);
   const saveLangPref = (newLang) => {
     const key = user ? `yte_lang_${user.id}` : 'yte_lang';
     localStorage.setItem(key, newLang);
@@ -907,6 +907,23 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
   const initial = (user.email || '?')[0].toUpperCase();
   const displayName = user.user_metadata?.username || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User';
   const latest = history[0] || null;
+  const latestWc = latest && latest.transcript ? latest.transcript.trim().split(/\s+/).length : 0;
+
+  // Per-day usage stats from history
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayCounts = [0, 0, 0, 0, 0, 0, 0];
+  history.forEach(h => { if (h.date) dayCounts[new Date(h.date).getDay()]++; });
+  const maxCount = Math.max(...dayCounts);
+  const mostUsedDayIdx = maxCount > 0 ? dayCounts.indexOf(maxCount) : -1;
+  const mostUsedDay = mostUsedDayIdx >= 0 ? `${dayNames[mostUsedDayIdx]} (${maxCount})` : '—';
+  const avgPerDay = history.length > 0 ? (history.length / 7).toFixed(1) : '0.0';
+
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(window.location.origin).then(() => {
+      setCopyLinkDone(true);
+      setTimeout(() => setCopyLinkDone(false), 2000);
+    });
+  };
 
   const openTranscript = (entry) => {
     if (!entry) return;
@@ -1307,6 +1324,16 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-usage-day.is-active {
           background: #2D6CDF;
         }
+        .ds-usage-daystats {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 8px;
+          padding-top: 8px;
+          border-top: 1px solid #E7E1D8;
+          font-size: 12px;
+          color: #6B645C;
+        }
         .ds-list-card { padding: 14px 0 6px; overflow: hidden; }
         .ds-list-head {
           display: flex;
@@ -1425,92 +1452,133 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           flex-direction: column;
           gap: 14px;
         }
-        .ds-side-main {
-          padding: 20px 18px 14px;
-        }
+        /* ── Continue where you left off ── */
+        .ds-continue { padding: 18px; }
         .ds-side-title {
-          margin: 0 0 5px;
-          font-size: 20px;
+          margin: 0 0 4px;
+          font-size: 17px;
           line-height: 1.2;
           color: #1C1917;
           font-weight: 700;
           letter-spacing: -0.01em;
         }
-        .ds-side-subtitle {
-          margin: 0;
-          font-size: 14px;
-          line-height: 1.45;
-          color: #6B645C;
-        }
-        .ds-side-safe {
-          margin: 12px 0 0;
-          font-size: 13px;
-          color: #6B645C;
-        }
-        .ds-side-safe strong { color: #1C1917; }
-        .ds-side-action {
-          margin-top: 12px;
-          padding: 14px;
-          border-radius: 14px;
-          border: 1px solid #E7E1D8;
-          background: white;
-        }
-        .ds-side-action + .ds-side-action { margin-top: 10px; }
-        .ds-side-action-head {
+        .ds-continue-thumb {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 16/9;
+          border-radius: 12px;
+          overflow: hidden;
+          background: rgba(45,108,223,0.08);
+          margin: 12px 0 10px;
+          cursor: pointer;
           display: flex;
           align-items: center;
-          gap: 10px;
-          margin-bottom: 6px;
+          justify-content: center;
         }
-        .ds-side-action-title {
-          margin: 0;
-          font-size: 20px;
-          color: #1C1917;
-          font-weight: 700;
-          letter-spacing: -0.01em;
+        .ds-continue-thumb img {
+          width: 100%; height: 100%; object-fit: cover; display: block;
         }
-        .ds-side-action-desc {
-          margin: 0;
+        .ds-continue-play {
+          position: absolute; inset: 0;
+          display: flex; align-items: center; justify-content: center;
+          background: rgba(0,0,0,0.28);
+          transition: background 0.15s;
+        }
+        .ds-continue-thumb:hover .ds-continue-play { background: rgba(0,0,0,0.45); }
+        .ds-continue-play-icon {
+          width: 46px; height: 46px;
+          background: rgba(255,255,255,0.92);
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+        }
+        .ds-continue-video-title {
+          margin: 0 0 3px;
           font-size: 15px;
-          line-height: 1.4;
+          font-weight: 700;
+          color: #1C1917;
+          letter-spacing: -0.01em;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .ds-continue-meta {
+          margin: 0 0 12px;
+          font-size: 13px;
           color: #6B645C;
+          display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
         }
-        .ds-side-pills {
-          margin-top: 11px;
-          display: flex;
-          gap: 6px;
-          flex-wrap: wrap;
-        }
-        .ds-side-pill {
-          border-radius: 999px;
-          padding: 3px 9px;
-          font-size: 12px;
-          border: 1px solid rgba(45,108,223,0.2);
-          color: #2D6CDF;
-          background: rgba(45,108,223,0.07);
-        }
-        .ds-side-btn {
-          margin-top: 11px;
+        .ds-continue-open-btn {
           width: 100%;
           border: none;
           border-radius: 10px;
           background: #2D6CDF;
           color: white;
-          font-size: 16px;
+          font-size: 15px;
           font-weight: 700;
-          letter-spacing: -0.01em;
           padding: 10px 12px;
           cursor: pointer;
-          transition: background 0.15s ease, transform 0.15s ease;
+          transition: background 0.15s, transform 0.15s;
+          margin-bottom: 8px;
         }
-        .ds-side-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
+        .ds-continue-open-btn:hover { background: #2459B8; transform: translateY(-1px); }
+        .ds-continue-quick {
+          display: flex;
+          gap: 6px;
         }
-        .ds-side-btn:not(:disabled):hover {
-          background: #2459B8;
-          transform: translateY(-1px);
+        .ds-continue-quick-btn {
+          flex: 1;
+          border: 1px solid #E7E1D8;
+          border-radius: 8px;
+          padding: 6px 4px;
+          background: white;
+          color: #1C1917;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s;
+          text-align: center;
         }
+        .ds-continue-quick-btn:hover { border-color: rgba(45,108,223,0.35); color: #2D6CDF; background: rgba(45,108,223,0.04); }
+        .ds-continue-empty {
+          padding: 28px 0 10px;
+          text-align: center;
+          color: #6B645C;
+          font-size: 13px;
+        }
+        /* ── Share card ── */
+        .ds-share { padding: 18px; }
+        .ds-share-head {
+          display: flex; align-items: center; gap: 10px; margin-bottom: 5px;
+        }
+        .ds-share-icon {
+          width: 34px; height: 34px; border-radius: 10px;
+          background: rgba(45,108,223,0.08); color: #2D6CDF;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+        }
+        .ds-share-title {
+          margin: 0; font-size: 17px; font-weight: 700; color: #1C1917;
+        }
+        .ds-share-desc {
+          margin: 0 0 10px; font-size: 13px; color: #6B645C; line-height: 1.45;
+        }
+        .ds-share-item {
+          display: flex; align-items: center; gap: 10px;
+          padding: 9px 0; border: none; border-bottom: 1px solid #E7E1D8;
+          background: none; width: 100%; text-align: left; cursor: pointer;
+          font-size: 13px; color: #1C1917; font-weight: 500;
+          transition: color 0.15s;
+        }
+        .ds-share-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .ds-share-item:hover { color: #2D6CDF; }
+        .ds-share-item-icon {
+          width: 30px; height: 30px; border-radius: 8px;
+          background: rgba(45,108,223,0.06);
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0; color: #6B645C;
+        }
+        .ds-share-item:hover .ds-share-item-icon { color: #2D6CDF; background: rgba(45,108,223,0.1); }
         .ds-empty {
           text-align: center;
           padding: 42px 18px;
@@ -1723,11 +1791,10 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
 
                 <section className="ds-card ds-usage">
                   <div className="ds-usage-head">
-                    <h2 className="ds-usage-title">Weekly Usage</h2>
-                    <div className="ds-usage-switch">
-                      <button className={usageRange === 'this' ? 'is-active' : ''} onClick={() => setUsageRange('this')}>This week</button>
-                      <button className={usageRange === 'past' ? 'is-active' : ''} onClick={() => setUsageRange('past')}>Past</button>
-                    </div>
+                    <h2 className="ds-usage-title">Weekly usage</h2>
+                    <span style={{ fontSize: 13, color: '#6B645C', fontWeight: 500 }}>
+                      Resets in <strong style={{ color: '#1C1917' }}>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong>
+                    </span>
                   </div>
                   <div className="ds-usage-track">
                     <div className="ds-usage-bar" style={{ width: `${pct}%` }} />
@@ -1735,7 +1802,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                   <div className="ds-usage-meta">
                     <div>
                       <strong>{used} / {tierMax}</strong>{' '}
-                      <span style={{ color: '#6B645C', fontSize: 14 }}>Credits Used</span>
+                      <span style={{ color: '#6B645C', fontSize: 14 }}>used</span>
                     </div>
                     <div className="ds-usage-days">
                       {weekSegments.map(i => (
@@ -1745,12 +1812,13 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                           style={{ height: `${8 + (i === activeDay ? 18 : i <= activeDay ? 12 : 6)}px` }}
                         />
                       ))}
-                      <span style={{ marginLeft: 6, fontSize: 14, color: '#6B645C' }}>{remaining} remaining</span>
+                      <span style={{ marginLeft: 6, fontSize: 13, color: '#6B645C' }}>{remaining} remaining</span>
                     </div>
                   </div>
-                  <p style={{ margin: '10px 0 0', fontSize: 13, color: '#6B645C' }}>
-                    Resets in <strong style={{ color: '#1C1917' }}>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong>
-                  </p>
+                  <div className="ds-usage-daystats">
+                    <span>Most used day: <strong style={{ color: '#1C1917' }}>{mostUsedDay}</strong></span>
+                    <span>Avg per day: <strong style={{ color: '#1C1917' }}>{avgPerDay}</strong></span>
+                  </div>
                 </section>
 
                 <section className="ds-card ds-list-card">
@@ -1785,13 +1853,16 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                               <p className="ds-row-meta">
                                 {h.platform === 'vimeo' ? <VimeoIcon size={13} /> : <YouTubeIcon size={13} />}
                                 {channel}
-                                        {wc > 0 ? `${wc.toLocaleString()} words` : null}
+                                {wc > 0 ? `${wc.toLocaleString()} words` : null}
                                 {timeAgo(h.date)}
                               </p>
                             </div>
                             <div className="ds-row-actions">
-                              <button className="ds-row-btn primary" onClick={() => openTranscript(h)}>View</button>
-                              <button className="ds-row-btn ghost" onClick={() => setTab('history')}>More</button>
+                              {idx === 0 ? (
+                                <button className="ds-row-btn primary" onClick={() => openTranscript(h)}>Open</button>
+                              ) : (
+                                <button className="ds-row-btn ghost" onClick={() => openTranscript(h)}>More &rsaquo;</button>
+                              )}
                             </div>
                           </div>
                         );
@@ -1922,71 +1993,112 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
 
           {tab === 'overview' && (
             <aside className="ds-side">
-              <section className="ds-card ds-side-main">
-                <h2 className="ds-side-title">Do something with your last transcript</h2>
-                <p className="ds-side-subtitle">
-                  Pick one and we&apos;ll open your most recent video transcript so you can continue right away.
-                </p>
-                <p className="ds-side-safe"><strong>Safe:</strong> actions open your saved transcript and keep your source unchanged.</p>
-
-                <article className="ds-side-action">
-                  <div className="ds-side-action-head">
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(45,108,223,0.08)', color: '#2D6CDF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                      </svg>
+              {/* ── Continue where you left off ── */}
+              <section className="ds-card ds-continue">
+                <h2 className="ds-side-title">Continue where you left off</h2>
+                {latest ? (
+                  <>
+                    <div className="ds-continue-thumb" onClick={() => openTranscript(latest)}>
+                      {latest.thumbnail ? (
+                        <img src={latest.thumbnail} alt={latest.title || 'Video'} loading="lazy" />
+                      ) : (
+                        <div style={{ color: 'rgba(45,108,223,0.3)' }}>
+                          {latest.platform === 'vimeo' ? <VimeoIcon size={48} /> : <YouTubeIcon size={48} />}
+                        </div>
+                      )}
+                      <div className="ds-continue-play">
+                        <div className="ds-continue-play-icon">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1C1917" style={{ marginLeft: 2 }}>
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                          </svg>
+                        </div>
+                      </div>
                     </div>
-                    <h3 className="ds-side-action-title">AI Summary</h3>
-                  </div>
-                  <p className="ds-side-action-desc">Generate a TLDR, key points, and chapter ideas for your latest transcript.</p>
-                  <div className="ds-side-pills">
-                    <span className="ds-side-pill">TLDR</span>
-                    <span className="ds-side-pill">Key points</span>
-                    <span className="ds-side-pill">Chapters</span>
-                  </div>
-                  <button className="ds-side-btn" disabled={!latest} onClick={() => openTranscript(latest)}>Generate summary</button>
-                </article>
-
-                <article className="ds-side-action">
-                  <div className="ds-side-action-head">
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(45,108,223,0.08)', color: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                      </svg>
+                    <p className="ds-continue-video-title">{latest.title || latest.id}</p>
+                    <p className="ds-continue-meta">
+                      {latest.platform === 'vimeo' ? <VimeoIcon size={12} /> : <YouTubeIcon size={12} />}
+                      {latest.channel || (latest.platform === 'vimeo' ? 'Vimeo' : 'YouTube')}
+                      {latestWc > 0 && <span style={{ color: '#C0BAB3' }}>·</span>}
+                      {latestWc > 0 && `${latestWc.toLocaleString()} words`}
+                    </p>
+                    <button className="ds-continue-open-btn" onClick={() => openTranscript(latest)}>Open</button>
+                    <div className="ds-continue-quick">
+                      <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Summarize</button>
+                      <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Flashcards</button>
+                      <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Study guide</button>
                     </div>
-                    <h3 className="ds-side-action-title">Ask AI (Chat)</h3>
+                  </>
+                ) : (
+                  <div className="ds-continue-empty">
+                    <p style={{ margin: 0 }}>Extract a transcript to see it here.</p>
+                    <button
+                      style={{ marginTop: 12, border: 'none', borderRadius: 10, background: '#2D6CDF', color: 'white', fontSize: 13, fontWeight: 600, padding: '8px 16px', cursor: 'pointer' }}
+                      onClick={onBack}
+                    >Extract transcript</button>
                   </div>
-                  <p className="ds-side-action-desc">Start chat with transcript context and ask focused questions instantly.</p>
-                  <div className="ds-side-pills">
-                    <span className="ds-side-pill">Transcript-aware</span>
-                    <span className="ds-side-pill">Fast answers</span>
-                  </div>
-                  <button className="ds-side-btn" disabled={!latest} onClick={() => openTranscript(latest)}>Start chat</button>
-                </article>
-
-                <article className="ds-side-action">
-                  <div className="ds-side-action-head">
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(45,108,223,0.08)', color: '#0F766E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <DownloadIcon size={18} />
-                    </div>
-                    <h3 className="ds-side-action-title">Export</h3>
-                  </div>
-                  <p className="ds-side-action-desc">Download transcript content in the format you need.</p>
-                  <div className="ds-side-pills">
-                    <span className="ds-side-pill">TXT</span>
-                    <span className="ds-side-pill">PDF</span>
-                    <span className="ds-side-pill">Markdown</span>
-                  </div>
-                  <button className="ds-side-btn" disabled={!latest} onClick={() => openTranscript(latest)}>Download</button>
-                </article>
+                )}
               </section>
 
-              <button className="ds-link-btn" onClick={() => setTab('history')} style={{ alignSelf: 'center' }}>
-                + View all transcripts <ChevronIcon size={11} />
-              </button>
+              {/* ── Share ScribeSnap ── */}
+              <section className="ds-card ds-share">
+                <div className="ds-share-head">
+                  <div className="ds-share-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                    </svg>
+                  </div>
+                  <h2 className="ds-share-title">Share ScribeSnap</h2>
+                </div>
+                <p className="ds-share-desc">Tell others about this project to support us.</p>
+                <button className="ds-share-item" onClick={copyShareLink}>
+                  <span className="ds-share-item-icon">
+                    {copyLinkDone ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    ) : (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                      </svg>
+                    )}
+                  </span>
+                  {copyLinkDone ? 'Copied!' : 'Copy link'}
+                </button>
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out ScribeSnap — instant YouTube transcripts + AI tools: ' + window.location.origin)}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="ds-share-item"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <span className="ds-share-item-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                  </span>
+                  Share on X
+                </a>
+                <a
+                  href={`mailto:?subject=${encodeURIComponent('Check out ScribeSnap')}&body=${encodeURIComponent('I\'ve been using ScribeSnap to extract YouTube transcripts and use AI tools on them. Check it out: ' + window.location.origin)}`}
+                  className="ds-share-item"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <span className="ds-share-item-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                  </span>
+                  Share via email
+                </a>
+                <button className="ds-share-item" onClick={() => setTab('settings')}>
+                  <span className="ds-share-item-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                  </span>
+                  Settings
+                </button>
+              </section>
             </aside>
           )}
         </div>
