@@ -3235,7 +3235,7 @@ const App = () => {
                     <iframe
                       ref={playerRef}
                       src={`https://player.vimeo.com/video/${currentVideoId}?api=1`}
-                      style={{ width: '100%', height: 230, border: 'none', display: 'block' }}
+                      style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block' }}
                       allow="autoplay; fullscreen; picture-in-picture"
                       allowFullScreen
                       title="Video player"
@@ -3244,7 +3244,7 @@ const App = () => {
                     <iframe
                       ref={playerRef}
                       src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&rel=0&modestbranding=1`}
-                      style={{ width: '100%', height: 230, border: 'none', display: 'block' }}
+                      style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block' }}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       title="Video player"
@@ -3253,7 +3253,7 @@ const App = () => {
                   {/* Slim meta bar */}
                   <div style={{ padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 10, background: '#FFFFFF' }}>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {currentTitle || currentChannel || currentVideoId}
                       </div>
                       {currentChannel && <div style={{ fontSize: 11, color: P.muted, marginTop: 1 }}>{currentChannel}</div>}
