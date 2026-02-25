@@ -2493,10 +2493,11 @@ const App = () => {
     }
   };
 
-  const getTranscript = () => {
+  const getTranscript = (langOverride) => {
     const parsed = parseVideoUrl(videoUrl);
     if (!parsed) { setError('Please enter a valid YouTube or Vimeo URL'); return; }
     const { platform, id: videoId, url: videoCanonical } = parsed;
+    const langToUse = langOverride || lang;
 
     setError(''); setTranscript(''); setTranscriptSource('');
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
@@ -2506,8 +2507,8 @@ const App = () => {
     setLoadingPercent(5); setLoadingStage('subtitles');
 
     const apiUrl = platform === 'vimeo'
-      ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${lang}`
-      : `/api/transcript?videoId=${videoId}&lang=${lang}`;
+      ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${langToUse}`
+      : `/api/transcript?videoId=${videoId}&lang=${langToUse}`;
     const es = new EventSource(apiUrl);
     const killTimer = setTimeout(() => {
       es.close();
@@ -3426,7 +3427,7 @@ const App = () => {
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                             <span style={{ fontSize: 10.5, fontWeight: 600, color: P.ink, letterSpacing: '0.03em' }}>{(LANGUAGES.find(l => l.code === lang) || LANGUAGES[0]).label.split(' ')[0].toUpperCase().slice(0, 3)}</span>
                             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                            <select value={lang} onChange={e => setLang(e.target.value)} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}>
+                            <select value={lang} onChange={e => { const v = e.target.value; setLang(v); getTranscript(v); }} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}>
                               {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
                             </select>
                           </label>
