@@ -889,11 +889,15 @@ const PasswordResetModal = ({ onClose }) => {
 };
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript, onChangePassword }) => {
+const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript, onChangePassword, lang, setLang }) => {
   const [tab, setTab] = React.useState('overview');
   const [usageRange, setUsageRange] = React.useState('this');
   const [passwordResetState, setPasswordResetState] = React.useState({ type: 'idle', message: '' });
   const [prefLangSaved, setPrefLangSaved] = React.useState(false);
+  const saveLangPref = (newLang) => {
+    const key = user ? `yte_lang_${user.id}` : 'yte_lang';
+    localStorage.setItem(key, newLang);
+  };
 
   const used = credits?.used ?? 0;
   const tierMax = credits?.tierMax || CREDITS_MAX;
@@ -2894,6 +2898,8 @@ const App = () => {
           user={user}
           credits={credits}
           history={history}
+          lang={lang}
+          setLang={setLang}
           onBack={() => setView('app')}
           onSignOut={handleSignOut}
           onLoadTranscript={loadFromHistory}
