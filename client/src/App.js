@@ -2139,6 +2139,8 @@ const App = () => {
   const [activeTab, setActiveTab]         = useState('transcript'); // 'transcript' | 'chapters' | 'editor'
   const [currentTitle, setCurrentTitle]   = useState('');
   const [currentChannel, setCurrentChannel] = useState('');
+  const [selectedSegment, setSelectedSegment] = useState(null);
+  const [exportToggle, setExportToggle]   = useState(false);
 
   const downloadMenuRef = useRef(null);
   const qaInputRef      = useRef(null);
@@ -2340,6 +2342,7 @@ const App = () => {
     setQuotes([]); setShowQuotes(false);
     setActiveTab('transcript');
     setCurrentTitle(''); setCurrentChannel('');
+    setSelectedSegment(null); setExportToggle(false);
   };
 
   const goHome = () => {
@@ -2479,6 +2482,28 @@ const App = () => {
       : transcript;
     navigator.clipboard.writeText(md).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
     setShowDownloadMenu(false);
+  };
+
+  const formatSrtTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    const ms = Math.round((seconds % 1) * 1000);
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')},${String(ms).padStart(3,'0')}`;
+  };
+
+  const downloadSrt = () => {
+    if (!segments.length) return;
+    const srt = segments.map((seg, i) => {
+      const start = formatSrtTime(seg.seconds);
+      const end = formatSrtTime(segments[i + 1] ? segments[i + 1].seconds - 0.05 : seg.seconds + 5);
+      return `${i + 1}\n${start} --> ${end}\n${seg.text.trim()}\n`;
+    }).join('\n');
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(new Blob([srt], { type: 'text/srt' })),
+      download: 'transcript.srt',
+    });
+    a.click(); URL.revokeObjectURL(a.href);
   };
 
   const summarize = async () => {
@@ -2679,7 +2704,7 @@ const App = () => {
         />
       )}
 
-      <div style={{ minHeight: '100vh', paddingTop: showBookmarkBanner ? 97 : 56, background: P.paper, transition: 'padding-top 0.3s ease', display: view === 'dashboard' ? 'none' : 'block' }}>
+      <div style={{ minHeight: '100vh', paddingTop: showBookmarkBanner ? 97 : 56, background: transcript ? 'linear-gradient(180deg, rgba(110,80,220,0.06) 0%, #F6F3EE 35%)' : P.paper, transition: 'padding-top 0.3s ease, background 0.4s ease', display: view === 'dashboard' ? 'none' : 'block' }}>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* LANDING VIEW */}
@@ -3016,14 +3041,20 @@ const App = () => {
         )}
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
-        {/* TRANSCRIPT VIEW — 3-column layout                               */}
+        {/* TRANSCRIPT VIEW — app shell 3-column layout                     */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {transcript && (
-          <div className="fade-up" style={{
-            maxWidth: 1340, margin: '0 auto', padding: '16px 20px 48px',
+          <div className="fade-up" style={{ maxWidth: 1400, margin: '0 auto', padding: '20px 20px 48px' }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: 24,
+            boxShadow: '0 8px 48px rgba(28,25,23,0.09), 0 1px 3px rgba(28,25,23,0.04)',
+            border: `1px solid ${P.border}`,
+            overflow: 'hidden',
             display: 'grid',
-            gridTemplateColumns: '220px 1fr 300px',
-            gap: 16, alignItems: 'start',
+            gridTemplateColumns: '280px 1fr 360px',
+            gridTemplateRows: 'auto 1fr',
+            minHeight: 'calc(100vh - 140px)',
           }}>
 
             {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────── */}
@@ -3523,6 +3554,7 @@ const App = () => {
               </div>
 
             </div>
+          </div>
           </div>
         )}
       </div>
