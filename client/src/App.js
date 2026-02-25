@@ -2148,11 +2148,15 @@ const App = () => {
   const [currentTitle, setCurrentTitle]   = useState('');
   const [currentChannel, setCurrentChannel] = useState('');
   const [selectedSegment, setSelectedSegment] = useState(null);
+  const [playingSegment, setPlayingSegment] = useState(null);
   const [exportToggle, setExportToggle]   = useState(false);
 
-  const downloadMenuRef = useRef(null);
-  const qaInputRef      = useRef(null);
-  const playerRef       = useRef(null);
+  const downloadMenuRef    = useRef(null);
+  const qaInputRef         = useRef(null);
+  const playerRef          = useRef(null);
+  const segmentRefs        = useRef({});
+  const transcriptListRef  = useRef(null);
+  const playingSegmentRef  = useRef(null);
   const urlInputRef     = useRef(null);
   const qaRef           = useRef(null);
   const recoveryIntentRef = useRef(false);
@@ -2173,6 +2177,52 @@ const App = () => {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // Reset playing segment when transcript changes
+  useEffect(() => {
+    setPlayingSegment(null);
+    playingSegmentRef.current = null;
+  }, [segments]);
+
+  // YouTube IFrame API — listen for time updates and auto-scroll transcript
+  useEffect(() => {
+    const handler = (event) => {
+      if (!playerRef.current) return;
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (!data || !data.event) return;
+        // When player is ready, subscribe to events
+        if (data.event === 'onReady') {
+          playerRef.current.contentWindow?.postMessage(
+            JSON.stringify({ event: 'listening', id: 1 }), '*'
+          );
+        }
+        // infoDelivery fires ~every 250ms while playing
+        if (data.event === 'infoDelivery' && data.info?.currentTime !== undefined) {
+          const t = data.info.currentTime;
+          if (segments.length > 0) {
+            let idx = 0;
+            for (let i = 0; i < segments.length; i++) {
+              if (segments[i].seconds <= t) idx = i;
+              else break;
+            }
+            if (idx !== playingSegmentRef.current) {
+              playingSegmentRef.current = idx;
+              setPlayingSegment(idx);
+              const el = segmentRefs.current[idx];
+              const container = transcriptListRef.current;
+              if (el && container) {
+                const scrollTarget = el.offsetTop - container.clientHeight / 3;
+                container.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+              }
+            }
+          }
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [segments]);
 
   useEffect(() => {
     if (localStorage.getItem('yte_bookmark_dismissed')) return;
@@ -3213,7 +3263,7 @@ const App = () => {
                 <div style={{ flexShrink: 0, borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}`, background: P.paper }}>
                   {/* Centered 16:9 player — max 391×220, no black bars, paper sides */}
                   <div style={{ display: 'flex', justifyContent: 'center', background: P.paper }}>
-                    <div style={{ width: 'min(100%, 391px)', flexShrink: 0, borderRadius: 0, overflow: 'hidden' }}>
+                    <div style={{ width: 'min(100%, 411px)', flexShrink: 0, borderRadius: 0, overflow: 'hidden' }}>
                       {currentPlatform === 'vimeo' ? (
                         <iframe
                           ref={playerRef}
@@ -3322,20 +3372,22 @@ const App = () => {
                       )}
                     </div>
                     {/* Transcript list — 2-column grid: timestamp | text */}
-                    <div style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF' }}>
+                    <div ref={transcriptListRef} style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF' }}>
                       {segments.length > 0 && showTimestamps ? (
                         segments.map((seg, i) => (
                           <div key={i}
+                            ref={el => { segmentRefs.current[i] = el; }}
                             onClick={() => { setSelectedSegment(selectedSegment === i ? null : i); seekToTime(seg.seconds); }}
                             style={{
                               display: 'grid', gridTemplateColumns: '54px 1fr',
                               gap: 0, padding: '0',
-                              background: selectedSegment === i ? 'rgba(45,108,223,0.06)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'),
-                              cursor: 'pointer', transition: 'background 0.1s',
+                              background: selectedSegment === i ? 'rgba(45,108,223,0.08)' : playingSegment === i ? 'rgba(45,108,223,0.05)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'),
+                              cursor: 'pointer', transition: 'background 0.15s',
+                              borderLeft: playingSegment === i ? `3px solid ${P.accent}` : '3px solid transparent',
                               borderBottom: `1px solid ${selectedSegment === i ? 'rgba(45,108,223,0.15)' : P.border}`,
                             }}
-                            onMouseEnter={e => { if (selectedSegment !== i) e.currentTarget.style.background = 'rgba(45,108,223,0.03)'; }}
-                            onMouseLeave={e => { if (selectedSegment !== i) e.currentTarget.style.background = i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'; }}
+                            onMouseEnter={e => { if (selectedSegment !== i && playingSegment !== i) e.currentTarget.style.background = 'rgba(45,108,223,0.03)'; }}
+                            onMouseLeave={e => { if (selectedSegment !== i) e.currentTarget.style.background = playingSegment === i ? 'rgba(45,108,223,0.05)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'); }}
                           >
                             <button
                               onClick={e => { e.stopPropagation(); seekToTime(seg.seconds); setSelectedSegment(i); }}
