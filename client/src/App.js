@@ -893,6 +893,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
   const [tab, setTab] = React.useState('overview');
   const [usageRange, setUsageRange] = React.useState('this');
   const [passwordResetState, setPasswordResetState] = React.useState({ type: 'idle', message: '' });
+  const [prefLangSaved, setPrefLangSaved] = React.useState(false);
 
   const used = credits?.used ?? 0;
   const tierMax = credits?.tierMax || CREDITS_MAX;
@@ -1876,6 +1877,31 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                   </div>
                 </div>
 
+                <div className="ds-card">
+                  <h3 className="ds-settings-title">Preferences</h3>
+                  <div className="ds-setting-row" style={{ alignItems: 'center' }}>
+                    <span className="ds-setting-label">Transcript language</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <select
+                        value={lang}
+                        onChange={e => {
+                          const v = e.target.value;
+                          setLang(v);
+                          saveLangPref(v);
+                          setPrefLangSaved(true);
+                          setTimeout(() => setPrefLangSaved(false), 2000);
+                        }}
+                        style={{ fontSize: 13, padding: '5px 10px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, color: P.ink, cursor: 'pointer', outline: 'none' }}
+                      >
+                        {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+                      </select>
+                      {prefLangSaved && (
+                        <span style={{ fontSize: 12, color: P.success, fontWeight: 600 }}>Saved ✓</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="ds-card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <h3 className="ds-settings-title" style={{ marginBottom: 2 }}>Security</h3>
                   <p className="ds-settings-help">
@@ -2104,7 +2130,7 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, on
 // ── Main App ──────────────────────────────────────────────────────────────────
 const App = () => {
   const [videoUrl, setVideoUrl]           = useState('');
-  const [lang, setLang]                   = useState('en');
+  const [lang, setLang]                   = useState(() => localStorage.getItem('yte_lang') || 'en');
   const [transcript, setTranscript]       = useState('');
   const [segments, setSegments]           = useState([]);
   const [transcriptSource, setTranscriptSource] = useState('');
@@ -2344,6 +2370,18 @@ const App = () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Load user-specific lang preference on login/logout
+  useEffect(() => {
+    const key = user ? `yte_lang_${user.id}` : 'yte_lang';
+    const saved = localStorage.getItem(key);
+    if (saved) setLang(saved);
+  }, [user]);
+
+  const saveLangPref = (newLang) => {
+    const key = user ? `yte_lang_${user.id}` : 'yte_lang';
+    localStorage.setItem(key, newLang);
+  };
 
   // Re-init credits keyed by user when auth changes
   useEffect(() => {
@@ -3456,7 +3494,7 @@ const App = () => {
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                             <span style={{ fontSize: 10.5, fontWeight: 600, color: P.ink, letterSpacing: '0.03em' }}>{(LANGUAGES.find(l => l.code === lang) || LANGUAGES[0]).label.split(' ')[0].toUpperCase().slice(0, 3)}</span>
                             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                            <select value={lang} onChange={e => { const v = e.target.value; setLang(v); refetchWithLang(v); }} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}>
+                            <select value={lang} onChange={e => { const v = e.target.value; setLang(v); saveLangPref(v); refetchWithLang(v); }} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}>
                               {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
                             </select>
                           </label>
