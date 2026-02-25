@@ -663,6 +663,60 @@ app.all('/api/*', (_req, res) => {
   res.status(404).json({ error: 'API route not found' });
 });
 
+// ── Referral claim ────────────────────────────────────────────────────────────
+// Called after a new user signs in for the first time.
+// Awards +3 referral_bonus to both the new user and the referrer.
+app.post('/api/referral/claim', requireAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ error: 'Auth not configured' });
+
+  const referred_id = req.user.id;
+  const { referrer_id } = req.body || {};
+
+  if (!referrer_id || typeof referrer_id !== 'string')
+    return res.status(400).json({ error: 'referrer_id required' });
+  if (referrer_id === referred_id)
+    return res.status(400).json({ error: 'Self-referral not allowed' });
+
+  // Fetch both users
+  const [{ data: referredData }, { data: referrerData }] = await Promise.all([
+    supabaseAdmin.auth.admin.getUserById(referred_id),
+    supabaseAdmin.auth.admin.getUserById(referrer_id),
+  ]);
+
+  if (!referredData?.user)  return res.status(404).json({ error: 'User not found' });
+  if (!referrerData?.user)  return res.status(404).json({ error: 'Referrer not found' });
+
+  const referredMeta  = referredData.user.user_metadata  || {};
+  const referrerMeta  = referrerData.user.user_metadata  || {};
+
+  // Idempotent — only credit once per referred user
+  if (referredMeta.referral_credited)
+    return res.status(409).json({ error: 'Already credited' });
+
+  const BONUS = 3;
+
+  // Award the new user +3
+  await supabaseAdmin.auth.admin.updateUserById(referred_id, {
+    user_metadata: {
+      ...referredMeta,
+      referred_by:       referrer_id,
+      referral_credited: true,
+      referral_bonus:    (referredMeta.referral_bonus || 0) + BONUS,
+    },
+  });
+
+  // Award the referrer +3 and increment their count
+  await supabaseAdmin.auth.admin.updateUserById(referrer_id, {
+    user_metadata: {
+      ...referrerMeta,
+      referral_bonus: (referrerMeta.referral_bonus || 0) + BONUS,
+      referral_count: (referrerMeta.referral_count || 0) + 1,
+    },
+  });
+
+  res.json({ ok: true, bonus: BONUS });
+});
+
 // Privacy policy static route
 app.get('/privacy', (_req, res) => {
   res.sendFile(path.join(__dirname, 'client/build', 'privacy.html'));

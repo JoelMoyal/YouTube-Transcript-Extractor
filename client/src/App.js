@@ -508,9 +508,10 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
         .maybeSingle();
       if (existing) { setError('Username already taken. Please choose another.'); return; }
 
+      const signUpPendingRef = localStorage.getItem('yte_pending_ref');
       const { error: err } = await supabase.auth.signUp({
         email, password,
-        options: { data: { full_name: trimmedUser, username: trimmedUser.toLowerCase() } },
+        options: { data: { full_name: trimmedUser, username: trimmedUser.toLowerCase(), ...(signUpPendingRef ? { referred_by: signUpPendingRef } : {}) } },
       });
       if (err) { setError(friendlyError(err.message)); return; }
       setScreen('pending');
@@ -883,9 +884,8 @@ const PasswordResetModal = ({ onClose }) => {
 };
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLoadTranscript, onChangePassword, lang, setLang }) => {
+const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLoadTranscript, lang, setLang }) => {
   const [tab, setTab] = React.useState('overview');
-  const [passwordResetState, setPasswordResetState] = React.useState({ type: 'idle', message: '' });
   const [prefLangSaved, setPrefLangSaved] = React.useState(false);
   const [copyLinkDone, setCopyLinkDone] = React.useState(false);
   const [copyRefDone, setCopyRefDone] = React.useState(false);
@@ -969,30 +969,6 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
     if (!entry) return;
     onLoadTranscript(entry);
     onBack();
-  };
-
-  const triggerPasswordReset = async () => {
-    if (passwordResetState.type === 'loading') return;
-    setPasswordResetState({ type: 'loading', message: `Sending reset link to ${user.email}...` });
-    try {
-      const result = await onChangePassword?.();
-      if (result?.ok) {
-        setPasswordResetState({
-          type: 'success',
-          message: `Reset link sent to ${user.email}. Check inbox/spam and open the link to set your new password.`,
-        });
-      } else {
-        setPasswordResetState({
-          type: 'error',
-          message: result?.error || 'Could not send reset email right now. Please try again.',
-        });
-      }
-    } catch (err) {
-      setPasswordResetState({
-        type: 'error',
-        message: err?.message || 'Could not send reset email right now. Please try again.',
-      });
-    }
   };
 
   // Save display name via Supabase
@@ -2078,6 +2054,18 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                       {copyRefDone ? '✓ Copied!' : 'Copy link'}
                     </button>
                   </div>
+                  {((user?.user_metadata?.referral_count || 0) > 0 || (user?.user_metadata?.referral_bonus || 0) > 0) && (
+                    <div className="ds-referral-stats">
+                      <div className="ds-referral-stat">
+                        <span className="ds-referral-stat-value">{user?.user_metadata?.referral_count || 0}</span>
+                        <span className="ds-referral-stat-label">friends joined</span>
+                      </div>
+                      <div className="ds-referral-stat">
+                        <span className="ds-referral-stat-value">+{user?.user_metadata?.referral_bonus || 0}</span>
+                        <span className="ds-referral-stat-label">credits earned</span>
+                      </div>
+                    </div>
+                  )}
                 </section>
               </div>
             )}
@@ -2131,24 +2119,70 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
             {tab === 'settings' && (
               <section className="ds-settings">
+
+                {/* ── Card 1: Profile ── */}
                 <div className="ds-card">
-                  <h3 className="ds-settings-title">Account</h3>
+                  <h3 className="ds-settings-title">Profile</h3>
+
+                  {/* Display name */}
+                  <div className="ds-setting-row" style={{ alignItems: 'flex-start', flexDirection: 'column', gap: 6 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                      <span className="ds-setting-label">Display name</span>
+                      {!editingName && (
+                        <div className="ds-settings-row-actions">
+                          {nameSaved && <span style={{ fontSize: 12, color: P.success, fontWeight: 600 }}>Saved ✓</span>}
+                          <button className="ds-settings-edit-btn" onClick={() => setEditingName(true)}>Edit</button>
+                        </div>
+                      )}
+                    </div>
+                    {editingName ? (
+                      <div style={{ width: '100%' }}>
+                        <input
+                          className="ds-settings-input"
+                          value={nameInput}
+                          onChange={e => setNameInput(e.target.value)}
+                          placeholder="Your display name"
+                          autoFocus
+                          onKeyDown={e => { if (e.key === 'Enter') saveDisplayName(); if (e.key === 'Escape') { setEditingName(false); setNameError(''); } }}
+                        />
+                        {nameError && <div className="ds-settings-feedback error" style={{ marginTop: 4 }}>{nameError}</div>}
+                        <div className="ds-settings-row-actions" style={{ marginTop: 6 }}>
+                          <button className="ds-settings-save-btn" onClick={saveDisplayName} disabled={nameSaving}>{nameSaving ? 'Saving…' : 'Save name'}</button>
+                          <button className="ds-settings-cancel-btn" onClick={() => { setEditingName(false); setNameError(''); }}>Cancel</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="ds-setting-value" style={{ textAlign: 'left', maxWidth: '100%' }}>{displayName}</span>
+                    )}
+                  </div>
+
+                  {/* Email */}
                   <div className="ds-setting-row">
                     <span className="ds-setting-label">Email</span>
                     <span className="ds-setting-value">{user.email}</span>
                   </div>
+
+                  {/* Member since */}
                   <div className="ds-setting-row">
                     <span className="ds-setting-label">Member since</span>
                     <span className="ds-setting-value">{memberSince}</span>
                   </div>
+
+                  {/* Plan */}
                   <div className="ds-setting-row">
                     <span className="ds-setting-label">Current plan</span>
-                    <span className="ds-setting-value">Free · {tierMax} credits / 7 days</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(45,108,223,0.1)', color: '#2D6CDF' }}>Free</span>
+                      <span className="ds-setting-value" style={{ maxWidth: 'none' }}>{tierMax} credits / 7 days</span>
+                    </div>
                   </div>
                 </div>
 
+                {/* ── Card 2: Preferences ── */}
                 <div className="ds-card">
                   <h3 className="ds-settings-title">Preferences</h3>
+
+                  {/* Transcript language */}
                   <div className="ds-setting-row" style={{ alignItems: 'center' }}>
                     <span className="ds-setting-label">Transcript language</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -2165,32 +2199,173 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                       >
                         {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
                       </select>
-                      {prefLangSaved && (
-                        <span style={{ fontSize: 12, color: P.success, fontWeight: 600 }}>Saved ✓</span>
-                      )}
+                      {prefLangSaved && <span style={{ fontSize: 12, color: P.success, fontWeight: 600 }}>Saved ✓</span>}
                     </div>
+                  </div>
+
+                  {/* Default export format */}
+                  <div className="ds-setting-row" style={{ alignItems: 'center' }}>
+                    <span className="ds-setting-label">Default export format</span>
+                    <select
+                      value={prefFormat}
+                      onChange={e => {
+                        setPrefFormat(e.target.value);
+                        try { localStorage.setItem(prefKey('format'), e.target.value); } catch {}
+                      }}
+                      style={{ fontSize: 13, padding: '5px 10px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, color: P.ink, cursor: 'pointer', outline: 'none' }}
+                    >
+                      <option value="plain">Plain text (.txt)</option>
+                      <option value="srt">Subtitles (.srt)</option>
+                      <option value="pdf">Document (.pdf)</option>
+                    </select>
+                  </div>
+
+                  {/* Show timestamps toggle */}
+                  <div className="ds-setting-row" style={{ alignItems: 'center' }}>
+                    <div>
+                      <span className="ds-setting-label">Show timestamps</span>
+                      <p style={{ margin: '2px 0 0', fontSize: 11, color: '#9B9490' }}>Display time markers in transcripts</p>
+                    </div>
+                    <label className="ds-toggle">
+                      <input
+                        type="checkbox"
+                        checked={prefTimestamps}
+                        onChange={e => {
+                          setPrefTimestamps(e.target.checked);
+                          try { localStorage.setItem(prefKey('timestamps'), String(e.target.checked)); } catch {}
+                        }}
+                      />
+                      <span className="ds-toggle-track" />
+                    </label>
+                  </div>
+
+                  {/* Auto-copy toggle */}
+                  <div className="ds-setting-row" style={{ alignItems: 'center' }}>
+                    <div>
+                      <span className="ds-setting-label">Auto-copy transcript</span>
+                      <p style={{ margin: '2px 0 0', fontSize: 11, color: '#9B9490' }}>Copy to clipboard after extraction</p>
+                    </div>
+                    <label className="ds-toggle">
+                      <input
+                        type="checkbox"
+                        checked={prefAutoCopy}
+                        onChange={e => {
+                          setPrefAutoCopy(e.target.checked);
+                          try { localStorage.setItem(prefKey('autocopy'), String(e.target.checked)); } catch {}
+                        }}
+                      />
+                      <span className="ds-toggle-track" />
+                    </label>
                   </div>
                 </div>
 
+                {/* ── Card 3: Security ── */}
                 <div className="ds-card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <h3 className="ds-settings-title" style={{ marginBottom: 2 }}>Security</h3>
-                  <p className="ds-settings-help">
-                    Change password sends a secure reset link to your account email.
-                  </p>
-                  <button
-                    className="ds-settings-btn"
-                    onClick={triggerPasswordReset}
-                    disabled={passwordResetState.type === 'loading'}
-                  >
-                    {passwordResetState.type === 'loading' ? 'Sending reset link...' : 'Change password'}
-                  </button>
-                  {passwordResetState.type !== 'idle' && (
-                    <div className={`ds-security-feedback ${passwordResetState.type}`}>
-                      {passwordResetState.message}
+
+                  {pwStep === 'idle' && (
+                    <button className="ds-settings-btn" onClick={() => { setPwStep('form'); setPwError(''); }}>Change password</button>
+                  )}
+
+                  {(pwStep === 'form' || pwStep === 'confirm') && (
+                    <div className="ds-settings-form">
+                      <div>
+                        <label className="ds-settings-form-label">Current password</label>
+                        <input className="ds-settings-input" type="password" value={pwCurrent} onChange={e => setPwCurrent(e.target.value)} placeholder="Enter current password" />
+                      </div>
+                      <div>
+                        <label className="ds-settings-form-label">New password</label>
+                        <input className="ds-settings-input" type="password" value={pwNew} onChange={e => setPwNew(e.target.value)} placeholder="Min. 6 characters" />
+                      </div>
+                      <div>
+                        <label className="ds-settings-form-label">Confirm new password</label>
+                        <input className="ds-settings-input" type="password" value={pwConfirm} onChange={e => setPwConfirm(e.target.value)} placeholder="Repeat new password" />
+                      </div>
+                      {pwError && <div className="ds-settings-feedback error">{pwError}</div>}
+
+                      {pwStep === 'form' && (
+                        <div className="ds-settings-row-actions">
+                          <button className="ds-settings-save-btn" style={{ flex: 1 }} onClick={() => {
+                            if (!pwCurrent) { setPwError('Enter your current password.'); return; }
+                            if (pwNew.length < 6) { setPwError('New password must be at least 6 characters.'); return; }
+                            if (pwNew !== pwConfirm) { setPwError('New passwords do not match.'); return; }
+                            setPwError(''); setPwStep('confirm');
+                          }}>Continue</button>
+                          <button className="ds-settings-cancel-btn" onClick={() => { setPwStep('idle'); setPwCurrent(''); setPwNew(''); setPwConfirm(''); setPwError(''); }}>Cancel</button>
+                        </div>
+                      )}
+
+                      {pwStep === 'confirm' && (
+                        <div className="ds-settings-confirm-box neutral">
+                          <p className="ds-settings-confirm-text">Are you sure you want to change your password? You'll stay signed in on this device.</p>
+                          <div className="ds-settings-confirm-row">
+                            <button className="ds-settings-save-btn" style={{ flex: 1 }} onClick={handlePasswordChange}>Yes, change it</button>
+                            <button className="ds-settings-cancel-btn" onClick={() => setPwStep('form')}>Go back</button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
-                  <button className="ds-settings-btn danger" onClick={onSignOut}>Sign out of account</button>
+
+                  {pwStep === 'loading' && <div className="ds-settings-feedback loading">Updating your password…</div>}
+                  {pwStep === 'success' && <div className="ds-settings-feedback success">Password updated successfully ✓</div>}
+
+                  <div style={{ borderTop: `1px solid ${P.border}`, paddingTop: 10, marginTop: 2 }}>
+                    {!signOutConfirm ? (
+                      <button className="ds-settings-btn danger" onClick={() => setSignOutConfirm(true)}>Sign out of account</button>
+                    ) : (
+                      <div className="ds-settings-confirm-box">
+                        <p className="ds-settings-confirm-text">Are you sure you want to sign out?</p>
+                        <div className="ds-settings-confirm-row">
+                          <button className="ds-settings-save-btn" style={{ flex: 1, background: P.error }} onClick={onSignOut}>Yes, sign out</button>
+                          <button className="ds-settings-cancel-btn" onClick={() => setSignOutConfirm(false)}>Cancel</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                {/* ── Card 4: Data & Storage ── */}
+                <div className="ds-card" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <h3 className="ds-settings-title" style={{ marginBottom: 2 }}>Data & Storage</h3>
+                  <p className="ds-settings-help">Your transcripts are stored locally on this device.</p>
+
+                  <div className="ds-setting-row" style={{ border: 'none', padding: '4px 0' }}>
+                    <span className="ds-setting-label">Saved transcripts</span>
+                    <span className="ds-setting-value">{history.length} / 10</span>
+                  </div>
+
+                  <button
+                    className="ds-settings-btn"
+                    onClick={exportHistory}
+                    disabled={history.length === 0}
+                    style={{ opacity: history.length === 0 ? 0.45 : 1 }}
+                  >Export history as JSON</button>
+
+                  {!clearConfirm ? (
+                    <button
+                      className="ds-settings-btn danger"
+                      onClick={() => setClearConfirm(true)}
+                      disabled={history.length === 0}
+                      style={{ opacity: history.length === 0 ? 0.45 : 1 }}
+                    >Clear all history</button>
+                  ) : (
+                    <div className="ds-settings-confirm-box">
+                      {clearDone ? (
+                        <div className="ds-settings-feedback success" style={{ margin: 0 }}>History cleared ✓</div>
+                      ) : (
+                        <>
+                          <p className="ds-settings-confirm-text">This will permanently delete all {history.length} saved transcript{history.length !== 1 ? 's' : ''}. This cannot be undone.</p>
+                          <div className="ds-settings-confirm-row">
+                            <button className="ds-settings-save-btn" style={{ flex: 1, background: P.error }} onClick={handleClearHistory}>Yes, clear all</button>
+                            <button className="ds-settings-cancel-btn" onClick={() => setClearConfirm(false)}>Cancel</button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+
               </section>
             )}
           </main>
@@ -2625,6 +2800,12 @@ const App = () => {
     const authState = getAuthUrlState();
     recoveryIntentRef.current = authState.isRecovery;
 
+    // Capture ?ref= referral param before cleanupAuthUrl removes it
+    const pendingRefParam = new URLSearchParams(window.location.search).get('ref');
+    if (pendingRefParam) {
+      localStorage.setItem('yte_pending_ref', pendingRefParam);
+    }
+
     let mounted = true;
     const bootstrapAuth = async () => {
       // Handle recovery links that arrive as token_hash + type=recovery.
@@ -2655,7 +2836,7 @@ const App = () => {
     };
     bootstrapAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setShowPasswordReset(true);
         recoveryIntentRef.current = false;
@@ -2674,6 +2855,29 @@ const App = () => {
         recoveryIntentRef.current = false;
       }
       if (session?.user || !getAuthUrlState().hasBlockingAuthParams) cleanupAuthUrl();
+
+      // Auto-claim referral bonus on first sign-in
+      if (event === 'SIGNED_IN' && session?.user) {
+        const claimRef = localStorage.getItem('yte_pending_ref');
+        if (claimRef && claimRef !== session.user.id) {
+          try {
+            const resp = await fetch('/api/referral/claim', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+              body: JSON.stringify({ referrer_id: claimRef }),
+            });
+            // On success or "already credited", clear the pending ref
+            if (resp.ok || resp.status === 409 || resp.status === 400) {
+              localStorage.removeItem('yte_pending_ref');
+            }
+            if (resp.ok) {
+              // Refresh user metadata so referral_bonus is reflected immediately
+              const { data: { user: refreshed } } = await supabase.auth.getUser();
+              if (refreshed) setUser(refreshed);
+            }
+          } catch (_) { /* network error — will retry next sign-in */ }
+        }
+      }
     });
     return () => {
       mounted = false;
@@ -2709,7 +2913,8 @@ const App = () => {
         }
       }
 
-      const tierMax = user ? CREDITS_MAX : CREDITS_FREE;
+      const referralBonus = user?.user_metadata?.referral_bonus || 0;
+      const tierMax = user ? CREDITS_MAX + referralBonus : CREDITS_FREE;
 
       if (!stored || typeof stored.resetAt !== 'number' || Date.now() > stored.resetAt) {
         stored = { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
@@ -2721,7 +2926,8 @@ const App = () => {
       localStorage.setItem(key, JSON.stringify(stored));
       setCredits(stored);
     } catch {
-      setCredits({ used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS, tierMax: user ? CREDITS_MAX : CREDITS_FREE, userId: user ? user.id : null });
+      const referralBonus = user?.user_metadata?.referral_bonus || 0;
+      setCredits({ used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS, tierMax: user ? CREDITS_MAX + referralBonus : CREDITS_FREE, userId: user ? user.id : null });
     }
   }, [user]);
 
@@ -2743,7 +2949,8 @@ const App = () => {
 
   const incrementCredits = () => {
     setCredits(prev => {
-      const max = user ? CREDITS_MAX : CREDITS_FREE;
+      const bonus = user?.user_metadata?.referral_bonus || 0;
+      const max = user ? CREDITS_MAX + bonus : CREDITS_FREE;
       const next = { ...prev, used: Math.min(max, prev.used + 1), tierMax: max, userId: user?.id ?? null };
       const key = user ? `yte_credits_${user.id}` : 'yte_credits';
       localStorage.setItem(key, JSON.stringify(next));
@@ -3214,16 +3421,12 @@ const App = () => {
           user={user}
           credits={credits}
           history={history}
+          setHistory={setHistory}
           lang={lang}
           setLang={setLang}
           onBack={() => setView('app')}
           onSignOut={handleSignOut}
           onLoadTranscript={loadFromHistory}
-          onChangePassword={async () => {
-            const { error } = await supabase.auth.resetPasswordForEmail(user.email, { redirectTo: getPasswordResetRedirectUrl() });
-            if (error) return { ok: false, error: friendlyError(error.message) };
-            return { ok: true };
-          }}
         />
       )}
 
