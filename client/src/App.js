@@ -3210,28 +3210,30 @@ const App = () => {
 
               {/* Video player card */}
               {currentVideoId && (
-                <div style={{ flexShrink: 0, borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}` }}>
-                  {/* Responsive 16:9 wrapper — no black bars */}
-                  <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', background: '#000' }}>
-                    {currentPlatform === 'vimeo' ? (
-                      <iframe
-                        ref={playerRef}
-                        src={`https://player.vimeo.com/video/${currentVideoId}?api=1`}
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: 'block' }}
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowFullScreen
-                        title="Video player"
-                      />
-                    ) : (
-                      <iframe
-                        ref={playerRef}
-                        src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&rel=0&modestbranding=1`}
-                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: 'block' }}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        title="Video player"
-                      />
-                    )}
+                <div style={{ flexShrink: 0, borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}`, background: P.paper }}>
+                  {/* Centered 16:9 player — max 391×220, no black bars, paper sides */}
+                  <div style={{ display: 'flex', justifyContent: 'center', background: P.paper }}>
+                    <div style={{ width: 'min(100%, 391px)', flexShrink: 0, borderRadius: 0, overflow: 'hidden' }}>
+                      {currentPlatform === 'vimeo' ? (
+                        <iframe
+                          ref={playerRef}
+                          src={`https://player.vimeo.com/video/${currentVideoId}?api=1`}
+                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block' }}
+                          allow="autoplay; fullscreen; picture-in-picture"
+                          allowFullScreen
+                          title="Video player"
+                        />
+                      ) : (
+                        <iframe
+                          ref={playerRef}
+                          src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&rel=0&modestbranding=1`}
+                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block' }}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title="Video player"
+                        />
+                      )}
+                    </div>
                   </div>
                   {/* Slim meta bar */}
                   <div style={{ padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 10, background: '#FFFFFF' }}>
@@ -3423,41 +3425,8 @@ const App = () => {
             {/* ── RIGHT SIDEBAR — col 3, row 2 ─────────────────────────────────── */}
             <div style={{ gridColumn: 3, gridRow: 2, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF' }}>
 
-              {/* Flash Cards section */}
-              <div style={{ padding: '12px 18px 10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: quotes.length > 0 ? 10 : 0 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(180,83,9,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={P.warning} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                  </div>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: P.ink, flex: 1 }}>Flash Cards</span>
-                  <button onClick={quotesLoading ? undefined : extractQuotes} style={{
-                    display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 20,
-                    border: `1px solid ${P.border}`, background: 'transparent', cursor: quotesLoading ? 'default' : 'pointer',
-                    fontSize: 11, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
-                  }}
-                    onMouseEnter={e => { if (!quotesLoading) { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.3)'; } }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}>
-                    {quotesLoading ? <SpinnerIcon size={10} /> : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>}
-                    {quotesLoading ? 'Generating…' : quotes.length > 0 ? 'Regenerate' : 'Generate'}
-                  </button>
-                </div>
-                {quotes.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    {quotes.filter(q => !q.startsWith('Error:')).map((q, i) => (
-                      <div key={i} style={{ padding: '8px 10px 8px 12px', background: P.paper, borderRadius: 8, borderLeft: `3px solid ${P.warning}`, border: `1px solid ${P.border}`, borderLeftWidth: 3, borderLeftColor: P.warning }}>
-                        <div style={{ fontSize: 9, fontWeight: 700, color: P.warning, letterSpacing: '0.06em', marginBottom: 3, textTransform: 'uppercase' }}>Card {i + 1}</div>
-                        <div style={{ fontSize: 12.5, lineHeight: 1.6, color: P.ink }}>{q}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Divider */}
-              <div style={{ height: 1, background: P.border, margin: '0 18px' }} />
-
               {/* Insights card */}
-              <div style={{ padding: '12px 18px 12px' }}>
+              <div style={{ padding: '10px 18px 12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -3470,8 +3439,8 @@ const App = () => {
                   { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(45,108,223,0.1)',
                     icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
                     onClick: summarize, active: !!summary, loading: summarizing },
-                  { title: 'Topic Extraction', sub: 'keywords & hashtags', color: P.warning, bg: 'rgba(180,83,9,0.1)',
-                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
+                  { title: 'Flash Cards', sub: 'Key concepts as cards', color: P.warning, bg: 'rgba(180,83,9,0.1)',
+                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
                     onClick: extractQuotes, active: quotes.length > 0, loading: quotesLoading },
                   { title: 'Sentiment Analysis', sub: 'Overall · +/- Negative', color: P.success, bg: 'rgba(15,118,110,0.1)',
                     icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>,
@@ -3496,6 +3465,18 @@ const App = () => {
                     {item.active && <div style={{ marginLeft: 'auto', width: 7, height: 7, borderRadius: '50%', background: item.color, flexShrink: 0 }} />}
                   </div>
                 ))}
+
+                {/* Flash cards if generated */}
+                {quotes.length > 0 && (
+                  <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    {quotes.filter(q => !q.startsWith('Error:')).map((q, i) => (
+                      <div key={i} style={{ padding: '8px 10px 8px 12px', background: P.paper, borderRadius: 8, borderLeft: `3px solid ${P.warning}`, border: `1px solid ${P.border}`, borderLeftWidth: 3, borderLeftColor: P.warning }}>
+                        <div style={{ fontSize: 9, fontWeight: 700, color: P.warning, letterSpacing: '0.06em', marginBottom: 3, textTransform: 'uppercase' }}>Card {i + 1}</div>
+                        <div style={{ fontSize: 12.5, lineHeight: 1.6, color: P.ink }}>{q}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Summary content if present */}
                 {summary && (
