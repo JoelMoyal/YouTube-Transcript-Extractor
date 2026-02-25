@@ -76,52 +76,53 @@ async function aiComplete(prompt) {
   throw new Error('No AI provider configured (GROQ_API_KEY or OPENROUTER_API_KEY required)');
 }
 
-const LANG_NAMES = { es:'Spanish', fr:'French', de:'German', it:'Italian', pt:'Portuguese', ru:'Russian', 'zh-Hans':'Chinese (Simplified)', 'zh-Hant':'Chinese (Traditional)', ja:'Japanese', ko:'Korean', ar:'Arabic', hi:'Hindi', tr:'Turkish', nl:'Dutch', pl:'Polish' };
+const LANG_NAMES = { en:'English', es:'Spanish', fr:'French', de:'German', it:'Italian', pt:'Portuguese', ru:'Russian', 'zh-Hans':'Chinese (Simplified)', 'zh-Hant':'Chinese (Traditional)', ja:'Japanese', ko:'Korean', ar:'Arabic', hi:'Hindi', tr:'Turkish', nl:'Dutch', pl:'Polish' };
 
 // Translate segments to targetLang using AI, in batches to stay within token limits
 async function translateSegments(segments, targetLang, send) {
-  if (targetLang === 'en' || !segments.length) return segments;
+  if (!segments.length) return segments;
   if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY) return segments;
   const langName = LANG_NAMES[targetLang] || targetLang;
   send('progress', { stage: 'translate', message: `Translating to ${langName}…`, percent: 88 });
-  const BATCH = 25; // smaller batches = fewer token issues & length mismatches
+
+  // Use ||| separator — far fewer API calls than per-segment batching
+  const SEP = '|||';
+  const CHUNK = 80; // 80 segments per call ≈ 3× fewer calls than before
   const out = [];
   const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
-  for (let i = 0; i < segments.length; i += BATCH) {
-    const batch = segments.slice(i, i + BATCH);
-    const texts = batch.map(s => s.text);
-    try {
-      const prompt = `Translate each line to ${langName}. Output ONLY a JSON array of ${texts.length} strings, same order, no extra text.\n${JSON.stringify(texts)}`;
-      let raw;
-      if (groq) {
-        const r = await groq.chat.completions.create({
-          model: 'llama-3.1-8b-instant',
-          messages: [
-            { role: 'system', content: 'You are a translator. Respond with only a valid JSON array of strings.' },
-            { role: 'user', content: prompt },
-          ],
-          max_tokens: 8192,
-          temperature: 0,
-        });
-        raw = r.choices[0].message.content;
-      } else {
-        const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: 'meta-llama/llama-3.1-8b-instruct:free', messages: [{ role: 'system', content: 'You are a translator. Respond with only a valid JSON array of strings.' }, { role: 'user', content: prompt }], max_tokens: 8192, temperature: 0 }),
-        });
-        const d = await r.json();
-        raw = d.choices[0].message.content;
+
+  for (let i = 0; i < segments.length; i += CHUNK) {
+    const batch = segments.slice(i, i + CHUNK);
+    const inputText = batch.map(s => s.text).join(`\n${SEP}\n`);
+    const messages = [
+      { role: 'system', content: `You are a translator. Translate the user's text to ${langName}. The text contains segments separated by "${SEP}". Preserve every "${SEP}" separator exactly where it is. Do not add or remove separators.` },
+      { role: 'user', content: inputText },
+    ];
+
+    let translatedText = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        if (attempt > 0) await new Promise(r => setTimeout(r, 1500));
+        if (groq) {
+          const r = await groq.chat.completions.create({ model: 'llama-3.1-8b-instant', messages, max_tokens: 8192, temperature: 0 });
+          translatedText = r.choices[0].message.content;
+        } else {
+          const r = await fetch('https://openrouter.ai/api/v1/chat/completions', { method: 'POST', headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'meta-llama/llama-3.1-8b-instruct:free', messages, max_tokens: 8192, temperature: 0 }) });
+          const d = await r.json();
+          translatedText = d.choices[0].message.content;
+        }
+        break;
+      } catch (e) {
+        console.error(`[translate] attempt ${attempt + 1} failed:`, e.message);
       }
-      const jsonMatch = raw.match(/\[[\s\S]*\]/);
-      const translated = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
-      if (Array.isArray(translated) && translated.length > 0) {
-        // lenient: use translation where available, fall back to original for extras
-        out.push(...batch.map((s, j) => ({ ...s, text: (translated[j] && String(translated[j]).trim()) || s.text })));
+    }
+
+    if (translatedText) {
+      const parts = translatedText.split(SEP).map(p => p.trim());
+      if (parts.length > 0) {
+        out.push(...batch.map((s, j) => ({ ...s, text: (parts[j] && parts[j].trim()) || s.text })));
         continue;
       }
-    } catch (e) {
-      console.error('[translate] batch failed:', e.message);
     }
     out.push(...batch); // keep originals on failure
   }
@@ -409,20 +410,37 @@ app.get('/api/transcript', async (req, res) => {
     try {
       send('progress', { stage: 'subtitles', message: 'Fetching transcript…', percent: 15 });
       const { YoutubeTranscript } = require('youtube-transcript');
-      // Always fetch default captions (video's native language), then AI-translate if needed.
-      // We intentionally do NOT use { lang: safeLang } here because YouTube auto-translated
-      // captions exist for many languages and falsely make it look like native captions exist.
-      const raw = await YoutubeTranscript.fetchTranscript(videoId);
+
+      let raw = null;
+      let gotTargetLang = false;
+
+      // Always try target language first — YouTube provides auto-translated captions
+      // for most languages. This handles both directions: en→de AND de→en instantly.
+      try {
+        const attempt = await YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang });
+        if (attempt && attempt.length > 0) { raw = attempt; gotTargetLang = true; }
+      } catch {}
+
+      // Fall back to any available captions (video's native language)
+      if (!gotTargetLang) {
+        try { raw = await YoutubeTranscript.fetchTranscript(videoId); } catch {}
+      }
+
       if (raw && raw.length > 0) {
         const seen = new Set();
         let segments = raw
           .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
           .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
-        if (safeLang !== 'en') {
+
+        let didTranslate = false;
+        if (!gotTargetLang) {
+          // YouTube didn't have target-language captions — use AI to translate
           segments = await translateSegments(segments, safeLang, send);
+          didTranslate = true;
         }
+
         const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-        send('done', { transcript, segments, source: 'subtitles', translated: safeLang !== 'en' });
+        send('done', { transcript, segments, source: 'subtitles', translated: didTranslate });
         res.end();
         return;
       }

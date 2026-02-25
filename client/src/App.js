@@ -998,7 +998,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-shell {
           min-height: 100vh;
           padding-top: 56px;
-          background: radial-gradient(70% 50% at 16% 14%, rgba(123,211,255,0.4) 0%, rgba(123,211,255,0.1) 30%, transparent 64%), #F6F2EA;
+          background: radial-gradient(ellipse 90% 55% at 50% -15%, rgba(45,108,223,0.1) 0%, transparent 65%), #F6F3EE;
           position: relative;
           overflow: hidden;
         }
@@ -1008,9 +1008,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           inset: 36px auto auto -220px;
           width: 760px;
           height: 760px;
-          background:
-            radial-gradient(circle at center, rgba(123,211,255,0.25) 0%, rgba(123,211,255,0.05) 54%, transparent 68%),
-            conic-gradient(from 210deg, rgba(123,211,255,0) 0deg, rgba(60,140,255,0.14) 200deg, rgba(123,211,255,0) 360deg);
+          background: radial-gradient(circle at center, rgba(45,108,223,0.06) 0%, transparent 68%);
           border-radius: 50%;
           pointer-events: none;
         }
@@ -1021,7 +1019,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           width: 620px;
           height: 620px;
           border-radius: 50%;
-          background: radial-gradient(circle at center, rgba(60,140,255,0.16) 0%, rgba(60,140,255,0) 72%);
+          background: radial-gradient(circle at center, rgba(45,108,223,0.05) 0%, transparent 72%);
           pointer-events: none;
         }
         .ds-wrap {
@@ -1037,14 +1035,14 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           gap: 6px;
           border: none;
           background: none;
-          color: #5A5960;
+          color: #6B645C;
           font-size: 15px;
           cursor: pointer;
           padding: 2px 0;
           margin-bottom: 10px;
           transition: color 0.15s ease;
         }
-        .ds-back:hover { color: #1D1D1F; }
+        .ds-back:hover { color: #1C1917; }
         .ds-grid {
           display: grid;
           grid-template-columns: minmax(0, 1.85fr) minmax(318px, 1fr);
@@ -1052,11 +1050,10 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           align-items: start;
         }
         .ds-card {
-          background: rgba(251,247,240,0.72);
-          border: 1px solid rgba(229,221,207,0.9);
+          background: #FFFEFC;
+          border: 1px solid #E7E1D8;
           border-radius: 18px;
-          box-shadow: 0 12px 34px rgba(31,53,95,0.08);
-          backdrop-filter: blur(4px);
+          box-shadow: 0 2px 12px rgba(28,25,23,0.06);
         }
         .ds-profile {
           display: flex;
@@ -1075,20 +1072,20 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           justify-content: center;
           font-size: 46px;
           font-weight: 700;
-          color: #EAF2FF;
-          background: linear-gradient(145deg, #7BD3FF 0%, #3C8CFF 52%, #1F6BFF 100%);
-          box-shadow: 0 12px 26px rgba(60,140,255,0.3);
+          color: white;
+          background: #2D6CDF;
+          box-shadow: 0 8px 20px rgba(45,108,223,0.28);
         }
         .ds-profile-name {
           font-size: clamp(28px, 3.2vw, 42px);
           font-weight: 700;
           letter-spacing: -0.02em;
-          color: #1D1D1F;
+          color: #1C1917;
           margin: 0 0 2px;
         }
         .ds-profile-email {
           font-size: 17px;
-          color: #5A5960;
+          color: #6B645C;
           margin: 0;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -1104,13 +1101,13 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           font-size: 12px;
           letter-spacing: 0.05em;
           text-transform: uppercase;
-          color: #6E6A76;
+          color: #6B645C;
           font-weight: 600;
         }
         .ds-profile-meta-value {
           margin: 0;
           font-size: 18px;
-          color: #1D1D1F;
+          color: #1C1917;
           font-weight: 700;
         }
         .ds-control-row {
@@ -1122,8 +1119,8 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-extract-btn {
           height: 58px;
           border-radius: 15px;
-          border: 1px solid rgba(60,140,255,0.35);
-          background: linear-gradient(130deg, #7BD3FF 0%, #3C8CFF 50%, #1F6BFF 100%);
+          border: none;
+          background: #2D6CDF;
           color: white;
           font-size: 24px;
           font-weight: 700;
@@ -1133,12 +1130,13 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           justify-content: center;
           align-items: center;
           gap: 8px;
-          box-shadow: 0 10px 22px rgba(31,107,255,0.28);
-          transition: transform 0.18s ease, box-shadow 0.18s ease;
+          box-shadow: 0 4px 16px rgba(45,108,223,0.3);
+          transition: background 0.15s ease, transform 0.18s ease, box-shadow 0.18s ease;
         }
         .ds-extract-btn:hover {
+          background: #2459B8;
           transform: translateY(-1px);
-          box-shadow: 0 14px 24px rgba(31,107,255,0.36);
+          box-shadow: 0 8px 20px rgba(45,108,223,0.35);
         }
         .ds-tabs {
           display: flex;
@@ -1153,17 +1151,17 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           border-radius: 12px;
           padding: 10px 10px;
           background: transparent;
-          color: #6E6A76;
+          color: #6B645C;
           font-size: 16px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.15s ease;
         }
-        .ds-tab:hover { color: #1D1D1F; }
+        .ds-tab:hover { color: #1C1917; }
         .ds-tab.is-active {
-          color: #1D1D1F;
-          background: rgba(255,255,255,0.72);
-          box-shadow: 0 8px 20px rgba(29,29,31,0.08);
+          color: #1C1917;
+          background: white;
+          box-shadow: 0 2px 8px rgba(28,25,23,0.08);
         }
         .ds-overview-col {
           display: flex;
@@ -1180,28 +1178,28 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           overflow: hidden;
           padding: 16px 16px 14px;
           border-radius: 16px;
-          border: 1px solid rgba(229,221,207,0.9);
-          background: rgba(251,247,240,0.8);
-          box-shadow: 0 9px 26px rgba(31,53,95,0.07);
+          border: 1px solid #E7E1D8;
+          background: #FFFEFC;
+          box-shadow: 0 2px 10px rgba(28,25,23,0.05);
         }
         .ds-stat::before {
           content: '';
           position: absolute;
           inset: -16px;
-          opacity: 0.7;
+          opacity: 0.8;
           pointer-events: none;
         }
         .ds-stat.ds-stat-primary::before {
-          background: linear-gradient(130deg, rgba(123,211,255,0.4) 0%, rgba(60,140,255,0.35) 48%, rgba(31,107,255,0.3) 100%);
+          background: linear-gradient(130deg, rgba(45,108,223,0.1) 0%, rgba(45,108,223,0.06) 100%);
         }
         .ds-stat.ds-stat-neutral::before {
-          background: linear-gradient(140deg, rgba(123,211,255,0.22) 0%, rgba(60,140,255,0.08) 100%);
+          background: linear-gradient(140deg, rgba(45,108,223,0.05) 0%, rgba(45,108,223,0.02) 100%);
         }
         .ds-stat.ds-stat-youtube::before {
-          background: linear-gradient(145deg, rgba(255,0,0,0.08) 0%, rgba(123,211,255,0.18) 48%, rgba(60,140,255,0.12) 100%);
+          background: linear-gradient(145deg, rgba(255,0,0,0.05) 0%, rgba(45,108,223,0.06) 100%);
         }
         .ds-stat.ds-stat-vimeo::before {
-          background: linear-gradient(140deg, rgba(26,183,234,0.12) 0%, rgba(123,211,255,0.2) 56%, rgba(31,107,255,0.08) 100%);
+          background: linear-gradient(140deg, rgba(26,183,234,0.07) 0%, rgba(45,108,223,0.05) 100%);
         }
         .ds-stat-head {
           position: relative;
@@ -1209,7 +1207,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           display: flex;
           align-items: center;
           gap: 6px;
-          color: #3C8CFF;
+          color: #2D6CDF;
           margin-bottom: 8px;
         }
         .ds-stat-value {
@@ -1219,7 +1217,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           font-size: 28px;
           line-height: 1.05;
           letter-spacing: -0.02em;
-          color: #1D1D1F;
+          color: #1C1917;
           font-weight: 700;
         }
         .ds-stat-label {
@@ -1227,7 +1225,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           z-index: 1;
           margin: 0 0 7px;
           font-size: 13px;
-          color: #2E2D34;
+          color: #1C1917;
           font-weight: 600;
         }
         .ds-stat-sub {
@@ -1235,7 +1233,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           z-index: 1;
           margin: 0;
           font-size: 13px;
-          color: #6E6A76;
+          color: #6B645C;
         }
         .ds-usage {
           padding: 16px 18px 14px;
@@ -1250,7 +1248,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-usage-title {
           margin: 0;
           font-size: 16px;
-          color: #1D1D1F;
+          color: #1C1917;
           font-weight: 700;
           letter-spacing: -0.01em;
         }
@@ -1258,8 +1256,8 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           display: inline-flex;
           border-radius: 10px;
           padding: 3px;
-          background: rgba(123,211,255,0.18);
-          border: 1px solid rgba(123,211,255,0.35);
+          background: rgba(45,108,223,0.07);
+          border: 1px solid rgba(45,108,223,0.18);
           gap: 3px;
         }
         .ds-usage-switch button {
@@ -1267,26 +1265,26 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           border-radius: 8px;
           padding: 5px 10px;
           background: transparent;
-          color: #666470;
+          color: #6B645C;
           font-size: 12px;
           font-weight: 700;
           cursor: pointer;
           transition: all 0.15s ease;
         }
         .ds-usage-switch button.is-active {
-          background: rgba(255,255,255,0.72);
-          color: #1D1D1F;
+          background: white;
+          color: #1C1917;
         }
         .ds-usage-track {
           height: 9px;
           border-radius: 999px;
-          background: rgba(229,221,207,0.95);
+          background: #E7E1D8;
           overflow: hidden;
         }
         .ds-usage-bar {
           height: 100%;
           border-radius: 999px;
-          background: linear-gradient(90deg, #7BD3FF 0%, #3C8CFF 60%, #1F6BFF 100%);
+          background: linear-gradient(90deg, #5B9BD5 0%, #2D6CDF 60%, #2459B8 100%);
           transition: width 0.45s ease;
         }
         .ds-usage-meta {
@@ -1298,7 +1296,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           margin-top: 12px;
         }
         .ds-usage-meta strong {
-          color: #1D1D1F;
+          color: #1C1917;
           font-size: 26px;
         }
         .ds-usage-days {
@@ -1309,11 +1307,11 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-usage-day {
           width: 13px;
           border-radius: 4px 4px 3px 3px;
-          background: rgba(123,211,255,0.24);
+          background: rgba(45,108,223,0.14);
           transition: all 0.2s ease;
         }
         .ds-usage-day.is-active {
-          background: linear-gradient(180deg, #7BD3FF 0%, #3C8CFF 100%);
+          background: #2D6CDF;
         }
         .ds-list-card { padding: 14px 0 6px; overflow: hidden; }
         .ds-list-head {
@@ -1326,7 +1324,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-list-title {
           margin: 0;
           font-size: 17px;
-          color: #1D1D1F;
+          color: #1C1917;
           font-weight: 700;
           letter-spacing: -0.02em;
         }
@@ -1335,22 +1333,22 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           align-items: center;
           gap: 12px;
           padding: 12px 18px;
-          border-top: 1px solid rgba(229,221,207,0.75);
+          border-top: 1px solid #E7E1D8;
           transition: background 0.15s ease;
         }
         .ds-row:first-of-type {
-          border-top: 1px solid rgba(60,140,255,0.32);
-          box-shadow: inset 2px 0 0 rgba(60,140,255,0.45);
+          border-top: 1px solid rgba(45,108,223,0.22);
+          box-shadow: inset 2px 0 0 rgba(45,108,223,0.35);
         }
-        .ds-row:hover { background: rgba(255,255,255,0.42); }
+        .ds-row:hover { background: rgba(45,108,223,0.03); }
         .ds-thumb {
           width: 124px;
           height: 70px;
           border-radius: 11px;
           overflow: hidden;
           flex-shrink: 0;
-          background: rgba(123,211,255,0.16);
-          border: 1px solid rgba(60,140,255,0.16);
+          background: rgba(45,108,223,0.06);
+          border: 1px solid rgba(45,108,223,0.1);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1364,7 +1362,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-row-title {
           margin: 0 0 4px;
           font-size: 16px;
-          color: #1D1D1F;
+          color: #1C1917;
           font-weight: 700;
           letter-spacing: -0.01em;
           overflow: hidden;
@@ -1374,7 +1372,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-row-meta {
           margin: 0;
           font-size: 13px;
-          color: #666470;
+          color: #6B645C;
           display: flex;
           align-items: center;
           gap: 6px;
@@ -1387,7 +1385,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           flex-shrink: 0;
         }
         .ds-row-btn {
-          border: 1px solid rgba(60,140,255,0.25);
+          border: 1px solid #E7E1D8;
           border-radius: 10px;
           padding: 8px 16px;
           min-width: 78px;
@@ -1397,28 +1395,28 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           transition: all 0.15s ease;
         }
         .ds-row-btn.primary {
-          background: linear-gradient(130deg, #7BD3FF 0%, #3C8CFF 48%, #1F6BFF 100%);
+          background: #2D6CDF;
           color: white;
-          border-color: rgba(60,140,255,0.4);
+          border-color: rgba(45,108,223,0.4);
         }
-        .ds-row-btn.primary:hover { filter: brightness(0.96); }
+        .ds-row-btn.primary:hover { background: #2459B8; }
         .ds-row-btn.ghost {
-          background: rgba(255,255,255,0.72);
-          color: #2E2D34;
-          border-color: rgba(229,221,207,0.95);
+          background: white;
+          color: #1C1917;
+          border-color: #E7E1D8;
         }
         .ds-row-btn.ghost:hover {
-          border-color: rgba(60,140,255,0.32);
-          color: #1F6BFF;
+          border-color: rgba(45,108,223,0.3);
+          color: #2D6CDF;
         }
         .ds-list-footer {
-          border-top: 1px solid rgba(229,221,207,0.75);
+          border-top: 1px solid #E7E1D8;
           padding: 12px 18px 10px;
         }
         .ds-link-btn {
           border: none;
           background: none;
-          color: #3C8CFF;
+          color: #2D6CDF;
           font-size: 15px;
           font-weight: 600;
           cursor: pointer;
@@ -1427,7 +1425,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           gap: 6px;
           padding: 0;
         }
-        .ds-link-btn:hover { color: #1F6BFF; }
+        .ds-link-btn:hover { color: #2459B8; }
         .ds-side {
           display: flex;
           flex-direction: column;
@@ -1440,7 +1438,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           margin: 0 0 5px;
           font-size: 20px;
           line-height: 1.2;
-          color: #1D1D1F;
+          color: #1C1917;
           font-weight: 700;
           letter-spacing: -0.01em;
         }
@@ -1448,21 +1446,20 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           margin: 0;
           font-size: 14px;
           line-height: 1.45;
-          color: #666470;
+          color: #6B645C;
         }
         .ds-side-safe {
           margin: 12px 0 0;
           font-size: 13px;
-          color: #666470;
+          color: #6B645C;
         }
-        .ds-side-safe strong { color: #1D1D1F; }
+        .ds-side-safe strong { color: #1C1917; }
         .ds-side-action {
           margin-top: 12px;
           padding: 14px;
           border-radius: 14px;
-          border: 1px solid rgba(229,221,207,0.95);
-          background: rgba(255,255,255,0.58);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+          border: 1px solid #E7E1D8;
+          background: white;
         }
         .ds-side-action + .ds-side-action { margin-top: 10px; }
         .ds-side-action-head {
@@ -1474,7 +1471,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-side-action-title {
           margin: 0;
           font-size: 20px;
-          color: #1D1D1F;
+          color: #1C1917;
           font-weight: 700;
           letter-spacing: -0.01em;
         }
@@ -1482,7 +1479,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           margin: 0;
           font-size: 15px;
           line-height: 1.4;
-          color: #666470;
+          color: #6B645C;
         }
         .ds-side-pills {
           margin-top: 11px;
@@ -1494,40 +1491,40 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           border-radius: 999px;
           padding: 3px 9px;
           font-size: 12px;
-          border: 1px solid rgba(123,211,255,0.45);
-          color: #1F6BFF;
-          background: rgba(123,211,255,0.18);
+          border: 1px solid rgba(45,108,223,0.2);
+          color: #2D6CDF;
+          background: rgba(45,108,223,0.07);
         }
         .ds-side-btn {
           margin-top: 11px;
           width: 100%;
           border: none;
           border-radius: 10px;
-          background: linear-gradient(135deg, #7BD3FF 0%, #3C8CFF 52%, #1F6BFF 100%);
+          background: #2D6CDF;
           color: white;
           font-size: 16px;
           font-weight: 700;
           letter-spacing: -0.01em;
           padding: 10px 12px;
           cursor: pointer;
-          transition: transform 0.15s ease, filter 0.15s ease;
+          transition: background 0.15s ease, transform 0.15s ease;
         }
         .ds-side-btn:disabled {
-          opacity: 0.55;
+          opacity: 0.5;
           cursor: not-allowed;
         }
         .ds-side-btn:not(:disabled):hover {
+          background: #2459B8;
           transform: translateY(-1px);
-          filter: brightness(0.97);
         }
         .ds-empty {
           text-align: center;
           padding: 42px 18px;
-          color: #666470;
+          color: #6B645C;
         }
         .ds-empty h3 {
           margin: 0 0 8px;
-          color: #1D1D1F;
+          color: #1C1917;
           font-size: 20px;
         }
         .ds-empty p {
@@ -1539,7 +1536,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           margin-top: 14px;
           border: none;
           border-radius: 10px;
-          background: #3C8CFF;
+          background: #2D6CDF;
           color: white;
           font-size: 14px;
           font-weight: 600;
@@ -1557,7 +1554,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-settings-title {
           margin: 0 0 13px;
           font-size: 17px;
-          color: #1D1D1F;
+          color: #1C1917;
           font-weight: 700;
         }
         .ds-setting-row {
@@ -1566,15 +1563,15 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           align-items: center;
           gap: 10px;
           padding: 8px 0;
-          border-bottom: 1px solid rgba(229,221,207,0.8);
+          border-bottom: 1px solid #E7E1D8;
         }
         .ds-setting-row:last-child {
           border-bottom: none;
           padding-bottom: 0;
         }
-        .ds-setting-label { color: #666470; font-size: 13px; }
+        .ds-setting-label { color: #6B645C; font-size: 13px; }
         .ds-setting-value {
-          color: #1D1D1F;
+          color: #1C1917;
           font-size: 13px;
           font-weight: 600;
           text-align: right;
@@ -1587,17 +1584,17 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           width: 100%;
           border-radius: 10px;
           padding: 9px 11px;
-          border: 1px solid rgba(229,221,207,0.95);
-          background: rgba(255,255,255,0.7);
-          color: #1D1D1F;
+          border: 1px solid #E7E1D8;
+          background: white;
+          color: #1C1917;
           font-size: 13px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.15s ease;
         }
         .ds-settings-btn:hover {
-          border-color: rgba(60,140,255,0.34);
-          background: rgba(123,211,255,0.12);
+          border-color: rgba(45,108,223,0.3);
+          background: rgba(45,108,223,0.06);
         }
         .ds-settings-btn.danger {
           border-color: rgba(180,35,24,0.26);
@@ -1611,7 +1608,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           margin: -2px 0 4px;
           font-size: 12px;
           line-height: 1.45;
-          color: #666470;
+          color: #6B645C;
         }
         .ds-security-feedback {
           margin-top: 2px;
@@ -1622,9 +1619,9 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           border: 1px solid transparent;
         }
         .ds-security-feedback.loading {
-          color: #1F6BFF;
-          background: rgba(123,211,255,0.2);
-          border-color: rgba(60,140,255,0.28);
+          color: #2D6CDF;
+          background: rgba(45,108,223,0.08);
+          border-color: rgba(45,108,223,0.22);
         }
         .ds-security-feedback.success {
           color: #0F766E;
@@ -1744,7 +1741,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                   <div className="ds-usage-meta">
                     <div>
                       <strong>{used} / {tierMax}</strong>{' '}
-                      <span style={{ color: '#666470', fontSize: 14 }}>Credits Used</span>
+                      <span style={{ color: '#6B645C', fontSize: 14 }}>Credits Used</span>
                     </div>
                     <div className="ds-usage-days">
                       {weekSegments.map(i => (
@@ -1754,11 +1751,11 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                           style={{ height: `${8 + (i === activeDay ? 18 : i <= activeDay ? 12 : 6)}px` }}
                         />
                       ))}
-                      <span style={{ marginLeft: 6, fontSize: 14, color: '#666470' }}>{remaining} remaining</span>
+                      <span style={{ marginLeft: 6, fontSize: 14, color: '#6B645C' }}>{remaining} remaining</span>
                     </div>
                   </div>
-                  <p style={{ margin: '10px 0 0', fontSize: 13, color: '#666470' }}>
-                    Resets in <strong style={{ color: '#1D1D1F' }}>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong>
+                  <p style={{ margin: '10px 0 0', fontSize: 13, color: '#6B645C' }}>
+                    Resets in <strong style={{ color: '#1C1917' }}>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong>
                   </p>
                 </section>
 
@@ -1794,7 +1791,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                               <p className="ds-row-meta">
                                 {h.platform === 'vimeo' ? <VimeoIcon size={13} /> : <YouTubeIcon size={13} />}
                                 {channel}
-                                {wc > 0 ? `${wc.toLocaleString()} words` : null}
+                                        {wc > 0 ? `${wc.toLocaleString()} words` : null}
                                 {timeAgo(h.date)}
                               </p>
                             </div>
@@ -1940,7 +1937,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
 
                 <article className="ds-side-action">
                   <div className="ds-side-action-head">
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(123,211,255,0.22)', color: '#3C8CFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(45,108,223,0.08)', color: '#2D6CDF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
                         <polyline points="14 2 14 8 20 8"/>
@@ -1961,7 +1958,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
 
                 <article className="ds-side-action">
                   <div className="ds-side-action-head">
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(123,211,255,0.22)', color: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(45,108,223,0.08)', color: '#7C3AED', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                       </svg>
@@ -1978,7 +1975,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
 
                 <article className="ds-side-action">
                   <div className="ds-side-action-head">
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(123,211,255,0.22)', color: '#0F766E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(45,108,223,0.08)', color: '#0F766E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <DownloadIcon size={18} />
                     </div>
                     <h3 className="ds-side-action-title">Export</h3>
@@ -2146,6 +2143,7 @@ const App = () => {
   const [loadingPercent, setLoadingPercent] = useState(0);
   const [loadingStage, setLoadingStage]   = useState('');
   const [langRefetching, setLangRefetching] = useState(false);
+  const [langRefetchMsg, setLangRefetchMsg] = useState('');
   const [isTranslated, setIsTranslated]   = useState(false);
   const [error, setError]                 = useState('');
   const [copied, setCopied]               = useState(false);
@@ -2619,27 +2617,33 @@ const App = () => {
     if (!parsed) return;
     const { platform, id: videoId, url: videoCanonical } = parsed;
     setLangRefetching(true);
+    setLangRefetchMsg('');
     setSearch(''); setSummary(''); setChapters([]); setQuotes([]); setQaMessages([]);
     const apiUrl = platform === 'vimeo'
       ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${newLang}`
       : `/api/transcript?videoId=${videoId}&lang=${newLang}`;
     const es = new EventSource(apiUrl);
-    const killTimer = setTimeout(() => { es.close(); setLangRefetching(false); }, 60000);
+    const killTimer = setTimeout(() => { es.close(); setLangRefetching(false); setLangRefetchMsg(''); }, 120000);
+    es.addEventListener('progress', (e) => {
+      try { const { message } = JSON.parse(e.data); if (message) setLangRefetchMsg(message); } catch {}
+    });
     es.addEventListener('done', async (e) => {
       clearTimeout(killTimer); es.close();
       try {
         const data = JSON.parse(e.data);
         const seen = new Set();
         const segs = (data.segments || []).filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
-        setSegments(segs);
-        setTranscript(data.transcript || segs.map(s => s.text).join(' '));
-        setIsTranslated(data.translated || false);
-        setSelectedSegment(null); setPlayingSegment(null); playingSegmentRef.current = null;
+        if (segs.length > 0) {
+          setSegments(segs);
+          setTranscript(data.transcript || segs.map(s => s.text).join(' '));
+          setIsTranslated(data.translated || false);
+          setSelectedSegment(null); setPlayingSegment(null); playingSegmentRef.current = null;
+        }
       } catch {}
-      setLangRefetching(false);
+      setLangRefetching(false); setLangRefetchMsg('');
     });
-    es.addEventListener('error', () => { clearTimeout(killTimer); es.close(); setLangRefetching(false); });
-    es.onerror = () => { clearTimeout(killTimer); es.close(); setLangRefetching(false); };
+    es.addEventListener('error', () => { clearTimeout(killTimer); es.close(); setLangRefetching(false); setLangRefetchMsg(''); });
+    es.onerror = () => { if (es.readyState === EventSource.CLOSED) return; clearTimeout(killTimer); es.close(); setLangRefetching(false); setLangRefetchMsg(''); };
   };
 
   const dlName = (ext) => {
@@ -3525,7 +3529,7 @@ const App = () => {
                           <div style={{ display: 'flex', gap: 6 }}>
                             {[0,1,2].map(i => <span key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: `dot-flicker 1.2s ease-in-out ${i * 0.2}s infinite` }} />)}
                           </div>
-                          <span style={{ fontSize: 12, color: P.muted, fontWeight: 500 }}>Loading in {LANGUAGES.find(l => l.code === lang)?.label}…</span>
+                          <span style={{ fontSize: 12, color: P.muted, fontWeight: 500 }}>{langRefetchMsg || `Loading in ${LANGUAGES.find(l => l.code === lang)?.label}…`}</span>
                         </div>
                       )}
                       {segments.length > 0 && showTimestamps ? (
