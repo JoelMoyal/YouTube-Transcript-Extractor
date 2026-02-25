@@ -3057,467 +3057,542 @@ const App = () => {
             minHeight: 'calc(100vh - 140px)',
           }}>
 
-            {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────── */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, position: 'sticky', top: 72, background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14, overflow: 'hidden' }}>
-
-              {/* Back / New search */}
-              <button onClick={resetAll} style={{
-                display: 'flex', alignItems: 'center', gap: 7, padding: '12px 14px',
-                border: 'none', borderBottom: `1px solid ${P.border}`, background: 'transparent',
-                cursor: 'pointer', fontSize: 13, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.color = P.ink; e.currentTarget.style.background = P.paper; }}
-                onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.background = 'transparent'; }}
-              >
-                <ChevronIcon dir="left" size={12} />
-                New search
-              </button>
-
-              {/* Export section */}
-              <div style={{ padding: '10px 14px 4px' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Export</div>
+            {/* ── LEFT SIDEBAR — col 1, spans both rows ────────────────────────── */}
+            <div style={{
+              gridColumn: 1, gridRow: '1 / 3',
+              display: 'flex', flexDirection: 'column',
+              background: P.paper, borderRight: `1px solid ${P.border}`,
+              minHeight: 0,
+            }}>
+              {/* Export header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '18px 16px 14px' }}>
+                <div style={{ width: 32, height: 32, background: '#FF0000', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                </div>
+                <span style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Export</span>
               </div>
-              <div style={{ padding: '0 8px 8px', display: 'flex', flexDirection: 'column', gap: 1 }}>
+
+              {/* Export format list */}
+              <div style={{ padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {[
-                  { label: 'Text', sub: '.txt file', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>, fn: downloadTxt },
-                  { label: 'PDF', sub: '.pdf file', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15v-1h6v1"/><path d="M12 15v3"/></svg>, fn: downloadPdf },
-                  { label: 'Markdown', sub: 'copy to clipboard', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>, fn: copyAsMarkdown },
-                  { label: copied ? 'Copied!' : 'Plain text', sub: 'copy to clipboard', icon: copied ? <CheckIcon /> : <CopyIcon />, fn: copyToClipboard },
+                  { label: 'Text', selected: true, fn: downloadTxt, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
+                  { label: 'PDF', selected: false, fn: downloadPdf, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 11h4"/><path d="M10 15h4"/></svg> },
+                  { label: 'Audio', selected: false, fn: () => { const url = currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}` : `https://youtube.com/watch?v=${currentVideoId}`; window.open(url, '_blank'); }, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> },
+                  { label: 'SRT', selected: false, fn: downloadSrt, disabled: segments.length === 0, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
                 ].map(item => (
-                  <button key={item.label} onClick={item.fn} style={{
-                    display: 'flex', alignItems: 'center', gap: 10, padding: '8px 8px',
-                    borderRadius: 8, border: 'none', background: 'transparent',
-                    cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left', width: '100%',
+                  <button key={item.label} onClick={item.disabled ? undefined : item.fn} style={{
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10,
+                    border: 'none', textAlign: 'left', width: '100%', cursor: item.disabled ? 'default' : 'pointer',
+                    background: item.selected ? P.accentLight : 'transparent', transition: 'background 0.12s',
+                    opacity: item.disabled ? 0.4 : 1,
                   }}
-                    onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                    onMouseEnter={e => { if (!item.disabled && !item.selected) e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; }}
+                    onMouseLeave={e => { if (!item.selected) e.currentTarget.style.background = 'transparent'; }}
                   >
-                    <span style={{ color: P.muted, flexShrink: 0, display: 'flex', alignItems: 'center' }}>{item.icon}</span>
-                    <span>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: P.ink, lineHeight: 1.3 }}>{item.label}</div>
-                      <div style={{ fontSize: 10, color: P.muted, lineHeight: 1.3 }}>{item.sub}</div>
-                    </span>
+                    <span style={{ color: item.selected ? P.accent : P.muted, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{item.icon}</span>
+                    <span style={{ fontSize: 13, fontWeight: item.selected ? 600 : 500, color: item.selected ? P.accent : P.ink }}>{item.label}</span>
                   </button>
                 ))}
               </div>
 
-              {/* History section */}
+              {/* Divider */}
+              <div style={{ height: 1, background: P.border, margin: '0 16px' }} />
+
+              {/* History header */}
               {history.length > 0 && (
-                <>
-                  <div style={{ borderTop: `1px solid ${P.border}`, padding: '10px 14px 4px' }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>History</div>
-                  </div>
-                  <div style={{ maxHeight: 320, overflowY: 'auto', padding: '0 8px 8px', display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    {history.map((entry) => {
-                      const hTitle = entry.title || entry.id;
-                      const hChannel = entry.channel || (entry.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
-                      return (
-                        <button key={entry.id}
-                          onClick={() => loadFromHistory(entry)}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 9, padding: '7px 8px',
-                            borderRadius: 8, border: 'none', background: entry.id === currentVideoId ? P.accentLight : 'transparent',
-                            cursor: 'pointer', transition: 'background 0.1s', textAlign: 'left', width: '100%',
-                          }}
-                          onMouseEnter={e => { if (entry.id !== currentVideoId) e.currentTarget.style.background = P.paper; }}
-                          onMouseLeave={e => { if (entry.id !== currentVideoId) e.currentTarget.style.background = 'transparent'; }}
-                        >
-                          {entry.thumbnail ? (
-                            <img src={entry.thumbnail} alt="" style={{ width: 44, height: 28, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} onError={e => { e.target.style.display = 'none'; }} />
-                          ) : (
-                            <div style={{ width: 44, height: 28, borderRadius: 4, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                              <YouTubeIcon />
-                            </div>
-                          )}
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <div style={{ fontSize: 11, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>{hTitle}</div>
-                            <div style={{ fontSize: 10, color: P.muted, lineHeight: 1.3 }}>{hChannel} · {timeAgo(entry.date)}</div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px 8px' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: P.ink }}>History</span>
+                  <button onClick={() => {}} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, padding: 4, display: 'flex', alignItems: 'center', borderRadius: 6, transition: 'background 0.1s' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = P.border; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                  </button>
+                </div>
               )}
+
+              {/* History list */}
+              <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {history.map((entry) => {
+                  const hTitle = entry.title || entry.id;
+                  const hChannel = entry.channel || (entry.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
+                  const isActive = entry.id === currentVideoId;
+                  return (
+                    <button key={entry.id} onClick={() => loadFromHistory(entry)} style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 9, padding: '8px 10px',
+                      borderRadius: 10, border: 'none', background: isActive ? P.accentLight : 'transparent',
+                      cursor: 'pointer', transition: 'background 0.1s', textAlign: 'left', width: '100%',
+                    }}
+                      onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; }}
+                      onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <div style={{ position: 'relative', flexShrink: 0 }}>
+                        {entry.thumbnail
+                          ? <img src={entry.thumbnail} alt="" style={{ width: 52, height: 33, objectFit: 'cover', borderRadius: 5, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+                          : <div style={{ width: 52, height: 33, borderRadius: 5, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><YouTubeIcon /></div>
+                        }
+                      </div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: 11.5, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.35, marginBottom: 3 }}>{hTitle}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: P.muted }}>
+                          {entry.platform === 'vimeo' ? <VimeoIcon size={9} /> : <YouTubeIcon />}
+                          <span>{hChannel}</span>
+                        </div>
+                        <div style={{ fontSize: 10, color: P.muted, marginTop: 1 }}>{timeAgo(entry.date)}</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Back button pinned at bottom */}
+              <div style={{ padding: '10px 12px', borderTop: `1px solid ${P.border}` }}>
+                <button onClick={resetAll} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%',
+                  padding: '8px', border: `1px solid ${P.border}`, borderRadius: 9, background: 'transparent',
+                  cursor: 'pointer', fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.color = P.ink; e.currentTarget.style.background = P.surface; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <ChevronIcon dir="left" size={11} /> New search
+                </button>
+              </div>
             </div>
 
-            {/* ── CENTER MAIN ───────────────────────────────────────────────────── */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 0, minWidth: 0, background: P.surface, border: `1px solid ${P.border}`, borderRadius: 14, overflow: 'hidden' }}>
+            {/* ── TOP BAR — col 2-3, row 1 ─────────────────────────────────────── */}
+            <div style={{
+              gridColumn: '2 / 4', gridRow: 1,
+              display: 'flex', alignItems: 'center', gap: 8,
+              height: 56, padding: '0 16px',
+              background: '#FFFFFF', borderBottom: `1px solid ${P.border}`,
+            }}>
+              {/* Hamburger */}
+              <button style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 6, borderRadius: 7, color: P.muted, display: 'flex', flexDirection: 'column', gap: 4, transition: 'background 0.1s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}>
+                {[0,1,2].map(i => <div key={i} style={{ width: 16, height: 1.5, background: 'currentColor', borderRadius: 1 }} />)}
+              </button>
 
-              {/* Video embed */}
+              {/* Global tabs: Transcript | Chapters | Editor */}
+              <div style={{ display: 'flex', gap: 3, marginLeft: 4 }}>
+                {[
+                  { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg> },
+                  { key: 'chapters', label: 'Chapters', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> },
+                  { key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
+                ].map(tab => (
+                  <button key={tab.key} onClick={() => { setActiveTab(tab.key); if (tab.key === 'chapters' && chapters.length === 0 && !chaptersLoading) detectChapters(); }} style={{
+                    display: 'flex', alignItems: 'center', gap: 6, padding: '5px 13px', borderRadius: 20, border: 'none',
+                    background: activeTab === tab.key ? P.accentLight : 'transparent',
+                    color: activeTab === tab.key ? P.accent : P.muted,
+                    fontSize: 13, fontWeight: activeTab === tab.key ? 600 : 500,
+                    cursor: 'pointer', transition: 'all 0.15s',
+                  }}>
+                    <span style={{ color: 'inherit' }}>{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Right actions */}
+              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+                {/* Clock icon */}
+                <button style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, padding: 7, borderRadius: 8, display: 'flex', alignItems: 'center', transition: 'background 0.1s' }}
+                  onClick={() => setShowTimestamps(v => !v)} title={showTimestamps ? 'Hide timestamps' : 'Show timestamps'}
+                  onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = activeTab === 'transcript' ? P.accent : P.muted; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={showTimestamps ? P.accent : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </button>
+                {/* Copy button */}
+                <button style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, padding: 7, borderRadius: 8, display: 'flex', alignItems: 'center', transition: 'background 0.1s' }}
+                  onClick={copyToClipboard}
+                  onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}>
+                  {copied ? <CheckIcon /> : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={copied ? P.success : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>}
+                </button>
+                {/* User avatar */}
+                <div style={{
+                  width: 30, height: 30, borderRadius: '50%',
+                  background: user ? P.accent : P.border,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 12, fontWeight: 700, color: 'white', flexShrink: 0, cursor: 'default',
+                }}>
+                  {user?.email?.charAt(0).toUpperCase() || <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
+                </div>
+              </div>
+            </div>
+
+            {/* ── CENTER — col 2, row 2 ─────────────────────────────────────────── */}
+            <div style={{ gridColumn: 2, gridRow: 2, display: 'flex', flexDirection: 'column', gap: 14, padding: '16px', overflowY: 'auto', background: P.paper, borderRight: `1px solid ${P.border}` }}>
+
+              {/* Video preview card */}
               {currentVideoId && (
-                <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}` : `https://youtube.com/watch?v=${currentVideoId}`}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{ display: 'block', textDecoration: 'none', position: 'relative', background: '#000' }}>
-                  {(currentThumbnail || currentPlatform === 'youtube') && (
+                <div style={{ background: '#FFFFFF', borderRadius: 16, boxShadow: '0 2px 12px rgba(28,25,23,0.07)', border: `1px solid ${P.border}`, overflow: 'hidden' }}>
+                  {/* Thumbnail */}
+                  <div style={{ position: 'relative', background: '#000' }}>
                     <img
                       src={currentThumbnail || `https://img.youtube.com/vi/${currentVideoId}/mqdefault.jpg`}
                       alt="Video thumbnail"
-                      style={{ width: '100%', display: 'block', maxHeight: 240, objectFit: 'cover', opacity: 0.92 }}
+                      style={{ width: '100%', display: 'block', maxHeight: 230, objectFit: 'cover', opacity: 0.9 }}
                       onError={e => { e.target.style.display = 'none'; }}
                     />
-                  )}
-                  {/* Play button overlay */}
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(6px)', border: '2px solid rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    {/* Big red YouTube-style play button */}
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}` : `https://youtube.com/watch?v=${currentVideoId}`}
+                        target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 62, height: 44, borderRadius: 12, background: currentPlatform === 'vimeo' ? '#1AB7EA' : '#FF0000', textDecoration: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.35)', transition: 'transform 0.15s' }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.08)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                      </a>
+                    </div>
+                    {/* "Watch on YouTube" pill at bottom left */}
+                    <div style={{ position: 'absolute', bottom: 10, left: 12 }}>
+                      <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}` : `https://youtube.com/watch?v=${currentVideoId}`}
+                        target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 999, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', textDecoration: 'none', fontSize: 11, fontWeight: 600, color: 'white' }}>
+                        {currentPlatform === 'vimeo' ? <VimeoIcon size={11} /> : <YouTubeIcon />}
+                        Watch on {currentPlatform === 'vimeo' ? 'Vimeo' : 'YouTube'}
+                      </a>
                     </div>
                   </div>
-                  {/* Title overlay at bottom */}
-                  {currentTitle && (
-                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '28px 14px 12px', background: 'linear-gradient(transparent, rgba(0,0,0,0.72))' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: 'white', lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentTitle}</div>
-                    </div>
-                  )}
-                </a>
-              )}
-
-              {/* Video meta row */}
-              {(currentTitle || currentChannel) && (
-                <div style={{ padding: '10px 16px 0', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  {currentChannel && (
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: P.muted, fontWeight: 500 }}>
-                      {currentPlatform === 'vimeo' ? <VimeoIcon size={11} /> : <YouTubeIcon />}
-                      {currentChannel}
-                    </span>
-                  )}
-                  {transcriptSource === 'whisper' && (
-                    <span style={{ padding: '1px 6px', fontSize: 10, fontWeight: 600, background: 'rgba(107,100,92,0.1)', color: P.muted, borderRadius: 999, border: `1px solid ${P.border}` }}>AI generated</span>
-                  )}
-                  {transcriptSource === 'subtitles' && (
-                    <span style={{ padding: '1px 6px', fontSize: 10, fontWeight: 600, background: 'rgba(15,118,110,0.1)', color: P.success, borderRadius: 999, border: `1px solid rgba(15,118,110,0.2)` }}>From subtitles</span>
-                  )}
-                </div>
-              )}
-
-              {/* Tab bar: Transcript | Chapters | Editor */}
-              <div style={{ display: 'flex', padding: '10px 12px 0', gap: 2, borderBottom: `1px solid ${P.border}`, marginTop: 10 }}>
-                {[
-                  { key: 'transcript', label: 'Transcript' },
-                  { key: 'chapters', label: chapters.length > 0 ? `Chapters (${chapters.filter(c => !c.isError).length})` : 'Chapters' },
-                  { key: 'editor', label: 'Editor' },
-                ].map(tab => (
-                  <button key={tab.key} onClick={() => {
-                    setActiveTab(tab.key);
-                    if (tab.key === 'chapters' && chapters.length === 0 && !chaptersLoading) detectChapters();
-                  }} style={{
-                    padding: '7px 14px', border: 'none', background: 'transparent',
-                    color: activeTab === tab.key ? P.accent : P.muted,
-                    fontSize: 13, fontWeight: activeTab === tab.key ? 700 : 500,
-                    cursor: 'pointer', transition: 'all 0.15s', position: 'relative',
-                    borderBottom: activeTab === tab.key ? `2px solid ${P.accent}` : '2px solid transparent',
-                    marginBottom: -1,
-                  }}>{tab.label}</button>
-                ))}
-                {/* Timestamps toggle pushed right */}
-                {segments.length > 0 && (
-                  <button onClick={() => setShowTimestamps(v => !v)} style={{
-                    marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6, marginBottom: 6,
-                    border: `1px solid ${showTimestamps ? 'rgba(45,108,223,0.25)' : P.border}`,
-                    background: showTimestamps ? P.accentLight : 'transparent', cursor: 'pointer',
-                    fontSize: 11, fontWeight: 600, color: showTimestamps ? P.accent : P.muted, transition: 'all 0.15s',
-                  }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    Timestamps
-                  </button>
-                )}
-              </div>
-
-              {/* Action buttons row */}
-              <div style={{ display: 'flex', gap: 8, padding: '10px 14px', borderBottom: `1px solid ${P.border}`, background: P.paper, flexWrap: 'wrap' }}>
-                <button onClick={summarize} disabled={summarizing} style={{
-                  display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 20,
-                  border: `1px solid ${P.border}`, background: P.surface,
-                  fontSize: 12, fontWeight: 600, color: P.ink, cursor: summarizing ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.15s', opacity: summarizing ? 0.7 : 1,
-                }}
-                  onMouseEnter={e => { if (!summarizing) { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.3)'; e.currentTarget.style.color = P.accent; } }}
-                  onMouseLeave={e => { e.currentTarget.style.background = P.surface; e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = P.ink; }}
-                >
-                  {summarizing ? <SpinnerIcon size={11} /> : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>}
-                  {summarizing ? 'Summarizing…' : 'Summarize'}
-                </button>
-                <button onClick={extractQuotes} disabled={quotesLoading} style={{
-                  display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 20,
-                  border: `1px solid ${P.border}`, background: P.surface,
-                  fontSize: 12, fontWeight: 600, color: P.ink, cursor: quotesLoading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.15s', opacity: quotesLoading ? 0.7 : 1,
-                }}
-                  onMouseEnter={e => { if (!quotesLoading) { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.3)'; e.currentTarget.style.color = P.accent; } }}
-                  onMouseLeave={e => { e.currentTarget.style.background = P.surface; e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = P.ink; }}
-                >
-                  {quotesLoading ? <SpinnerIcon size={11} /> : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>}
-                  {quotesLoading ? 'Extracting…' : 'Key Quotes'}
-                </button>
-                <button onClick={() => { detectChapters(); setActiveTab('chapters'); }} disabled={chaptersLoading} style={{
-                  display: 'flex', alignItems: 'center', gap: 6, padding: '6px 13px', borderRadius: 20,
-                  border: `1px solid ${P.border}`, background: P.surface,
-                  fontSize: 12, fontWeight: 600, color: P.ink, cursor: chaptersLoading ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.15s', opacity: chaptersLoading ? 0.7 : 1,
-                }}
-                  onMouseEnter={e => { if (!chaptersLoading) { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.3)'; e.currentTarget.style.color = P.accent; } }}
-                  onMouseLeave={e => { e.currentTarget.style.background = P.surface; e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = P.ink; }}
-                >
-                  {chaptersLoading ? <SpinnerIcon size={11} /> : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>}
-                  {chaptersLoading ? 'Detecting…' : 'Chapters'}
-                </button>
-              </div>
-
-              {/* Transcript tab */}
-              {activeTab === 'transcript' && (
-                <div>
-                  {/* Search bar */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderBottom: `1px solid ${P.border}`, background: P.paper }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search transcript…"
-                      style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13, color: P.ink }} />
-                    {search && matchCount > 0 && <span style={{ fontSize: 11, color: P.muted }}>{matchCount} match{matchCount !== 1 ? 'es' : ''}</span>}
-                    {search && <button onClick={() => setSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
-                  </div>
-                  {/* Transcript text */}
-                  <div style={{ padding: '20px', maxHeight: 520, overflowY: 'auto', fontSize: 14, lineHeight: 2, color: P.ink, background: P.surface }}>
-                    {segments.length > 0 && showTimestamps ? (
-                      segments.map((seg, i) => (
-                        <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 6 }}>
-                          <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}#t=${seg.seconds}s` : `https://youtube.com/watch?v=${currentVideoId}&t=${seg.seconds}s`}
-                            target="_blank" rel="noopener noreferrer"
-                            title={`Jump to ${formatTime(seg.seconds)}`}
-                            style={{ color: P.accent, fontWeight: 700, fontSize: 11, textDecoration: 'none', fontFamily: 'monospace', flexShrink: 0, marginTop: 5, minWidth: 38 }}>
-                            {formatTime(seg.seconds)}
-                          </a>
-                          <span style={{ lineHeight: 1.85 }}>{highlightText(seg.text)}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <span>{highlightText(transcript)}</span>
-                    )}
-                  </div>
-                  {/* Footer stats bar */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', background: P.paper, borderTop: `1px solid ${P.border}` }}>
-                    <span style={{ fontSize: 11, color: P.muted }}><strong style={{ color: P.ink }}>{wordCount.toLocaleString()}</strong> words</span>
-                    <span style={{ color: P.border }}>·</span>
-                    <span style={{ fontSize: 11, color: P.muted }}><strong style={{ color: P.ink }}>{charCount >= 1000 ? `${(charCount / 1000).toFixed(1)}k` : charCount}</strong> chars</span>
-                    <span style={{ color: P.border }}>·</span>
-                    <span style={{ fontSize: 11, color: P.muted }}>~<strong style={{ color: P.ink }}>{readingMins}</strong> min read</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Chapters tab */}
-              {activeTab === 'chapters' && (
-                <div>
-                  {chaptersLoading ? (
-                    <div style={{ padding: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: P.muted, fontSize: 13 }}>
-                      <SpinnerIcon size={14} /> Detecting chapters…
-                    </div>
-                  ) : chapters.length > 0 ? (
-                    <>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>{chapters.filter(c => !c.isError).length} chapters · click to jump</span>
-                        <button onClick={detectChapters} disabled={chaptersLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Refresh</button>
+                  {/* Metadata row */}
+                  <div style={{ padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentTitle || currentChannel || currentVideoId}</div>
+                      <div style={{ fontSize: 11, color: P.muted, marginTop: 2 }}>
+                        Word Count: <strong style={{ color: P.ink }}>{wordCount.toLocaleString()}</strong>
+                        &nbsp;&nbsp;Character Count: <strong style={{ color: P.ink }}>{charCount.toLocaleString()}</strong>
                       </div>
-                      <div style={{ padding: '4px 0', maxHeight: 560, overflowY: 'auto' }}>
-                        {chapters.map((ch, i) => (
-                          ch.isError ? (
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                      <button onClick={copyToClipboard} style={{
+                        display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20,
+                        border: `1px solid ${P.border}`, background: 'transparent', cursor: 'pointer',
+                        fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.3)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}>
+                        {copied ? <CheckIcon /> : <CopyIcon />} {copied ? 'Copied' : 'Copy'}
+                      </button>
+                      <button onClick={downloadTxt} style={{
+                        display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20,
+                        border: `1px solid ${P.border}`, background: 'transparent', cursor: 'pointer',
+                        fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.3)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}>
+                        <DownloadIcon size={12} /> Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Transcript card */}
+              <div style={{ background: '#FFFFFF', borderRadius: 16, boxShadow: '0 2px 12px rgba(28,25,23,0.07)', border: `1px solid ${P.border}`, overflow: 'hidden' }}>
+
+                {/* Local tabs + export toggle */}
+                <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: `1px solid ${P.border}`, background: '#FFFFFF', gap: 2 }}>
+                  {[
+                    { key: 'transcript', label: 'Transcript' },
+                    { key: 'chapters', label: chapters.length > 0 ? `Chapters (${chapters.filter(c => !c.isError).length})` : 'Chapters' },
+                    { key: 'editor', label: 'Editor' },
+                  ].map(tab => (
+                    <button key={tab.key} onClick={() => { setActiveTab(tab.key); if (tab.key === 'chapters' && chapters.length === 0 && !chaptersLoading) detectChapters(); }} style={{
+                      padding: '12px 14px', border: 'none', background: 'transparent',
+                      color: activeTab === tab.key ? P.accent : P.muted,
+                      fontSize: 13, fontWeight: activeTab === tab.key ? 700 : 500, cursor: 'pointer', transition: 'all 0.15s',
+                      borderBottom: activeTab === tab.key ? `2px solid ${P.accent}` : '2px solid transparent', marginBottom: -1,
+                    }}>{tab.label}</button>
+                  ))}
+                  {/* Export toggle area */}
+                  <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+                    <span style={{ fontSize: 12, color: P.muted, fontWeight: 500 }}>Export</span>
+                    {/* Toggle switch */}
+                    <div onClick={() => setExportToggle(v => !v)} style={{ width: 32, height: 18, borderRadius: 9, background: exportToggle ? P.accent : P.border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+                      <div style={{ position: 'absolute', top: 2, left: exportToggle ? 16 : 2, width: 14, height: 14, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action pill buttons */}
+                <div style={{ display: 'flex', gap: 7, padding: '10px 16px', borderBottom: `1px solid ${P.border}`, background: P.paper, flexWrap: 'wrap' }}>
+                  {[
+                    { label: summarizing ? 'Summarizing…' : 'Summarize', loading: summarizing, fn: summarize,
+                      icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+                    { label: quotesLoading ? 'Extracting…' : 'Create Flash Cards', loading: quotesLoading, fn: extractQuotes,
+                      icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> },
+                    { label: chaptersLoading ? 'Detecting…' : 'Generate Study Guide', loading: chaptersLoading, fn: () => { detectChapters(); setActiveTab('chapters'); },
+                      icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> },
+                  ].map(btn => (
+                    <button key={btn.label} onClick={btn.loading ? undefined : btn.fn} style={{
+                      display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 999,
+                      border: `1px solid ${P.border}`, background: '#FFFFFF', cursor: btn.loading ? 'default' : 'pointer',
+                      fontSize: 12, fontWeight: 500, color: P.ink, transition: 'all 0.15s', opacity: btn.loading ? 0.7 : 1,
+                    }}
+                      onMouseEnter={e => { if (!btn.loading) { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.3)'; } }}
+                      onMouseLeave={e => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.border; }}
+                    >
+                      {btn.loading ? <SpinnerIcon size={11} /> : <span style={{ color: 'inherit' }}>{btn.icon}</span>}
+                      {btn.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Transcript tab content */}
+                {activeTab === 'transcript' && (
+                  <>
+                    {/* Search bar */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderBottom: `1px solid ${P.border}`, background: '#FFFFFF' }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search transcript…"
+                        style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13, color: P.ink }} />
+                      {search && matchCount > 0 && <span style={{ fontSize: 11, color: P.muted }}>{matchCount} match{matchCount !== 1 ? 'es' : ''}</span>}
+                      {search && <button onClick={() => setSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
+                    </div>
+                    {/* Transcript list — 2-column grid: timestamp | text */}
+                    <div style={{ maxHeight: 420, overflowY: 'auto', background: '#FFFFFF' }}>
+                      {segments.length > 0 && showTimestamps ? (
+                        segments.map((seg, i) => (
+                          <div key={i}
+                            onClick={() => setSelectedSegment(selectedSegment === i ? null : i)}
+                            style={{
+                              display: 'grid', gridTemplateColumns: '54px 1fr',
+                              gap: 0, padding: '0',
+                              background: selectedSegment === i ? 'rgba(45,108,223,0.06)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'),
+                              cursor: 'pointer', transition: 'background 0.1s',
+                              borderBottom: `1px solid ${selectedSegment === i ? 'rgba(45,108,223,0.15)' : P.border}`,
+                            }}
+                            onMouseEnter={e => { if (selectedSegment !== i) e.currentTarget.style.background = 'rgba(45,108,223,0.03)'; }}
+                            onMouseLeave={e => { if (selectedSegment !== i) e.currentTarget.style.background = i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'; }}
+                          >
+                            <a href={currentPlatform === 'vimeo' ? `https://vimeo.com/${currentVideoId}#t=${seg.seconds}s` : `https://youtube.com/watch?v=${currentVideoId}&t=${seg.seconds}s`}
+                              target="_blank" rel="noopener noreferrer"
+                              onClick={e => e.stopPropagation()}
+                              style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '10px 6px 10px 0', textDecoration: 'none', color: selectedSegment === i ? P.accent : '#999', fontWeight: 600, fontSize: 10.5, fontFamily: 'monospace', flexShrink: 0 }}>
+                              {formatTime(seg.seconds)}
+                            </a>
+                            <div style={{ padding: '10px 14px 10px 8px', fontSize: 13.5, lineHeight: 1.7, color: selectedSegment === i ? P.ink : P.ink, fontWeight: selectedSegment === i ? 500 : 400 }}>
+                              {highlightText(seg.text)}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ padding: '20px', fontSize: 14, lineHeight: 1.85, color: P.ink }}>
+                          {highlightText(transcript)}
+                        </div>
+                      )}
+                    </div>
+                    {/* Bottom info bar */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', background: P.paper, borderTop: `1px solid ${P.border}` }}>
+                      <span style={{ fontSize: 11, color: P.muted }}>Word Count: <strong style={{ color: P.ink }}>{wordCount.toLocaleString()}</strong></span>
+                      <span style={{ color: P.border }}>·</span>
+                      <span style={{ fontSize: 11, color: P.muted }}>Character Count: <strong style={{ color: P.ink }}>{charCount.toLocaleString()}</strong></span>
+                      <span style={{ color: P.border }}>·</span>
+                      <span style={{ fontSize: 11, color: P.muted }}>~<strong style={{ color: P.ink }}>{readingMins}</strong> min read</span>
+                      {/* Timestamps toggle in footer */}
+                      {segments.length > 0 && (
+                        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontSize: 11, color: P.muted }}>Timestamps</span>
+                          <div onClick={() => setShowTimestamps(v => !v)} style={{ width: 28, height: 16, borderRadius: 8, background: showTimestamps ? P.accent : P.border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s' }}>
+                            <div style={{ position: 'absolute', top: 2, left: showTimestamps ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Chapters tab */}
+                {activeTab === 'chapters' && (
+                  <div>
+                    {chaptersLoading ? (
+                      <div style={{ padding: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: P.muted, fontSize: 13 }}>
+                        <SpinnerIcon size={14} /> Detecting chapters…
+                      </div>
+                    ) : chapters.length > 0 ? (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>{chapters.filter(c => !c.isError).length} chapters · click to jump</span>
+                          <button onClick={detectChapters} disabled={chaptersLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Refresh</button>
+                        </div>
+                        <div style={{ maxHeight: 440, overflowY: 'auto' }}>
+                          {chapters.map((ch, i) => ch.isError ? (
                             <div key={i} style={{ padding: '8px 16px', fontSize: 12, color: P.error }}>{ch.title}</div>
                           ) : (
                             <a key={i} href={`https://youtube.com/watch?v=${currentVideoId}&t=${ch.seconds}s`} target="_blank" rel="noopener noreferrer"
                               style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '11px 16px', textDecoration: 'none', transition: 'background 0.1s', borderBottom: `1px solid ${P.border}` }}
                               onMouseEnter={e => e.currentTarget.style.background = P.paper}
-                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                            >
+                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                               <span style={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 700, color: P.accent, flexShrink: 0, minWidth: 36 }}>{formatTime(ch.seconds)}</span>
                               <span style={{ fontSize: 13, fontWeight: 600, color: P.ink }}>{ch.title}</span>
                               <svg style={{ marginLeft: 'auto', color: P.border, flexShrink: 0 }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                             </a>
-                          )
-                        ))}
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 13, color: P.muted }}>No chapters detected yet.</span>
+                        <button onClick={detectChapters} style={{ padding: '8px 18px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: P.ink, transition: 'all 0.15s' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.25)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.border; }}>
+                          Detect Chapters
+                        </button>
                       </div>
-                    </>
-                  ) : (
-                    <div style={{ padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontSize: 13, color: P.muted }}>No chapters detected yet.</span>
-                      <button onClick={detectChapters} style={{
-                        padding: '8px 18px', borderRadius: 8, border: `1px solid ${P.border}`,
-                        background: P.paper, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: P.ink, transition: 'all 0.15s',
-                      }}
-                        onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.25)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.border; }}
-                      >Detect Chapters</button>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
 
-              {/* Editor tab */}
-              {activeTab === 'editor' && (
-                <div style={{ padding: '16px' }}>
-                  <textarea
-                    defaultValue={transcript}
-                    style={{
-                      width: '100%', minHeight: 480, border: `1px solid ${P.border}`, borderRadius: 10,
+                {/* Editor tab */}
+                {activeTab === 'editor' && (
+                  <div style={{ padding: '16px' }}>
+                    <textarea defaultValue={transcript} style={{
+                      width: '100%', minHeight: 400, border: `1px solid ${P.border}`, borderRadius: 10,
                       padding: '16px', fontSize: 13.5, lineHeight: 1.85, color: P.ink, background: P.paper,
                       outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
                     }}
-                    onFocus={e => { e.target.style.borderColor = P.accent; }}
-                    onBlur={e => { e.target.style.borderColor = P.border; }}
-                  />
-                  <div style={{ marginTop: 8, fontSize: 11, color: P.muted }}>Edit the transcript text above. Changes are local only.</div>
-                </div>
-              )}
+                      onFocus={e => { e.target.style.borderColor = P.accent; }}
+                      onBlur={e => { e.target.style.borderColor = P.border; }}
+                    />
+                    <div style={{ marginTop: 8, fontSize: 11, color: P.muted }}>Edit the transcript above. Changes are local only.</div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* ── RIGHT SIDEBAR — Insights + Ask Anything ───────────────────────── */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, position: 'sticky', top: 72, maxHeight: 'calc(100vh - 88px)', overflowY: 'auto' }}>
+            {/* ── RIGHT SIDEBAR — col 3, row 2 ─────────────────────────────────── */}
+            <div style={{ gridColumn: 3, gridRow: 2, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF' }}>
 
-              {/* Insights header */}
-              <div style={{ fontSize: 16, fontWeight: 700, color: P.ink, paddingLeft: 2 }}>Insights</div>
-
-              {/* AI Summaries card */}
-              <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 12, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(45,108,223,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>AI Summaries</div>
-                      <div style={{ fontSize: 10, color: P.muted }}>Bullet point summaries</div>
-                    </div>
+              {/* Insights card */}
+              <div style={{ padding: '18px 18px 12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   </div>
-                  {summary && (
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 3, border: `1px solid ${P.border}`, background: summaryCopied ? P.paper : P.surface, cursor: 'pointer', borderRadius: 5, padding: '2px 7px', fontSize: 10, fontWeight: 600, color: summaryCopied ? P.success : P.muted, transition: 'all 0.15s' }}>
-                        {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
-                      </button>
-                      <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 16, lineHeight: 1, padding: '0 2px' }}>×</button>
-                    </div>
-                  )}
+                  <span style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Insights</span>
                 </div>
-                {summary ? (
-                  <div style={{ padding: '12px 14px', background: P.surface, fontSize: 12.5, lineHeight: 1.75, color: P.ink, maxHeight: 200, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>{summary}</div>
-                ) : (
-                  <div style={{ padding: '10px 12px' }}>
-                    <button onClick={summarize} disabled={summarizing} style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%',
-                      padding: '8px 14px', borderRadius: 8,
-                      border: `1px solid ${summarizing ? P.border : 'rgba(45,108,223,0.25)'}`,
-                      background: summarizing ? P.paper : P.accentLight,
-                      color: summarizing ? P.muted : P.accent,
-                      cursor: summarizing ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 600, transition: 'all 0.15s',
-                    }}
-                      onMouseEnter={e => { if (!summarizing) e.currentTarget.style.background = 'rgba(45,108,223,0.14)'; }}
-                      onMouseLeave={e => { if (!summarizing) e.currentTarget.style.background = P.accentLight; }}
-                    >
-                      {summarizing ? <SpinnerIcon size={11} /> : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>}
-                      {summarizing ? 'Summarizing…' : 'Generate Summary'}
-                    </button>
+
+                {/* Insight rows */}
+                {[
+                  { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(45,108,223,0.1)',
+                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+                    onClick: summarize, active: !!summary, loading: summarizing },
+                  { title: 'Topic Extraction', sub: 'keywords & hashtags', color: P.warning, bg: 'rgba(180,83,9,0.1)',
+                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
+                    onClick: extractQuotes, active: quotes.length > 0, loading: quotesLoading },
+                  { title: 'Sentiment Analysis', sub: 'Overall · +/- Negative', color: P.success, bg: 'rgba(15,118,110,0.1)',
+                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>,
+                    onClick: summarize, active: false, loading: false },
+                  { title: 'Question Answers', sub: 'Q&A about transcript', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
+                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+                    onClick: () => { qaInputRef.current?.focus(); }, active: qaMessages.length > 0, loading: qaLoading },
+                ].map(item => (
+                  <div key={item.title}
+                    onClick={item.loading ? undefined : item.onClick}
+                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 8px', borderRadius: 10, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 2 }}
+                    onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: item.active ? item.bg : (item.bg.replace('0.1', '0.07')), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color, transition: 'background 0.15s' }}>
+                      {item.loading ? <SpinnerIcon size={12} /> : item.icon}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: item.active ? item.color : P.ink }}>{item.title}</div>
+                      <div style={{ fontSize: 11, color: P.muted }}>{item.sub}</div>
+                    </div>
+                    {item.active && <div style={{ marginLeft: 'auto', width: 7, height: 7, borderRadius: '50%', background: item.color, flexShrink: 0 }} />}
+                  </div>
+                ))}
+
+                {/* Summary content if present */}
+                {summary && (
+                  <div style={{ marginTop: 8, background: P.paper, borderRadius: 10, padding: '10px 12px', border: `1px solid ${P.border}` }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Summary</span>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 3, border: `1px solid ${P.border}`, background: P.surface, cursor: 'pointer', borderRadius: 5, padding: '2px 7px', fontSize: 10, fontWeight: 600, color: summaryCopied ? P.success : P.muted, transition: 'all 0.15s' }}>
+                          {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
+                        </button>
+                        <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 16, lineHeight: 1, padding: '0 2px' }}>×</button>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 12.5, lineHeight: 1.75, color: P.ink, maxHeight: 180, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>{summary}</div>
                   </div>
                 )}
-              </div>
 
-              {/* Key Quotes / Topic Extraction card */}
-              <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 12, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(180,83,9,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.warning} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>Key Quotes</div>
-                      <div style={{ fontSize: 10, color: P.muted }}>Notable excerpts</div>
-                    </div>
-                  </div>
-                  {quotes.length > 0 && (
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <button onClick={() => { navigator.clipboard.writeText(quotes.map(q => `"${q}"`).join('\n\n')).then(() => { setQuotesCopied(true); setTimeout(() => setQuotesCopied(false), 2000); }); }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 3, border: `1px solid ${P.border}`, background: quotesCopied ? P.paper : P.surface, cursor: 'pointer', borderRadius: 5, padding: '2px 7px', fontSize: 10, fontWeight: 600, color: quotesCopied ? P.success : P.muted, transition: 'all 0.15s' }}>
-                        {quotesCopied ? <CheckIcon /> : <CopyIcon />} {quotesCopied ? 'Copied!' : 'Copy all'}
-                      </button>
-                    </div>
-                  )}
-                </div>
-                {quotes.length > 0 ? (
-                  <div style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 180, overflowY: 'auto' }}>
-                    {quotes.map((q, i) => (
-                      q.startsWith('Error:') ? (
-                        <div key={i} style={{ fontSize: 11, color: P.error }}>{q}</div>
-                      ) : (
-                        <div key={i} style={{ position: 'relative', padding: '8px 10px 8px 14px', background: P.paper, borderRadius: 7, borderLeft: `2px solid ${P.warning}`, fontSize: 12, lineHeight: 1.6, color: P.ink, fontStyle: 'italic' }}>
-                          {q}
-                        </div>
-                      )
+                {/* Key quotes if present */}
+                {quotes.length > 0 && (
+                  <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5, maxHeight: 150, overflowY: 'auto' }}>
+                    {quotes.slice(0, 3).map((q, i) => !q.startsWith('Error:') && (
+                      <div key={i} style={{ padding: '7px 10px 7px 12px', background: P.paper, borderRadius: 7, borderLeft: `2px solid ${P.warning}`, fontSize: 12, lineHeight: 1.6, color: P.ink, fontStyle: 'italic' }}>{q}</div>
                     ))}
                   </div>
-                ) : (
-                  <div style={{ padding: '10px 12px' }}>
-                    <button onClick={extractQuotes} disabled={quotesLoading} style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%',
-                      padding: '8px 14px', borderRadius: 8, border: `1px solid ${P.border}`,
-                      background: quotesLoading ? P.paper : P.surface, color: P.muted,
-                      cursor: quotesLoading ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 600, transition: 'all 0.15s',
-                    }}
-                      onMouseEnter={e => { if (!quotesLoading) { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; } }}
-                      onMouseLeave={e => { if (!quotesLoading) { e.currentTarget.style.background = P.surface; e.currentTarget.style.color = P.muted; } }}
-                    >
-                      {quotesLoading ? <SpinnerIcon size={11} /> : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>}
-                      {quotesLoading ? 'Extracting…' : 'Extract Key Quotes'}
-                    </button>
-                  </div>
                 )}
               </div>
 
-              {/* Ask Anything / Q&A card */}
-              <div ref={qaRef} style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 12, overflow: 'hidden' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(45,108,223,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>Ask Anything</div>
-                      <div style={{ fontSize: 10, color: P.muted }}>Q&amp;A about transcript</div>
-                    </div>
+              {/* Divider */}
+              <div style={{ height: 1, background: P.border, margin: '0 18px' }} />
+
+              {/* Ask Anything card */}
+              <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px 18px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                   </div>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Ask Anything</span>
                   {qaMessages.length > 0 && (
-                    <button onClick={() => setQaMessages([])} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Clear</button>
+                    <button onClick={() => setQaMessages([])} style={{ marginLeft: 'auto', border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Clear</button>
                   )}
                 </div>
 
-                {/* Suggestion chips */}
+                {/* Top input (quick ask) */}
                 {qaMessages.length === 0 && (
-                  <div style={{ padding: '8px 10px', background: P.surface, borderBottom: `1px solid ${P.border}`, display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                    {DEMO_CHIPS.map(chip => (
-                      <button key={chip} onClick={() => askQuestion(chip)} style={{
-                        padding: '4px 9px', borderRadius: 999, border: `1px solid ${P.border}`,
-                        background: P.paper, fontSize: 11, color: P.muted, cursor: 'pointer', transition: 'all 0.15s',
-                      }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.color = P.accent; e.currentTarget.style.background = P.accentLight; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = P.muted; e.currentTarget.style.background = P.paper; }}
-                      >{chip}</button>
-                    ))}
-                  </div>
+                  <>
+                    <div style={{ border: `1.5px solid ${P.border}`, borderRadius: 10, padding: '10px 14px', marginBottom: 10, cursor: 'text', background: P.paper }}
+                      onClick={() => qaInputRef.current?.focus()}>
+                      <div style={{ fontSize: 12, color: P.muted }}>Summarize the key points of this video</div>
+                    </div>
+                    {/* Suggestion chips */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
+                      {DEMO_CHIPS.map(chip => (
+                        <button key={chip} onClick={() => askQuestion(chip)} style={{
+                          padding: '4px 9px', borderRadius: 999, border: `1px solid ${P.border}`,
+                          background: P.paper, fontSize: 11, color: P.muted, cursor: 'pointer', transition: 'all 0.15s',
+                        }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.color = P.accent; e.currentTarget.style.background = P.accentLight; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = P.muted; e.currentTarget.style.background = P.paper; }}
+                        >{chip}</button>
+                      ))}
+                    </div>
+                  </>
                 )}
 
                 {/* Chat messages */}
                 {qaMessages.length > 0 && (
-                  <div style={{ maxHeight: 260, overflowY: 'auto', background: P.surface, padding: '10px 11px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 10, maxHeight: 280 }}>
                     {qaMessages.map((msg, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                        <div style={{
-                          maxWidth: '90%', padding: '8px 11px',
-                          borderRadius: msg.role === 'user' ? '10px 10px 3px 10px' : '10px 10px 10px 3px',
-                          background: msg.role === 'user' ? P.accent : (msg.isError ? 'rgba(180,35,24,0.06)' : P.paper),
-                          border: msg.role === 'ai' ? `1px solid ${msg.isError ? 'rgba(180,35,24,0.2)' : P.border}` : 'none',
-                          fontSize: 12.5, lineHeight: 1.6,
-                          color: msg.role === 'user' ? 'white' : (msg.isError ? P.error : P.ink),
-                        }}>{msg.text}</div>
+                      <div key={i}>
+                        {msg.role === 'ai' && (
+                          <div style={{ fontSize: 10, fontWeight: 600, color: P.muted, marginBottom: 4, paddingLeft: 2 }}>AI</div>
+                        )}
+                        <div style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                          <div style={{
+                            maxWidth: '92%', padding: '9px 12px',
+                            borderRadius: msg.role === 'user' ? '12px 12px 3px 12px' : '12px 12px 12px 3px',
+                            background: msg.role === 'user' ? P.accent : (msg.isError ? 'rgba(180,35,24,0.06)' : P.paper),
+                            border: msg.role === 'ai' ? `1px solid ${msg.isError ? 'rgba(180,35,24,0.2)' : P.border}` : 'none',
+                            fontSize: 13, lineHeight: 1.65,
+                            color: msg.role === 'user' ? 'white' : (msg.isError ? P.error : P.ink),
+                          }}>{msg.text}</div>
+                        </div>
                       </div>
                     ))}
                     {qaLoading && (
                       <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                        <div style={{ padding: '8px 12px', borderRadius: '10px 10px 10px 3px', background: P.paper, border: `1px solid ${P.border}`, display: 'flex', gap: 4, alignItems: 'center' }}>
+                        <div style={{ padding: '9px 13px', borderRadius: '12px 12px 12px 3px', background: P.paper, border: `1px solid ${P.border}`, display: 'flex', gap: 4, alignItems: 'center' }}>
                           {[0, 1, 2].map(d => <div key={d} style={{ width: 5, height: 5, borderRadius: '50%', background: P.accent, opacity: 0.5, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}
                         </div>
                       </div>
@@ -3525,30 +3600,32 @@ const App = () => {
                   </div>
                 )}
 
-                {/* Input row */}
-                <div style={{ display: 'flex', gap: 6, padding: '8px 10px', background: P.paper, borderTop: `1px solid ${P.border}` }}>
-                  <input ref={qaInputRef} value={qaQuestion} onChange={e => setQaQuestion(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
-                    placeholder="Ask anything about this video…" disabled={qaLoading}
-                    style={{ flex: 1, border: `1.5px solid ${P.border}`, borderRadius: 8, padding: '7px 11px', fontSize: 12, color: P.ink, background: P.surface, outline: 'none', transition: 'border-color 0.15s' }}
-                    onFocus={e => { e.target.style.borderColor = P.accent; }}
-                    onBlur={e => { e.target.style.borderColor = P.border; }}
-                  />
+                {/* Bottom composer */}
+                <div style={{ marginTop: 'auto', display: 'flex', gap: 7, paddingTop: 10, borderTop: `1px solid ${P.border}` }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, border: `1.5px solid ${P.border}`, borderRadius: 10, padding: '7px 12px', background: P.paper, transition: 'border-color 0.15s' }}
+                    onFocus={() => {}} onClick={() => qaInputRef.current?.focus()}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input ref={qaInputRef} value={qaQuestion} onChange={e => setQaQuestion(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
+                      placeholder="Ask further questions…" disabled={qaLoading}
+                      style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12.5, color: P.ink }}
+                      onFocus={e => { e.currentTarget.closest('div').style.borderColor = P.accent; }}
+                      onBlur={e => { e.currentTarget.closest('div').style.borderColor = P.border; }}
+                    />
+                  </div>
                   <button onClick={() => askQuestion()} disabled={!qaQuestion.trim() || qaLoading} style={{
-                    flexShrink: 0, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    borderRadius: 8, border: 'none',
+                    flexShrink: 0, padding: '0 16px', height: 38, display: 'flex', alignItems: 'center', gap: 5,
+                    borderRadius: 10, border: 'none',
                     background: !qaQuestion.trim() || qaLoading ? P.border : P.accent,
                     color: !qaQuestion.trim() || qaLoading ? P.muted : 'white',
                     cursor: !qaQuestion.trim() || qaLoading ? 'not-allowed' : 'pointer',
-                    transition: 'all 0.15s',
+                    fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
                   }}
                     onMouseEnter={e => { if (qaQuestion.trim() && !qaLoading) e.currentTarget.style.background = P.accentHover; }}
                     onMouseLeave={e => { if (qaQuestion.trim() && !qaLoading) e.currentTarget.style.background = P.accent; }}
                   >
-                    {qaLoading
-                      ? <SpinnerIcon size={12} />
-                      : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    }
+                    {qaLoading ? <SpinnerIcon size={12} /> : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>}
+                    Send
                   </button>
                 </div>
               </div>
