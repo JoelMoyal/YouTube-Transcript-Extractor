@@ -3225,11 +3225,11 @@ const App = () => {
             </div>
 
             {/* ── CENTER — col 2, row 2 ─────────────────────────────────────────── */}
-            <div style={{ gridColumn: 2, gridRow: 2, display: 'flex', flexDirection: 'column', gap: 14, padding: '16px', overflowY: 'auto', background: P.paper, borderRight: `1px solid ${P.border}` }}>
+            <div style={{ gridColumn: 2, gridRow: 2, display: 'flex', flexDirection: 'column', gap: 14, padding: '16px', overflow: 'hidden', background: P.paper, borderRight: `1px solid ${P.border}` }}>
 
               {/* Video player card */}
               {currentVideoId && (
-                <div style={{ background: '#000', borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}` }}>
+                <div style={{ flexShrink: 0, background: '#000', borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}` }}>
                   {/* Embedded player */}
                   {currentPlatform === 'vimeo' ? (
                     <iframe
@@ -3283,10 +3283,10 @@ const App = () => {
               )}
 
               {/* Transcript card */}
-              <div style={{ background: '#FFFFFF', borderRadius: 16, boxShadow: '0 2px 12px rgba(28,25,23,0.07)', border: `1px solid ${P.border}`, overflow: 'hidden' }}>
+              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRadius: 16, boxShadow: '0 2px 12px rgba(28,25,23,0.07)', border: `1px solid ${P.border}`, overflow: 'hidden' }}>
 
                 {/* Local tabs + export toggle */}
-                <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: `1px solid ${P.border}`, background: '#FFFFFF', gap: 2 }}>
+                <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: `1px solid ${P.border}`, background: '#FFFFFF', gap: 2 }}>
                   {[
                     { key: 'transcript', label: 'Transcript' },
                     { key: 'chapters', label: chapters.length > 0 ? `Chapters (${chapters.filter(c => !c.isError).length})` : 'Chapters' },
@@ -3311,7 +3311,7 @@ const App = () => {
                 </div>
 
                 {/* Action pill buttons */}
-                <div style={{ display: 'flex', gap: 7, padding: '10px 16px', borderBottom: `1px solid ${P.border}`, background: P.paper, flexWrap: 'wrap' }}>
+                <div style={{ flexShrink: 0, display: 'flex', gap: 7, padding: '10px 16px', borderBottom: `1px solid ${P.border}`, background: P.paper, flexWrap: 'wrap' }}>
                   {[
                     { label: summarizing ? 'Summarizing…' : 'Summarize', loading: summarizing, fn: summarize,
                       icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
@@ -3336,9 +3336,9 @@ const App = () => {
 
                 {/* Transcript tab content */}
                 {activeTab === 'transcript' && (
-                  <>
+                  <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {/* Search bar */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderBottom: `1px solid ${P.border}`, background: '#FFFFFF' }}>
+                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderBottom: `1px solid ${P.border}`, background: '#FFFFFF' }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                       <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search transcript…"
                         style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13, color: P.ink }} />
@@ -3346,7 +3346,7 @@ const App = () => {
                       {search && <button onClick={() => setSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
                     </div>
                     {/* Transcript list — 2-column grid: timestamp | text */}
-                    <div style={{ maxHeight: 420, overflowY: 'auto', background: '#FFFFFF' }}>
+                    <div style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF' }}>
                       {segments.length > 0 && showTimestamps ? (
                         segments.map((seg, i) => (
                           <div key={i}
@@ -3378,7 +3378,7 @@ const App = () => {
                       )}
                     </div>
                     {/* Bottom info bar */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', background: P.paper, borderTop: `1px solid ${P.border}` }}>
+                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', background: P.paper, borderTop: `1px solid ${P.border}` }}>
                       <span style={{ fontSize: 11, color: P.muted }}>Word Count: <strong style={{ color: P.ink }}>{wordCount.toLocaleString()}</strong></span>
                       <span style={{ color: P.border }}>·</span>
                       <span style={{ fontSize: 11, color: P.muted }}>Character Count: <strong style={{ color: P.ink }}>{charCount.toLocaleString()}</strong></span>
@@ -3394,12 +3394,12 @@ const App = () => {
                         </div>
                       )}
                     </div>
-                  </>
+                  </div>
                 )}
 
                 {/* Chapters tab */}
                 {activeTab === 'chapters' && (
-                  <div>
+                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
                     {chaptersLoading ? (
                       <div style={{ padding: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: P.muted, fontSize: 13 }}>
                         <SpinnerIcon size={14} /> Detecting chapters…
@@ -3440,7 +3440,7 @@ const App = () => {
 
                 {/* Editor tab */}
                 {activeTab === 'editor' && (
-                  <div style={{ padding: '16px' }}>
+                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '16px' }}>
                     <textarea defaultValue={transcript} style={{
                       width: '100%', minHeight: 400, border: `1px solid ${P.border}`, borderRadius: 10,
                       padding: '16px', fontSize: 13.5, lineHeight: 1.85, color: P.ink, background: P.paper,
