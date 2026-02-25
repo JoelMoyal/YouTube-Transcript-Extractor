@@ -3388,11 +3388,25 @@ const App = () => {
                       {search && matchCount > 0 && <span style={{ fontSize: 11, color: P.muted }}>{matchCount} match{matchCount !== 1 ? 'es' : ''}</span>}
                       {search && <button onClick={() => setSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
                       {segments.length > 0 && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, borderLeft: `1px solid ${P.border}`, paddingLeft: 10, flexShrink: 0 }}>
-                          <span style={{ fontSize: 11, color: P.muted, whiteSpace: 'nowrap' }}>Timestamps</span>
-                          <div onClick={() => setShowTimestamps(v => !v)} style={{ width: 28, height: 16, borderRadius: 8, background: showTimestamps ? P.accent : P.border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
-                            <div style={{ position: 'absolute', top: 2, left: showTimestamps ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, borderLeft: `1px solid ${P.border}`, paddingLeft: 10, flexShrink: 0 }}>
+                          {/* Timestamps toggle */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <span style={{ fontSize: 11, color: P.muted, whiteSpace: 'nowrap' }}>Timestamps</span>
+                            <div onClick={() => setShowTimestamps(v => !v)} style={{ width: 28, height: 16, borderRadius: 8, background: showTimestamps ? P.accent : P.border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+                              <div style={{ position: 'absolute', top: 2, left: showTimestamps ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                            </div>
                           </div>
+                          {/* Language pill */}
+                          <label style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px 3px 7px', borderRadius: 20, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', position: 'relative', transition: 'border-color 0.15s' }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            <span style={{ fontSize: 10.5, fontWeight: 600, color: P.ink, letterSpacing: '0.03em' }}>{(LANGUAGES.find(l => l.code === lang) || LANGUAGES[0]).label.split(' ')[0].toUpperCase().slice(0, 3)}</span>
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                            <select value={lang} onChange={e => setLang(e.target.value)} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}>
+                              {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+                            </select>
+                          </label>
                         </div>
                       )}
                     </div>
@@ -3508,13 +3522,7 @@ const App = () => {
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   </div>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: P.ink, flex: 1 }}>Insights</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                    <select value={lang} onChange={e => setLang(e.target.value)} style={{ border: `1px solid ${P.border}`, borderRadius: 6, background: P.paper, fontSize: 11, color: P.ink, padding: '3px 5px', outline: 'none', cursor: 'pointer' }}>
-                      {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
-                    </select>
-                  </div>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Insights</span>
                 </div>
 
                 {/* Insight rows */}
