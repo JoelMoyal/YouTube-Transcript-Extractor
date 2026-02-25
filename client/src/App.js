@@ -2175,7 +2175,7 @@ const App = () => {
   const segmentsRef        = useRef([]);
   const urlInputRef     = useRef(null);
   const qaRef           = useRef(null);
-  const chatBottomRef   = useRef(null);
+  const chatMessagesRef = useRef(null);
   const recoveryIntentRef = useRef(false);
 
   useEffect(() => {
@@ -2497,7 +2497,6 @@ const App = () => {
     setQaMessages(prev => [...prev, { role: 'user', text: q }]);
     setQaQuestion('');
     setQaLoading(true);
-    setTimeout(() => qaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
     try {
       const res = await fetch('/api/ask', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2518,9 +2517,10 @@ const App = () => {
     }
   };
 
-  // Auto-scroll chat to bottom on new messages or while loading
+  // Auto-scroll chat messages container to bottom (direct scrollTop, no page scroll)
   useEffect(() => {
-    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = chatMessagesRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [qaMessages, qaLoading]);
 
   const getTranscript = (langOverride) => {
@@ -3750,7 +3750,7 @@ const App = () => {
 
                 {/* Chat messages */}
                 {qaMessages.length > 0 && (
-                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, padding: '14px 18px 8px' }}>
+                  <div ref={chatMessagesRef} style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, padding: '14px 18px 8px' }}>
                     {qaMessages.map((msg, i) => (
                       <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                         {msg.role === 'ai' ? (
@@ -3801,7 +3801,6 @@ const App = () => {
                         </div>
                       </div>
                     )}
-                    <div ref={chatBottomRef} />
                   </div>
                 )}
 
