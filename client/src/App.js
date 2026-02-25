@@ -2115,6 +2115,7 @@ const App = () => {
   const [loadingMsg, setLoadingMsg]       = useState('');
   const [loadingPercent, setLoadingPercent] = useState(0);
   const [loadingStage, setLoadingStage]   = useState('');
+  const [langRefetching, setLangRefetching] = useState(false);
   const [error, setError]                 = useState('');
   const [copied, setCopied]               = useState(false);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
@@ -2566,6 +2567,34 @@ const App = () => {
       setError('Connection lost. Please try again.');
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     };
+  };
+
+  // Lightweight re-fetch that stays inside the transcript view (doesn't reset the layout)
+  const refetchWithLang = (newLang) => {
+    const parsed = parseVideoUrl(videoUrl);
+    if (!parsed) return;
+    const { platform, id: videoId, url: videoCanonical } = parsed;
+    setLangRefetching(true);
+    setSearch(''); setSummary(''); setChapters([]); setQuotes([]); setQaMessages([]);
+    const apiUrl = platform === 'vimeo'
+      ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${newLang}`
+      : `/api/transcript?videoId=${videoId}&lang=${newLang}`;
+    const es = new EventSource(apiUrl);
+    const killTimer = setTimeout(() => { es.close(); setLangRefetching(false); }, 60000);
+    es.addEventListener('done', async (e) => {
+      clearTimeout(killTimer); es.close();
+      try {
+        const data = JSON.parse(e.data);
+        const seen = new Set();
+        const segs = (data.segments || []).filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
+        setSegments(segs);
+        setTranscript(data.transcript || segs.map(s => s.text).join(' '));
+        setSelectedSegment(null); setPlayingSegment(null); playingSegmentRef.current = null;
+      } catch {}
+      setLangRefetching(false);
+    });
+    es.addEventListener('error', () => { clearTimeout(killTimer); es.close(); setLangRefetching(false); });
+    es.onerror = () => { clearTimeout(killTimer); es.close(); setLangRefetching(false); };
   };
 
   const dlName = (ext) => {
@@ -3427,7 +3456,7 @@ const App = () => {
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                             <span style={{ fontSize: 10.5, fontWeight: 600, color: P.ink, letterSpacing: '0.03em' }}>{(LANGUAGES.find(l => l.code === lang) || LANGUAGES[0]).label.split(' ')[0].toUpperCase().slice(0, 3)}</span>
                             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                            <select value={lang} onChange={e => { const v = e.target.value; setLang(v); getTranscript(v); }} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}>
+                            <select value={lang} onChange={e => { const v = e.target.value; setLang(v); refetchWithLang(v); }} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}>
                               {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
                             </select>
                           </label>
@@ -3435,7 +3464,15 @@ const App = () => {
                       )}
                     </div>
                     {/* Transcript list — 2-column grid: timestamp | text */}
-                    <div ref={transcriptListRef} style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF' }}>
+                    <div ref={transcriptListRef} style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF', position: 'relative' }}>
+                      {langRefetching && (
+                        <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(246,243,238,0.7)', backdropFilter: 'blur(2px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            {[0,1,2].map(i => <span key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: `dot-flicker 1.2s ease-in-out ${i * 0.2}s infinite` }} />)}
+                          </div>
+                          <span style={{ fontSize: 12, color: P.muted, fontWeight: 500 }}>Loading in {LANGUAGES.find(l => l.code === lang)?.label}…</span>
+                        </div>
+                      )}
                       {segments.length > 0 && showTimestamps ? (
                         segments.map((seg, i) => (
                           <div key={i}
