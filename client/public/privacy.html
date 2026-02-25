@@ -58,6 +58,17 @@
       ul { padding-left: 18px; margin: 0 0 12px; }
       a { color: var(--accent); text-decoration: none; }
       a:hover { color: var(--accent2); }
+      .link-btn {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        color: var(--accent);
+        font: inherit;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      .link-btn:hover { color: var(--accent2); }
       .meta {
         display: flex;
         gap: 12px;
@@ -152,8 +163,29 @@
         </ul>
 
         <h2>Contact</h2>
-        <p>Email: <a href="mailto:info@scribesnap.ai?subject=ScribeSnap%20Support">info@scribesnap.ai</a></p>
+        <p>Email: <a href="mailto:info@scribesnap.ai?subject=ScribeSnap%20Support&body=Hi%20ScribeSnap%20team%2C%0A%0A">info@scribesnap.ai</a></p>
+        <p id="mail-fallback" style="font-size: 12.5px;">If your email app does not open, <button class="link-btn" id="copy-email-btn" type="button">copy the address</button>.</p>
       </div>
     </main>
+    <script>
+      (function () {
+        const btn = document.getElementById('copy-email-btn');
+        const fallback = document.getElementById('mail-fallback');
+        if (!btn || !fallback) return;
+        const supportEmail = 'info@scribesnap.ai';
+        btn.addEventListener('click', async function () {
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(supportEmail);
+            } else {
+              window.prompt('Copy support email:', supportEmail);
+            }
+            fallback.textContent = 'Copied: info@scribesnap.ai';
+          } catch (_) {
+            window.prompt('Copy support email:', supportEmail);
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

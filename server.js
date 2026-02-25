@@ -78,21 +78,23 @@ async function aiComplete(prompt) {
 
 const LANG_NAMES = { en:'English', es:'Spanish', fr:'French', de:'German', it:'Italian', pt:'Portuguese', ru:'Russian', 'zh-Hans':'Chinese (Simplified)', 'zh-Hant':'Chinese (Traditional)', ja:'Japanese', ko:'Korean', ar:'Arabic', hi:'Hindi', tr:'Turkish', nl:'Dutch', pl:'Polish' };
 
-// Translate segments to targetLang using AI, in batches to stay within token limits
+// Translate segments to targetLang using AI, in parallel batches to stay within token limits
 async function translateSegments(segments, targetLang, send) {
   if (!segments.length) return segments;
   if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY) return segments;
   const langName = LANG_NAMES[targetLang] || targetLang;
   send('progress', { stage: 'translate', message: `Translating to ${langName}…`, percent: 88 });
 
-  // Use ||| separator — far fewer API calls than per-segment batching
   const SEP = '|||';
-  const CHUNK = 80; // 80 segments per call ≈ 3× fewer calls than before
-  const out = [];
+  const CHUNK = 80;
   const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
 
-  for (let i = 0; i < segments.length; i += CHUNK) {
-    const batch = segments.slice(i, i + CHUNK);
+  // Split into chunks upfront
+  const chunks = [];
+  for (let i = 0; i < segments.length; i += CHUNK) chunks.push(segments.slice(i, i + CHUNK));
+
+  // Translate a single chunk with retry
+  const translateChunk = async (batch) => {
     const inputText = batch.map(s => s.text).join(`\n${SEP}\n`);
     const messages = [
       { role: 'system', content: `You are a translator. Translate the user's text to ${langName}. The text contains segments separated by "${SEP}". Preserve every "${SEP}" separator exactly where it is. Do not add or remove separators.` },
@@ -120,14 +122,22 @@ async function translateSegments(segments, targetLang, send) {
     if (translatedText) {
       const parts = translatedText.split(SEP).map(p => p.trim());
       if (parts.length > 0) {
-        out.push(...batch.map((s, j) => ({ ...s, text: (parts[j] && parts[j].trim()) || s.text })));
-        continue;
+        return batch.map((s, j) => ({ ...s, text: (parts[j] && parts[j].trim()) || s.text }));
       }
     }
-    out.push(...batch); // keep originals on failure
-  }
-  return out;
+    return batch; // keep originals on failure
+  };
+
+  // Run all chunks in parallel — ~4× faster than sequential for multi-chunk videos
+  const results = await Promise.allSettled(chunks.map(chunk => translateChunk(chunk)));
+  return results.flatMap((r, i) => r.status === 'fulfilled' ? r.value : chunks[i]);
 }
+
+// Race a promise against a ms timeout (rejects on timeout)
+const withTimeout = (promise, ms) => Promise.race([
+  promise,
+  new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+]);
 
 const execFileAsync = promisify(execFile);
 const app = express();
@@ -417,13 +427,13 @@ app.get('/api/transcript', async (req, res) => {
       // Always try target language first — YouTube provides auto-translated captions
       // for most languages. This handles both directions: en→de AND de→en instantly.
       try {
-        const attempt = await YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang });
+        const attempt = await withTimeout(YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang }), 8000);
         if (attempt && attempt.length > 0) { raw = attempt; gotTargetLang = true; }
       } catch {}
 
       // Fall back to any available captions (video's native language)
       if (!gotTargetLang) {
-        try { raw = await YoutubeTranscript.fetchTranscript(videoId); } catch {}
+        try { raw = await withTimeout(YoutubeTranscript.fetchTranscript(videoId), 8000); } catch {}
       }
 
       if (raw && raw.length > 0) {
