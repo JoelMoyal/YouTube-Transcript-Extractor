@@ -84,30 +84,45 @@ async function translateSegments(segments, targetLang, send) {
   if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY) return segments;
   const langName = LANG_NAMES[targetLang] || targetLang;
   send('progress', { stage: 'translate', message: `Translating to ${langName}…`, percent: 88 });
-  const BATCH = 60;
+  const BATCH = 25; // smaller batches = fewer token issues & length mismatches
   const out = [];
+  const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
   for (let i = 0; i < segments.length; i += BATCH) {
     const batch = segments.slice(i, i + BATCH);
     const texts = batch.map(s => s.text);
     try {
-      const prompt = `Translate these ${texts.length} transcript segments to ${langName}. Return ONLY a valid JSON array of strings in the same order. No extra text, no markdown.\n\n${JSON.stringify(texts)}`;
+      const prompt = `Translate each line to ${langName}. Output ONLY a JSON array of ${texts.length} strings, same order, no extra text.\n${JSON.stringify(texts)}`;
       let raw;
-      if (process.env.GROQ_API_KEY) {
-        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-        const r = await groq.chat.completions.create({ model: 'llama-3.1-8b-instant', messages: [{ role: 'user', content: prompt }], max_tokens: 4096 });
+      if (groq) {
+        const r = await groq.chat.completions.create({
+          model: 'llama-3.1-8b-instant',
+          messages: [
+            { role: 'system', content: 'You are a translator. Respond with only a valid JSON array of strings.' },
+            { role: 'user', content: prompt },
+          ],
+          max_tokens: 8192,
+          temperature: 0,
+        });
         raw = r.choices[0].message.content;
       } else {
-        const r = await fetch('https://openrouter.ai/api/v1/chat/completions', { method: 'POST', headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'meta-llama/llama-3.1-8b-instruct:free', messages: [{ role: 'user', content: prompt }], max_tokens: 4096 }) });
+        const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'meta-llama/llama-3.1-8b-instruct:free', messages: [{ role: 'system', content: 'You are a translator. Respond with only a valid JSON array of strings.' }, { role: 'user', content: prompt }], max_tokens: 8192, temperature: 0 }),
+        });
         const d = await r.json();
         raw = d.choices[0].message.content;
       }
       const jsonMatch = raw.match(/\[[\s\S]*\]/);
       const translated = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
-      if (Array.isArray(translated) && translated.length === batch.length) {
-        out.push(...batch.map((s, j) => ({ ...s, text: String(translated[j] || s.text) })));
+      if (Array.isArray(translated) && translated.length > 0) {
+        // lenient: use translation where available, fall back to original for extras
+        out.push(...batch.map((s, j) => ({ ...s, text: (translated[j] && String(translated[j]).trim()) || s.text })));
         continue;
       }
-    } catch {}
+    } catch (e) {
+      console.error('[translate] batch failed:', e.message);
+    }
     out.push(...batch); // keep originals on failure
   }
   return out;
