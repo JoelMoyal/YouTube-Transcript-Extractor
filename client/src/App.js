@@ -1040,20 +1040,42 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           position: relative;
           z-index: 1;
         }
-        .ds-back {
+        /* ── Top nav ── */
+        .ds-topnav {
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          margin-bottom: 22px;
+        }
+        .ds-topnav-back {
           display: inline-flex;
           align-items: center;
-          gap: 6px;
+          justify-content: center;
+          border: none;
+          background: none;
+          color: #6B645C;
+          cursor: pointer;
+          padding: 6px 8px 6px 2px;
+          transition: color 0.15s;
+          flex-shrink: 0;
+        }
+        .ds-topnav-back:hover { color: #1C1917; }
+        .ds-topnav-tab {
           border: none;
           background: none;
           color: #6B645C;
           font-size: 15px;
+          font-weight: 500;
           cursor: pointer;
-          padding: 2px 0;
-          margin-bottom: 10px;
-          transition: color 0.15s ease;
+          padding: 6px 14px;
+          border-radius: 8px;
+          transition: all 0.15s;
         }
-        .ds-back:hover { color: #1C1917; }
+        .ds-topnav-tab:hover { color: #1C1917; background: rgba(28,25,23,0.05); }
+        .ds-topnav-tab.is-active {
+          color: #1C1917;
+          font-weight: 700;
+        }
         .ds-grid {
           display: grid;
           grid-template-columns: minmax(0, 1.85fr) minmax(318px, 1fr);
@@ -1121,58 +1143,39 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           color: #1C1917;
           font-weight: 700;
         }
-        .ds-control-row {
-          display: grid;
-          grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
-          gap: 12px;
-          margin-bottom: 14px;
-        }
-        .ds-extract-btn {
-          height: 58px;
-          border-radius: 15px;
-          border: none;
-          background: #2D6CDF;
-          color: white;
-          font-size: 24px;
-          font-weight: 700;
-          letter-spacing: -0.01em;
-          cursor: pointer;
-          display: inline-flex;
-          justify-content: center;
-          align-items: center;
-          gap: 8px;
-          box-shadow: 0 4px 16px rgba(45,108,223,0.3);
-          transition: background 0.15s ease, transform 0.18s ease, box-shadow 0.18s ease;
-        }
-        .ds-extract-btn:hover {
-          background: #2459B8;
-          transform: translateY(-1px);
-          box-shadow: 0 8px 20px rgba(45,108,223,0.35);
-        }
-        .ds-tabs {
+        /* ── Section tabs (inside left column, below profile) ── */
+        .ds-section-tabs {
           display: flex;
           align-items: center;
-          gap: 4px;
-          padding: 5px;
+          gap: 0;
+          margin-bottom: 16px;
+          border-bottom: 1px solid #E7E1D8;
         }
-        .ds-tab {
-          flex: 1;
-          min-width: 0;
+        .ds-section-tab {
           border: none;
-          border-radius: 12px;
-          padding: 10px 10px;
-          background: transparent;
+          background: none;
           color: #6B645C;
-          font-size: 16px;
-          font-weight: 600;
+          font-size: 15px;
+          font-weight: 500;
           cursor: pointer;
-          transition: all 0.15s ease;
+          padding: 10px 18px;
+          position: relative;
+          transition: color 0.15s;
         }
-        .ds-tab:hover { color: #1C1917; }
-        .ds-tab.is-active {
+        .ds-section-tab:hover { color: #1C1917; }
+        .ds-section-tab.is-active {
           color: #1C1917;
-          background: white;
-          box-shadow: 0 2px 8px rgba(28,25,23,0.08);
+          font-weight: 700;
+        }
+        .ds-section-tab.is-active::after {
+          content: '';
+          position: absolute;
+          bottom: -1px;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: #2D6CDF;
+          border-radius: 2px 2px 0 0;
         }
         .ds-overview-col {
           display: flex;
@@ -1700,12 +1703,12 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           .ds-side { order: 2; }
         }
         @media (max-width: 930px) {
-          .ds-control-row { grid-template-columns: 1fr; }
           .ds-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .ds-settings { grid-template-columns: 1fr; }
         }
         @media (max-width: 760px) {
-          .ds-wrap { padding: 24px 14px 44px; }
+          .ds-wrap { padding: 16px 14px 44px; }
+          .ds-topnav { margin-bottom: 14px; }
           .ds-profile {
             flex-wrap: wrap;
             justify-content: center;
@@ -1721,8 +1724,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
             white-space: normal;
             overflow-wrap: anywhere;
           }
-          .ds-tabs { flex-wrap: wrap; }
-          .ds-tab { flex: 1 1 calc(50% - 6px); }
+          .ds-section-tabs { overflow-x: auto; }
           .ds-stats { grid-template-columns: 1fr; }
           .ds-usage-head { flex-wrap: wrap; }
           .ds-row {
@@ -1745,9 +1747,17 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
       `}</style>
 
       <div className="ds-wrap">
-        <button className="ds-back" onClick={onBack}>
-          <ChevronIcon size={14} dir="left" /> Back
-        </button>
+        {/* Top navigation bar */}
+        <nav className="ds-topnav">
+          <button className="ds-topnav-back" onClick={onBack} title="Back to extractor">
+            <ChevronIcon size={16} dir="left" />
+          </button>
+          {[['overview', 'Overview'], ['history', 'History'], ['settings', '⚙ Settings']].map(([key, label]) => (
+            <button key={key} className={`ds-topnav-tab ${tab === key ? 'is-active' : ''}`} onClick={() => setTab(key)}>
+              {label}
+            </button>
+          ))}
+        </nav>
 
         <div className="ds-grid">
           <main>
@@ -1763,18 +1773,14 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
               </div>
             </section>
 
-            <section className="ds-control-row">
-              <button className="ds-extract-btn" onClick={onBack}>
-                <span style={{ fontSize: 20, lineHeight: 1 }}>+</span> Extract new transcript
-              </button>
-              <div className="ds-card ds-tabs">
-                {[['overview', 'Overview'], ['history', 'History'], ['settings', 'Settings']].map(([key, label]) => (
-                  <button key={key} className={`ds-tab ${tab === key ? 'is-active' : ''}`} onClick={() => setTab(key)}>
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </section>
+            {/* Inline section tabs */}
+            <div className="ds-section-tabs">
+              {[['overview', 'Overview'], ['history', 'History'], ['settings', 'Settings']].map(([key, label]) => (
+                <button key={key} className={`ds-section-tab ${tab === key ? 'is-active' : ''}`} onClick={() => setTab(key)}>
+                  {label}
+                </button>
+              ))}
+            </div>
 
             {tab === 'overview' && (
               <div className="ds-overview-col">
