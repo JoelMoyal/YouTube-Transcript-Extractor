@@ -2567,10 +2567,15 @@ const App = () => {
     };
   };
 
+  const dlName = (ext) => {
+    const safe = (currentTitle || 'transcript').replace(/[/\\?%*:|"<>]/g, '-').trim().slice(0, 80);
+    return `ScribeSnap.ai - ${safe}.${ext}`;
+  };
+
   const downloadTxt = () => {
     const a = Object.assign(document.createElement('a'), {
       href: URL.createObjectURL(new Blob([transcript], { type: 'text/plain' })),
-      download: 'transcript.txt',
+      download: dlName('txt'),
     });
     a.click(); URL.revokeObjectURL(a.href); setShowDownloadMenu(false);
   };
@@ -2578,7 +2583,7 @@ const App = () => {
   const downloadPdf = () => {
     const doc = new jsPDF(); const m = 15; doc.setFontSize(12);
     doc.text(doc.splitTextToSize(transcript, doc.internal.pageSize.getWidth() - m * 2), m, m);
-    doc.save('transcript.pdf'); setShowDownloadMenu(false);
+    doc.save(dlName('pdf')); setShowDownloadMenu(false);
   };
 
   const copyToClipboard = () => {
@@ -2613,7 +2618,7 @@ const App = () => {
     }).join('\n');
     const a = Object.assign(document.createElement('a'), {
       href: URL.createObjectURL(new Blob([srt], { type: 'text/srt' })),
-      download: 'transcript.srt',
+      download: dlName('srt'),
     });
     a.click(); URL.revokeObjectURL(a.href);
   };
@@ -3233,26 +3238,27 @@ const App = () => {
                   const isActive = entry.id === currentVideoId;
                   return (
                     <button key={entry.id} onClick={() => loadFromHistory(entry)} style={{
-                      display: 'flex', alignItems: 'flex-start', gap: 9, padding: '8px 10px',
-                      borderRadius: 10, border: 'none', background: isActive ? P.accentLight : 'transparent',
+                      display: 'flex', alignItems: 'flex-start', gap: 11, padding: '10px 12px',
+                      borderRadius: 12, border: `1px solid ${isActive ? 'rgba(45,108,223,0.2)' : 'transparent'}`,
+                      background: isActive ? P.accentLight : 'transparent',
                       cursor: 'pointer', transition: 'background 0.1s', textAlign: 'left', width: '100%',
                     }}
-                      onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; }}
-                      onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                      onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; e.currentTarget.style.borderColor = P.border; } }}
+                      onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; } }}
                     >
                       <div style={{ position: 'relative', flexShrink: 0 }}>
                         {entry.thumbnail
-                          ? <img src={entry.thumbnail} alt="" style={{ width: 76, height: 48, objectFit: 'cover', borderRadius: 6, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
-                          : <div style={{ width: 76, height: 48, borderRadius: 6, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><YouTubeIcon /></div>
+                          ? <img src={entry.thumbnail} alt="" style={{ width: 96, height: 60, objectFit: 'cover', borderRadius: 8, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+                          : <div style={{ width: 96, height: 60, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><YouTubeIcon /></div>
                         }
                       </div>
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: 11.5, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.35, marginBottom: 3 }}>{hTitle}</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: P.muted }}>
+                      <div style={{ minWidth: 0, flex: 1, paddingTop: 2 }}>
+                        <div style={{ fontSize: 12.5, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.4, marginBottom: 5 }}>{hTitle}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: P.muted, marginBottom: 2 }}>
                           {entry.platform === 'vimeo' ? <VimeoIcon size={9} /> : <YouTubeIcon />}
-                          <span>{hChannel}</span>
+                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hChannel}</span>
                         </div>
-                        <div style={{ fontSize: 10, color: P.muted, marginTop: 1 }}>{timeAgo(entry.date)}</div>
+                        <div style={{ fontSize: 10.5, color: P.muted }}>{timeAgo(entry.date)}</div>
                       </div>
                     </button>
                   );
@@ -3281,13 +3287,6 @@ const App = () => {
               height: 56, padding: '0 16px',
               background: '#FFFFFF', borderBottom: `1px solid ${P.border}`,
             }}>
-              {/* Hamburger */}
-              <button style={{ border: 'none', background: 'none', cursor: 'pointer', padding: 6, borderRadius: 7, color: P.muted, display: 'flex', flexDirection: 'column', gap: 4, transition: 'background 0.1s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}>
-                {[0,1,2].map(i => <div key={i} style={{ width: 16, height: 1.5, background: 'currentColor', borderRadius: 1 }} />)}
-              </button>
-
               {/* Global tabs: Transcript | Chapters | Editor */}
               <div style={{ display: 'flex', gap: 3, marginLeft: 4 }}>
                 {[
@@ -3377,30 +3376,6 @@ const App = () => {
 
               {/* Transcript card */}
               <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRadius: 16, boxShadow: '0 2px 12px rgba(28,25,23,0.07)', border: `1px solid ${P.border}`, overflow: 'hidden' }}>
-
-                {/* Action pill buttons */}
-                <div style={{ flexShrink: 0, display: 'flex', gap: 7, padding: '10px 16px', borderBottom: `1px solid ${P.border}`, background: P.paper, flexWrap: 'wrap' }}>
-                  {[
-                    { label: summarizing ? 'Summarizing…' : 'Summarize', loading: summarizing, fn: summarize,
-                      icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
-                    { label: quotesLoading ? 'Extracting…' : 'Create Flash Cards', loading: quotesLoading, fn: extractQuotes,
-                      icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> },
-                    { label: chaptersLoading ? 'Detecting…' : 'Generate Study Guide', loading: chaptersLoading, fn: () => { detectChapters(); setActiveTab('chapters'); },
-                      icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> },
-                  ].map(btn => (
-                    <button key={btn.label} onClick={btn.loading ? undefined : btn.fn} style={{
-                      display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 999,
-                      border: `1px solid ${P.border}`, background: '#FFFFFF', cursor: btn.loading ? 'default' : 'pointer',
-                      fontSize: 12, fontWeight: 500, color: P.ink, transition: 'all 0.15s', opacity: btn.loading ? 0.7 : 1,
-                    }}
-                      onMouseEnter={e => { if (!btn.loading) { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.3)'; } }}
-                      onMouseLeave={e => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.border; }}
-                    >
-                      {btn.loading ? <SpinnerIcon size={11} /> : <span style={{ color: 'inherit' }}>{btn.icon}</span>}
-                      {btn.label}
-                    </button>
-                  ))}
-                </div>
 
                 {/* Transcript tab content */}
                 {activeTab === 'transcript' && (
@@ -3533,7 +3508,13 @@ const App = () => {
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   </div>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Insights</span>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: P.ink, flex: 1 }}>Insights</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <select value={lang} onChange={e => setLang(e.target.value)} style={{ border: `1px solid ${P.border}`, borderRadius: 6, background: P.paper, fontSize: 11, color: P.ink, padding: '3px 5px', outline: 'none', cursor: 'pointer' }}>
+                      {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+                    </select>
+                  </div>
                 </div>
 
                 {/* Insight rows */}
@@ -3544,12 +3525,12 @@ const App = () => {
                   { title: 'Flash Cards', sub: 'Key concepts as cards', color: P.warning, bg: 'rgba(180,83,9,0.1)',
                     icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
                     onClick: extractQuotes, active: quotes.length > 0, loading: quotesLoading },
-                  { title: 'Sentiment Analysis', sub: 'Overall · +/- Negative', color: P.success, bg: 'rgba(15,118,110,0.1)',
-                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>,
-                    onClick: summarize, active: false, loading: false },
-                  { title: 'Question Answers', sub: 'Q&A about transcript', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
-                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-                    onClick: () => { qaInputRef.current?.focus(); }, active: qaMessages.length > 0, loading: qaLoading },
+                  { title: 'Study Guide', sub: 'Chapters & structure', color: P.success, bg: 'rgba(15,118,110,0.1)',
+                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+                    onClick: () => { detectChapters(); setActiveTab('chapters'); }, active: chapters.length > 0, loading: chaptersLoading },
+                  { title: 'Ask AI', sub: 'Chat about this video', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
+                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="13" y2="14"/></svg>,
+                    onClick: () => { setTimeout(() => qaInputRef.current?.focus(), 50); qaInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, active: qaMessages.length > 0, loading: qaLoading },
                 ].map(item => (
                   <div key={item.title}
                     onClick={item.loading ? undefined : item.onClick}
