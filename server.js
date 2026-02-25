@@ -76,6 +76,43 @@ async function aiComplete(prompt) {
   throw new Error('No AI provider configured (GROQ_API_KEY or OPENROUTER_API_KEY required)');
 }
 
+const LANG_NAMES = { es:'Spanish', fr:'French', de:'German', it:'Italian', pt:'Portuguese', ru:'Russian', 'zh-Hans':'Chinese (Simplified)', 'zh-Hant':'Chinese (Traditional)', ja:'Japanese', ko:'Korean', ar:'Arabic', hi:'Hindi', tr:'Turkish', nl:'Dutch', pl:'Polish' };
+
+// Translate segments to targetLang using AI, in batches to stay within token limits
+async function translateSegments(segments, targetLang, send) {
+  if (targetLang === 'en' || !segments.length) return segments;
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY) return segments;
+  const langName = LANG_NAMES[targetLang] || targetLang;
+  send('progress', { stage: 'translate', message: `Translating to ${langName}…`, percent: 88 });
+  const BATCH = 60;
+  const out = [];
+  for (let i = 0; i < segments.length; i += BATCH) {
+    const batch = segments.slice(i, i + BATCH);
+    const texts = batch.map(s => s.text);
+    try {
+      const prompt = `Translate these ${texts.length} transcript segments to ${langName}. Return ONLY a valid JSON array of strings in the same order. No extra text, no markdown.\n\n${JSON.stringify(texts)}`;
+      let raw;
+      if (process.env.GROQ_API_KEY) {
+        const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+        const r = await groq.chat.completions.create({ model: 'llama-3.1-8b-instant', messages: [{ role: 'user', content: prompt }], max_tokens: 4096 });
+        raw = r.choices[0].message.content;
+      } else {
+        const r = await fetch('https://openrouter.ai/api/v1/chat/completions', { method: 'POST', headers: { 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'meta-llama/llama-3.1-8b-instruct:free', messages: [{ role: 'user', content: prompt }], max_tokens: 4096 }) });
+        const d = await r.json();
+        raw = d.choices[0].message.content;
+      }
+      const jsonMatch = raw.match(/\[[\s\S]*\]/);
+      const translated = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+      if (Array.isArray(translated) && translated.length === batch.length) {
+        out.push(...batch.map((s, j) => ({ ...s, text: String(translated[j] || s.text) })));
+        continue;
+      }
+    } catch {}
+    out.push(...batch); // keep originals on failure
+  }
+  return out;
+}
+
 const execFileAsync = promisify(execFile);
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -362,9 +399,10 @@ app.get('/api/transcript', async (req, res) => {
       );
       if (raw && raw.length > 0) {
         const seen = new Set();
-        const segments = raw
+        let segments = raw
           .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
           .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
+        segments = await translateSegments(segments, safeLang, send);
         const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
         send('done', { transcript, segments, source: 'subtitles' });
         res.end();
@@ -390,9 +428,10 @@ app.get('/api/transcript', async (req, res) => {
         }
         if (result && Array.isArray(result.content) && result.content.length > 0) {
           const seen = new Set();
-          const segments = result.content
+          let segments = result.content
             .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
             .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
+          segments = await translateSegments(segments, safeLang, send);
           const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
           send('done', { transcript, segments, source: 'subtitles' });
           res.end();
@@ -438,7 +477,9 @@ app.get('/api/transcript', async (req, res) => {
       const content = await fsPromises.readFile(subPath, 'utf-8');
       await fsPromises.unlink(subPath);
       const result = subFile.endsWith('.json3') ? parseJSON3(content) : parseVTT(content);
-      send('done', { transcript: result.transcript, segments: result.segments, source: 'subtitles' });
+      const translatedSegs = await translateSegments(result.segments, safeLang, send);
+      const translatedTxt = translatedSegs.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
+      send('done', { transcript: translatedTxt, segments: translatedSegs, source: 'subtitles' });
       res.end();
       return;
     }
@@ -470,9 +511,11 @@ app.get('/api/transcript', async (req, res) => {
       return;
     }
 
-    send('progress', { stage: 'whisper', message: 'Finalising transcript…', percent: 95 });
-    const { transcript, segments } = await whisperTranscribe(audioFile, safeLang);
-    send('done', { transcript, segments, source: 'whisper' });
+    send('progress', { stage: 'whisper', message: 'Finalising transcript…', percent: 90 });
+    const { transcript: rawTxt, segments: rawSegs } = await whisperTranscribe(audioFile, safeLang);
+    const translatedSegs = await translateSegments(rawSegs, safeLang, send);
+    const translatedTxt = translatedSegs.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
+    send('done', { transcript: translatedTxt || rawTxt, segments: translatedSegs, source: 'whisper' });
     res.end();
 
   } catch (error) {

@@ -2974,9 +2974,9 @@ const App = () => {
                   {/* Stage pills */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                     <div style={{ display: 'flex', gap: 5 }}>
-                      {['subtitles', 'audio', 'whisper'].map((s) => {
-                        const labels = { subtitles: 'Captions', audio: 'Audio', whisper: 'AI' };
-                        const order = ['subtitles', 'audio', 'whisper'];
+                      {['subtitles', 'audio', 'whisper', 'translate'].map((s) => {
+                        const labels = { subtitles: 'Captions', audio: 'Audio', whisper: 'AI', translate: 'Translate' };
+                        const order = ['subtitles', 'audio', 'whisper', 'translate'];
                         const isDone = loadingStage && order.indexOf(s) < order.indexOf(loadingStage);
                         const isActive = s === loadingStage;
                         return (
