@@ -3310,6 +3310,14 @@ const App = () => {
                         style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13, color: P.ink }} />
                       {search && matchCount > 0 && <span style={{ fontSize: 11, color: P.muted }}>{matchCount} match{matchCount !== 1 ? 'es' : ''}</span>}
                       {search && <button onClick={() => setSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
+                      {segments.length > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, borderLeft: `1px solid ${P.border}`, paddingLeft: 10, flexShrink: 0 }}>
+                          <span style={{ fontSize: 11, color: P.muted, whiteSpace: 'nowrap' }}>Timestamps</span>
+                          <div onClick={() => setShowTimestamps(v => !v)} style={{ width: 28, height: 16, borderRadius: 8, background: showTimestamps ? P.accent : P.border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+                            <div style={{ position: 'absolute', top: 2, left: showTimestamps ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                          </div>
+                        </div>
+                      )}
                     </div>
                     {/* Transcript list — 2-column grid: timestamp | text */}
                     <div style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF' }}>
@@ -3350,15 +3358,6 @@ const App = () => {
                       <span style={{ fontSize: 11, color: P.muted }}>Character Count: <strong style={{ color: P.ink }}>{charCount.toLocaleString()}</strong></span>
                       <span style={{ color: P.border }}>·</span>
                       <span style={{ fontSize: 11, color: P.muted }}>~<strong style={{ color: P.ink }}>{readingMins}</strong> min read</span>
-                      {/* Timestamps toggle in footer */}
-                      {segments.length > 0 && (
-                        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontSize: 11, color: P.muted }}>Timestamps</span>
-                          <div onClick={() => setShowTimestamps(v => !v)} style={{ width: 28, height: 16, borderRadius: 8, background: showTimestamps ? P.accent : P.border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s' }}>
-                            <div style={{ position: 'absolute', top: 2, left: showTimestamps ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
                 )}
@@ -3424,8 +3423,41 @@ const App = () => {
             {/* ── RIGHT SIDEBAR — col 3, row 2 ─────────────────────────────────── */}
             <div style={{ gridColumn: 3, gridRow: 2, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF' }}>
 
+              {/* Flash Cards section */}
+              <div style={{ padding: '12px 18px 10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: quotes.length > 0 ? 10 : 0 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(180,83,9,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={P.warning} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                  </div>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: P.ink, flex: 1 }}>Flash Cards</span>
+                  <button onClick={quotesLoading ? undefined : extractQuotes} style={{
+                    display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 20,
+                    border: `1px solid ${P.border}`, background: 'transparent', cursor: quotesLoading ? 'default' : 'pointer',
+                    fontSize: 11, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
+                  }}
+                    onMouseEnter={e => { if (!quotesLoading) { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.3)'; } }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}>
+                    {quotesLoading ? <SpinnerIcon size={10} /> : <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>}
+                    {quotesLoading ? 'Generating…' : quotes.length > 0 ? 'Regenerate' : 'Generate'}
+                  </button>
+                </div>
+                {quotes.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    {quotes.filter(q => !q.startsWith('Error:')).map((q, i) => (
+                      <div key={i} style={{ padding: '8px 10px 8px 12px', background: P.paper, borderRadius: 8, borderLeft: `3px solid ${P.warning}`, border: `1px solid ${P.border}`, borderLeftWidth: 3, borderLeftColor: P.warning }}>
+                        <div style={{ fontSize: 9, fontWeight: 700, color: P.warning, letterSpacing: '0.06em', marginBottom: 3, textTransform: 'uppercase' }}>Card {i + 1}</div>
+                        <div style={{ fontSize: 12.5, lineHeight: 1.6, color: P.ink }}>{q}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Divider */}
+              <div style={{ height: 1, background: P.border, margin: '0 18px' }} />
+
               {/* Insights card */}
-              <div style={{ padding: '18px 18px 12px' }}>
+              <div style={{ padding: '12px 18px 12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -3482,14 +3514,6 @@ const App = () => {
                   </div>
                 )}
 
-                {/* Key quotes if present */}
-                {quotes.length > 0 && (
-                  <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5, maxHeight: 150, overflowY: 'auto' }}>
-                    {quotes.slice(0, 3).map((q, i) => !q.startsWith('Error:') && (
-                      <div key={i} style={{ padding: '7px 10px 7px 12px', background: P.paper, borderRadius: 7, borderLeft: `2px solid ${P.warning}`, fontSize: 12, lineHeight: 1.6, color: P.ink, fontStyle: 'italic' }}>{q}</div>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Divider */}
