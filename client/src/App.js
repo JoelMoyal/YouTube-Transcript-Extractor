@@ -2572,7 +2572,7 @@ const App = () => {
 
         setTranscript(data.transcript);
         setSegments(data.segments || []);
-        setIsTranslated(data.translated || false);
+        setIsTranslated(false); // never show banner on initial load
         setTranscriptSource(data.source || '');
         setCurrentVideoId(videoId);
         setCurrentThumbnail(thumb);

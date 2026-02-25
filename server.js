@@ -409,31 +409,20 @@ app.get('/api/transcript', async (req, res) => {
     try {
       send('progress', { stage: 'subtitles', message: 'Fetching transcript…', percent: 15 });
       const { YoutubeTranscript } = require('youtube-transcript');
-      let raw = null;
-      let nativeInTargetLang = false;
-      // Try native captions in the requested language first
-      if (safeLang !== 'en') {
-        try {
-          const attempt = await YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang });
-          if (attempt && attempt.length > 0) { raw = attempt; nativeInTargetLang = true; }
-        } catch {}
-      }
-      // Fall back to any available captions (usually the video's native language)
-      if (!raw || raw.length === 0) {
-        raw = await YoutubeTranscript.fetchTranscript(videoId);
-      }
+      // Always fetch default captions (video's native language), then AI-translate if needed.
+      // We intentionally do NOT use { lang: safeLang } here because YouTube auto-translated
+      // captions exist for many languages and falsely make it look like native captions exist.
+      const raw = await YoutubeTranscript.fetchTranscript(videoId);
       if (raw && raw.length > 0) {
         const seen = new Set();
         let segments = raw
           .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
           .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
-        // Only translate if the captions aren't already in the target language
-        const needsTranslation = !nativeInTargetLang && safeLang !== 'en';
-        if (needsTranslation) {
+        if (safeLang !== 'en') {
           segments = await translateSegments(segments, safeLang, send);
         }
         const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-        send('done', { transcript, segments, source: 'subtitles', translated: needsTranslation });
+        send('done', { transcript, segments, source: 'subtitles', translated: safeLang !== 'en' });
         res.end();
         return;
       }
