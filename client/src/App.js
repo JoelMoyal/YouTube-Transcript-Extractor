@@ -195,6 +195,14 @@ function formatTime(seconds) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+function formatVideoDuration(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m} min ${s} sec`;
+}
+
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -3202,34 +3210,44 @@ const App = () => {
 
               {/* Video player card */}
               {currentVideoId && (
-                <div style={{ flexShrink: 0, background: '#000', borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}` }}>
-                  {/* Embedded player */}
-                  {currentPlatform === 'vimeo' ? (
-                    <iframe
-                      ref={playerRef}
-                      src={`https://player.vimeo.com/video/${currentVideoId}?api=1`}
-                      style={{ width: '100%', height: 196, border: 'none', display: 'block' }}
-                      allow="autoplay; fullscreen; picture-in-picture"
-                      allowFullScreen
-                      title="Video player"
-                    />
-                  ) : (
-                    <iframe
-                      ref={playerRef}
-                      src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&rel=0&modestbranding=1`}
-                      style={{ width: '100%', height: 196, border: 'none', display: 'block' }}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      title="Video player"
-                    />
-                  )}
+                <div style={{ flexShrink: 0, borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}` }}>
+                  {/* Responsive 16:9 wrapper — no black bars */}
+                  <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', background: '#000' }}>
+                    {currentPlatform === 'vimeo' ? (
+                      <iframe
+                        ref={playerRef}
+                        src={`https://player.vimeo.com/video/${currentVideoId}?api=1`}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: 'block' }}
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowFullScreen
+                        title="Video player"
+                      />
+                    ) : (
+                      <iframe
+                        ref={playerRef}
+                        src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&rel=0&modestbranding=1`}
+                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', display: 'block' }}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title="Video player"
+                      />
+                    )}
+                  </div>
                   {/* Slim meta bar */}
                   <div style={{ padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 10, background: '#FFFFFF' }}>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {currentTitle || currentChannel || currentVideoId}
                       </div>
-                      {currentChannel && <div style={{ fontSize: 11, color: P.muted, marginTop: 1 }}>{currentChannel}</div>}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
+                        {currentChannel && <span style={{ fontSize: 11, color: P.muted }}>{currentChannel}</span>}
+                        {segments.length > 0 && (
+                          <>
+                            {currentChannel && <span style={{ fontSize: 11, color: P.border }}>·</span>}
+                            <span style={{ fontSize: 11, color: P.muted }}>{formatVideoDuration(segments[segments.length - 1].seconds)}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                     <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                       <button onClick={copyToClipboard} style={{
