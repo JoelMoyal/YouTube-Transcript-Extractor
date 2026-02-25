@@ -3208,7 +3208,7 @@ const App = () => {
                     <iframe
                       ref={playerRef}
                       src={`https://player.vimeo.com/video/${currentVideoId}?api=1`}
-                      style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block' }}
+                      style={{ width: '100%', height: 196, border: 'none', display: 'block' }}
                       allow="autoplay; fullscreen; picture-in-picture"
                       allowFullScreen
                       title="Video player"
@@ -3217,7 +3217,7 @@ const App = () => {
                     <iframe
                       ref={playerRef}
                       src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&rel=0&modestbranding=1`}
-                      style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block' }}
+                      style={{ width: '100%', height: 196, border: 'none', display: 'block' }}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       title="Video player"
@@ -3257,31 +3257,6 @@ const App = () => {
 
               {/* Transcript card */}
               <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRadius: 16, boxShadow: '0 2px 12px rgba(28,25,23,0.07)', border: `1px solid ${P.border}`, overflow: 'hidden' }}>
-
-                {/* Local tabs + export toggle */}
-                <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', padding: '0 16px', borderBottom: `1px solid ${P.border}`, background: '#FFFFFF', gap: 2 }}>
-                  {[
-                    { key: 'transcript', label: 'Transcript' },
-                    { key: 'chapters', label: chapters.length > 0 ? `Chapters (${chapters.filter(c => !c.isError).length})` : 'Chapters' },
-                    { key: 'editor', label: 'Editor' },
-                  ].map(tab => (
-                    <button key={tab.key} onClick={() => { setActiveTab(tab.key); if (tab.key === 'chapters' && chapters.length === 0 && !chaptersLoading) detectChapters(); }} style={{
-                      padding: '12px 14px', border: 'none', background: 'transparent',
-                      color: activeTab === tab.key ? P.accent : P.muted,
-                      fontSize: 13, fontWeight: activeTab === tab.key ? 700 : 500, cursor: 'pointer', transition: 'all 0.15s',
-                      borderBottom: activeTab === tab.key ? `2px solid ${P.accent}` : '2px solid transparent', marginBottom: -1,
-                    }}>{tab.label}</button>
-                  ))}
-                  {/* Export toggle area */}
-                  <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-                    <span style={{ fontSize: 12, color: P.muted, fontWeight: 500 }}>Export</span>
-                    {/* Toggle switch */}
-                    <div onClick={() => setExportToggle(v => !v)} style={{ width: 32, height: 18, borderRadius: 9, background: exportToggle ? P.accent : P.border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
-                      <div style={{ position: 'absolute', top: 2, left: exportToggle ? 16 : 2, width: 14, height: 14, borderRadius: '50%', background: 'white', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-                    </div>
-                  </div>
-                </div>
 
                 {/* Action pill buttons */}
                 <div style={{ flexShrink: 0, display: 'flex', gap: 7, padding: '10px 16px', borderBottom: `1px solid ${P.border}`, background: P.paper, flexWrap: 'wrap' }}>
