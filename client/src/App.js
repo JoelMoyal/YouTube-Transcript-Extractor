@@ -3069,9 +3069,6 @@ const App = () => {
             }}>
               {/* Export header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '18px 16px 14px' }}>
-                <div style={{ width: 32, height: 32, background: '#FF0000', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                </div>
                 <span style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Export</span>
               </div>
 
@@ -3196,32 +3193,8 @@ const App = () => {
                 ))}
               </div>
 
-              {/* Right actions */}
-              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-                {/* Clock icon */}
-                <button style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, padding: 7, borderRadius: 8, display: 'flex', alignItems: 'center', transition: 'background 0.1s' }}
-                  onClick={() => setShowTimestamps(v => !v)} title={showTimestamps ? 'Hide timestamps' : 'Show timestamps'}
-                  onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = activeTab === 'transcript' ? P.accent : P.muted; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={showTimestamps ? P.accent : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                </button>
-                {/* Copy button */}
-                <button style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, padding: 7, borderRadius: 8, display: 'flex', alignItems: 'center', transition: 'background 0.1s' }}
-                  onClick={copyToClipboard}
-                  onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}>
-                  {copied ? <CheckIcon /> : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={copied ? P.success : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>}
-                </button>
-                {/* User avatar */}
-                <div style={{
-                  width: 30, height: 30, borderRadius: '50%',
-                  background: user ? P.accent : P.border,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 12, fontWeight: 700, color: 'white', flexShrink: 0, cursor: 'default',
-                }}>
-                  {user?.email?.charAt(0).toUpperCase() || <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
-                </div>
-              </div>
+              {/* Right actions — intentionally empty */}
+              <div style={{ marginLeft: 'auto' }} />
             </div>
 
             {/* ── CENTER — col 2, row 2 ─────────────────────────────────────────── */}
