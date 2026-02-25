@@ -2142,6 +2142,7 @@ const App = () => {
   const [loadingPercent, setLoadingPercent] = useState(0);
   const [loadingStage, setLoadingStage]   = useState('');
   const [langRefetching, setLangRefetching] = useState(false);
+  const [isTranslated, setIsTranslated]   = useState(false);
   const [error, setError]                 = useState('');
   const [copied, setCopied]               = useState(false);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
@@ -2485,7 +2486,7 @@ const App = () => {
   };
 
   const resetAll = () => {
-    setVideoUrl(''); setTranscript(''); setSegments([]);
+    setVideoUrl(''); setTranscript(''); setSegments([]); setIsTranslated(false);
     setTranscriptSource(''); setCurrentVideoId(null); setCurrentPlatform('youtube'); setCurrentThumbnail(null); setError(''); setSearch('');
     setSummary(''); setShowTimestamps(true); setShowQA(false);
     setQaQuestion(''); setQaMessages([]);
@@ -2571,6 +2572,7 @@ const App = () => {
 
         setTranscript(data.transcript);
         setSegments(data.segments || []);
+        setIsTranslated(data.translated || false);
         setTranscriptSource(data.source || '');
         setCurrentVideoId(videoId);
         setCurrentThumbnail(thumb);
@@ -2627,6 +2629,7 @@ const App = () => {
         const segs = (data.segments || []).filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
         setSegments(segs);
         setTranscript(data.transcript || segs.map(s => s.text).join(' '));
+        setIsTranslated(data.translated || false);
         setSelectedSegment(null); setPlayingSegment(null); playingSegmentRef.current = null;
       } catch {}
       setLangRefetching(false);
@@ -3502,7 +3505,7 @@ const App = () => {
                       )}
                     </div>
                     {/* Translation notice */}
-                    {lang !== 'en' && segments.length > 0 && !langRefetching && (
+                    {isTranslated && segments.length > 0 && !langRefetching && (
                       <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, padding: '5px 14px', background: 'rgba(45,108,223,0.05)', borderBottom: `1px solid rgba(45,108,223,0.13)` }}>
                         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
                         <span style={{ fontSize: 11, color: P.accent, fontWeight: 500 }}>AI translated to {LANGUAGES.find(l => l.code === lang)?.label}</span>

@@ -409,17 +409,31 @@ app.get('/api/transcript', async (req, res) => {
     try {
       send('progress', { stage: 'subtitles', message: 'Fetching transcript…', percent: 15 });
       const { YoutubeTranscript } = require('youtube-transcript');
-      const raw = await YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang }).catch(() =>
-        YoutubeTranscript.fetchTranscript(videoId)
-      );
+      let raw = null;
+      let nativeInTargetLang = false;
+      // Try native captions in the requested language first
+      if (safeLang !== 'en') {
+        try {
+          const attempt = await YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang });
+          if (attempt && attempt.length > 0) { raw = attempt; nativeInTargetLang = true; }
+        } catch {}
+      }
+      // Fall back to any available captions (usually the video's native language)
+      if (!raw || raw.length === 0) {
+        raw = await YoutubeTranscript.fetchTranscript(videoId);
+      }
       if (raw && raw.length > 0) {
         const seen = new Set();
         let segments = raw
           .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
           .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
-        segments = await translateSegments(segments, safeLang, send);
+        // Only translate if the captions aren't already in the target language
+        const needsTranslation = !nativeInTargetLang && safeLang !== 'en';
+        if (needsTranslation) {
+          segments = await translateSegments(segments, safeLang, send);
+        }
         const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-        send('done', { transcript, segments, source: 'subtitles' });
+        send('done', { transcript, segments, source: 'subtitles', translated: needsTranslation });
         res.end();
         return;
       }
@@ -448,7 +462,7 @@ app.get('/api/transcript', async (req, res) => {
             .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
           segments = await translateSegments(segments, safeLang, send);
           const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-          send('done', { transcript, segments, source: 'subtitles' });
+          send('done', { transcript, segments, source: 'subtitles', translated: safeLang !== 'en' });
           res.end();
           return;
         }
@@ -492,9 +506,13 @@ app.get('/api/transcript', async (req, res) => {
       const content = await fsPromises.readFile(subPath, 'utf-8');
       await fsPromises.unlink(subPath);
       const result = subFile.endsWith('.json3') ? parseJSON3(content) : parseVTT(content);
-      const translatedSegs = await translateSegments(result.segments, safeLang, send);
+      // Check if yt-dlp found subs in the target language (filename contains lang code)
+      const subIsNative = safeLang !== 'en' && (subFile.includes(`.${safeLang}.`) || subFile.includes(`.${safeLang}-`));
+      const subNeedsTranslation = !subIsNative && safeLang !== 'en';
+      let translatedSegs = result.segments;
+      if (subNeedsTranslation) translatedSegs = await translateSegments(result.segments, safeLang, send);
       const translatedTxt = translatedSegs.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-      send('done', { transcript: translatedTxt, segments: translatedSegs, source: 'subtitles' });
+      send('done', { transcript: translatedTxt, segments: translatedSegs, source: 'subtitles', translated: subNeedsTranslation });
       res.end();
       return;
     }
@@ -530,7 +548,7 @@ app.get('/api/transcript', async (req, res) => {
     const { transcript: rawTxt, segments: rawSegs } = await whisperTranscribe(audioFile, safeLang);
     const translatedSegs = await translateSegments(rawSegs, safeLang, send);
     const translatedTxt = translatedSegs.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-    send('done', { transcript: translatedTxt || rawTxt, segments: translatedSegs, source: 'whisper' });
+    send('done', { transcript: translatedTxt || rawTxt, segments: translatedSegs, source: 'whisper', translated: safeLang !== 'en' });
     res.end();
 
   } catch (error) {
