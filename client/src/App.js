@@ -883,12 +883,46 @@ const PasswordResetModal = ({ onClose }) => {
 };
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript, onChangePassword, lang, setLang }) => {
+const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLoadTranscript, onChangePassword, lang, setLang }) => {
   const [tab, setTab] = React.useState('overview');
   const [passwordResetState, setPasswordResetState] = React.useState({ type: 'idle', message: '' });
   const [prefLangSaved, setPrefLangSaved] = React.useState(false);
   const [copyLinkDone, setCopyLinkDone] = React.useState(false);
   const [copyRefDone, setCopyRefDone] = React.useState(false);
+
+  // Profile editing
+  const [editingName, setEditingName] = React.useState(false);
+  const [nameInput, setNameInput] = React.useState(
+    user.user_metadata?.username || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || ''
+  );
+  const [nameSaving, setNameSaving] = React.useState(false);
+  const [nameSaved, setNameSaved] = React.useState(false);
+  const [nameError, setNameError] = React.useState('');
+
+  // Inline password change (multi-step)
+  const [pwStep, setPwStep] = React.useState('idle'); // idle | form | confirm | loading | success | error
+  const [pwCurrent, setPwCurrent] = React.useState('');
+  const [pwNew, setPwNew] = React.useState('');
+  const [pwConfirm, setPwConfirm] = React.useState('');
+  const [pwError, setPwError] = React.useState('');
+
+  // Confirmations
+  const [signOutConfirm, setSignOutConfirm] = React.useState(false);
+  const [clearConfirm, setClearConfirm] = React.useState(false);
+  const [clearDone, setClearDone] = React.useState(false);
+
+  // Extra preferences
+  const prefKey = (k) => user ? `yte_pref_${k}_${user.id}` : `yte_pref_${k}`;
+  const [prefTimestamps, setPrefTimestamps] = React.useState(() => {
+    try { return localStorage.getItem(prefKey('timestamps')) !== 'false'; } catch { return true; }
+  });
+  const [prefAutoCopy, setPrefAutoCopy] = React.useState(() => {
+    try { return localStorage.getItem(prefKey('autocopy')) === 'true'; } catch { return false; }
+  });
+  const [prefFormat, setPrefFormat] = React.useState(() => {
+    try { return localStorage.getItem(prefKey('format')) || 'plain'; } catch { return 'plain'; }
+  });
+
   const refLink = `${window.location.origin}?ref=${user.id}`;
   const copyRefLink = () => {
     navigator.clipboard.writeText(refLink).then(() => {
@@ -959,6 +993,69 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         message: err?.message || 'Could not send reset email right now. Please try again.',
       });
     }
+  };
+
+  // Save display name via Supabase
+  const saveDisplayName = async () => {
+    if (!nameInput.trim()) return;
+    setNameSaving(true);
+    setNameError('');
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { username: nameInput.trim(), full_name: nameInput.trim() },
+      });
+      if (error) { setNameError(error.message); return; }
+      setEditingName(false);
+      setNameSaved(true);
+      setTimeout(() => setNameSaved(false), 3000);
+    } catch (e) {
+      setNameError(e.message || 'Failed to save name.');
+    } finally {
+      setNameSaving(false);
+    }
+  };
+
+  // Inline password change
+  const handlePasswordChange = async () => {
+    if (pwNew !== pwConfirm) { setPwError('New passwords do not match.'); return; }
+    if (pwNew.length < 6) { setPwError('Password must be at least 6 characters.'); return; }
+    setPwStep('loading');
+    setPwError('');
+    try {
+      // Re-authenticate to verify current password
+      const { error: reAuthErr } = await supabase.auth.signInWithPassword({ email: user.email, password: pwCurrent });
+      if (reAuthErr) { setPwError('Current password is incorrect.'); setPwStep('confirm'); return; }
+      const { error: updateErr } = await supabase.auth.updateUser({ password: pwNew });
+      if (updateErr) { setPwError(updateErr.message); setPwStep('confirm'); return; }
+      setPwStep('success');
+      setTimeout(() => { setPwStep('idle'); setPwCurrent(''); setPwNew(''); setPwConfirm(''); setPwError(''); }, 3000);
+    } catch (e) {
+      setPwError(e.message || 'Failed to update password.');
+      setPwStep('confirm');
+    }
+  };
+
+  // Clear history
+  const handleClearHistory = () => {
+    const key = user ? `yte_history_${user.id}` : 'yte_history';
+    localStorage.removeItem(key);
+    if (setHistory) setHistory([]);
+    setClearDone(true);
+    setTimeout(() => { setClearConfirm(false); setClearDone(false); }, 2000);
+  };
+
+  // Export history as JSON
+  const exportHistory = () => {
+    const data = JSON.stringify(history, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `scribesnap-history-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const weekSegments = Array.from({ length: 7 }, (_, i) => i);
@@ -1716,6 +1813,69 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           background: rgba(180,35,24,0.08);
           border-color: rgba(180,35,24,0.24);
         }
+        /* ── Settings extras ── */
+        .ds-settings-input {
+          width: 100%; padding: 7px 10px; border-radius: 8px;
+          border: 1px solid #E7E1D8; background: #F6F3EE;
+          font-size: 13px; color: #1C1917; outline: none;
+          transition: border-color 0.15s; font-family: inherit; box-sizing: border-box;
+        }
+        .ds-settings-input:focus { border-color: rgba(45,108,223,0.5); }
+        .ds-settings-form { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .ds-settings-form-label { font-size: 11px; font-weight: 600; color: #6B645C; margin-bottom: 3px; display: block; }
+        .ds-settings-row-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+        .ds-settings-edit-btn {
+          padding: 4px 10px; border-radius: 6px; border: 1px solid #E7E1D8;
+          background: white; font-size: 12px; font-weight: 600; color: #6B645C;
+          cursor: pointer; transition: all 0.15s; white-space: nowrap;
+        }
+        .ds-settings-edit-btn:hover { border-color: rgba(45,108,223,0.3); color: #2D6CDF; }
+        .ds-settings-save-btn {
+          padding: 4px 10px; border-radius: 6px; border: none;
+          background: #2D6CDF; font-size: 12px; font-weight: 600;
+          color: white; cursor: pointer; transition: background 0.15s; white-space: nowrap;
+        }
+        .ds-settings-save-btn:hover { background: #2459B8; }
+        .ds-settings-save-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+        .ds-settings-cancel-btn {
+          padding: 4px 10px; border-radius: 6px; border: 1px solid #E7E1D8;
+          background: white; font-size: 12px; font-weight: 600;
+          color: #6B645C; cursor: pointer; white-space: nowrap;
+        }
+        .ds-settings-confirm-box {
+          margin-top: 8px; padding: 12px 14px; border-radius: 10px;
+          background: rgba(180,35,24,0.05); border: 1px solid rgba(180,35,24,0.18);
+        }
+        .ds-settings-confirm-box.neutral {
+          background: rgba(45,108,223,0.05); border-color: rgba(45,108,223,0.18);
+        }
+        .ds-settings-confirm-text { font-size: 13px; color: #1C1917; margin: 0 0 10px; line-height: 1.4; }
+        .ds-settings-confirm-row { display: flex; gap: 8px; }
+        /* Toggle switch */
+        .ds-toggle-wrap { display: flex; align-items: center; gap: 8px; }
+        .ds-toggle {
+          position: relative; width: 36px; height: 20px; flex-shrink: 0;
+          display: inline-block; cursor: pointer;
+        }
+        .ds-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+        .ds-toggle-track {
+          position: absolute; inset: 0; border-radius: 20px;
+          background: #D5CFC7; transition: background 0.2s; cursor: pointer;
+        }
+        .ds-toggle input:checked ~ .ds-toggle-track { background: #2D6CDF; }
+        .ds-toggle-track::after {
+          content: ''; position: absolute; width: 14px; height: 14px;
+          border-radius: 50%; background: white; top: 3px; left: 3px;
+          transition: transform 0.2s;
+        }
+        .ds-toggle input:checked ~ .ds-toggle-track::after { transform: translateX(16px); }
+        .ds-settings-feedback {
+          margin-top: 6px; border-radius: 8px; padding: 8px 11px;
+          font-size: 12px; line-height: 1.45; border: 1px solid transparent;
+        }
+        .ds-settings-feedback.success { color: #0F766E; background: rgba(15,118,110,0.09); border-color: rgba(15,118,110,0.24); }
+        .ds-settings-feedback.error { color: #B42318; background: rgba(180,35,24,0.07); border-color: rgba(180,35,24,0.22); }
+        .ds-settings-feedback.loading { color: #2D6CDF; background: rgba(45,108,223,0.07); border-color: rgba(45,108,223,0.2); }
         @media (max-width: 1130px) {
           .ds-grid { grid-template-columns: 1fr; }
           .ds-side { order: 2; }
@@ -3818,16 +3978,21 @@ const App = () => {
                 </div>
 
                 {/* Composer — at the TOP, below header */}
-                <div style={{ padding: '10px 18px 10px', borderBottom: `1px solid ${P.border}` }}>
+                <div style={{
+                  padding: '12px 16px 11px',
+                  borderBottom: `1px solid ${P.border}`,
+                  background: 'linear-gradient(180deg, rgba(45,108,223,0.04) 0%, transparent 100%)',
+                }}>
                   <div
                     data-composer="true"
                     style={{
                       display: 'flex', alignItems: 'center',
-                      background: P.surface,
+                      background: '#fff',
                       border: `1.5px solid ${P.border}`,
-                      borderRadius: 13,
-                      padding: '4px 4px 4px 14px',
+                      borderRadius: 14,
+                      padding: '6px 6px 6px 16px',
                       transition: 'border-color 0.2s, box-shadow 0.2s',
+                      boxShadow: '0 1px 4px rgba(28,25,23,0.06)',
                     }}
                     onClick={() => qaInputRef.current?.focus()}
                   >
@@ -3838,30 +4003,30 @@ const App = () => {
                       onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
                       placeholder={qaMessages.length === 0 ? 'Ask anything about this video…' : 'Ask a follow-up…'}
                       disabled={qaLoading}
-                      style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13, color: P.ink, padding: '5px 0' }}
+                      style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, color: P.ink, padding: '4px 0' }}
                       onFocus={e => {
                         const w = e.currentTarget.closest('[data-composer]');
-                        if (w) { w.style.borderColor = P.accent; w.style.boxShadow = '0 0 0 3px rgba(45,108,223,0.1)'; }
+                        if (w) { w.style.borderColor = P.accent; w.style.boxShadow = '0 0 0 3px rgba(45,108,223,0.12)'; }
                       }}
                       onBlur={e => {
                         const w = e.currentTarget.closest('[data-composer]');
-                        if (w) { w.style.borderColor = P.border; w.style.boxShadow = 'none'; }
+                        if (w) { w.style.borderColor = P.border; w.style.boxShadow = '0 1px 4px rgba(28,25,23,0.06)'; }
                       }}
                     />
                     <button
                       onClick={e => { e.stopPropagation(); askQuestion(); }}
                       disabled={!qaQuestion.trim() || qaLoading}
                       style={{
-                        flexShrink: 0, width: 36, height: 36,
+                        flexShrink: 0, width: 38, height: 38,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         borderRadius: 10, border: 'none',
                         background: qaQuestion.trim() && !qaLoading
                           ? 'linear-gradient(135deg, #5ba4f5 0%, #2D6CDF 100%)'
-                          : 'transparent',
+                          : 'rgba(28,25,23,0.05)',
                         color: qaQuestion.trim() && !qaLoading ? 'white' : P.muted,
                         cursor: qaQuestion.trim() && !qaLoading ? 'pointer' : 'default',
                         transition: 'all 0.2s',
-                        boxShadow: qaQuestion.trim() && !qaLoading ? '0 2px 8px rgba(45,108,223,0.28)' : 'none',
+                        boxShadow: qaQuestion.trim() && !qaLoading ? '0 2px 8px rgba(45,108,223,0.3)' : 'none',
                       }}
                       onMouseEnter={e => {
                         if (qaQuestion.trim() && !qaLoading) {
@@ -3872,7 +4037,7 @@ const App = () => {
                       onMouseLeave={e => {
                         if (qaQuestion.trim() && !qaLoading) {
                           e.currentTarget.style.background = 'linear-gradient(135deg, #5ba4f5 0%, #2D6CDF 100%)';
-                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(45,108,223,0.28)';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(45,108,223,0.3)';
                         }
                       }}
                     >
@@ -3887,23 +4052,43 @@ const App = () => {
                   )}
                 </div>
 
-                {/* Empty state — suggestion list */}
+                {/* Empty state — intentional, not a bug */}
                 {qaMessages.length === 0 && (
-                  <div style={{ padding: '12px 18px 10px', flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    {DEMO_CHIPS.map(chip => (
-                      <button key={chip} onClick={() => askQuestion(chip)} style={{
-                        display: 'flex', alignItems: 'center', gap: 10,
-                        padding: '9px 13px', borderRadius: 9, border: `1px solid ${P.border}`,
-                        background: P.paper, fontSize: 12.5, color: P.ink,
-                        cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left', width: '100%',
-                      }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
-                      >
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.4 }}><polyline points="9 18 15 12 9 6"/></svg>
-                        {chip}
-                      </button>
-                    ))}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px 18px 16px', background: 'linear-gradient(180deg, rgba(45,108,223,0.025) 0%, transparent 50%)' }}>
+                    {/* Hero */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginBottom: 20, paddingTop: 4 }}>
+                      <div style={{
+                        width: 54, height: 54, borderRadius: 17,
+                        background: 'linear-gradient(135deg, rgba(45,108,223,0.14) 0%, rgba(45,108,223,0.05) 100%)',
+                        border: '1.5px solid rgba(45,108,223,0.2)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 4px 16px rgba(45,108,223,0.1)',
+                      }}>
+                        <img src="/scribesnap_icon_wave.svg" alt="" style={{ width: 32, height: 32 }} />
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: P.ink, marginBottom: 3 }}>Ask anything</div>
+                        <div style={{ fontSize: 11.5, color: P.muted, lineHeight: 1.4 }}>Questions answered from the video transcript</div>
+                      </div>
+                    </div>
+                    {/* Suggestions */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {DEMO_CHIPS.map(chip => (
+                        <button key={chip} onClick={() => askQuestion(chip)} style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '10px 14px', borderRadius: 10, border: `1px solid ${P.border}`,
+                          background: '#fff', fontSize: 12.5, color: P.ink,
+                          cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left', width: '100%',
+                          boxShadow: '0 1px 3px rgba(28,25,23,0.04)',
+                        }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.boxShadow = '0 2px 8px rgba(45,108,223,0.1)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = P.ink; e.currentTarget.style.boxShadow = '0 1px 3px rgba(28,25,23,0.04)'; }}
+                        >
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.35 }}><polyline points="9 18 15 12 9 6"/></svg>
+                          {chip}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
@@ -3968,39 +4153,42 @@ const App = () => {
               <div style={{ height: 1, background: P.border, margin: '0 18px' }} />
 
               {/* Insights card — below chat */}
-              <div style={{ padding: '10px 18px 12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <div style={{ padding: '14px 18px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   </div>
                   <span style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Insights</span>
                 </div>
 
                 {[
                   { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(45,108,223,0.1)',
-                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+                    icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
                     onClick: summarize, active: !!summary, loading: summarizing },
                   { title: 'Flash Cards', sub: 'Key concepts as cards', color: P.warning, bg: 'rgba(180,83,9,0.1)',
-                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+                    icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
                     onClick: extractQuotes, active: quotes.length > 0, loading: quotesLoading },
                   { title: 'Study Guide', sub: 'Chapters & structure', color: P.success, bg: 'rgba(15,118,110,0.1)',
-                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+                    icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
                     onClick: () => { detectChapters(); setActiveTab('chapters'); }, active: chapters.length > 0, loading: chaptersLoading },
                 ].map(item => (
                   <div key={item.title}
                     onClick={item.loading ? undefined : item.onClick}
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 8px', borderRadius: 10, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 2 }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 10px', borderRadius: 11, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 3 }}
                     onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                   >
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: item.active ? item.bg : (item.bg.replace('0.1', '0.07')), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color, transition: 'background 0.15s' }}>
-                      {item.loading ? <SpinnerIcon size={12} /> : item.icon}
+                    <div style={{ width: 42, height: 42, borderRadius: 12, background: item.active ? item.bg : (item.bg.replace('0.1', '0.07')), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color, transition: 'background 0.15s' }}>
+                      {item.loading ? <SpinnerIcon size={14} /> : item.icon}
                     </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: item.active ? item.color : P.ink }}>{item.title}</div>
-                      <div style={{ fontSize: 11, color: P.muted }}>{item.sub}</div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: 13.5, fontWeight: 600, color: item.active ? item.color : P.ink }}>{item.title}</div>
+                      <div style={{ fontSize: 11.5, color: P.muted, marginTop: 1 }}>{item.sub}</div>
                     </div>
-                    {item.active && <div style={{ marginLeft: 'auto', width: 7, height: 7, borderRadius: '50%', background: item.color, flexShrink: 0 }} />}
+                    {item.active
+                      ? <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
+                      : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.4 }}><polyline points="9 18 15 12 9 6"/></svg>
+                    }
                   </div>
                 ))}
 
