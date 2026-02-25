@@ -3501,6 +3501,14 @@ const App = () => {
                         </div>
                       )}
                     </div>
+                    {/* Translation notice */}
+                    {lang !== 'en' && segments.length > 0 && !langRefetching && (
+                      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 7, padding: '5px 14px', background: 'rgba(45,108,223,0.05)', borderBottom: `1px solid rgba(45,108,223,0.13)` }}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+                        <span style={{ fontSize: 11, color: P.accent, fontWeight: 500 }}>AI translated to {LANGUAGES.find(l => l.code === lang)?.label}</span>
+                        <span style={{ fontSize: 11, color: P.muted }}>· not the original video language</span>
+                      </div>
+                    )}
                     {/* Transcript list — 2-column grid: timestamp | text */}
                     <div ref={transcriptListRef} style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF', position: 'relative' }}>
                       {langRefetching && (
