@@ -3423,7 +3423,7 @@ const App = () => {
                           >
                             <button
                               onClick={e => { e.stopPropagation(); seekToTime(seg.seconds); setSelectedSegment(i); }}
-                              style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '10px 6px 10px 0', background: 'none', border: 'none', cursor: 'pointer', color: selectedSegment === i ? P.accent : '#999', fontWeight: 600, fontSize: 10.5, fontFamily: 'monospace', flexShrink: 0 }}>
+                              style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '10px 6px 10px 0', background: 'none', border: 'none', cursor: 'pointer', color: selectedSegment === i ? P.accent : playingSegment === i ? '#5B9BD5' : '#999', fontWeight: playingSegment === i ? 700 : 600, fontSize: 10.5, fontFamily: 'monospace', flexShrink: 0 }}>
                               {formatTime(seg.seconds)}
                             </button>
                             <div style={{ padding: '10px 14px 10px 8px', fontSize: 13.5, lineHeight: 1.7, color: selectedSegment === i ? P.ink : P.ink, fontWeight: selectedSegment === i ? 500 : 400 }}>
