@@ -899,8 +899,6 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
   const daysLeft = Math.max(0, Math.ceil((resetAt - Date.now()) / 86400000));
   const pct = Math.min(100, (used / tierMax) * 100);
   const remaining = Math.max(0, tierMax - used);
-  const ytCount = history.filter(h => (h.platform || 'youtube') === 'youtube').length;
-  const viCount = history.filter(h => h.platform === 'vimeo').length;
   const memberSince = user.created_at
     ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : '—';
@@ -954,51 +952,6 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
       });
     }
   };
-
-  const statCards = [
-    {
-      key: 'credits',
-      icon: (
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-        </svg>
-      ),
-      value: `${used} / ${tierMax}`,
-      label: 'Credits Used',
-      sub: `Resets in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`,
-      className: 'ds-stat-primary',
-    },
-    {
-      key: 'total',
-      icon: (
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="4" y="3" width="16" height="18" rx="2"/>
-          <line x1="8" y1="8" x2="16" y2="8"/>
-          <line x1="8" y1="12" x2="16" y2="12"/>
-        </svg>
-      ),
-      value: history.length,
-      label: 'Total Transcripts',
-      sub: 'All time',
-      className: 'ds-stat-neutral',
-    },
-    {
-      key: 'yt',
-      icon: <YouTubeIcon size={14} />,
-      value: ytCount,
-      label: 'YouTube Videos',
-      sub: 'Connected',
-      className: 'ds-stat-youtube',
-    },
-    {
-      key: 'vimeo',
-      icon: <VimeoIcon size={14} />,
-      value: viCount,
-      label: 'Vimeo Videos',
-      sub: 'Connected',
-      className: 'ds-stat-vimeo',
-    },
-  ];
 
   const weekSegments = Array.from({ length: 7 }, (_, i) => i);
   const activeDay = Math.min(6, Math.round((pct / 100) * 6));
@@ -1143,39 +1096,36 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           color: #1C1917;
           font-weight: 700;
         }
-        /* ── Section tabs (inside left column, below profile) ── */
+        /* ── Section tabs (white card, blue active) ── */
         .ds-section-tabs {
           display: flex;
           align-items: center;
-          gap: 0;
-          margin-bottom: 16px;
-          border-bottom: 1px solid #E7E1D8;
+          gap: 4px;
+          padding: 5px;
+          margin-bottom: 14px;
+          background: #FFFEFC;
+          border: 1px solid #E7E1D8;
+          border-radius: 18px;
+          box-shadow: 0 2px 12px rgba(28,25,23,0.06);
         }
         .ds-section-tab {
+          flex: 1;
           border: none;
-          background: none;
+          border-radius: 12px;
+          padding: 10px;
+          background: transparent;
           color: #6B645C;
           font-size: 15px;
           font-weight: 500;
           cursor: pointer;
-          padding: 10px 18px;
-          position: relative;
-          transition: color 0.15s;
+          transition: all 0.15s;
+          text-align: center;
         }
         .ds-section-tab:hover { color: #1C1917; }
         .ds-section-tab.is-active {
-          color: #1C1917;
+          color: #2D6CDF;
           font-weight: 700;
-        }
-        .ds-section-tab.is-active::after {
-          content: '';
-          position: absolute;
-          bottom: -1px;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background: #2D6CDF;
-          border-radius: 2px 2px 0 0;
+          background: rgba(45,108,223,0.07);
         }
         .ds-overview-col {
           display: flex;
@@ -1456,10 +1406,12 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           gap: 14px;
         }
         /* ── Continue where you left off ── */
-        .ds-continue { padding: 18px; }
+        .ds-continue { padding: 0; overflow: hidden; }
+        .ds-continue-header { padding: 16px 16px 0; }
+        .ds-continue-body { padding: 12px 16px 16px; }
         .ds-side-title {
           margin: 0 0 4px;
-          font-size: 17px;
+          font-size: 16px;
           line-height: 1.2;
           color: #1C1917;
           font-weight: 700;
@@ -1469,10 +1421,9 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           position: relative;
           width: 100%;
           aspect-ratio: 16/9;
-          border-radius: 12px;
           overflow: hidden;
           background: rgba(45,108,223,0.08);
-          margin: 12px 0 10px;
+          margin: 10px 0 0;
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -1484,10 +1435,10 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
         .ds-continue-play {
           position: absolute; inset: 0;
           display: flex; align-items: center; justify-content: center;
-          background: rgba(0,0,0,0.28);
+          background: rgba(0,0,0,0.22);
           transition: background 0.15s;
         }
-        .ds-continue-thumb:hover .ds-continue-play { background: rgba(0,0,0,0.45); }
+        .ds-continue-thumb:hover .ds-continue-play { background: rgba(0,0,0,0.4); }
         .ds-continue-play-icon {
           width: 46px; height: 46px;
           background: rgba(255,255,255,0.92);
@@ -1515,8 +1466,8 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           width: 100%;
           border: none;
           border-radius: 10px;
-          background: #2D6CDF;
-          color: white;
+          background: rgba(45,108,223,0.15);
+          color: #2D6CDF;
           font-size: 15px;
           font-weight: 700;
           padding: 10px 12px;
@@ -1524,7 +1475,7 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
           transition: background 0.15s, transform 0.15s;
           margin-bottom: 8px;
         }
-        .ds-continue-open-btn:hover { background: #2459B8; transform: translateY(-1px); }
+        .ds-continue-open-btn:hover { background: rgba(45,108,223,0.24); transform: translateY(-1px); }
         .ds-continue-quick {
           display: flex;
           gap: 6px;
@@ -1784,17 +1735,6 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
 
             {tab === 'overview' && (
               <div className="ds-overview-col">
-                <section className="ds-stats">
-                  {statCards.map(stat => (
-                    <article key={stat.key} className={`ds-stat ${stat.className}`}>
-                      <div className="ds-stat-head">{stat.icon}</div>
-                      <p className="ds-stat-value">{stat.value}</p>
-                      <p className="ds-stat-label">{stat.label}</p>
-                      <p className="ds-stat-sub">{stat.sub}</p>
-                    </article>
-                  ))}
-                </section>
-
                 <section className="ds-card ds-usage">
                   <div className="ds-usage-head">
                     <h2 className="ds-usage-title">Weekly usage</h2>
@@ -2001,7 +1941,9 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
             <aside className="ds-side">
               {/* ── Continue where you left off ── */}
               <section className="ds-card ds-continue">
-                <h2 className="ds-side-title">Continue where you left off</h2>
+                <div className="ds-continue-header">
+                  <h2 className="ds-side-title">Continue where you left off</h2>
+                </div>
                 {latest ? (
                   <>
                     <div className="ds-continue-thumb" onClick={() => openTranscript(latest)}>
@@ -2020,18 +1962,20 @@ const Dashboard = ({ user, credits, history, onBack, onSignOut, onLoadTranscript
                         </div>
                       </div>
                     </div>
-                    <p className="ds-continue-video-title">{latest.title || latest.id}</p>
-                    <p className="ds-continue-meta">
-                      {latest.platform === 'vimeo' ? <VimeoIcon size={12} /> : <YouTubeIcon size={12} />}
-                      {latest.channel || (latest.platform === 'vimeo' ? 'Vimeo' : 'YouTube')}
-                      {latestWc > 0 && <span style={{ color: '#C0BAB3' }}>·</span>}
-                      {latestWc > 0 && `${latestWc.toLocaleString()} words`}
-                    </p>
-                    <button className="ds-continue-open-btn" onClick={() => openTranscript(latest)}>Open</button>
-                    <div className="ds-continue-quick">
-                      <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Summarize</button>
-                      <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Flashcards</button>
-                      <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Study guide</button>
+                    <div className="ds-continue-body">
+                      <p className="ds-continue-video-title">{latest.title || latest.id}</p>
+                      <p className="ds-continue-meta">
+                        {latest.platform === 'vimeo' ? <VimeoIcon size={12} /> : <YouTubeIcon size={12} />}
+                        {latest.channel || (latest.platform === 'vimeo' ? 'Vimeo' : 'YouTube')}
+                        {latestWc > 0 && <span style={{ color: '#C0BAB3' }}>·</span>}
+                        {latestWc > 0 && `${latestWc.toLocaleString()} words`}
+                      </p>
+                      <button className="ds-continue-open-btn" onClick={() => openTranscript(latest)}>Open</button>
+                      <div className="ds-continue-quick">
+                        <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Summarize</button>
+                        <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Flashcards</button>
+                        <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Study guide</button>
+                      </div>
                     </div>
                   </>
                 ) : (
