@@ -353,17 +353,38 @@ app.get('/api/transcript', async (req, res) => {
   const outputTemplate = path.join(tmpDir, videoId);
 
   try {
-    // ── Stage 1a: Supadata (no cookies needed) ────────────────────────────────
+    // ── Stage 1a: youtube-transcript npm (fastest, no API key, YT timedtext) ──
+    try {
+      send('progress', { stage: 'subtitles', message: 'Fetching transcript…', percent: 15 });
+      const { YoutubeTranscript } = require('youtube-transcript');
+      const raw = await YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang }).catch(() =>
+        YoutubeTranscript.fetchTranscript(videoId)
+      );
+      if (raw && raw.length > 0) {
+        const seen = new Set();
+        const segments = raw
+          .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
+          .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
+        const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
+        send('done', { transcript, segments, source: 'subtitles' });
+        res.end();
+        return;
+      }
+    } catch {
+      // Fall through to Supadata
+    }
+
+    // ── Stage 1b: Supadata API (handles edge cases, long videos) ─────────────
     if (process.env.SUPADATA_API_KEY) {
       try {
-        send('progress', { stage: 'subtitles', message: 'Fetching transcript…', percent: 15 });
+        send('progress', { stage: 'subtitles', message: 'Trying alternate source…', percent: 25 });
         const supadata = new Supadata({ apiKey: process.env.SUPADATA_API_KEY });
 
         let result = await supadata.transcript({ url: `https://www.youtube.com/watch?v=${videoId}`, lang: safeLang, mode: 'auto' });
 
         // Videos >20 min return a jobId — poll until done
         if (result && 'jobId' in result) {
-          send('progress', { stage: 'subtitles', message: 'Processing transcript…', percent: 25 });
+          send('progress', { stage: 'subtitles', message: 'Processing transcript…', percent: 35 });
           for (let i = 0; i < 60; i++) {
             await new Promise(r => setTimeout(r, 3000));
             const job = await supadata.transcript.getJobStatus(result.jobId);
@@ -383,28 +404,8 @@ app.get('/api/transcript', async (req, res) => {
           return;
         }
       } catch {
-        // Fall through to youtube-transcript
+        // Fall through to yt-dlp
       }
-    }
-
-    // ── Stage 1b: youtube-transcript npm (no cookies, uses YT timedtext API) ───
-    try {
-      const { YoutubeTranscript } = require('youtube-transcript');
-      const raw = await YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang }).catch(() =>
-        YoutubeTranscript.fetchTranscript(videoId)
-      );
-      if (raw && raw.length > 0) {
-        const seen = new Set();
-        const segments = raw
-          .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
-          .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
-        const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-        send('done', { transcript, segments, source: 'subtitles' });
-        res.end();
-        return;
-      }
-    } catch {
-      // Fall through to yt-dlp
     }
 
     // ── Stage 1c: yt-dlp subtitles ────────────────────────────────────────────
