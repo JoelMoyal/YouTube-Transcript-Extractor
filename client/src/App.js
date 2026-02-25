@@ -2175,6 +2175,7 @@ const App = () => {
   const segmentsRef        = useRef([]);
   const urlInputRef     = useRef(null);
   const qaRef           = useRef(null);
+  const chatBottomRef   = useRef(null);
   const recoveryIntentRef = useRef(false);
 
   useEffect(() => {
@@ -2516,6 +2517,11 @@ const App = () => {
       setTimeout(() => qaInputRef.current?.focus(), 50);
     }
   };
+
+  // Auto-scroll chat to bottom on new messages or while loading
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [qaMessages, qaLoading]);
 
   const getTranscript = (langOverride) => {
     const parsed = parseVideoUrl(videoUrl);
@@ -3693,97 +3699,148 @@ const App = () => {
               {/* Divider */}
               <div style={{ height: 1, background: P.border, margin: '0 18px' }} />
 
-              {/* Ask Anything card */}
-              <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px 18px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              {/* ScribeSnap AI Chat */}
+              <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '13px 18px 11px', borderBottom: `1px solid ${P.border}` }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 9, flexShrink: 0,
+                    background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)',
+                    border: `1.5px solid rgba(45,108,223,0.2)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <img src="/scribesnap_icon_wave.svg" alt="ScribeSnap AI" style={{ width: 19, height: 19 }} />
                   </div>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Ask Anything</span>
+                  <div>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: P.ink, lineHeight: 1.25 }}>ScribeSnap AI</div>
+                    <div style={{ fontSize: 10.5, color: P.muted, lineHeight: 1 }}>Ask anything about this video</div>
+                  </div>
                   {qaMessages.length > 0 && (
-                    <button onClick={() => setQaMessages([])} style={{ marginLeft: 'auto', border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Clear</button>
+                    <button onClick={() => setQaMessages([])} style={{
+                      marginLeft: 'auto', border: `1px solid ${P.border}`, background: 'none',
+                      cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600,
+                      padding: '3px 9px', borderRadius: 6, transition: 'all 0.15s',
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.ink; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}
+                    >Clear</button>
                   )}
                 </div>
 
-                {/* Top input (quick ask) */}
+                {/* Empty state — suggestion list */}
                 {qaMessages.length === 0 && (
-                  <>
-                    <div style={{ border: `1.5px solid ${P.border}`, borderRadius: 10, padding: '10px 14px', marginBottom: 10, cursor: 'text', background: P.paper }}
-                      onClick={() => qaInputRef.current?.focus()}>
-                      <div style={{ fontSize: 12, color: P.muted }}>Summarize the key points of this video</div>
-                    </div>
-                    {/* Suggestion chips */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
-                      {DEMO_CHIPS.map(chip => (
-                        <button key={chip} onClick={() => askQuestion(chip)} style={{
-                          padding: '4px 9px', borderRadius: 999, border: `1px solid ${P.border}`,
-                          background: P.paper, fontSize: 11, color: P.muted, cursor: 'pointer', transition: 'all 0.15s',
-                        }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.color = P.accent; e.currentTarget.style.background = P.accentLight; }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = P.muted; e.currentTarget.style.background = P.paper; }}
-                        >{chip}</button>
-                      ))}
-                    </div>
-                  </>
+                  <div style={{ padding: '12px 18px 10px', flex: 1, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    {DEMO_CHIPS.map(chip => (
+                      <button key={chip} onClick={() => askQuestion(chip)} style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '9px 13px', borderRadius: 9, border: `1px solid ${P.border}`,
+                        background: P.paper, fontSize: 12.5, color: P.ink,
+                        cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left', width: '100%',
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.4 }}><polyline points="9 18 15 12 9 6"/></svg>
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
                 )}
 
                 {/* Chat messages */}
                 {qaMessages.length > 0 && (
-                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 10, maxHeight: 280 }}>
+                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12, padding: '14px 18px 8px', maxHeight: 340 }}>
                     {qaMessages.map((msg, i) => (
-                      <div key={i}>
-                        {msg.role === 'ai' && (
-                          <div style={{ fontSize: 10, fontWeight: 600, color: P.muted, marginBottom: 4, paddingLeft: 2 }}>AI</div>
-                        )}
-                        <div style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                      <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                        {msg.role === 'ai' ? (
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, maxWidth: '93%' }}>
+                            {/* AI avatar */}
+                            <div style={{
+                              width: 26, height: 26, borderRadius: 7, flexShrink: 0, marginTop: 1,
+                              background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)',
+                              border: `1.5px solid rgba(45,108,223,0.2)`,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}>
+                              <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 15, height: 15 }} />
+                            </div>
+                            <div style={{
+                              padding: '9px 13px',
+                              borderRadius: '3px 12px 12px 12px',
+                              background: msg.isError ? 'rgba(180,35,24,0.05)' : P.paper,
+                              border: `1px solid ${msg.isError ? 'rgba(180,35,24,0.2)' : P.border}`,
+                              fontSize: 13, lineHeight: 1.65,
+                              color: msg.isError ? P.error : P.ink,
+                            }}>
+                              {msg.text.split('\n').map((line, li, arr) => (
+                                <React.Fragment key={li}>{line}{li < arr.length - 1 && <br />}</React.Fragment>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
                           <div style={{
-                            maxWidth: '92%', padding: '9px 12px',
-                            borderRadius: msg.role === 'user' ? '12px 12px 3px 12px' : '12px 12px 12px 3px',
-                            background: msg.role === 'user' ? P.accent : (msg.isError ? 'rgba(180,35,24,0.06)' : P.paper),
-                            border: msg.role === 'ai' ? `1px solid ${msg.isError ? 'rgba(180,35,24,0.2)' : P.border}` : 'none',
-                            fontSize: 13, lineHeight: 1.65,
-                            color: msg.role === 'user' ? 'white' : (msg.isError ? P.error : P.ink),
+                            maxWidth: '86%', padding: '9px 13px',
+                            borderRadius: '12px 12px 3px 12px',
+                            background: P.accent, fontSize: 13, lineHeight: 1.6, color: 'white',
                           }}>{msg.text}</div>
-                        </div>
+                        )}
                       </div>
                     ))}
                     {qaLoading && (
-                      <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                        <div style={{ padding: '9px 13px', borderRadius: '12px 12px 12px 3px', background: P.paper, border: `1px solid ${P.border}`, display: 'flex', gap: 4, alignItems: 'center' }}>
-                          {[0, 1, 2].map(d => <div key={d} style={{ width: 5, height: 5, borderRadius: '50%', background: P.accent, opacity: 0.5, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                        <div style={{
+                          width: 26, height: 26, borderRadius: 7, flexShrink: 0,
+                          background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)',
+                          border: `1.5px solid rgba(45,108,223,0.2)`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 15, height: 15 }} />
+                        </div>
+                        <div style={{ padding: '11px 15px', borderRadius: '3px 12px 12px 12px', background: P.paper, border: `1px solid ${P.border}`, display: 'flex', gap: 4, alignItems: 'center' }}>
+                          {[0, 1, 2].map(d => <div key={d} style={{ width: 5, height: 5, borderRadius: '50%', background: P.accent, opacity: 0.6, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}
                         </div>
                       </div>
                     )}
+                    <div ref={chatBottomRef} />
                   </div>
                 )}
 
-                {/* Bottom composer */}
-                <div style={{ marginTop: 'auto', display: 'flex', gap: 7, paddingTop: 10, borderTop: `1px solid ${P.border}` }}>
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, border: `1.5px solid ${P.border}`, borderRadius: 10, padding: '7px 12px', background: P.paper, transition: 'border-color 0.15s' }}
-                    onFocus={() => {}} onClick={() => qaInputRef.current?.focus()}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input ref={qaInputRef} value={qaQuestion} onChange={e => setQaQuestion(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
-                      placeholder="Ask further questions…" disabled={qaLoading}
-                      style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12.5, color: P.ink }}
-                      onFocus={e => { e.currentTarget.closest('div').style.borderColor = P.accent; }}
-                      onBlur={e => { e.currentTarget.closest('div').style.borderColor = P.border; }}
-                    />
+                {/* Composer */}
+                <div style={{ padding: '10px 18px 14px', marginTop: qaMessages.length === 0 ? 'auto' : 0, borderTop: `1px solid ${P.border}` }}>
+                  <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
+                    <div style={{
+                      flex: 1, display: 'flex', alignItems: 'center', gap: 8,
+                      border: `1.5px solid ${P.border}`, borderRadius: 10,
+                      padding: '7px 12px', background: P.surface, transition: 'border-color 0.15s',
+                    }} onClick={() => qaInputRef.current?.focus()}>
+                      <input ref={qaInputRef} value={qaQuestion} onChange={e => setQaQuestion(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
+                        placeholder={qaMessages.length === 0 ? 'Ask something about this video…' : 'Ask a follow-up…'}
+                        disabled={qaLoading}
+                        style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 12.5, color: P.ink }}
+                        onFocus={e => { e.currentTarget.closest('div').style.borderColor = P.accent; }}
+                        onBlur={e => { e.currentTarget.closest('div').style.borderColor = P.border; }}
+                      />
+                      {!qaQuestion && <span style={{ fontSize: 10, color: P.muted, flexShrink: 0, letterSpacing: 0.2 }}>↵</span>}
+                    </div>
+                    <button onClick={() => askQuestion()} disabled={!qaQuestion.trim() || qaLoading} style={{
+                      flexShrink: 0, width: 38, height: 38,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      borderRadius: 10, border: 'none',
+                      background: !qaQuestion.trim() || qaLoading ? P.border : P.accent,
+                      color: !qaQuestion.trim() || qaLoading ? P.muted : 'white',
+                      cursor: !qaQuestion.trim() || qaLoading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                      onMouseEnter={e => { if (qaQuestion.trim() && !qaLoading) e.currentTarget.style.background = P.accentHover; }}
+                      onMouseLeave={e => { if (qaQuestion.trim() && !qaLoading) e.currentTarget.style.background = P.accent; }}
+                    >
+                      {qaLoading
+                        ? <SpinnerIcon size={13} />
+                        : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      }
+                    </button>
                   </div>
-                  <button onClick={() => askQuestion()} disabled={!qaQuestion.trim() || qaLoading} style={{
-                    flexShrink: 0, padding: '0 16px', height: 38, display: 'flex', alignItems: 'center', gap: 5,
-                    borderRadius: 10, border: 'none',
-                    background: !qaQuestion.trim() || qaLoading ? P.border : P.accent,
-                    color: !qaQuestion.trim() || qaLoading ? P.muted : 'white',
-                    cursor: !qaQuestion.trim() || qaLoading ? 'not-allowed' : 'pointer',
-                    fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
-                  }}
-                    onMouseEnter={e => { if (qaQuestion.trim() && !qaLoading) e.currentTarget.style.background = P.accentHover; }}
-                    onMouseLeave={e => { if (qaQuestion.trim() && !qaLoading) e.currentTarget.style.background = P.accent; }}
-                  >
-                    {qaLoading ? <SpinnerIcon size={12} /> : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>}
-                    Send
-                  </button>
                 </div>
               </div>
 
