@@ -3428,7 +3428,7 @@ const App = () => {
                             style={{
                               display: 'grid', gridTemplateColumns: '54px 1fr',
                               gap: 0, padding: '0',
-                              background: selectedSegment === i ? 'rgba(45,108,223,0.08)' : playingSegment === i ? 'rgba(45,108,223,0.05)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'),
+                              background: selectedSegment === i ? 'rgba(45,108,223,0.08)' : playingSegment === i ? 'rgba(91,155,213,0.13)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'),
                               cursor: 'pointer', transition: 'background 0.15s',
                               borderLeft: playingSegment === i ? `3px solid ${P.accent}` : '3px solid transparent',
                               borderBottom: `1px solid ${selectedSegment === i ? 'rgba(45,108,223,0.15)' : P.border}`,
@@ -3441,7 +3441,7 @@ const App = () => {
                               style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '10px 6px 10px 0', background: 'none', border: 'none', cursor: 'pointer', color: selectedSegment === i ? P.accent : playingSegment === i ? '#5B9BD5' : '#999', fontWeight: playingSegment === i ? 700 : 600, fontSize: 10.5, fontFamily: 'monospace', flexShrink: 0 }}>
                               {formatTime(seg.seconds)}
                             </button>
-                            <div style={{ padding: '10px 14px 10px 8px', fontSize: 13.5, lineHeight: 1.7, color: selectedSegment === i ? P.ink : P.ink, fontWeight: selectedSegment === i ? 500 : 400 }}>
+                            <div style={{ padding: '10px 14px 10px 8px', fontSize: 13.5, lineHeight: 1.7, color: P.ink, fontWeight: playingSegment === i ? 600 : selectedSegment === i ? 500 : 400 }}>
                               {highlightText(seg.text)}
                             </div>
                           </div>
