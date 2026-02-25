@@ -371,10 +371,39 @@ app.get('/api/transcript', async (req, res) => {
         return;
       }
     } catch {
-      // Fall through to yt-dlp subtitles
+      // Fall through to Supadata
     }
 
-    // ── Stage 1b: yt-dlp subtitles ────────────────────────────────────────────
+    // ── Stage 1b: Supadata API (fallback for edge cases / missing captions) ───
+    if (process.env.SUPADATA_API_KEY) {
+      try {
+        const supadata = new Supadata({ apiKey: process.env.SUPADATA_API_KEY });
+        let result = await supadata.transcript({ url: `https://www.youtube.com/watch?v=${videoId}`, lang: safeLang, mode: 'auto' });
+        if (result && 'jobId' in result) {
+          send('progress', { stage: 'subtitles', message: 'Processing transcript…', percent: 35 });
+          for (let i = 0; i < 60; i++) {
+            await new Promise(r => setTimeout(r, 3000));
+            const job = await supadata.transcript.getJobStatus(result.jobId);
+            if (job.status === 'completed') { result = job; break; }
+            if (job.status === 'failed') { result = null; break; }
+          }
+        }
+        if (result && Array.isArray(result.content) && result.content.length > 0) {
+          const seen = new Set();
+          const segments = result.content
+            .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
+            .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
+          const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
+          send('done', { transcript, segments, source: 'subtitles' });
+          res.end();
+          return;
+        }
+      } catch {
+        // Fall through to yt-dlp
+      }
+    }
+
+    // ── Stage 1c: yt-dlp subtitles ────────────────────────────────────────────
     send('progress', { stage: 'subtitles', message: 'Looking for subtitles…', percent: 10 });
     let lastSubError = null;
 
