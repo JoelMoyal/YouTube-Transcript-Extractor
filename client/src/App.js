@@ -2735,6 +2735,8 @@ const App = () => {
         @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
         @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity:0.4; } 40% { transform: scale(1); opacity:1; } }
         @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+        @keyframes dot-flicker { 0%,80%,100% { opacity:0.2; transform:scale(0.8); } 40% { opacity:1; transform:scale(1); } }
         .fade-up { animation: fadeUp 0.3s ease forwards; }
         * { box-sizing: border-box; }
         body { margin: 0; background: ${P.paper}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
@@ -2937,31 +2939,52 @@ const App = () => {
               </div>
 
               {/* Progress bar */}
-              {loading && loadingPercent > 0 && (
-                <div className="fade-up" style={{ marginTop: 16 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              {loading && (
+                <div className="fade-up" style={{ marginTop: 18 }}>
+                  {/* Stage pills */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                     <div style={{ display: 'flex', gap: 5 }}>
-                      {['subtitles', 'audio', 'whisper'].map((stage) => {
-                        const labels = { subtitles: 'Subtitles', audio: 'Audio', whisper: 'AI' };
+                      {['subtitles', 'audio', 'whisper'].map((s) => {
+                        const labels = { subtitles: 'Captions', audio: 'Audio', whisper: 'AI' };
                         const order = ['subtitles', 'audio', 'whisper'];
-                        const isDone = order.indexOf(stage) < order.indexOf(loadingStage);
-                        const isActive = stage === loadingStage;
+                        const isDone = loadingStage && order.indexOf(s) < order.indexOf(loadingStage);
+                        const isActive = s === loadingStage;
                         return (
-                          <span key={stage} style={{
-                            fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 999,
-                            background: isDone ? 'rgba(15,118,110,0.1)' : isActive ? P.accentLight : P.paper,
+                          <span key={s} style={{
+                            fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 999,
+                            background: isDone ? 'rgba(15,118,110,0.1)' : isActive ? P.accentLight : 'transparent',
                             color: isDone ? P.success : isActive ? P.accent : P.muted,
-                            border: `1px solid ${isDone ? 'rgba(15,118,110,0.2)' : isActive ? 'rgba(45,108,223,0.2)' : P.border}`,
-                          }}>{isDone ? '✓ ' : ''}{labels[stage]}</span>
+                            border: `1px solid ${isDone ? 'rgba(15,118,110,0.25)' : isActive ? 'rgba(45,108,223,0.25)' : P.border}`,
+                            transition: 'all 0.3s',
+                          }}>{isDone ? '✓ ' : isActive ? '· ' : ''}{labels[s]}</span>
                         );
                       })}
                     </div>
-                    <span style={{ fontSize: 11, color: P.muted, fontWeight: 600 }}>{loadingPercent}%</span>
+                    {loadingPercent > 0 && (
+                      <span style={{ fontSize: 11, color: P.accent, fontWeight: 700 }}>{loadingPercent}%</span>
+                    )}
                   </div>
-                  <div style={{ height: 3, borderRadius: 999, background: P.border, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${loadingPercent}%`, background: P.accent, borderRadius: 999, transition: 'width 0.5s ease' }} />
+
+                  {/* Progress bar — shimmer when 0%, real fill when > 0% */}
+                  <div style={{ height: 4, borderRadius: 999, background: P.border, overflow: 'hidden', position: 'relative' }}>
+                    {loadingPercent > 0 ? (
+                      <div style={{ height: '100%', width: `${loadingPercent}%`, background: `linear-gradient(90deg, ${P.accent}, #5B9BD5)`, borderRadius: 999, transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)' }} />
+                    ) : (
+                      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, transparent, rgba(45,108,223,0.35), transparent)`, animation: 'shimmer 1.4s infinite' }} />
+                    )}
                   </div>
-                  <p style={{ fontSize: 12, color: P.muted, marginTop: 8 }}>{loadingMsg}</p>
+
+                  {/* Status message with animated dots */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 10 }}>
+                    <span style={{ fontSize: 12, color: P.muted }}>
+                      {loadingMsg || 'Fetching transcript'}
+                    </span>
+                    <span style={{ display: 'flex', gap: 3 }}>
+                      {[0, 1, 2].map(i => (
+                        <span key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: `dot-flicker 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+                      ))}
+                    </span>
+                  </div>
                 </div>
               )}
 
