@@ -1890,6 +1890,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-referral-share-x:hover { background: rgba(0,0,0,0.09); }
         .ds-referral-share-email { border-color: #E7E1D8; background: #F6F3EE; color: #1a1a2e; }
         .ds-referral-share-email:hover { background: #EFEBE4; }
+        .ds-referral-share-ig { border-color: rgba(193,53,132,0.3); background: linear-gradient(135deg, rgba(253,245,230,0.7), rgba(243,220,240,0.7)); color: #C13584; }
+        .ds-referral-share-ig:hover { background: linear-gradient(135deg, rgba(253,245,230,1), rgba(243,220,240,1)); }
         .ds-referral-stats {
           display: flex; gap: 10px; margin-top: 12px;
         }
