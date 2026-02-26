@@ -4583,11 +4583,33 @@ const App = () => {
                         );
                       })}
                     </div>
+                    {/* Generate More / exhausted */}
+                    <div style={{ marginTop: 14 }}>
+                      {flashcardsExhausted ? (
+                        <div style={{ padding: '10px 14px', borderRadius: 9, border: `1px solid ${P.border}`, background: P.surface, color: P.muted, fontSize: 12, lineHeight: 1.55, textAlign: 'center' }}>
+                          {flashcardsExhaustedReason}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={generateMoreFlashcards}
+                          disabled={flashcardsMoreLoading}
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: '8px 0', borderRadius: 8, border: `1.5px dashed ${P.border}`, background: 'none', color: flashcardsMoreLoading ? P.muted : P.ink, fontSize: 12.5, fontWeight: 600, cursor: flashcardsMoreLoading ? 'default' : 'pointer', transition: 'all 0.15s', opacity: flashcardsMoreLoading ? 0.6 : 1 }}
+                          onMouseEnter={e => { if (!flashcardsMoreLoading) { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.color = P.accent; } }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = flashcardsMoreLoading ? P.muted : P.ink; }}
+                        >
+                          {flashcardsMoreLoading ? (
+                            <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Generating more…</>
+                          ) : (
+                            <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Generate More Flashcards</>
+                          )}
+                        </button>
+                      )}
+                    </div>
                     {/* Reset progress */}
                     {flashcardKnown.size > 0 && (
                       <button
                         onClick={() => setFlashcardKnown(new Set())}
-                        style={{ marginTop: 16, display: 'block', width: '100%', padding: '8px 0', borderRadius: 8, border: `1px solid ${P.border}`, background: 'none', color: P.muted, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
+                        style={{ marginTop: 10, display: 'block', width: '100%', padding: '8px 0', borderRadius: 8, border: `1px solid ${P.border}`, background: 'none', color: P.muted, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
                         onMouseEnter={e => { e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.ink; }}
                         onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}
                       >Reset Progress</button>
