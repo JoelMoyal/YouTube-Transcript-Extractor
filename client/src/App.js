@@ -2853,6 +2853,7 @@ const App = () => {
   const [playingSegment, setPlayingSegment] = useState(null);
   const [exportToggle, setExportToggle]   = useState(false);
 
+  const aiCacheRef         = useRef({});  // keyed by videoId → saved AI state
   const downloadMenuRef    = useRef(null);
   const qaInputRef         = useRef(null);
   const playerRef          = useRef(null);
@@ -3234,6 +3235,15 @@ const App = () => {
   };
 
   const loadFromHistory = (entry) => {
+    // Save current video's AI state before switching
+    if (currentVideoId) {
+      aiCacheRef.current[currentVideoId] = {
+        summary, timeline, showQA, qaMessages,
+        flashcards, flashcardsExhausted, flashcardsExhaustedReason, expandedCards,
+        studyGuide, sgMessages, activeTab,
+      };
+    }
+
     const platform = entry.platform || 'youtube';
     setVideoUrl(platform === 'vimeo' ? `https://vimeo.com/${entry.id}` : `https://youtube.com/watch?v=${entry.id}`);
     setTranscript(entry.transcript);
@@ -3245,9 +3255,22 @@ const App = () => {
     setCurrentTitle(entry.title || '');
     setCurrentChannel(entry.channel || '');
     setError(''); setSearch('');
-    setSummary(''); setTimeline(null); setShowQA(false); setQaMessages([]);
-    setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
-    setActiveTab('transcript');
+
+    // Restore cached AI state for this video, or clear if none
+    const cached = aiCacheRef.current[entry.id];
+    setSummary(cached?.summary ?? '');
+    setTimeline(cached?.timeline ?? null);
+    setShowQA(cached?.showQA ?? false);
+    setQaMessages(cached?.qaMessages ?? []);
+    setFlashcards(cached?.flashcards ?? []);
+    setFlashcardsExhausted(cached?.flashcardsExhausted ?? false);
+    setFlashcardsExhaustedReason(cached?.flashcardsExhaustedReason ?? '');
+    setExpandedCards(cached?.expandedCards ?? new Set());
+    setStudyGuide(cached?.studyGuide ?? null);
+    setSgMessages(cached?.sgMessages ?? []);
+    setStudyGuideFull(false);
+    setShowFlashcardModal(false);
+    setActiveTab(cached?.activeTab ?? 'transcript');
   };
 
   const resetAll = () => {
