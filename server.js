@@ -629,8 +629,8 @@ app.post('/api/flashcards', async (req, res) => {
 
   try {
     const raw = await aiComplete(
-      `You create educational flashcards from YouTube video transcripts. Generate 8-12 question-and-answer flashcard pairs covering the key concepts, facts, and ideas from the video. Each card should test meaningful understanding, not trivial details. Return ONLY a valid JSON array of objects — no explanation, no markdown, just the JSON array.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nReturn JSON array only: [{"question": "What is X?", "answer": "X is...", "topic": "Section Name"}, ...]`,
-      2048
+      `Create exactly 6 flashcard Q&A pairs from this transcript. Cover the most important concepts. Return ONLY a JSON array — no markdown, no explanation.\n\nTranscript:\n${transcript.slice(0, 12000)}\n\nReturn: [{"question":"...","answer":"...","topic":"..."},...]`,
+      1400
     );
     const match = raw.match(/\[[\s\S]*\]/);
     const flashcards = match ? JSON.parse(match[0]) : [];
