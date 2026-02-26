@@ -608,6 +608,35 @@ const friendlyError = (msg = '') => {
   return msg || 'Something went wrong. Please try again.';
 };
 
+const funnyTranscriptError = (msg = '') => {
+  const m = msg.toLowerCase();
+  if (m.includes('rate') || m.includes('too many requests') || m.includes('429'))
+    return "YouTube's bouncer cut us off. Give it a minute, then try again.";
+  if (m.includes('private') || m.includes('members only') || m.includes('members-only'))
+    return "That video has trust issues. It's private or members-only — nothing we can do here.";
+  if (m.includes('copyright'))
+    return "A copyright lawyer got there first. This one's locked down.";
+  if (m.includes('unavailable'))
+    return "The video didn't show up. Classic. Double-check the URL and try again.";
+  if (m.includes('no captions') || m.includes('no captions found'))
+    return "This video went caption-free and AI transcription isn't set up. Nothing to grab, sadly.";
+  if (m.includes('audio file too large') || m.includes('too large'))
+    return "That video is way too long. Even we have limits. Try a shorter one.";
+  if (m.includes('timed out') || m.includes('timeout'))
+    return "Still loading... just kidding, we gave up. The video might be hiding. Try again.";
+  if (m.includes('connection') || m.includes('network') || m.includes('fetch'))
+    return "Connection ghosted us. Were you on a train? Try again.";
+  if (m.includes('failed to process'))
+    return "We got the transcript and immediately dropped it. Very smooth. Try again.";
+  if (m.includes('invalid') && m.includes('url'))
+    return "That URL looks suspicious. YouTube and Vimeo only, please.";
+  if (m.includes('invalid') && m.includes('vimeo'))
+    return "That Vimeo URL didn't pass the vibe check. Try pasting it again.";
+  if (m.includes('failed to fetch') || m.includes('failed to download'))
+    return "The transcript played hard to get. Try again.";
+  return msg || "Something went sideways. Give it another shot.";
+};
+
 // ── AuthModal ─────────────────────────────────────────────────────────────────
 const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
   const [screen, setScreen]     = React.useState(initialTab); // 'signin'|'signup'|'forgot'|'pending'
@@ -2822,9 +2851,8 @@ const App = () => {
   const [qaQuestion, setQaQuestion]       = useState('');
   const [qaMessages, setQaMessages]       = useState([]);
   const [qaLoading, setQaLoading]         = useState(false);
-  const [chapters, setChapters]           = useState([]);
-  const [chaptersLoading, setChaptersLoading] = useState(false);
-  const [showChapters, setShowChapters]   = useState(false);
+  const [timeline, setTimeline]           = useState(null);  // [{title, startSeconds, summary}]
+  const [timelineLoading, setTimelineLoading] = useState(false);
   const [flashcards, setFlashcards]               = useState([]);       // [{question, answer, topic}]
   const [flashcardsLoading, setFlashcardsLoading] = useState(false);
   const [showFlashcardModal, setShowFlashcardModal] = useState(false);
@@ -2837,7 +2865,7 @@ const App = () => {
   const [sgQuestion, setSgQuestion]               = useState('');
   const [sgMessages, setSgMessages]               = useState([]);       // [{role, text, isError?}]
   const [sgLoading, setSgLoading]                 = useState(false);
-  const [activeTab, setActiveTab]         = useState('transcript'); // 'transcript' | 'chapters' | 'editor' | 'summary' | 'study-guide'
+  const [activeTab, setActiveTab]         = useState('transcript'); // 'transcript' | 'timeline' | 'editor' | 'summary' | 'study-guide'
   const [currentTitle, setCurrentTitle]   = useState('');
   const [currentChannel, setCurrentChannel] = useState('');
   const [selectedSegment, setSelectedSegment] = useState(null);
@@ -3218,7 +3246,7 @@ const App = () => {
     setTranscriptSource(''); setCurrentVideoId(null); setCurrentPlatform('youtube'); setCurrentThumbnail(null); setError(''); setSearch('');
     setSummary(''); setShowTimestamps(true); setShowQA(false);
     setQaQuestion(''); setQaMessages([]);
-    setChapters([]); setShowChapters(false);
+    setTimeline(null);
     setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
     setActiveTab('transcript');
     setCurrentTitle(''); setCurrentChannel('');
@@ -3268,13 +3296,13 @@ const App = () => {
 
   const getTranscript = (langOverride) => {
     const parsed = parseVideoUrl(videoUrl);
-    if (!parsed) { setError('Please enter a valid YouTube or Vimeo URL'); return; }
+    if (!parsed) { setError(funnyTranscriptError('invalid url')); return; }
     const { platform, id: videoId, url: videoCanonical } = parsed;
     const langToUse = langOverride || lang;
 
     setError(''); setTranscript(''); setTranscriptSource('');
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
-    setSummary(''); setChapters([]); setShowChapters(false);
+    setSummary(''); setTimeline(null);
     setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
@@ -3285,7 +3313,7 @@ const App = () => {
     const es = new EventSource(apiUrl);
     const killTimer = setTimeout(() => {
       es.close();
-      setError('Request timed out. The video may be too long or unavailable.');
+      setError(funnyTranscriptError('timed out'));
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     }, 180000);
 
@@ -3323,7 +3351,7 @@ const App = () => {
           thumbnail: thumb, title, channel, url: videoCanonical,
         });
       } catch {
-        setError('Failed to process transcript response.');
+        setError(funnyTranscriptError('failed to process'));
       } finally {
         setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
       }
@@ -3333,15 +3361,15 @@ const App = () => {
       clearTimeout(killTimer); es.close();
       try {
         const data = JSON.parse(e.data);
-        setError(data.details ? `${data.error}: ${data.details}` : (data.error || 'Failed to fetch transcript'));
-      } catch { setError('Connection lost. Please try again.'); }
+        setError(funnyTranscriptError(data.details ? `${data.error}: ${data.details}` : (data.error || 'failed to fetch')));
+      } catch { setError(funnyTranscriptError('connection')); }
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     });
 
     es.onerror = () => {
       if (es.readyState === EventSource.CLOSED) return;
       clearTimeout(killTimer); es.close();
-      setError('Connection lost. Please try again.');
+      setError(funnyTranscriptError('connection'));
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     };
   };
@@ -3353,7 +3381,7 @@ const App = () => {
     const { platform, id: videoId, url: videoCanonical } = parsed;
     setLangRefetching(true);
     setLangRefetchMsg('');
-    setSearch(''); setSummary(''); setChapters([]); setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]);
+    setSearch(''); setSummary(''); setTimeline(null); setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]);
     const apiUrl = platform === 'vimeo'
       ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${newLang}`
       : `/api/transcript?videoId=${videoId}&lang=${newLang}`;
@@ -3465,22 +3493,24 @@ const App = () => {
     finally { setSummarizing(false); }
   };
 
-  const detectChapters = async () => {
-    if (chaptersLoading) return;
-    setChaptersLoading(true); setChapters([]);
+  const generateTimeline = async () => {
+    if (timelineLoading) return;
+    setTimelineLoading(true); setTimeline(null);
     try {
-      const res = await fetch('/api/chapters', {
+      const res = await fetch('/api/timeline', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transcript, segments }),
       });
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
-      if (!res.ok) throw new Error(data.error || 'Failed to detect chapters');
-      setChapters(data.chapters || []); setShowChapters(true);
+      if (!res.ok) throw new Error(data.error || 'Failed to generate timeline');
+      setTimeline(data.sections || []);
+      setActiveTab('timeline');
     } catch (err) {
-      setChapters([{ seconds: 0, title: `Error: ${err.message}`, isError: true }]); setShowChapters(true);
-    } finally { setChaptersLoading(false); }
+      setTimeline([{ title: 'Error', startSeconds: 0, summary: err.message, _error: true }]);
+      setActiveTab('timeline');
+    } finally { setTimelineLoading(false); }
   };
 
   const generateFlashcards = async () => {
@@ -4331,7 +4361,7 @@ const App = () => {
               <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
                 {[
                   { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> },
-                  { key: 'chapters', label: 'Chapters', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> },
+                  { key: 'timeline', label: 'Timeline', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><line x1="12" y1="2" x2="12" y2="22"/><polyline points="17 7 12 2 7 7"/><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg> },
                   { key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
                   ...(summary ? [{ key: 'summary', label: 'Summary', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
                   ...(studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
@@ -4456,40 +4486,68 @@ const App = () => {
                 )}
 
                 {/* Chapters tab */}
-                {activeTab === 'chapters' && (
+                {activeTab === 'timeline' && (
                   <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-                    {chaptersLoading ? (
+                    {timelineLoading ? (
                       <div style={{ padding: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: P.muted, fontSize: 13 }}>
-                        <SpinnerIcon size={14} /> Detecting chapters…
+                        <SpinnerIcon size={14} /> Building timeline…
                       </div>
-                    ) : chapters.length > 0 ? (
+                    ) : timeline && timeline.length > 0 ? (
                       <>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>{chapters.filter(c => !c.isError).length} chapters · click to jump</span>
-                          <button onClick={detectChapters} disabled={chaptersLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Refresh</button>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>{timeline.filter(s => !s._error).length} sections · click to jump</span>
+                          <button onClick={generateTimeline} disabled={timelineLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Refresh</button>
                         </div>
-                        <div style={{ maxHeight: 440, overflowY: 'auto' }}>
-                          {chapters.map((ch, i) => ch.isError ? (
-                            <div key={i} style={{ padding: '8px 16px', fontSize: 12, color: P.error }}>{ch.title}</div>
-                          ) : (
-                            <a key={i} href={`https://youtube.com/watch?v=${currentVideoId}&t=${ch.seconds}s`} target="_blank" rel="noopener noreferrer"
-                              style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '11px 16px', textDecoration: 'none', transition: 'background 0.1s', borderBottom: `1px solid ${P.border}` }}
-                              onMouseEnter={e => e.currentTarget.style.background = P.paper}
-                              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                              <span style={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 700, color: P.accent, flexShrink: 0, minWidth: 36 }}>{formatTime(ch.seconds)}</span>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: P.ink }}>{ch.title}</span>
-                              <svg style={{ marginLeft: 'auto', color: P.border, flexShrink: 0 }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                            </a>
-                          ))}
-                        </div>
+                        {timeline.map((section, si) => {
+                          if (section._error) return (
+                            <div key={si} style={{ padding: '10px 16px', fontSize: 12, color: P.error }}>{section.summary}</div>
+                          );
+                          // Gather segments that fall within this section's time range
+                          const nextStart = si + 1 < timeline.length ? timeline[si + 1].startSeconds : Infinity;
+                          const sectionSegs = segments.filter(s => s.seconds >= section.startSeconds && s.seconds < nextStart);
+                          return (
+                            <div key={si} style={{ borderBottom: `1px solid ${P.border}` }}>
+                              {/* Section header — clicking seeks video */}
+                              <div
+                                onClick={() => seekToTime(section.startSeconds)}
+                                style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 16px', cursor: 'pointer', background: 'rgba(45,108,223,0.03)', transition: 'background 0.12s' }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(45,108,223,0.07)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(45,108,223,0.03)'}
+                              >
+                                <span onClick={e => { e.stopPropagation(); seekToTime(section.startSeconds); }} style={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 700, color: P.accent, flexShrink: 0, minWidth: 36, paddingTop: 2 }}>{formatTime(section.startSeconds)}</span>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, marginBottom: 3 }}>{section.title}</div>
+                                  <div style={{ fontSize: 12, color: P.muted, lineHeight: 1.5 }}>{section.summary}</div>
+                                </div>
+                                <svg style={{ flexShrink: 0, color: P.accent, marginTop: 2 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                              </div>
+                              {/* Transcript segments within this section */}
+                              {sectionSegs.length > 0 && (
+                                <div style={{ background: '#fff' }}>
+                                  {sectionSegs.map((seg, i) => (
+                                    <div key={i}
+                                      onClick={() => seekToTime(seg.seconds)}
+                                      style={{ display: 'grid', gridTemplateColumns: '50px 1fr', gap: 0, cursor: 'pointer', borderTop: `1px solid ${P.border}`, transition: 'background 0.1s' }}
+                                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(45,108,223,0.04)'}
+                                      onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                                    >
+                                      <span style={{ padding: '8px 6px 8px 16px', fontFamily: 'monospace', fontSize: 10.5, fontWeight: 600, color: P.muted, display: 'flex', alignItems: 'flex-start', paddingTop: 10 }}>{formatTime(seg.seconds)}</span>
+                                      <span style={{ padding: '8px 14px 8px 4px', fontSize: 12.5, lineHeight: 1.65, color: P.ink }}>{seg.text}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </>
                     ) : (
                       <div style={{ padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontSize: 13, color: P.muted }}>No chapters detected yet.</span>
-                        <button onClick={detectChapters} style={{ padding: '8px 18px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: P.ink, transition: 'all 0.15s' }}
+                        <span style={{ fontSize: 13, color: P.muted }}>No timeline generated yet.</span>
+                        <button onClick={generateTimeline} style={{ padding: '8px 18px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: P.ink, transition: 'all 0.15s' }}
                           onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.25)'; }}
                           onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.border; }}>
-                          Detect Chapters
+                          Build Timeline
                         </button>
                       </div>
                     )}
@@ -4959,6 +5017,9 @@ const App = () => {
                   { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
                     onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
+                  { title: 'Timeline', sub: 'Transcript segmented by topic', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
+                    icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><polyline points="17 7 12 2 7 7"/><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg>,
+                    onClick: timeline && !timeline[0]?._error ? () => setActiveTab('timeline') : generateTimeline, active: !!timeline && !timeline[0]?._error, loading: timelineLoading },
                 ].map(item => (
                   <div key={item.title}
                     onClick={item.loading ? undefined : item.onClick}

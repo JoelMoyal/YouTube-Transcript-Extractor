@@ -595,7 +595,7 @@ app.post('/api/summarize', async (req, res) => {
 });
 
 // ── Chapters endpoint ─────────────────────────────────────────────────────────
-app.post('/api/chapters', async (req, res) => {
+app.post('/api/timeline', async (req, res) => {
   const { transcript, segments } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -604,17 +604,18 @@ app.post('/api/chapters', async (req, res) => {
 
   try {
     const segmentsHint = Array.isArray(segments) && segments.length > 0
-      ? `\n\nTimestamp reference (seconds → text snippet):\n${segments.slice(0, 60).map(s => `${s.seconds}s: ${s.text.slice(0, 80)}`).join('\n')}`
+      ? `\n\nTimestamp reference (seconds → text):\n${segments.slice(0, 80).map(s => `${s.seconds}s: ${s.text.slice(0, 100)}`).join('\n')}`
       : '';
 
     const raw = await aiComplete(
-      `You detect natural chapter breaks in YouTube video transcripts. Return ONLY a valid JSON array of chapter objects with "seconds" (integer, must match one of the provided timestamps) and "title" (short, 2-6 words). No explanation, no markdown, just the JSON array.\n\nDetect 3-8 natural chapter breaks in this transcript. Use the timestamp reference to assign accurate seconds values.\n\nTranscript:\n${transcript.slice(0, 15000)}${segmentsHint}\n\nReturn JSON array only: [{"seconds": 0, "title": "Introduction"}, ...]`
+      `You segment YouTube video transcripts into logical topic sections for a learning timeline. Return ONLY a valid JSON array. Each object must have: "title" (2-5 words, topic name), "startSeconds" (integer matching one of the provided timestamps), "summary" (1 concise sentence describing what this section covers). Produce 4-8 sections covering the whole video.\n\nTranscript:\n${transcript.slice(0, 15000)}${segmentsHint}\n\nReturn JSON array only: [{"title": "Introduction", "startSeconds": 0, "summary": "Speaker introduces the topic and sets context."}, ...]`,
+      1024
     );
     const match = raw.match(/\[[\s\S]*\]/);
-    const chapters = match ? JSON.parse(match[0]) : [];
-    res.json({ chapters });
+    const sections = match ? JSON.parse(match[0]) : [];
+    res.json({ sections });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to detect chapters', details: err.message });
+    res.status(500).json({ error: 'Failed to generate timeline', details: err.message });
   }
 });
 
