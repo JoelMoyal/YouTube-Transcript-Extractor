@@ -3635,14 +3635,6 @@ const App = () => {
     }
   };
 
-  const handleChipClick = (chip) => {
-    if (!transcript) return;
-    setQaQuestion(chip);
-    setShowQA(true);
-    setTimeout(() => { qaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
-    askQuestion(chip);
-  };
-
   // shared pill button style
   const pillBtn = (active) => ({
     display: 'flex', alignItems: 'center', gap: 5,
@@ -3860,17 +3852,22 @@ const App = () => {
                 fontSize: 12, fontWeight: 600, color: P.accent,
               }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
-                YouTube · Vimeo · Free · No account required
+                ✦ Built for Silicon Valley &amp; fast-growing teams · Free
               </div>
 
               <h1 style={{
-                fontSize: 'clamp(32px, 6vw, 52px)', fontWeight: 800, color: P.ink,
-                letterSpacing: '-0.04em', lineHeight: 1.1, margin: '0 0 18px',
+                fontSize: 'clamp(30px, 5.5vw, 52px)', fontWeight: 800, color: P.ink,
+                letterSpacing: '-0.04em', lineHeight: 1.12, margin: '0 0 20px',
               }}>
-                Extract any YouTube<br />transcript, ask AI anything
+                Turn any YouTube video into<br />
+                <span style={{
+                  background: 'linear-gradient(135deg, #2D6CDF 0%, #7C3AED 100%)',
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}>transcripts, summaries &amp; insights</span>
               </h1>
-              <p style={{ fontSize: 17, color: P.muted, margin: '0 0 40px', lineHeight: 1.65, maxWidth: 520, marginLeft: 'auto', marginRight: 'auto' }}>
-                Paste a link, get a precise transcript instantly. Then summarize, ask questions, or export — all AI-powered.
+              <p style={{ fontSize: 16, color: P.muted, margin: '0 0 40px', lineHeight: 1.7, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>
+                Paste a link and get the full transcript in seconds. Summarize with AI, generate flashcards, ask questions, or build a study guide — no account needed.
               </p>
 
               {/* Input card */}
@@ -3994,122 +3991,88 @@ const App = () => {
                 </div>
               )}
 
-              {/* Demo question chips */}
-              <div style={{ marginTop: 22, display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
-                <span style={{ fontSize: 12, color: P.muted, width: '100%', marginBottom: 2, display: 'block' }}>Try asking:</span>
-                {DEMO_CHIPS.map(chip => (
-                  <button
-                    key={chip}
-                    className="chip-btn"
-                    onClick={() => handleChipClick(chip)}
-                    style={{
-                      padding: '7px 15px', borderRadius: 999,
-                      border: `1px solid ${P.border}`, background: P.surface,
-                      fontSize: 13, color: P.muted, cursor: 'pointer',
-                    }}
-                  >
-                    {chip}
-                  </button>
+              {/* Social proof pills */}
+              <div style={{ marginTop: 22, display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', alignItems: 'center' }}>
+                {[
+                  { icon: '⚡', text: 'Instant extraction' },
+                  { icon: '🤖', text: 'AI-powered insights' },
+                  { icon: '🔒', text: 'No account needed' },
+                  { icon: '🏢', text: 'Trusted by SV teams' },
+                ].map(p => (
+                  <span key={p.text} style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    padding: '5px 12px', borderRadius: 999,
+                    background: P.surface, border: `1px solid ${P.border}`,
+                    fontSize: 12, fontWeight: 500, color: P.muted,
+                  }}>
+                    <span>{p.icon}</span>{p.text}
+                  </span>
                 ))}
               </div>
             </div>
             </div>{/* end hero-grad */}
 
-            {/* How it works */}
-            <div style={{
-              maxWidth: 740,
-              margin: '0 auto',
-              padding: '6px 24px 36px',
-              display: 'flex',
-              gap: 16,
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexWrap: 'wrap'
-            }}>
-              {[
-                { num: '1', label: 'Paste a YouTube URL' },
-                { num: '2', label: 'Get the transcript instantly' },
-                { num: '3', label: 'Ask AI anything about it' },
-              ].map((step, i) => (
-                <React.Fragment key={step.num}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 210 }}>
-                    <div style={{
-                      width: 28, height: 28, borderRadius: '50%',
-                      border: `1.5px solid ${P.accent}`,
-                      background: 'rgba(60,140,255,0.08)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 12, fontWeight: 800, color: P.accent, flexShrink: 0
-                    }}>{step.num}</div>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: P.ink, letterSpacing: '-0.01em' }}>
-                      {step.label}
-                    </span>
-                  </div>
-                  {i < 2 && <div style={{ width: 26, height: 1, background: P.border, flexShrink: 0 }} />}
-                </React.Fragment>
-              ))}
-            </div>
-
-            {/* Feature cards */}
-            <div style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px 48px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+            {/* Capability cards */}
+            <div style={{ maxWidth: 820, margin: '0 auto', padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14 }}>
               {[
                 {
-                  icon: (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                      <line x1="16" y1="13" x2="8" y2="13"/>
-                      <line x1="16" y1="17" x2="8" y2="17"/>
-                      <polyline points="10 9 9 9 8 9"/>
-                    </svg>
-                  ),
-                  bg: 'rgba(45,108,223,0.07)',
+                  emoji: '⚡',
                   label: 'Instant Transcript',
-                  desc: 'Extract complete transcripts from YouTube & Vimeo with timestamps in seconds — no login needed',
+                  desc: 'Full text + timestamps from YouTube & Vimeo in seconds. Auto-translated to English when needed.',
+                  accent: P.accent,
+                  bg: 'rgba(45,108,223,0.06)',
+                  border: 'rgba(45,108,223,0.14)',
                 },
                 {
-                  icon: (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                    </svg>
-                  ),
-                  bg: 'rgba(15,118,110,0.07)',
-                  label: 'AI Summaries',
-                  desc: 'Summarize long transcripts into concise highlights using fast LLMs',
+                  emoji: '✨',
+                  label: 'AI Insights',
+                  desc: 'Summaries, chapter breakdowns, flashcards & study guides — generated on demand.',
+                  accent: '#7C3AED',
+                  bg: 'rgba(124,58,237,0.06)',
+                  border: 'rgba(124,58,237,0.14)',
                 },
                 {
-                  icon: (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
-                  ),
-                  bg: 'rgba(124,58,237,0.07)',
-                  label: 'Ask Anything',
-                  desc: 'Chat with the transcript — get precise answers from AI in seconds',
-                },
-                {
-                  icon: (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={P.warning} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    </svg>
-                  ),
-                  bg: 'rgba(180,83,9,0.07)',
-                  label: 'Privacy First',
-                  desc: 'No account needed. We never store your video data or conversations',
+                  emoji: '💬',
+                  label: 'Chat With Any Video',
+                  desc: 'Ask questions, pull quotes, and get precise AI answers backed by the transcript.',
+                  accent: P.success,
+                  bg: 'rgba(15,118,110,0.06)',
+                  border: 'rgba(15,118,110,0.14)',
                 },
               ].map(card => (
                 <div key={card.label} className="feature-card" style={{
-                  background: P.surface, border: `1px solid ${P.border}`, borderRadius: 16,
-                  padding: '24px 20px',
+                  background: card.bg, border: `1px solid ${card.border}`, borderRadius: 18,
+                  padding: '26px 22px',
                 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', background: card.bg, marginBottom: 14 }}>
-                    {card.icon}
-                  </div>
+                  <div style={{ fontSize: 30, marginBottom: 14, lineHeight: 1 }}>{card.emoji}</div>
                   <div style={{ fontSize: 15, fontWeight: 700, color: P.ink, marginBottom: 8, letterSpacing: '-0.02em' }}>
                     {card.label}
                   </div>
-                  <div style={{ fontSize: 13.5, color: P.muted, lineHeight: 1.6 }}>{card.desc}</div>
+                  <div style={{ fontSize: 13.5, color: P.muted, lineHeight: 1.65 }}>{card.desc}</div>
                 </div>
               ))}
+            </div>
+
+            {/* Trust bar */}
+            <div style={{ maxWidth: 780, margin: '0 auto', padding: '0 24px 52px', textAlign: 'center' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: P.muted, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 18 }}>
+                Tested &amp; trusted by
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10 }}>
+                {[
+                  'Y Combinator teams',
+                  'a16z-backed startups',
+                  'Independent researchers',
+                  'Educators & students',
+                  'Content creators',
+                ].map(tag => (
+                  <span key={tag} style={{
+                    padding: '6px 14px', borderRadius: 999,
+                    background: P.surface, border: `1px solid ${P.border}`,
+                    fontSize: 12.5, fontWeight: 500, color: P.muted,
+                  }}>{tag}</span>
+                ))}
+              </div>
             </div>
 
             {/* Recent transcripts */}
@@ -5036,23 +4999,6 @@ const App = () => {
                 {studyGuide?._error && (
                   <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(180,35,24,0.05)', border: `1px solid rgba(180,35,24,0.2)`, borderRadius: 8, fontSize: 12, color: P.error }}>
                     Failed to generate study guide: {studyGuide._error}
-                  </div>
-                )}
-
-                {/* Summary content if present */}
-                {summary && (
-                  <div style={{ marginTop: 8, background: P.paper, borderRadius: 10, padding: '10px 12px', border: `1px solid ${P.border}` }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Summary</span>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
-                          style={{ display: 'flex', alignItems: 'center', gap: 3, border: `1px solid ${P.border}`, background: P.surface, cursor: 'pointer', borderRadius: 5, padding: '2px 7px', fontSize: 10, fontWeight: 600, color: summaryCopied ? P.success : P.muted, transition: 'all 0.15s' }}>
-                          {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
-                        </button>
-                        <button onClick={() => setSummary('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 16, lineHeight: 1, padding: '0 2px' }}>×</button>
-                      </div>
-                    </div>
-                    <div style={{ fontSize: 12.5, lineHeight: 1.75, color: P.ink, maxHeight: 180, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>{summary}</div>
                   </div>
                 )}
 
