@@ -2847,6 +2847,7 @@ const App = () => {
   const [summarizing, setSummarizing]     = useState(false);
   const [summaryCopied, setSummaryCopied] = useState(false);
   const [showTimestamps, setShowTimestamps] = useState(true);
+  const [showTopics, setShowTopics]         = useState(false);
   const [showQA, setShowQA]               = useState(false);
   const [qaQuestion, setQaQuestion]       = useState('');
   const [qaMessages, setQaMessages]       = useState([]);
@@ -3244,7 +3245,7 @@ const App = () => {
   const resetAll = () => {
     setVideoUrl(''); setTranscript(''); setSegments([]); setIsTranslated(false);
     setTranscriptSource(''); setCurrentVideoId(null); setCurrentPlatform('youtube'); setCurrentThumbnail(null); setError(''); setSearch('');
-    setSummary(''); setShowTimestamps(true); setShowQA(false);
+    setSummary(''); setShowTimestamps(true); setShowTopics(false); setShowQA(false);
     setQaQuestion(''); setQaMessages([]);
     setTimeline(null);
     setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
@@ -3302,7 +3303,7 @@ const App = () => {
 
     setError(''); setTranscript(''); setTranscriptSource('');
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
-    setSummary(''); setTimeline(null);
+    setSummary(''); setTimeline(null); setShowTopics(false);
     setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
@@ -3381,7 +3382,7 @@ const App = () => {
     const { platform, id: videoId, url: videoCanonical } = parsed;
     setLangRefetching(true);
     setLangRefetchMsg('');
-    setSearch(''); setSummary(''); setTimeline(null); setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]);
+    setSearch(''); setSummary(''); setTimeline(null); setShowTopics(false); setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]);
     const apiUrl = platform === 'vimeo'
       ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${newLang}`
       : `/api/transcript?videoId=${videoId}&lang=${newLang}`;
@@ -3506,10 +3507,8 @@ const App = () => {
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
       if (!res.ok) throw new Error(data.error || 'Failed to generate timeline');
       setTimeline(data.sections || []);
-      setActiveTab('timeline');
     } catch (err) {
       setTimeline([{ title: 'Error', startSeconds: 0, summary: err.message, _error: true }]);
-      setActiveTab('timeline');
     } finally { setTimelineLoading(false); }
   };
 
@@ -4361,7 +4360,6 @@ const App = () => {
               <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
                 {[
                   { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> },
-                  { key: 'timeline', label: 'Timeline', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><line x1="12" y1="2" x2="12" y2="22"/><polyline points="17 7 12 2 7 7"/><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg> },
                   { key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
                   ...(summary ? [{ key: 'summary', label: 'Summary', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
                   ...(studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
@@ -4410,6 +4408,17 @@ const App = () => {
                               <div style={{ position: 'absolute', top: 2, left: showTimestamps ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
                             </div>
                           </div>
+                          {/* Topics toggle */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <span style={{ fontSize: 11, color: P.muted, whiteSpace: 'nowrap' }}>Topics</span>
+                            <div onClick={() => {
+                              const next = !showTopics;
+                              setShowTopics(next);
+                              if (next && !timeline && !timelineLoading) generateTimeline();
+                            }} style={{ width: 28, height: 16, borderRadius: 8, background: showTopics ? '#7C3AED' : P.border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+                              <div style={{ position: 'absolute', top: 2, left: showTopics ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                            </div>
+                          </div>
                           {/* Language pill */}
                           <label style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px 3px 7px', borderRadius: 20, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', position: 'relative', transition: 'border-color 0.15s' }}
                             onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; }}
@@ -4443,31 +4452,55 @@ const App = () => {
                         </div>
                       )}
                       {segments.length > 0 && showTimestamps ? (
-                        segments.map((seg, i) => (
-                          <div key={i}
-                            ref={el => { segmentRefs.current[i] = el; }}
-                            onClick={() => { setSelectedSegment(selectedSegment === i ? null : i); seekToTime(seg.seconds); }}
-                            style={{
-                              display: 'grid', gridTemplateColumns: '54px 1fr',
-                              gap: 0, padding: '0',
-                              background: selectedSegment === i ? 'rgba(45,108,223,0.08)' : playingSegment === i ? 'rgba(91,155,213,0.13)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'),
-                              cursor: 'pointer', transition: 'background 0.15s',
-                              borderLeft: playingSegment === i ? `3px solid ${P.accent}` : '3px solid transparent',
-                              borderBottom: `1px solid ${selectedSegment === i ? 'rgba(45,108,223,0.15)' : P.border}`,
-                            }}
-                            onMouseEnter={e => { if (selectedSegment !== i && playingSegment !== i) e.currentTarget.style.background = 'rgba(45,108,223,0.03)'; }}
-                            onMouseLeave={e => { if (selectedSegment !== i) e.currentTarget.style.background = playingSegment === i ? 'rgba(45,108,223,0.05)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'); }}
-                          >
-                            <button
-                              onClick={e => { e.stopPropagation(); seekToTime(seg.seconds); setSelectedSegment(i); }}
-                              style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '10px 6px 10px 0', background: 'none', border: 'none', cursor: 'pointer', color: selectedSegment === i ? P.accent : playingSegment === i ? '#5B9BD5' : '#999', fontWeight: playingSegment === i ? 700 : 600, fontSize: 10.5, fontFamily: 'monospace', flexShrink: 0 }}>
-                              {formatTime(seg.seconds)}
-                            </button>
-                            <div style={{ padding: '10px 14px 10px 8px', fontSize: 13.5, lineHeight: 1.7, color: P.ink, fontWeight: playingSegment === i ? 600 : selectedSegment === i ? 500 : 400 }}>
-                              {highlightText(seg.text)}
-                            </div>
-                          </div>
-                        ))
+                        (() => {
+                          // Pre-compute which segment index starts each topic section
+                          const sectionBreaks = (showTopics && timeline && !timeline[0]?._error)
+                            ? timeline.map(sec => segments.findIndex(s => s.seconds >= sec.startSeconds)).filter(idx => idx >= 0)
+                            : [];
+                          return segments.map((seg, i) => {
+                            const secIdx = sectionBreaks.indexOf(i);
+                            const section = secIdx >= 0 ? timeline[secIdx] : null;
+                            return (
+                              <React.Fragment key={i}>
+                                {section && (
+                                  <div
+                                    onClick={() => seekToTime(section.startSeconds)}
+                                    style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 14px 7px 10px', background: 'rgba(124,58,237,0.06)', borderBottom: `1px solid rgba(124,58,237,0.15)`, borderTop: i > 0 ? `1px solid rgba(124,58,237,0.15)` : 'none', cursor: 'pointer' }}
+                                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(124,58,237,0.11)'}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(124,58,237,0.06)'}
+                                  >
+                                    <span style={{ fontFamily: 'monospace', fontSize: 10, fontWeight: 700, color: '#7C3AED', flexShrink: 0 }}>{formatTime(section.startSeconds)}</span>
+                                    <span style={{ fontSize: 11.5, fontWeight: 700, color: '#5B21B6', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{section.title}</span>
+                                    {timelineLoading && secIdx === 0 && <span style={{ fontSize: 10, color: '#7C3AED', opacity: 0.6 }}>loading…</span>}
+                                  </div>
+                                )}
+                                <div
+                                  ref={el => { segmentRefs.current[i] = el; }}
+                                  onClick={() => { setSelectedSegment(selectedSegment === i ? null : i); seekToTime(seg.seconds); }}
+                                  style={{
+                                    display: 'grid', gridTemplateColumns: '54px 1fr',
+                                    gap: 0, padding: '0',
+                                    background: selectedSegment === i ? 'rgba(45,108,223,0.08)' : playingSegment === i ? 'rgba(91,155,213,0.13)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'),
+                                    cursor: 'pointer', transition: 'background 0.15s',
+                                    borderLeft: playingSegment === i ? `3px solid ${P.accent}` : '3px solid transparent',
+                                    borderBottom: `1px solid ${selectedSegment === i ? 'rgba(45,108,223,0.15)' : P.border}`,
+                                  }}
+                                  onMouseEnter={e => { if (selectedSegment !== i && playingSegment !== i) e.currentTarget.style.background = 'rgba(45,108,223,0.03)'; }}
+                                  onMouseLeave={e => { if (selectedSegment !== i) e.currentTarget.style.background = playingSegment === i ? 'rgba(45,108,223,0.05)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'); }}
+                                >
+                                  <button
+                                    onClick={e => { e.stopPropagation(); seekToTime(seg.seconds); setSelectedSegment(i); }}
+                                    style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '10px 6px 10px 0', background: 'none', border: 'none', cursor: 'pointer', color: selectedSegment === i ? P.accent : playingSegment === i ? '#5B9BD5' : '#999', fontWeight: playingSegment === i ? 700 : 600, fontSize: 10.5, fontFamily: 'monospace', flexShrink: 0 }}>
+                                    {formatTime(seg.seconds)}
+                                  </button>
+                                  <div style={{ padding: '10px 14px 10px 8px', fontSize: 13.5, lineHeight: 1.7, color: P.ink, fontWeight: playingSegment === i ? 600 : selectedSegment === i ? 500 : 400 }}>
+                                    {highlightText(seg.text)}
+                                  </div>
+                                </div>
+                              </React.Fragment>
+                            );
+                          });
+                        })()
                       ) : (
                         <div style={{ padding: '20px', fontSize: 14, lineHeight: 1.85, color: P.ink }}>
                           {highlightText(transcript)}
@@ -4482,75 +4515,6 @@ const App = () => {
                       <span style={{ color: P.border }}>·</span>
                       <span style={{ fontSize: 11, color: P.muted }}>~<strong style={{ color: P.ink }}>{readingMins}</strong> min read</span>
                     </div>
-                  </div>
-                )}
-
-                {/* Chapters tab */}
-                {activeTab === 'timeline' && (
-                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-                    {timelineLoading ? (
-                      <div style={{ padding: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: P.muted, fontSize: 13 }}>
-                        <SpinnerIcon size={14} /> Building timeline…
-                      </div>
-                    ) : timeline && timeline.length > 0 ? (
-                      <>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>{timeline.filter(s => !s._error).length} sections · click to jump</span>
-                          <button onClick={generateTimeline} disabled={timelineLoading} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: 0 }}>Refresh</button>
-                        </div>
-                        {timeline.map((section, si) => {
-                          if (section._error) return (
-                            <div key={si} style={{ padding: '10px 16px', fontSize: 12, color: P.error }}>{section.summary}</div>
-                          );
-                          // Gather segments that fall within this section's time range
-                          const nextStart = si + 1 < timeline.length ? timeline[si + 1].startSeconds : Infinity;
-                          const sectionSegs = segments.filter(s => s.seconds >= section.startSeconds && s.seconds < nextStart);
-                          return (
-                            <div key={si} style={{ borderBottom: `1px solid ${P.border}` }}>
-                              {/* Section header — clicking seeks video */}
-                              <div
-                                onClick={() => seekToTime(section.startSeconds)}
-                                style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 16px', cursor: 'pointer', background: 'rgba(45,108,223,0.03)', transition: 'background 0.12s' }}
-                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(45,108,223,0.07)'}
-                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(45,108,223,0.03)'}
-                              >
-                                <span onClick={e => { e.stopPropagation(); seekToTime(section.startSeconds); }} style={{ fontFamily: 'monospace', fontSize: 11, fontWeight: 700, color: P.accent, flexShrink: 0, minWidth: 36, paddingTop: 2 }}>{formatTime(section.startSeconds)}</span>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, marginBottom: 3 }}>{section.title}</div>
-                                  <div style={{ fontSize: 12, color: P.muted, lineHeight: 1.5 }}>{section.summary}</div>
-                                </div>
-                                <svg style={{ flexShrink: 0, color: P.accent, marginTop: 2 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                              </div>
-                              {/* Transcript segments within this section */}
-                              {sectionSegs.length > 0 && (
-                                <div style={{ background: '#fff' }}>
-                                  {sectionSegs.map((seg, i) => (
-                                    <div key={i}
-                                      onClick={() => seekToTime(seg.seconds)}
-                                      style={{ display: 'grid', gridTemplateColumns: '50px 1fr', gap: 0, cursor: 'pointer', borderTop: `1px solid ${P.border}`, transition: 'background 0.1s' }}
-                                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(45,108,223,0.04)'}
-                                      onMouseLeave={e => e.currentTarget.style.background = '#fff'}
-                                    >
-                                      <span style={{ padding: '8px 6px 8px 16px', fontFamily: 'monospace', fontSize: 10.5, fontWeight: 600, color: P.muted, display: 'flex', alignItems: 'flex-start', paddingTop: 10 }}>{formatTime(seg.seconds)}</span>
-                                      <span style={{ padding: '8px 14px 8px 4px', fontSize: 12.5, lineHeight: 1.65, color: P.ink }}>{seg.text}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </>
-                    ) : (
-                      <div style={{ padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontSize: 13, color: P.muted }}>No timeline generated yet.</span>
-                        <button onClick={generateTimeline} style={{ padding: '8px 18px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', fontSize: 13, fontWeight: 600, color: P.ink, transition: 'all 0.15s' }}
-                          onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.25)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.border; }}>
-                          Build Timeline
-                        </button>
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -5017,9 +4981,6 @@ const App = () => {
                   { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
                     onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
-                  { title: 'Timeline', sub: 'Transcript segmented by topic', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
-                    icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><polyline points="17 7 12 2 7 7"/><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg>,
-                    onClick: timeline && !timeline[0]?._error ? () => setActiveTab('timeline') : generateTimeline, active: !!timeline && !timeline[0]?._error, loading: timelineLoading },
                 ].map(item => (
                   <div key={item.title}
                     onClick={item.loading ? undefined : item.onClick}
