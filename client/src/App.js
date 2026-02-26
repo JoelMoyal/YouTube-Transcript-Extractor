@@ -3245,6 +3245,9 @@ const App = () => {
     setCurrentTitle(entry.title || '');
     setCurrentChannel(entry.channel || '');
     setError(''); setSearch('');
+    setSummary(''); setTimeline(null); setShowQA(false); setQaMessages([]);
+    setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
+    setActiveTab('transcript');
   };
 
   const resetAll = () => {
