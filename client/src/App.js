@@ -2623,69 +2623,64 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                 )}
               </section>
 
-              {/* ── Share ScribeSnap ── */}
-              <section className="ds-card ds-share">
-                <div className="ds-share-head">
-                  <div className="ds-share-icon">
+              {/* ── Invite friends (sidebar referral card) ── */}
+              <section className="ds-card ds-referral">
+                <div className="ds-referral-head">
+                  <div className="ds-referral-icon">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                     </svg>
                   </div>
-                  <h2 className="ds-share-title">Share ScribeSnap</h2>
+                  <h2 className="ds-referral-title">Invite friends, earn credits</h2>
                 </div>
-                <p className="ds-share-desc">Tell others about this project to support us.</p>
-                <button className="ds-share-item" onClick={copyShareLink}>
-                  <span className="ds-share-item-icon">
-                    {copyLinkDone ? (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    ) : (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                      </svg>
-                    )}
-                  </span>
-                  {copyLinkDone ? 'Copied!' : 'Copy link'}
-                </button>
-                <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent('Check out ScribeSnap — instant YouTube transcripts + AI tools: ' + window.location.origin)}`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="ds-share-item"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <span className="ds-share-item-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                    </svg>
-                  </span>
-                  Share on X
-                </a>
-                <a
-                  href={`mailto:?subject=${encodeURIComponent('Check out ScribeSnap')}&body=${encodeURIComponent('I\'ve been using ScribeSnap to extract YouTube transcripts and use AI tools on them. Check it out: ' + window.location.origin)}`}
-                  className="ds-share-item"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <span className="ds-share-item-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-                    </svg>
-                  </span>
-                  Share via email
-                </a>
-                <a
-                  href={`https://wa.me/?text=${encodeURIComponent('Check out ScribeSnap — instant YouTube transcripts + AI tools: ' + window.location.origin)}`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="ds-share-item"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <span className="ds-share-item-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                    </svg>
-                  </span>
-                  WhatsApp
-                </a>
+                <div className="ds-referral-badge">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  +3 free credits per friend who signs up
+                </div>
+                <p className="ds-referral-desc">
+                  Share your personal link. Every friend who creates an account using it gets a bonus — and so do you.
+                </p>
+                <div className="ds-referral-link-row">
+                  <div className="ds-referral-link-box">{refLink}</div>
+                  <button
+                    className={`ds-referral-copy-btn${copyRefDone ? ' done' : ''}`}
+                    onClick={copyRefLink}
+                  >
+                    {copyRefDone ? '✓ Copied!' : 'Copy link'}
+                  </button>
+                </div>
+                <div className="ds-referral-share-row">
+                  <button className="ds-referral-share-btn ds-referral-share-wa"
+                    onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank')}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    WhatsApp
+                  </button>
+                  <button className="ds-referral-share-btn ds-referral-share-x"
+                    onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I use ScribeSnap to get YouTube transcripts instantly 🎬 Try it free — use my invite link and we both get bonus credits 👉 ${refLink}`)}`, '_blank')}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    Share on X
+                  </button>
+                  <button className="ds-referral-share-btn ds-referral-share-email"
+                    onClick={() => window.open(`mailto:?subject=${encodeURIComponent('Try ScribeSnap — free YouTube transcript tool')}&body=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank')}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+                    Email
+                  </button>
+                </div>
+                {((user?.user_metadata?.referral_count || 0) > 0 || (user?.user_metadata?.referral_bonus || 0) > 0) && (
+                  <div className="ds-referral-stats">
+                    <div className="ds-referral-stat">
+                      <span className="ds-referral-stat-value">{user?.user_metadata?.referral_count || 0}</span>
+                      <span className="ds-referral-stat-label">friends joined</span>
+                    </div>
+                    <div className="ds-referral-stat">
+                      <span className="ds-referral-stat-value">+{user?.user_metadata?.referral_bonus || 0}</span>
+                      <span className="ds-referral-stat-label">credits earned</span>
+                    </div>
+                  </div>
+                )}
               </section>
             </aside>
           )}
@@ -3662,7 +3657,10 @@ const App = () => {
         @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
         @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
         @keyframes dot-flicker { 0%,80%,100% { opacity:0.2; transform:scale(0.8); } 40% { opacity:1; transform:scale(1); } }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .fade-up { animation: fadeUp 0.3s ease forwards; }
+        .marquee-track { animation: marquee 28s linear infinite; }
+        .marquee-track:hover { animation-play-state: paused; }
         * { box-sizing: border-box; }
         body { margin: 0; background: ${P.paper}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         ::-webkit-scrollbar { width: 5px; }
@@ -3860,32 +3858,28 @@ const App = () => {
                 fontSize: 12, fontWeight: 600, color: P.accent,
               }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
-                ✦ Built for Silicon Valley &amp; fast-growing teams · Free
+                YouTube &amp; Vimeo · Free · No account required
               </div>
 
               <h1 style={{
-                fontSize: 'clamp(30px, 5.5vw, 52px)', fontWeight: 800, color: P.ink,
+                fontSize: 'clamp(30px, 5.5vw, 50px)', fontWeight: 800, color: P.ink,
                 letterSpacing: '-0.04em', lineHeight: 1.12, margin: '0 0 20px',
               }}>
-                Turn any YouTube video into<br />
-                <span style={{
-                  background: 'linear-gradient(135deg, #2D6CDF 0%, #7C3AED 100%)',
-                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>transcripts, summaries &amp; insights</span>
+                Transcripts, summaries, flashcards &amp; more —<br />
+                <span style={{ color: P.accent }}>for any YouTube or Vimeo video</span>
               </h1>
               <p style={{ fontSize: 16, color: P.muted, margin: '0 0 40px', lineHeight: 1.7, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>
-                Paste a link and get the full transcript in seconds. Summarize with AI, generate flashcards, ask questions, or build a study guide — no account needed.
+                Paste a link and get the full transcript in seconds. Then summarize, ask AI questions, generate flashcards, or build a study guide — all in one place.
               </p>
 
               {/* Input card */}
               <div style={{
                 background: P.surface, border: `1px solid ${P.border}`,
-                borderRadius: 18, boxShadow: '0 8px 48px rgba(28,25,23,0.1)',
-                padding: 8,
+                borderRadius: 20, boxShadow: '0 12px 56px rgba(28,25,23,0.13)',
+                padding: 10,
               }}>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: P.paper, borderRadius: 12, border: `1px solid ${P.border}` }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: P.paper, borderRadius: 14, border: `1px solid ${P.border}` }}>
                     {parseVideoUrl(videoUrl)?.platform === 'vimeo' ? <VimeoIcon /> : <YouTubeIcon />}
                     <input
                       ref={urlInputRef}
@@ -3897,7 +3891,7 @@ const App = () => {
                       placeholder="Paste a YouTube or Vimeo URL…"
                       style={{
                         flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                        fontSize: 16, color: P.ink,
+                        fontSize: 17, color: P.ink,
                       }}
                     />
                   </div>
@@ -3905,31 +3899,23 @@ const App = () => {
                     onClick={getTranscript}
                     disabled={loading}
                     style={{
-                      flexShrink: 0, padding: '0 24px', borderRadius: 12, border: 'none',
+                      flexShrink: 0, padding: '0 28px', borderRadius: 14, border: 'none',
                       background: loading ? `rgba(45,108,223,0.5)` : P.accent,
-                      color: 'white', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-                      display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap',
+                      color: 'white', fontSize: 16, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
+                      display: 'flex', alignItems: 'center', gap: 9, whiteSpace: 'nowrap',
                       transition: 'background 0.15s',
-                      minWidth: 130,
+                      minWidth: 148,
                     }}
                     onMouseEnter={e => { if (!loading) e.currentTarget.style.background = P.accentHover; }}
                     onMouseLeave={e => { e.currentTarget.style.background = loading ? `rgba(45,108,223,0.5)` : P.accent; }}
                   >
                     {loading ? <SpinnerIcon /> : (
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <polygon points="5 3 19 12 5 21 5 3"/>
                       </svg>
                     )}
                     {loading ? 'Extracting…' : 'Extract'}
                   </button>
-                </div>
-
-                {/* Hint row */}
-                <div style={{ display: 'flex', alignItems: 'center', padding: '9px 12px 5px' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: P.muted }}>
-                    <YouTubeIcon /> <VimeoIcon size={13} />
-                    <span>YouTube &amp; Vimeo supported</span>
-                  </span>
                 </div>
               </div>
 
@@ -4061,24 +4047,43 @@ const App = () => {
               ))}
             </div>
 
-            {/* Trust bar */}
-            <div style={{ maxWidth: 780, margin: '0 auto', padding: '0 24px 52px', textAlign: 'center' }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: P.muted, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 18 }}>
-                Tested &amp; trusted by
+            {/* Marquee trust bar */}
+            <div style={{ padding: '0 0 56px', overflow: 'hidden', position: 'relative' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: P.muted, letterSpacing: '0.1em', textTransform: 'uppercase', textAlign: 'center', marginBottom: 20 }}>
+                Tested &amp; trusted by teams across Silicon Valley &amp; beyond
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 10 }}>
+              {/* fade edges */}
+              <div style={{ position: 'absolute', left: 0, top: 32, bottom: 0, width: 100, background: `linear-gradient(to right, ${P.paper}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', right: 0, top: 32, bottom: 0, width: 100, background: `linear-gradient(to left, ${P.paper}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+              <div className="marquee-track" style={{ display: 'flex', gap: 12, width: 'max-content' }}>
                 {[
-                  'Y Combinator teams',
-                  'a16z-backed startups',
-                  'Independent researchers',
-                  'Educators & students',
-                  'Content creators',
-                ].map(tag => (
-                  <span key={tag} style={{
-                    padding: '6px 14px', borderRadius: 999,
+                  { icon: '🏢', label: 'Silicon Valley startups' },
+                  { icon: '🎓', label: 'Researchers & academics' },
+                  { icon: '🚀', label: 'YC-backed founders' },
+                  { icon: '🎙️', label: 'Podcast creators' },
+                  { icon: '📚', label: 'Educators & students' },
+                  { icon: '🗞️', label: 'Journalists & writers' },
+                  { icon: '💼', label: 'Product managers' },
+                  { icon: '🌍', label: '120+ countries' },
+                  { icon: '🏢', label: 'Silicon Valley startups' },
+                  { icon: '🎓', label: 'Researchers & academics' },
+                  { icon: '🚀', label: 'YC-backed founders' },
+                  { icon: '🎙️', label: 'Podcast creators' },
+                  { icon: '📚', label: 'Educators & students' },
+                  { icon: '🗞️', label: 'Journalists & writers' },
+                  { icon: '💼', label: 'Product managers' },
+                  { icon: '🌍', label: '120+ countries' },
+                ].map((item, i) => (
+                  <span key={i} style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 7,
+                    padding: '8px 18px', borderRadius: 999,
                     background: P.surface, border: `1px solid ${P.border}`,
-                    fontSize: 12.5, fontWeight: 500, color: P.muted,
-                  }}>{tag}</span>
+                    fontSize: 13, fontWeight: 500, color: P.ink,
+                    whiteSpace: 'nowrap', flexShrink: 0,
+                  }}>
+                    <span style={{ fontSize: 15 }}>{item.icon}</span>
+                    {item.label}
+                  </span>
                 ))}
               </div>
             </div>
@@ -5107,20 +5112,32 @@ const App = () => {
       {studyGuideFull && studyGuide && !studyGuide._error && (
         <div style={{ position: 'fixed', inset: 0, background: '#FAFAF8', zIndex: 9998, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Toolbar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 28px', borderBottom: `1px solid ${P.border}`, background: '#fff', flexShrink: 0 }}>
-            <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.success }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 24px', borderBottom: `1px solid ${P.border}`, background: '#fff', flexShrink: 0 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.success, flexShrink: 0 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
             </div>
-            <span style={{ fontSize: 14.5, fontWeight: 700, color: P.ink }}>Study Guide</span>
-            <span style={{ fontSize: 12, color: P.muted, marginLeft: 4 }}>· Press Esc to close</span>
-            {/* Prominent close button */}
-            <button onClick={() => setStudyGuideFull(false)}
-              style={{ marginLeft: 'auto', width: 36, height: 36, borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.muted, transition: 'all 0.15s', flexShrink: 0 }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,35,24,0.07)'; e.currentTarget.style.borderColor = 'rgba(180,35,24,0.25)'; e.currentTarget.style.color = P.error; }}
+            <div>
+              <div style={{ fontSize: 14.5, fontWeight: 700, color: P.ink, lineHeight: 1.2 }}>Study Guide</div>
+              <div style={{ fontSize: 11, color: P.muted, marginTop: 1 }}>{currentTitle || 'Full study guide'}</div>
+            </div>
+            <button
+              onClick={() => setStudyGuideFull(false)}
+              style={{
+                marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 7,
+                padding: '9px 18px', borderRadius: 10,
+                border: `1px solid ${P.border}`, background: P.paper,
+                cursor: 'pointer', color: P.muted, fontSize: 13, fontWeight: 600,
+                transition: 'all 0.15s', flexShrink: 0,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,35,24,0.06)'; e.currentTarget.style.borderColor = 'rgba(180,35,24,0.28)'; e.currentTarget.style.color = P.error; }}
               onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = P.muted; }}
               title="Close (Esc)"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+              Close
+              <span style={{ fontSize: 10, opacity: 0.5, fontWeight: 500, marginLeft: 2 }}>Esc</span>
             </button>
           </div>
           {/* Scrollable content */}
