@@ -406,7 +406,19 @@ function initCredits() {
 
 const CreditsWidget = ({ credits, onUpgrade, user, onShowReferralPromo }) => {
   const [open, setOpen] = React.useState(false);
+  const [refCopied, setRefCopied] = React.useState(false);
   const ref = React.useRef(null);
+  const refLink = user ? `${window.location.origin}?ref=${user.id}` : '';
+  const copyRefLink = () => {
+    if (!refLink) return;
+    navigator.clipboard.writeText(refLink).then(() => {
+      setRefCopied(true);
+      setTimeout(() => setRefCopied(false), 2000);
+    });
+  };
+  const shareWA    = () => window.open(`https://wa.me/?text=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank');
+  const shareX     = () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I use ScribeSnap to get YouTube transcripts instantly 🎬 Try it free — use my invite link and we both get bonus credits 👉 ${refLink}`)}`, '_blank');
+  const shareEmail = () => window.open(`mailto:?subject=${encodeURIComponent('Try ScribeSnap — free YouTube transcript tool')}&body=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank');
   const used = credits?.used ?? 0;
   const resetAt = credits?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS);
   const tierMax = credits?.tierMax || (credits?.userId ? CREDITS_MAX : CREDITS_FREE);
@@ -447,7 +459,7 @@ const CreditsWidget = ({ credits, onUpgrade, user, onShowReferralPromo }) => {
       {open && (
         <div className="fade-up" style={{
           position: 'absolute', right: 0, top: 'calc(100% + 8px)',
-          width: 220, background: P.surface, border: `1px solid ${P.border}`,
+          width: 290, background: P.surface, border: `1px solid ${P.border}`,
           borderRadius: 14, boxShadow: '0 8px 32px rgba(28,25,23,0.12)',
           padding: '14px 16px', zIndex: 200,
         }}>
@@ -2776,7 +2788,11 @@ const App = () => {
   const [flashcardKnown, setFlashcardKnown]       = useState(new Set());
   const [studyGuide, setStudyGuide]               = useState(null);     // {overview, objectives, keyConcepts, sections, reviewQuestions}
   const [studyGuideLoading, setStudyGuideLoading] = useState(false);
-  const [activeTab, setActiveTab]         = useState('transcript'); // 'transcript' | 'chapters' | 'editor'
+  const [studyGuideFull, setStudyGuideFull]       = useState(false);
+  const [sgQuestion, setSgQuestion]               = useState('');
+  const [sgMessages, setSgMessages]               = useState([]);       // [{role, text, isError?}]
+  const [sgLoading, setSgLoading]                 = useState(false);
+  const [activeTab, setActiveTab]         = useState('transcript'); // 'transcript' | 'chapters' | 'editor' | 'summary' | 'study-guide'
   const [currentTitle, setCurrentTitle]   = useState('');
   const [currentChannel, setCurrentChannel] = useState('');
   const [selectedSegment, setSelectedSegment] = useState(null);
@@ -2825,7 +2841,7 @@ const App = () => {
       if (e.key === 'ArrowRight') fcNext();
       else if (e.key === 'ArrowLeft') fcPrev();
       else if (e.key === ' ') { e.preventDefault(); setFlashcardFlipped(f => !f); }
-      else if (e.key === 'Escape') setShowFlashcardModal(false);
+      else if (e.key === 'Escape') closeFlashcardModal();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -3158,7 +3174,7 @@ const App = () => {
     setSummary(''); setShowTimestamps(true); setShowQA(false);
     setQaQuestion(''); setQaMessages([]);
     setChapters([]); setShowChapters(false);
-    setFlashcards([]); setStudyGuide(null); setShowFlashcardModal(false);
+    setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
     setActiveTab('transcript');
     setCurrentTitle(''); setCurrentChannel('');
     setSelectedSegment(null); setExportToggle(false);
@@ -3214,7 +3230,7 @@ const App = () => {
     setError(''); setTranscript(''); setTranscriptSource('');
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
     setSummary(''); setChapters([]); setShowChapters(false);
-    setFlashcards([]); setStudyGuide(null); setQaMessages([]); setShowQA(false);
+    setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
 
@@ -3292,7 +3308,7 @@ const App = () => {
     const { platform, id: videoId, url: videoCanonical } = parsed;
     setLangRefetching(true);
     setLangRefetchMsg('');
-    setSearch(''); setSummary(''); setChapters([]); setFlashcards([]); setStudyGuide(null); setQaMessages([]);
+    setSearch(''); setSummary(''); setChapters([]); setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]);
     const apiUrl = platform === 'vimeo'
       ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${newLang}`
       : `/api/transcript?videoId=${videoId}&lang=${newLang}`;
@@ -3399,6 +3415,7 @@ const App = () => {
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
       if (!res.ok) throw new Error(data.error || 'Failed to summarize');
       setSummary(data.summary);
+      setActiveTab('summary');
     } catch (err) { setSummary(`Error: ${err.message}`); }
     finally { setSummarizing(false); }
   };
@@ -3436,7 +3453,7 @@ const App = () => {
       const cards = data.flashcards || [];
       setFlashcards(cards);
       setFlashcardIndex(0); setFlashcardFlipped(false); setFlashcardKnown(new Set());
-      if (cards.length > 0) setShowFlashcardModal(true);
+      if (cards.length > 0) { pauseVideo(); setShowFlashcardModal(true); }
     } catch (err) { setFlashcards([]); }
     finally { setFlashcardsLoading(false); }
   };
@@ -3459,6 +3476,30 @@ const App = () => {
     finally { setStudyGuideLoading(false); }
   };
 
+  const pauseVideo = () => {
+    if (currentPlatform === 'vimeo') {
+      playerRef.current?.contentWindow?.postMessage(JSON.stringify({ method: 'pause' }), '*');
+    } else {
+      ytPlayerRef.current?.pauseVideo?.();
+    }
+  };
+  const resumeVideo = () => {
+    if (currentPlatform === 'vimeo') {
+      playerRef.current?.contentWindow?.postMessage(JSON.stringify({ method: 'play' }), '*');
+    } else {
+      ytPlayerRef.current?.playVideo?.();
+    }
+  };
+
+  const openFlashcardModal = () => {
+    pauseVideo();
+    setFlashcardIndex(0); setFlashcardFlipped(false);
+    setShowFlashcardModal(true);
+  };
+  const closeFlashcardModal = () => {
+    setShowFlashcardModal(false);
+  };
+
   const fcNext = () => {
     setFlashcardFlipped(false);
     setTimeout(() => setFlashcardIndex(i => Math.min(i + 1, flashcards.length - 1)), 150);
@@ -3474,6 +3515,25 @@ const App = () => {
       return next;
     });
     if (flashcardIndex < flashcards.length - 1) fcNext();
+  };
+
+  const askSgQuestion = async (overrideQ) => {
+    const q = (overrideQ || sgQuestion).trim();
+    if (!q || sgLoading) return;
+    setSgMessages(prev => [...prev, { role: 'user', text: q }]);
+    setSgQuestion('');
+    setSgLoading(true);
+    try {
+      const res = await fetch('/api/ask', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript, question: q }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      setSgMessages(prev => [...prev, { role: 'ai', text: data.answer }]);
+    } catch (err) {
+      setSgMessages(prev => [...prev, { role: 'ai', text: `Error: ${err.message}`, isError: true }]);
+    } finally { setSgLoading(false); }
   };
 
   const highlightText = (text) => {
@@ -4159,57 +4219,8 @@ const App = () => {
               </div>
             </div>
 
-            {/* ── BROWSER-STYLE TAB BAR — col 2-3, row 1 ──────────────────────── */}
-            <div style={{
-              gridColumn: '2 / 4', gridRow: 1,
-              display: 'flex', alignItems: 'flex-end',
-              height: 48,
-              background: P.paper,
-              borderBottom: `1px solid ${P.border}`,
-              paddingLeft: 10,
-              paddingTop: 8,
-              gap: 2,
-            }}>
-              {[
-                { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg> },
-                { key: 'chapters', label: 'Chapters', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> },
-                { key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
-                ...(studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', accentColor: P.success, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
-              ].map(tab => {
-                const isActive = activeTab === tab.key;
-                const labelColor = isActive ? (tab.accentColor || P.ink) : P.muted;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => { setActiveTab(tab.key); if (tab.key === 'chapters' && chapters.length === 0 && !chaptersLoading) detectChapters(); }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 6,
-                      padding: '7px 15px 8px',
-                      borderRadius: '7px 7px 0 0',
-                      border: isActive ? `1px solid ${P.border}` : '1px solid transparent',
-                      borderBottom: isActive ? `1px solid #fff` : '1px solid transparent',
-                      background: isActive ? '#fff' : 'transparent',
-                      color: labelColor,
-                      fontSize: 12.5,
-                      fontWeight: isActive ? 600 : 500,
-                      cursor: 'pointer',
-                      transition: 'background 0.12s, color 0.12s',
-                      marginBottom: '-1px',
-                      position: 'relative',
-                      whiteSpace: 'nowrap',
-                    }}
-                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(28,25,23,0.04)'; }}
-                    onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <span style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}>{tab.icon}</span>
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* ── CENTER — col 2, row 2 ─────────────────────────────────────────── */}
-            <div style={{ gridColumn: 2, gridRow: 2, display: 'flex', flexDirection: 'column', gap: 14, padding: '16px', overflow: 'hidden', background: P.paper, borderRight: `1px solid ${P.border}` }}>
+            {/* ── CENTER — col 2, rows 1-2 ─────────────────────────────────────── */}
+            <div style={{ gridColumn: 2, gridRow: '1 / 3', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: P.paper, borderRight: `1px solid ${P.border}` }}>
 
               {/* Video player card */}
               {currentVideoId && (
@@ -4271,8 +4282,39 @@ const App = () => {
                 </div>
               )}
 
+              {/* Browser-style tab bar — between video and content */}
+              <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
+                {[
+                  { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> },
+                  { key: 'chapters', label: 'Chapters', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> },
+                  { key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
+                  ...(summary ? [{ key: 'summary', label: 'Summary', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
+                  ...(studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
+                ].map(tab => {
+                  const isActive = activeTab === tab.key;
+                  return (
+                    <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
+                      display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 12,
+                      fontWeight: isActive ? 600 : 500,
+                      border: isActive ? `1px solid ${P.border}` : '1px solid transparent',
+                      borderBottom: isActive ? '1px solid #FFFFFF' : '1px solid transparent',
+                      borderRadius: '7px 7px 0 0', marginBottom: '-1px',
+                      background: isActive ? '#FFFFFF' : 'transparent',
+                      color: isActive ? P.ink : P.muted, cursor: 'pointer', transition: 'all 0.15s',
+                      whiteSpace: 'nowrap',
+                    }}
+                      onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; e.currentTarget.style.color = P.ink; }}}
+                      onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; }}}
+                    >
+                      {tab.icon}
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* Transcript card */}
-              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRadius: 16, boxShadow: '0 2px 12px rgba(28,25,23,0.07)', border: `1px solid ${P.border}`, overflow: 'hidden' }}>
+              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRadius: '0 0 16px 16px', boxShadow: '0 2px 12px rgba(28,25,23,0.07)', border: `1px solid ${P.border}`, borderTop: 'none', overflow: 'hidden' }}>
 
                 {/* Transcript tab content */}
                 {activeTab === 'transcript' && (
@@ -4424,6 +4466,43 @@ const App = () => {
                   </div>
                 )}
 
+                {/* Summary tab */}
+                {activeTab === 'summary' && (
+                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px' }}>
+                    {summarizing ? (
+                      <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
+                        <SpinnerIcon size={14} /> Summarizing…
+                      </div>
+                    ) : summary ? (
+                      <div style={{ maxWidth: 700, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ width: 34, height: 34, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.accent }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Summary</div>
+                              <div style={{ fontSize: 11.5, color: P.muted }}>AI-generated from transcript</div>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
+                              style={{ display: 'flex', alignItems: 'center', gap: 4, border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', borderRadius: 6, padding: '4px 10px', fontSize: 11, fontWeight: 600, color: summaryCopied ? P.success : P.muted, transition: 'all 0.15s' }}>
+                              {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
+                            </button>
+                            <button onClick={() => { setSummary(''); setActiveTab('transcript'); }}
+                              style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 6, transition: 'all 0.15s' }}
+                              onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+                              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+                            >Clear</button>
+                          </div>
+                        </div>
+                        <div style={{ padding: '18px 20px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', fontSize: 14, lineHeight: 1.8, color: P.ink, whiteSpace: 'pre-wrap' }}>{summary}</div>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+
                 {/* Study Guide tab */}
                 {activeTab === 'study-guide' && (
                   <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px' }}>
@@ -4431,113 +4510,186 @@ const App = () => {
                       <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
                         <SpinnerIcon size={14} /> Generating study guide…
                       </div>
-                    ) : studyGuide && !studyGuide._error ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 700, margin: '0 auto' }}>
-                        {/* Header */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.success }}>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    ) : studyGuide && !studyGuide._error ? (() => {
+                      const sgBody = (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 700, margin: '0 auto' }}>
+                          {/* Header */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.success }}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Study Guide</div>
+                                <div style={{ fontSize: 11.5, color: P.muted }}>AI-generated from transcript</div>
+                              </div>
                             </div>
-                            <div>
-                              <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Study Guide</div>
-                              <div style={{ fontSize: 11.5, color: P.muted }}>AI-generated from transcript</div>
-                            </div>
-                          </div>
-                          <button onClick={() => { setStudyGuide(null); setActiveTab('transcript'); }}
-                            style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 6, transition: 'all 0.15s' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
-                          >Clear</button>
-                        </div>
-
-                        {/* Overview */}
-                        <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
-                          <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 8 }}>Overview</div>
-                          <div style={{ fontSize: 14, lineHeight: 1.7, color: P.ink }}>{studyGuide.overview}</div>
-                        </div>
-
-                        {/* Learning Objectives */}
-                        {studyGuide.objectives?.length > 0 && (
-                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
-                            <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Learning Objectives</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                              {studyGuide.objectives.map((obj, i) => (
-                                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                                  <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                                    <span style={{ fontSize: 10, fontWeight: 700, color: P.success }}>{i + 1}</span>
-                                  </div>
-                                  <div style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink }}>{obj}</div>
-                                </div>
-                              ))}
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <button onClick={() => setStudyGuideFull(true)}
+                                title="Full screen"
+                                style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 5 }}
+                                onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                                Full Screen
+                              </button>
+                              <button onClick={() => { setStudyGuide(null); setSgMessages([]); setActiveTab('transcript'); }}
+                                style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 6, transition: 'all 0.15s' }}
+                                onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+                              >Clear</button>
                             </div>
                           </div>
-                        )}
 
-                        {/* Key Concepts */}
-                        {studyGuide.keyConcepts?.length > 0 && (
+                          {/* Overview */}
                           <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
-                            <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Key Concepts</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                              {studyGuide.keyConcepts.map((kc, i) => (
-                                <div key={i} style={{ paddingBottom: i < studyGuide.keyConcepts.length - 1 ? 10 : 0, borderBottom: i < studyGuide.keyConcepts.length - 1 ? `1px solid ${P.border}` : 'none' }}>
-                                  <span style={{ fontSize: 13.5, fontWeight: 700, color: P.success }}>{kc.term}</span>
-                                  <span style={{ fontSize: 13.5, color: P.muted }}> — </span>
-                                  <span style={{ fontSize: 13.5, color: P.ink, lineHeight: 1.6 }}>{kc.definition}</span>
-                                </div>
-                              ))}
-                            </div>
+                            <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 8 }}>Overview</div>
+                            <div style={{ fontSize: 14, lineHeight: 1.7, color: P.ink }}>{studyGuide.overview}</div>
                           </div>
-                        )}
 
-                        {/* Sections */}
-                        {studyGuide.sections?.length > 0 && (
-                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
-                            <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Sections</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                              {studyGuide.sections.map((sec, i) => (
-                                <div key={i} style={{ paddingBottom: i < studyGuide.sections.length - 1 ? 16 : 0, borderBottom: i < studyGuide.sections.length - 1 ? `1px solid ${P.border}` : 'none' }}>
-                                  <div style={{ fontSize: 14, fontWeight: 700, color: P.ink, marginBottom: 6 }}>{sec.title}</div>
-                                  <div style={{ fontSize: 13, lineHeight: 1.65, color: P.muted, marginBottom: sec.keyPoints?.length ? 10 : 0 }}>{sec.summary}</div>
-                                  {sec.keyPoints?.length > 0 && (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                                      {sec.keyPoints.map((pt, j) => (
-                                        <div key={j} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                                          <div style={{ width: 5, height: 5, borderRadius: '50%', background: P.success, flexShrink: 0, marginTop: 6 }} />
-                                          <div style={{ fontSize: 13, lineHeight: 1.6, color: P.ink }}>{pt}</div>
-                                        </div>
-                                      ))}
+                          {/* Learning Objectives */}
+                          {studyGuide.objectives?.length > 0 && (
+                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                              <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Learning Objectives</div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                {studyGuide.objectives.map((obj, i) => (
+                                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                    <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                                      <span style={{ fontSize: 10, fontWeight: 700, color: P.success }}>{i + 1}</span>
                                     </div>
-                                  )}
-                                </div>
-                              ))}
+                                    <div style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink }}>{obj}</div>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
 
-                        {/* Review Questions */}
-                        {studyGuide.reviewQuestions?.length > 0 && (
-                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', marginBottom: 16 }}>
-                            <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Review Questions</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                              {studyGuide.reviewQuestions.map((q, i) => (
-                                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', background: P.paper, borderRadius: 8 }}>
-                                  <span style={{ fontSize: 12, fontWeight: 700, color: P.success, flexShrink: 0, marginTop: 1 }}>Q{i + 1}</span>
-                                  <span style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink }}>{q}</span>
-                                </div>
-                              ))}
+                          {/* Key Concepts */}
+                          {studyGuide.keyConcepts?.length > 0 && (
+                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                              <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Key Concepts</div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                {studyGuide.keyConcepts.map((kc, i) => (
+                                  <div key={i} style={{ paddingBottom: i < studyGuide.keyConcepts.length - 1 ? 10 : 0, borderBottom: i < studyGuide.keyConcepts.length - 1 ? `1px solid ${P.border}` : 'none' }}>
+                                    <span style={{ fontSize: 13.5, fontWeight: 700, color: P.success }}>{kc.term}</span>
+                                    <span style={{ fontSize: 13.5, color: P.muted }}> — </span>
+                                    <span style={{ fontSize: 13.5, color: P.ink, lineHeight: 1.6 }}>{kc.definition}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Sections */}
+                          {studyGuide.sections?.length > 0 && (
+                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                              <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Sections</div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                {studyGuide.sections.map((sec, i) => (
+                                  <div key={i} style={{ paddingBottom: i < studyGuide.sections.length - 1 ? 16 : 0, borderBottom: i < studyGuide.sections.length - 1 ? `1px solid ${P.border}` : 'none' }}>
+                                    <div style={{ fontSize: 14, fontWeight: 700, color: P.ink, marginBottom: 6 }}>{sec.title}</div>
+                                    <div style={{ fontSize: 13, lineHeight: 1.65, color: P.muted, marginBottom: sec.keyPoints?.length ? 10 : 0 }}>{sec.summary}</div>
+                                    {sec.keyPoints?.length > 0 && (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                                        {sec.keyPoints.map((pt, j) => (
+                                          <div key={j} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                                            <div style={{ width: 5, height: 5, borderRadius: '50%', background: P.success, flexShrink: 0, marginTop: 6 }} />
+                                            <div style={{ fontSize: 13, lineHeight: 1.6, color: P.ink }}>{pt}</div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Review Questions */}
+                          {studyGuide.reviewQuestions?.length > 0 && (
+                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                              <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Review Questions</div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                {studyGuide.reviewQuestions.map((q, i) => (
+                                  <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', background: P.paper, borderRadius: 8 }}>
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: P.success, flexShrink: 0, marginTop: 1 }}>Q{i + 1}</span>
+                                    <span style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink }}>{q}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Ask ScribeSnap AI */}
+                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1.5px solid rgba(45,108,223,0.18)`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', marginBottom: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                              <div style={{ width: 26, height: 26, borderRadius: 7, background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)', border: '1.5px solid rgba(45,108,223,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 14, height: 14 }} />
+                              </div>
+                              <span style={{ fontSize: 12.5, fontWeight: 700, color: P.accent }}>Ask ScribeSnap AI</span>
+                              <span style={{ fontSize: 11.5, color: P.muted, marginLeft: 2 }}>— deeper questions about this video</span>
+                              {sgMessages.length > 0 && (
+                                <button onClick={() => setSgMessages([])} style={{ marginLeft: 'auto', border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 5 }}>Clear</button>
+                              )}
+                            </div>
+
+                            {/* Chat messages */}
+                            {sgMessages.length > 0 && (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
+                                {sgMessages.map((msg, i) => (
+                                  <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                                    {msg.role === 'ai' ? (
+                                      <div style={{ maxWidth: '90%', padding: '9px 13px', borderRadius: '3px 12px 12px 12px', background: P.paper, border: `1px solid ${P.border}`, fontSize: 13, lineHeight: 1.65, color: msg.isError ? P.error : P.ink }}>
+                                        {msg.text.split('\n').map((line, li, arr) => <React.Fragment key={li}>{line}{li < arr.length - 1 && <br />}</React.Fragment>)}
+                                      </div>
+                                    ) : (
+                                      <div style={{ maxWidth: '86%', padding: '9px 13px', borderRadius: '12px 12px 3px 12px', background: P.accent, fontSize: 13, lineHeight: 1.6, color: 'white' }}>{msg.text}</div>
+                                    )}
+                                  </div>
+                                ))}
+                                {sgLoading && (
+                                  <div style={{ display: 'flex', gap: 5, padding: '10px 13px', background: P.paper, border: `1px solid ${P.border}`, borderRadius: '3px 12px 12px 12px', width: 'fit-content' }}>
+                                    {[0,1,2].map(d => <div key={d} style={{ width: 5, height: 5, borderRadius: '50%', background: P.accent, opacity: 0.6, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Input */}
+                            <div style={{ display: 'flex', alignItems: 'center', background: P.paper, border: `1.5px solid ${P.border}`, borderRadius: 12, padding: '6px 6px 6px 14px', transition: 'border-color 0.2s' }}
+                              onFocus={() => {}} onBlur={() => {}}
+                            >
+                              <input
+                                value={sgQuestion}
+                                onChange={e => setSgQuestion(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askSgQuestion()}
+                                placeholder="Ask a question about this video…"
+                                disabled={sgLoading}
+                                style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13, color: P.ink, padding: '3px 0' }}
+                                onFocus={e => { e.currentTarget.parentElement.style.borderColor = P.accent; e.currentTarget.parentElement.style.boxShadow = '0 0 0 3px rgba(45,108,223,0.1)'; }}
+                                onBlur={e => { e.currentTarget.parentElement.style.borderColor = P.border; e.currentTarget.parentElement.style.boxShadow = 'none'; }}
+                              />
+                              <button
+                                onClick={() => askSgQuestion()}
+                                disabled={!sgQuestion.trim() || sgLoading}
+                                style={{ flexShrink: 0, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: 'none', background: sgQuestion.trim() && !sgLoading ? 'linear-gradient(135deg, #5ba4f5 0%, #2D6CDF 100%)' : 'rgba(28,25,23,0.05)', color: sgQuestion.trim() && !sgLoading ? 'white' : P.muted, cursor: sgQuestion.trim() && !sgLoading ? 'pointer' : 'default', transition: 'all 0.2s' }}
+                              >
+                                {sgLoading ? <SpinnerIcon size={12} /> : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>}
+                              </button>
                             </div>
                           </div>
-                        )}
-                      </div>
-                    ) : null}
+                        </div>
+                      );
+                      return sgBody;
+                    })() : null}
                   </div>
                 )}
               </div>
             </div>
 
-            {/* ── RIGHT SIDEBAR — col 3, row 2 ─────────────────────────────────── */}
-            <div style={{ gridColumn: 3, gridRow: 2, display: 'flex', flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF' }}>
+            {/* ── RIGHT SIDEBAR — col 3, spans both rows ───────────────────────── */}
+            <div style={{ gridColumn: 3, gridRow: '1 / 3', display: 'flex', flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF' }}>
 
               {/* ScribeSnap AI Chat — TOP of sidebar, composer at top */}
               <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
@@ -4755,10 +4907,10 @@ const App = () => {
                 {[
                   { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(45,108,223,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-                    onClick: summarize, active: !!summary, loading: summarizing },
+                    onClick: summary ? () => setActiveTab('summary') : summarize, active: !!summary, loading: summarizing },
                   { title: 'Flash Cards', sub: 'Q&A cards with flip mode', color: P.warning, bg: 'rgba(180,83,9,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-                    onClick: flashcards.length > 0 ? () => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); } : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
+                    onClick: flashcards.length > 0 ? openFlashcardModal : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
                   { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
                     onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
@@ -4787,7 +4939,7 @@ const App = () => {
                 {flashcards.length > 0 && (
                   <div style={{ marginTop: 8 }}>
                     <button
-                      onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
+                      onClick={openFlashcardModal}
                       style={{ display: 'flex', alignItems: 'center', gap: 7, width: '100%', padding: '9px 14px', background: 'rgba(180,83,9,0.07)', border: `1px solid rgba(180,83,9,0.2)`, borderRadius: 10, cursor: 'pointer', color: P.warning, fontSize: 12.5, fontWeight: 600, transition: 'all 0.15s' }}
                       onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,83,9,0.12)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'rgba(180,83,9,0.07)'; }}
@@ -4930,6 +5082,139 @@ const App = () => {
         </div>
       </footer>}
 
+      {/* ── Study Guide Fullscreen Overlay ──────────────────────────────── */}
+      {studyGuideFull && studyGuide && !studyGuide._error && (
+        <div style={{ position: 'fixed', inset: 0, background: '#FAFAF8', zIndex: 9998, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {/* Toolbar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 28px', borderBottom: `1px solid ${P.border}`, background: '#fff', flexShrink: 0 }}>
+            <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.success }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <span style={{ fontSize: 14.5, fontWeight: 700, color: P.ink }}>Study Guide</span>
+            <span style={{ fontSize: 12, color: P.muted, marginLeft: 4 }}>Full Screen</span>
+            <button onClick={() => setStudyGuideFull(false)}
+              style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 8, transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="21" y2="3"/><line x1="3" y1="21" x2="14" y2="10"/></svg>
+              Exit Full Screen
+            </button>
+          </div>
+          {/* Scrollable content */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '28px 40px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 22, maxWidth: 800, margin: '0 auto' }}>
+              {studyGuide.overview && (
+                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 10 }}>Overview</div>
+                  <div style={{ fontSize: 15, lineHeight: 1.75, color: P.ink }}>{studyGuide.overview}</div>
+                </div>
+              )}
+              {studyGuide.objectives?.length > 0 && (
+                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 14 }}>Learning Objectives</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {studyGuide.objectives.map((obj, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                        <div style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: P.success }}>{i + 1}</span>
+                        </div>
+                        <div style={{ fontSize: 14.5, lineHeight: 1.65, color: P.ink }}>{obj}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {studyGuide.keyConcepts?.length > 0 && (
+                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 14 }}>Key Concepts</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {studyGuide.keyConcepts.map((kc, i) => (
+                      <div key={i} style={{ paddingBottom: i < studyGuide.keyConcepts.length - 1 ? 12 : 0, borderBottom: i < studyGuide.keyConcepts.length - 1 ? `1px solid ${P.border}` : 'none' }}>
+                        <span style={{ fontSize: 14.5, fontWeight: 700, color: P.success }}>{kc.term}</span>
+                        <span style={{ fontSize: 14.5, color: P.muted }}> — </span>
+                        <span style={{ fontSize: 14.5, color: P.ink, lineHeight: 1.65 }}>{kc.definition}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {studyGuide.sections?.length > 0 && (
+                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 14 }}>Sections</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                    {studyGuide.sections.map((sec, i) => (
+                      <div key={i} style={{ paddingBottom: i < studyGuide.sections.length - 1 ? 18 : 0, borderBottom: i < studyGuide.sections.length - 1 ? `1px solid ${P.border}` : 'none' }}>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: P.ink, marginBottom: 7 }}>{sec.title}</div>
+                        <div style={{ fontSize: 13.5, lineHeight: 1.7, color: P.muted, marginBottom: sec.keyPoints?.length ? 12 : 0 }}>{sec.summary}</div>
+                        {sec.keyPoints?.length > 0 && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                            {sec.keyPoints.map((pt, j) => (
+                              <div key={j} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: P.success, flexShrink: 0, marginTop: 7 }} />
+                                <div style={{ fontSize: 13.5, lineHeight: 1.65, color: P.ink }}>{pt}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {studyGuide.reviewQuestions?.length > 0 && (
+                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 14 }}>Review Questions</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {studyGuide.reviewQuestions.map((q, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '12px 16px', background: P.paper, borderRadius: 10 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: P.success, flexShrink: 0, marginTop: 1 }}>Q{i + 1}</span>
+                        <span style={{ fontSize: 14.5, lineHeight: 1.65, color: P.ink }}>{q}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Ask ScribeSnap AI — fullscreen version */}
+              <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1.5px solid rgba(45,108,223,0.18)`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)', marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)', border: '1.5px solid rgba(45,108,223,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 16, height: 16 }} />
+                  </div>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: P.accent }}>Ask ScribeSnap AI</span>
+                  <span style={{ fontSize: 12.5, color: P.muted }}>— deeper questions about this video</span>
+                  {sgMessages.length > 0 && <button onClick={() => setSgMessages([])} style={{ marginLeft: 'auto', border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 6 }}>Clear</button>}
+                </div>
+                {sgMessages.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 14 }}>
+                    {sgMessages.map((msg, i) => (
+                      <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                        {msg.role === 'ai'
+                          ? <div style={{ maxWidth: '85%', padding: '10px 16px', borderRadius: '3px 14px 14px 14px', background: P.paper, border: `1px solid ${P.border}`, fontSize: 14, lineHeight: 1.7, color: msg.isError ? P.error : P.ink }}>{msg.text.split('\n').map((l, li, a) => <React.Fragment key={li}>{l}{li < a.length - 1 && <br />}</React.Fragment>)}</div>
+                          : <div style={{ maxWidth: '80%', padding: '10px 16px', borderRadius: '14px 14px 3px 14px', background: P.accent, fontSize: 14, lineHeight: 1.65, color: 'white' }}>{msg.text}</div>
+                        }
+                      </div>
+                    ))}
+                    {sgLoading && <div style={{ display: 'flex', gap: 5, padding: '10px 14px', background: P.paper, border: `1px solid ${P.border}`, borderRadius: '3px 14px 14px 14px', width: 'fit-content' }}>{[0,1,2].map(d => <div key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, opacity: 0.6, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}</div>}
+                  </div>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', background: P.paper, border: `1.5px solid ${P.border}`, borderRadius: 14, padding: '8px 8px 8px 18px' }}>
+                  <input value={sgQuestion} onChange={e => setSgQuestion(e.target.value)} onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askSgQuestion()} placeholder="Ask a question about this video…" disabled={sgLoading}
+                    style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 14, color: P.ink, padding: '4px 0' }}
+                    onFocus={e => { e.currentTarget.parentElement.style.borderColor = P.accent; e.currentTarget.parentElement.style.boxShadow = '0 0 0 3px rgba(45,108,223,0.1)'; }}
+                    onBlur={e => { e.currentTarget.parentElement.style.borderColor = P.border; e.currentTarget.parentElement.style.boxShadow = 'none'; }}
+                  />
+                  <button onClick={() => askSgQuestion()} disabled={!sgQuestion.trim() || sgLoading}
+                    style={{ flexShrink: 0, width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, border: 'none', background: sgQuestion.trim() && !sgLoading ? 'linear-gradient(135deg, #5ba4f5 0%, #2D6CDF 100%)' : 'rgba(28,25,23,0.05)', color: sgQuestion.trim() && !sgLoading ? 'white' : P.muted, cursor: sgQuestion.trim() && !sgLoading ? 'pointer' : 'default', transition: 'all 0.2s' }}>
+                    {sgLoading ? <SpinnerIcon size={13} /> : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Flashcard Modal ─────────────────────────────────────────────── */}
       {showFlashcardModal && flashcards.length > 0 && (() => {
         const card = flashcards[flashcardIndex];
@@ -4938,7 +5223,7 @@ const App = () => {
         const progressPct = Math.round((flashcardKnown.size / flashcards.length) * 100);
         return (
           <div
-            onClick={(e) => { if (e.target === e.currentTarget) setShowFlashcardModal(false); }}
+            onClick={(e) => { if (e.target === e.currentTarget) closeFlashcardModal(); }}
             style={{ position: 'fixed', inset: 0, background: 'rgba(28,25,23,0.72)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}
           >
             {/* Header */}
@@ -4952,7 +5237,7 @@ const App = () => {
                 </span>
               </div>
               <button
-                onClick={() => setShowFlashcardModal(false)}
+                onClick={closeFlashcardModal}
                 style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 13, fontWeight: 600, padding: '5px 12px', transition: 'all 0.15s' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.18)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
