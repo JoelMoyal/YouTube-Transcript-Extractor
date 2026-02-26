@@ -2838,6 +2838,8 @@ const App = () => {
   const [studyGuide, setStudyGuide]               = useState(null);     // {overview, objectives, keyConcepts, sections, reviewQuestions}
   const [studyGuideLoading, setStudyGuideLoading] = useState(false);
   const [studyGuideFull, setStudyGuideFull]       = useState(false);
+  const [activeLogo, setActiveLogo]               = useState('youtube'); // 'youtube' | 'vimeo'
+  const [logoFlip, setLogoFlip]                   = useState('idle');    // 'idle' | 'out' | 'in'
   const [sgQuestion, setSgQuestion]               = useState('');
   const [sgMessages, setSgMessages]               = useState([]);       // [{role, text, isError?}]
   const [sgLoading, setSgLoading]                 = useState(false);
@@ -2909,6 +2911,23 @@ const App = () => {
     setPlayingSegment(null);
     playingSegmentRef.current = null;
   }, [segments]);
+
+  // Flip-clock logo alternation — only when no URL is typed
+  useEffect(() => {
+    if (parseVideoUrl(videoUrl)?.platform) return;
+    const FLIP_DURATION = 220;
+    const id = setInterval(() => {
+      setLogoFlip('out');
+      const t1 = setTimeout(() => {
+        setActiveLogo(p => p === 'youtube' ? 'vimeo' : 'youtube');
+        setLogoFlip('in');
+        const t2 = setTimeout(() => setLogoFlip('idle'), FLIP_DURATION);
+        return () => clearTimeout(t2);
+      }, FLIP_DURATION);
+      return () => clearTimeout(t1);
+    }, 2800);
+    return () => clearInterval(id);
+  }, [videoUrl]);
 
   // YouTube IFrame API — proper SDK approach for reliable time tracking
   useEffect(() => {
@@ -3638,6 +3657,8 @@ const App = () => {
         @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
         @keyframes dot-flicker { 0%,80%,100% { opacity:0.2; transform:scale(0.8); } 40% { opacity:1; transform:scale(1); } }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes logoFlipOut { 0% { transform: perspective(300px) rotateX(0deg); opacity:1; } 100% { transform: perspective(300px) rotateX(-80deg); opacity:0; } }
+        @keyframes logoFlipIn  { 0% { transform: perspective(300px) rotateX(80deg);  opacity:0; } 100% { transform: perspective(300px) rotateX(0deg);   opacity:1; } }
         .fade-up { animation: fadeUp 0.3s ease forwards; }
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
@@ -3864,11 +3885,18 @@ const App = () => {
                       const platform = parseVideoUrl(videoUrl)?.platform;
                       if (platform === 'youtube') return <YouTubeIcon />;
                       if (platform === 'vimeo') return <VimeoIcon />;
+                      // Flip-clock animation between logos
+                      const flipStyle = {
+                        display: 'inline-flex', flexShrink: 0,
+                        animation: logoFlip === 'out'
+                          ? 'logoFlipOut 0.22s ease-in forwards'
+                          : logoFlip === 'in'
+                          ? 'logoFlipIn 0.22s ease-out forwards'
+                          : 'none',
+                      };
                       return (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                          <YouTubeIcon />
-                          <span style={{ width: 1, height: 14, background: P.border, display: 'inline-block' }} />
-                          <VimeoIcon />
+                        <span style={flipStyle}>
+                          {activeLogo === 'youtube' ? <YouTubeIcon /> : <VimeoIcon />}
                         </span>
                       );
                     })()}
