@@ -3779,24 +3779,11 @@ const App = () => {
                 </div>
 
                 {/* Hint row */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px 5px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', padding: '9px 12px 5px' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: P.muted }}>
                     <YouTubeIcon /> <VimeoIcon size={13} />
                     <span>YouTube &amp; Vimeo supported</span>
                   </span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 11, color: P.muted }}>Language:</span>
-                    <select
-                      value={lang}
-                      onChange={e => setLang(e.target.value)}
-                      style={{
-                        border: `1px solid ${P.border}`, borderRadius: 6, background: P.paper,
-                        fontSize: 11, color: P.ink, padding: '3px 6px', outline: 'none', cursor: 'pointer',
-                      }}
-                    >
-                      {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
-                    </select>
-                  </div>
                 </div>
               </div>
 
