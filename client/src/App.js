@@ -2908,6 +2908,14 @@ const App = () => {
   // Keep segmentsRef in sync so intervals can read latest value without stale closure
   useEffect(() => { segmentsRef.current = segments; }, [segments]);
 
+  // Study guide fullscreen — Escape to close
+  useEffect(() => {
+    if (!studyGuideFull) return;
+    const handler = (e) => { if (e.key === 'Escape') setStudyGuideFull(false); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [studyGuideFull]);
+
   // Flashcard modal keyboard navigation
   useEffect(() => {
     if (!showFlashcardModal) return;
@@ -5104,14 +5112,15 @@ const App = () => {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
             </div>
             <span style={{ fontSize: 14.5, fontWeight: 700, color: P.ink }}>Study Guide</span>
-            <span style={{ fontSize: 12, color: P.muted, marginLeft: 4 }}>Full Screen</span>
+            <span style={{ fontSize: 12, color: P.muted, marginLeft: 4 }}>· Press Esc to close</span>
+            {/* Prominent close button */}
             <button onClick={() => setStudyGuideFull(false)}
-              style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 8, transition: 'all 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+              style={{ marginLeft: 'auto', width: 36, height: 36, borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.muted, transition: 'all 0.15s', flexShrink: 0 }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,35,24,0.07)'; e.currentTarget.style.borderColor = 'rgba(180,35,24,0.25)'; e.currentTarget.style.color = P.error; }}
+              onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = P.muted; }}
+              title="Close (Esc)"
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="21" y2="3"/><line x1="3" y1="21" x2="14" y2="10"/></svg>
-              Exit Full Screen
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
           {/* Scrollable content */}
