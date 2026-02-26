@@ -2855,6 +2855,7 @@ const App = () => {
   const [flashcardIndex, setFlashcardIndex]       = useState(0);
   const [flashcardFlipped, setFlashcardFlipped]   = useState(false);
   const [flashcardKnown, setFlashcardKnown]       = useState(new Set());
+  const [expandedCards, setExpandedCards]         = useState(new Set());  // indices expanded in tab view
   const [studyGuide, setStudyGuide]               = useState(null);     // {overview, objectives, keyConcepts, sections, reviewQuestions}
   const [studyGuideLoading, setStudyGuideLoading] = useState(false);
   const [studyGuideFull, setStudyGuideFull]       = useState(false);
@@ -3251,7 +3252,7 @@ const App = () => {
     setSummary(''); setShowTimestamps(true); setShowTopics(false); setShowQA(false);
     setQaQuestion(''); setQaMessages([]);
     setTimeline(null);
-    setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
+    setFlashcards([]); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
     setActiveTab('transcript');
     setCurrentTitle(''); setCurrentChannel('');
     setSelectedSegment(null); setExportToggle(false);
@@ -3307,7 +3308,7 @@ const App = () => {
     setError(''); setTranscript(''); setTranscriptSource('');
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
     setSummary(''); setTimeline(null); setShowTopics(false);
-    setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
+    setFlashcards([]); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
 
@@ -3385,7 +3386,7 @@ const App = () => {
     const { platform, id: videoId, url: videoCanonical } = parsed;
     setLangRefetching(true);
     setLangRefetchMsg('');
-    setSearch(''); setSummary(''); setTimeline(null); setShowTopics(false); setFlashcards([]); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]);
+    setSearch(''); setSummary(''); setTimeline(null); setShowTopics(false); setFlashcards([]); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]);
     const apiUrl = platform === 'vimeo'
       ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${newLang}`
       : `/api/transcript?videoId=${videoId}&lang=${newLang}`;
@@ -3529,8 +3530,8 @@ const App = () => {
       if (!res.ok) throw new Error(data.error || 'Failed to generate flashcards');
       const cards = data.flashcards || [];
       setFlashcards(cards);
-      setFlashcardIndex(0); setFlashcardFlipped(false); setFlashcardKnown(new Set());
-      if (cards.length > 0) { pauseVideo(); setShowFlashcardModal(true); }
+      setFlashcardIndex(0); setFlashcardFlipped(false); setFlashcardKnown(new Set()); setExpandedCards(new Set());
+      if (cards.length > 0) { setActiveTab('flashcards'); pauseVideo(); setShowFlashcardModal(true); }
     } catch (err) { setFlashcards([]); }
     finally { setFlashcardsLoading(false); }
   };
@@ -3862,14 +3863,14 @@ const App = () => {
               </div>
 
               <h1 style={{
-                fontSize: 'clamp(30px, 5.5vw, 50px)', fontWeight: 800, color: P.ink,
-                letterSpacing: '-0.04em', lineHeight: 1.12, margin: '0 0 20px',
+                fontSize: 'clamp(38px, 6.5vw, 62px)', fontWeight: 800, color: P.ink,
+                letterSpacing: '-0.045em', lineHeight: 1.06, margin: '0 0 22px',
               }}>
-                Transcripts, summaries, flashcards &amp; more —<br />
-                <span style={{ color: P.accent }}>for any YouTube or Vimeo video</span>
+                Watch less.<br />
+                <span style={{ color: P.accent }}>Know more.</span>
               </h1>
-              <p style={{ fontSize: 16, color: P.muted, margin: '0 0 40px', lineHeight: 1.7, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>
-                Paste a link and get the full transcript in seconds. Then summarize, ask AI questions, generate flashcards, or build a study guide — all in one place.
+              <p style={{ fontSize: 16, color: P.muted, margin: '0 0 40px', lineHeight: 1.7, maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
+                Extract full transcripts from YouTube &amp; Vimeo, then summarize with AI, generate flashcards, ask questions, and build study guides — in seconds.
               </p>
 
               {/* Input card */}
@@ -4337,6 +4338,7 @@ const App = () => {
                 {[
                   { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> },
                   { key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
+                  ...(flashcards.length > 0 ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
                   ...(summary ? [{ key: 'summary', label: 'Summary', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
                   ...(studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
                 ].map(tab => {
@@ -4506,6 +4508,91 @@ const App = () => {
                       onBlur={e => { e.target.style.borderColor = P.border; }}
                     />
                     <div style={{ marginTop: 8, fontSize: 11, color: P.muted }}>Edit the transcript above. Changes are local only.</div>
+                  </div>
+                )}
+
+                {/* Flashcards tab */}
+                {activeTab === 'flashcards' && (
+                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px' }}>
+                    {/* Top bar */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(245,158,11,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D97706' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Flashcards</div>
+                          <div style={{ fontSize: 11.5, color: P.muted }}>{flashcardKnown.size} / {flashcards.length} known</div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, border: 'none', background: P.accent, color: 'white', fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'background 0.15s' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = P.accentHover; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = P.accent; }}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Study in Modal
+                      </button>
+                    </div>
+                    {/* Progress bar */}
+                    <div style={{ height: 6, borderRadius: 3, background: P.border, marginBottom: 18, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', borderRadius: 3, background: P.success, width: `${flashcards.length > 0 ? (flashcardKnown.size / flashcards.length) * 100 : 0}%`, transition: 'width 0.4s' }} />
+                    </div>
+                    {/* Card list */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {flashcards.map((card, i) => {
+                        const isExpanded = expandedCards.has(i);
+                        const isKnown = flashcardKnown.has(i);
+                        return (
+                          <div key={i} style={{ borderRadius: 10, border: `1px solid ${isKnown ? 'rgba(15,118,110,0.3)' : P.border}`, background: isKnown ? 'rgba(15,118,110,0.04)' : '#fff', overflow: 'hidden', transition: 'border-color 0.2s' }}>
+                            {/* Card header row */}
+                            <div
+                              onClick={() => setExpandedCards(prev => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; })}
+                              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', cursor: 'pointer', userSelect: 'none' }}
+                            >
+                              <div style={{ width: 24, height: 24, borderRadius: 6, background: isKnown ? 'rgba(15,118,110,0.12)' : P.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <span style={{ fontSize: 10, fontWeight: 700, color: isKnown ? P.success : P.muted }}>{i + 1}</span>
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: 12.5, fontWeight: 600, color: P.ink, lineHeight: 1.45, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: isExpanded ? 'normal' : 'nowrap' }}>{card.question}</div>
+                                {card.topic && !isExpanded && (
+                                  <div style={{ fontSize: 10.5, color: '#D97706', fontWeight: 600, marginTop: 2 }}>{card.topic}</div>
+                                )}
+                              </div>
+                              {isKnown && (
+                                <div style={{ fontSize: 10, fontWeight: 700, color: P.success, background: 'rgba(15,118,110,0.1)', padding: '2px 8px', borderRadius: 4, flexShrink: 0, letterSpacing: '0.04em' }}>KNOWN</div>
+                              )}
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            {/* Expanded answer */}
+                            {isExpanded && (
+                              <div style={{ borderTop: `1px solid ${P.border}`, padding: '12px 14px', background: P.paper }}>
+                                {card.topic && (
+                                  <div style={{ fontSize: 10.5, fontWeight: 700, color: '#D97706', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{card.topic}</div>
+                                )}
+                                <div style={{ fontSize: 13, lineHeight: 1.65, color: P.ink }}>{card.answer}</div>
+                                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                                  <button
+                                    onClick={e => { e.stopPropagation(); setFlashcardKnown(prev => { const next = new Set(prev); if (isKnown) next.delete(i); else next.add(i); return next; }); }}
+                                    style={{ flex: 1, padding: '6px 0', borderRadius: 7, border: `1px solid ${isKnown ? 'rgba(15,118,110,0.4)' : P.border}`, background: isKnown ? 'rgba(15,118,110,0.08)' : 'none', color: isKnown ? P.success : P.muted, fontSize: 11.5, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
+                                  >{isKnown ? '✓ Known' : 'Mark as Known'}</button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {/* Reset progress */}
+                    {flashcardKnown.size > 0 && (
+                      <button
+                        onClick={() => setFlashcardKnown(new Set())}
+                        style={{ marginTop: 16, display: 'block', width: '100%', padding: '8px 0', borderRadius: 8, border: `1px solid ${P.border}`, background: 'none', color: P.muted, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
+                        onMouseEnter={e => { e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.ink; }}
+                        onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}
+                      >Reset Progress</button>
+                    )}
                   </div>
                 )}
 
