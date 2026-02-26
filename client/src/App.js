@@ -4586,8 +4586,12 @@ const App = () => {
                     {/* Generate More / exhausted */}
                     <div style={{ marginTop: 14 }}>
                       {flashcardsExhausted ? (
-                        <div style={{ padding: '10px 14px', borderRadius: 9, border: `1px solid ${P.border}`, background: P.surface, color: P.muted, fontSize: 12, lineHeight: 1.55, textAlign: 'center' }}>
-                          {flashcardsExhaustedReason}
+                        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '12px 14px', borderRadius: 10, border: '1px solid rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.07)' }}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                          <div>
+                            <div style={{ fontSize: 12.5, fontWeight: 700, color: '#D97706', marginBottom: 3 }}>No more flashcards available</div>
+                            <div style={{ fontSize: 12, color: P.muted, lineHeight: 1.55 }}>{flashcardsExhaustedReason}</div>
+                          </div>
                         </div>
                       ) : (
                         <button
@@ -5494,8 +5498,12 @@ const App = () => {
             {/* Generate More / exhausted */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 12 }}>
               {flashcardsExhausted ? (
-                <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.45)', textAlign: 'center', maxWidth: 400, lineHeight: 1.5, padding: '8px 14px', background: 'rgba(255,255,255,0.06)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)' }}>
-                  {flashcardsExhaustedReason}
+                <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '11px 16px', borderRadius: 12, border: '1px solid rgba(245,158,11,0.35)', background: 'rgba(245,158,11,0.1)', maxWidth: 420 }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: '#FBBF24', marginBottom: 3 }}>No more flashcards available</div>
+                    <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.55)', lineHeight: 1.55 }}>{flashcardsExhaustedReason}</div>
+                  </div>
                 </div>
               ) : (
                 <button
