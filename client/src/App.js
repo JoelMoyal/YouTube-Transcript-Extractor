@@ -1830,37 +1830,63 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-share-item:hover .ds-share-item-icon { color: #2D6CDF; background: rgba(45,108,223,0.08); }
         /* ── Referral card ── */
         .ds-referral {
-          padding: 16px 18px 18px;
-          background: linear-gradient(135deg, rgba(45,108,223,0.06) 0%, rgba(45,108,223,0.02) 100%);
+          padding: 0; overflow: hidden;
+          border: 1.5px solid rgba(45,108,223,0.2) !important;
+          box-shadow: 0 4px 20px rgba(45,108,223,0.1), 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .ds-referral-banner {
+          background: linear-gradient(135deg, #2D6CDF 0%, #6C47D9 100%);
+          padding: 16px 18px 14px;
+          position: relative; overflow: hidden;
+        }
+        .ds-referral-banner::before {
+          content: ''; position: absolute;
+          width: 100px; height: 100px; border-radius: 50%;
+          background: rgba(255,255,255,0.08);
+          top: -30px; right: -20px;
+        }
+        .ds-referral-banner::after {
+          content: ''; position: absolute;
+          width: 60px; height: 60px; border-radius: 50%;
+          background: rgba(255,255,255,0.06);
+          bottom: -15px; right: 40px;
         }
         .ds-referral-head {
-          display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+          display: flex; align-items: center; gap: 10px; margin-bottom: 10px; position: relative; z-index: 1;
         }
         .ds-referral-icon {
-          width: 32px; height: 32px; border-radius: 9px;
-          background: rgba(45,108,223,0.12); color: #2D6CDF;
-          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+          width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+          background: rgba(255,255,255,0.2);
+          border: 1px solid rgba(255,255,255,0.25);
+          color: white;
+          display: flex; align-items: center; justify-content: center;
         }
         .ds-referral-title {
-          margin: 0; font-size: 15px; font-weight: 700; color: #1C1917; letter-spacing: -0.01em;
+          margin: 0 0 1px; font-size: 14.5px; font-weight: 700; color: white; letter-spacing: -0.01em;
         }
-        .ds-referral-desc {
-          margin: 0 0 12px; font-size: 13px; color: #6B645C; line-height: 1.45;
+        .ds-referral-subtitle {
+          margin: 0; font-size: 11.5px; color: rgba(255,255,255,0.7);
         }
         .ds-referral-badge {
-          display: inline-flex; align-items: center; gap: 5px;
-          background: rgba(45,108,223,0.1); color: #2D6CDF;
-          border: 1px solid rgba(45,108,223,0.2);
-          border-radius: 999px; padding: 3px 10px 3px 6px;
-          font-size: 12px; font-weight: 700; margin-bottom: 12px;
+          display: inline-flex; align-items: center; gap: 5px; position: relative; z-index: 1;
+          background: rgba(255,255,255,0.18); color: white;
+          border: 1px solid rgba(255,255,255,0.3);
+          border-radius: 999px; padding: 4px 11px 4px 8px;
+          font-size: 11.5px; font-weight: 700;
+        }
+        .ds-referral-body {
+          padding: 14px 18px 18px; background: white;
+        }
+        .ds-referral-desc {
+          margin: 0 0 12px; font-size: 12.5px; color: #6B645C; line-height: 1.5;
         }
         .ds-referral-link-row {
-          display: flex; gap: 7px; align-items: stretch;
+          display: flex; gap: 7px; align-items: stretch; margin-bottom: 10px;
         }
         .ds-referral-link-box {
           flex: 1; min-width: 0;
-          background: white; border: 1px solid #E7E1D8; border-radius: 9px;
-          padding: 8px 11px; font-size: 12px; color: #6B645C;
+          background: #F8F6F2; border: 1.5px solid #E7E1D8; border-radius: 9px;
+          padding: 8px 11px; font-size: 11.5px; color: #6B645C;
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
           font-family: monospace; letter-spacing: -0.01em;
         }
@@ -1869,41 +1895,37 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           background: #2D6CDF; color: white;
           font-size: 12px; font-weight: 700;
           padding: 8px 14px; cursor: pointer; flex-shrink: 0;
-          transition: background 0.15s, transform 0.15s;
-          white-space: nowrap;
+          transition: all 0.15s; white-space: nowrap;
+          box-shadow: 0 2px 8px rgba(45,108,223,0.35);
         }
-        .ds-referral-copy-btn:hover { background: #2459B8; transform: translateY(-1px); }
-        .ds-referral-copy-btn.done { background: #0F766E; }
+        .ds-referral-copy-btn:hover { background: #2459B8; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(45,108,223,0.45); }
+        .ds-referral-copy-btn.done { background: #0F766E; box-shadow: 0 2px 8px rgba(15,118,110,0.3); }
         .ds-referral-share-row {
-          display: flex; gap: 7px; margin-top: 8px;
+          display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
         }
         .ds-referral-share-btn {
-          flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-          padding: 8px 6px; border-radius: 9px; font-size: 12px; font-weight: 600;
-          cursor: pointer; transition: all 0.15s; border: 1px solid #E7E1D8;
-          background: #F6F3EE; color: #1a1a2e;
+          display: flex; align-items: center; justify-content: center; gap: 6px;
+          padding: 9px 6px; border-radius: 9px; font-size: 12px; font-weight: 600;
+          cursor: pointer; transition: all 0.15s; border: none; color: white;
         }
-        .ds-referral-share-btn:hover { transform: translateY(-1px); }
-        .ds-referral-share-wa { border-color: rgba(37,211,102,0.3); background: rgba(37,211,102,0.07); color: #128C7E; }
-        .ds-referral-share-wa:hover { background: rgba(37,211,102,0.14); }
-        .ds-referral-share-x { border-color: rgba(0,0,0,0.13); background: rgba(0,0,0,0.04); color: #1a1a2e; }
-        .ds-referral-share-x:hover { background: rgba(0,0,0,0.09); }
-        .ds-referral-share-email { border-color: #E7E1D8; background: #F6F3EE; color: #1a1a2e; }
-        .ds-referral-share-email:hover { background: #EFEBE4; }
-        .ds-referral-share-ig { border-color: rgba(193,53,132,0.3); background: linear-gradient(135deg, rgba(253,245,230,0.7), rgba(243,220,240,0.7)); color: #C13584; }
-        .ds-referral-share-ig:hover { background: linear-gradient(135deg, rgba(253,245,230,1), rgba(243,220,240,1)); }
+        .ds-referral-share-btn:hover { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
+        .ds-referral-share-wa { background: #25D366; }
+        .ds-referral-share-x { background: #1a1a2e; }
+        .ds-referral-share-ig { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .ds-referral-share-email { background: #4A86D4; }
         .ds-referral-stats {
-          display: flex; gap: 10px; margin-top: 12px;
+          display: flex; gap: 8px; margin-top: 12px;
         }
         .ds-referral-stat {
-          flex: 1; background: white; border: 1px solid #E7E1D8;
-          border-radius: 9px; padding: 8px 10px; text-align: center;
+          flex: 1; background: linear-gradient(135deg, rgba(45,108,223,0.05), rgba(108,71,217,0.05));
+          border: 1.5px solid rgba(45,108,223,0.15);
+          border-radius: 10px; padding: 9px 10px; text-align: center;
         }
         .ds-referral-stat-value {
-          font-size: 18px; font-weight: 700; color: #2D6CDF; margin: 0 0 1px;
+          display: block; font-size: 19px; font-weight: 800; color: #2D6CDF; line-height: 1;
         }
         .ds-referral-stat-label {
-          font-size: 11px; color: #6B645C; margin: 0;
+          display: block; font-size: 10.5px; color: #6B645C; margin-top: 3px;
         }
         .ds-empty {
           text-align: center;
@@ -2568,70 +2590,76 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
               {/* ── Invite friends (sidebar referral card) ── */}
               <section className="ds-card ds-referral">
-                <div className="ds-referral-head">
-                  <div className="ds-referral-icon">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                      <circle cx="9" cy="7" r="4"/>
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                  </div>
-                  <h2 className="ds-referral-title">Invite friends, earn credits</h2>
-                </div>
-                <div className="ds-referral-badge">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                  +3 free credits per friend who signs up
-                </div>
-                <p className="ds-referral-desc">
-                  Share your personal link. Every friend who creates an account using it gets a bonus — and so do you.
-                </p>
-                <div className="ds-referral-link-row">
-                  <div className="ds-referral-link-box">{refLink}</div>
-                  <button
-                    className={`ds-referral-copy-btn${copyRefDone ? ' done' : ''}`}
-                    onClick={copyRefLink}
-                  >
-                    {copyRefDone ? '✓ Copied!' : 'Copy link'}
-                  </button>
-                </div>
-                <div className="ds-referral-share-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                  <button className="ds-referral-share-btn ds-referral-share-wa"
-                    onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank')}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                    WhatsApp
-                  </button>
-                  <button className="ds-referral-share-btn ds-referral-share-x"
-                    onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('I use ScribeSnap to get YouTube transcripts instantly 🎬 Try it free — use my invite link and we both get +3 bonus credits 👉')}&url=${encodeURIComponent(refLink)}`, '_blank')}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    Share on X
-                  </button>
-                  <button className="ds-referral-share-btn ds-referral-share-ig"
-                    onClick={() => { navigator.clipboard.writeText(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`); window.open('https://www.instagram.com/', '_blank'); }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" stroke="url(#igGrad2)">
-                      <defs><linearGradient id="igGrad2" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stopColor="#f09433"/><stop offset="50%" stopColor="#dc2743"/><stop offset="100%" stopColor="#bc1888"/></linearGradient></defs>
-                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-                    </svg>
-                    Instagram
-                  </button>
-                  <button className="ds-referral-share-btn ds-referral-share-email"
-                    onClick={() => { window.location.href = `mailto:?subject=${encodeURIComponent('Try ScribeSnap — free YouTube transcript tool')}&body=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`; }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-                    Email
-                  </button>
-                </div>
-                {((user?.user_metadata?.referral_count || 0) > 0 || (user?.user_metadata?.referral_bonus || 0) > 0) && (
-                  <div className="ds-referral-stats">
-                    <div className="ds-referral-stat">
-                      <span className="ds-referral-stat-value">{user?.user_metadata?.referral_count || 0}</span>
-                      <span className="ds-referral-stat-label">friends joined</span>
+                <div className="ds-referral-banner">
+                  <div className="ds-referral-head">
+                    <div className="ds-referral-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                      </svg>
                     </div>
-                    <div className="ds-referral-stat">
-                      <span className="ds-referral-stat-value">+{user?.user_metadata?.referral_bonus || 0}</span>
-                      <span className="ds-referral-stat-label">credits earned</span>
+                    <div>
+                      <h2 className="ds-referral-title">Invite friends, earn credits</h2>
+                      <p className="ds-referral-subtitle">Share your link · both get rewarded</p>
                     </div>
                   </div>
-                )}
+                  <div className="ds-referral-badge">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    +3 free credits per friend who signs up
+                  </div>
+                </div>
+                <div className="ds-referral-body">
+                  <p className="ds-referral-desc">
+                    Share your personal link. Every friend who signs up gets a bonus — and so do you.
+                  </p>
+                  <div className="ds-referral-link-row">
+                    <div className="ds-referral-link-box">{refLink}</div>
+                    <button
+                      className={`ds-referral-copy-btn${copyRefDone ? ' done' : ''}`}
+                      onClick={copyRefLink}
+                    >
+                      {copyRefDone ? '✓ Copied!' : 'Copy link'}
+                    </button>
+                  </div>
+                  <div className="ds-referral-share-row">
+                    <button className="ds-referral-share-btn ds-referral-share-wa"
+                      onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank')}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                      WhatsApp
+                    </button>
+                    <button className="ds-referral-share-btn ds-referral-share-x"
+                      onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('I use ScribeSnap to get YouTube transcripts instantly 🎬 Try it free — use my invite link and we both get +3 bonus credits 👉')}&url=${encodeURIComponent(refLink)}`, '_blank')}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                      Share on X
+                    </button>
+                    <button className="ds-referral-share-btn ds-referral-share-ig"
+                      onClick={() => { navigator.clipboard.writeText(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`); window.open('https://www.instagram.com/', '_blank'); }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" stroke="white">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                      </svg>
+                      Instagram
+                    </button>
+                    <button className="ds-referral-share-btn ds-referral-share-email"
+                      onClick={() => { window.location.href = `mailto:?subject=${encodeURIComponent('Try ScribeSnap — free YouTube transcript tool')}&body=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`; }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+                      Email
+                    </button>
+                  </div>
+                  {((user?.user_metadata?.referral_count || 0) > 0 || (user?.user_metadata?.referral_bonus || 0) > 0) && (
+                    <div className="ds-referral-stats">
+                      <div className="ds-referral-stat">
+                        <span className="ds-referral-stat-value">{user?.user_metadata?.referral_count || 0}</span>
+                        <span className="ds-referral-stat-label">friends joined</span>
+                      </div>
+                      <div className="ds-referral-stat">
+                        <span className="ds-referral-stat-value">+{user?.user_metadata?.referral_bonus || 0}</span>
+                        <span className="ds-referral-stat-label">credits earned</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </section>
             </aside>
           )}
