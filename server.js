@@ -623,17 +623,34 @@ app.post('/api/timeline', async (req, res) => {
 
 // ── Flashcards endpoint ───────────────────────────────────────────────────────
 app.post('/api/flashcards', async (req, res) => {
-  const { transcript } = req.body;
+  const { transcript, existingQuestions } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
   if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY)
     return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY or OPENROUTER_API_KEY)' });
 
+  const isMore = Array.isArray(existingQuestions) && existingQuestions.length > 0;
+
   try {
-    const raw = await aiComplete(
-      `Create exactly 6 flashcard Q&A pairs from this transcript. Cover the most important concepts. Return ONLY a JSON array — no markdown, no explanation.\n\nTranscript:\n${transcript.slice(0, 12000)}\n\nReturn: [{"question":"...","answer":"...","topic":"..."},...]`,
-      1400
-    );
+    let prompt;
+    if (isMore) {
+      const coveredList = existingQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n');
+      prompt = `Create 6 NEW flashcard Q&A pairs from this transcript that cover different topics than those already generated. Do NOT repeat or rephrase any of the covered questions.\n\nIf there is not enough new or distinct content in the transcript to create meaningful additional flashcards, return exactly this JSON object instead of an array: {"noMore":true,"reason":"<one sentence explaining why>"}\n\nTranscript:\n${transcript.slice(0, 12000)}\n\nAlready covered questions (do not repeat these):\n${coveredList}\n\nReturn ONLY a JSON array OR the noMore object — no markdown, no explanation.`;
+    } else {
+      prompt = `Create exactly 6 flashcard Q&A pairs from this transcript. Cover the most important concepts. Return ONLY a JSON array — no markdown, no explanation.\n\nTranscript:\n${transcript.slice(0, 12000)}\n\nReturn: [{"question":"...","answer":"...","topic":"..."},...]`;
+    }
+
+    const raw = await aiComplete(prompt, 1400);
+
+    // Check for noMore signal first
+    const noMoreMatch = raw.match(/\{\s*"noMore"\s*:\s*true[\s\S]*?\}/);
+    if (noMoreMatch) {
+      try {
+        const parsed = JSON.parse(noMoreMatch[0]);
+        return res.json({ flashcards: [], noMore: true, reason: parsed.reason || 'This transcript doesn\'t have enough distinct content for more flashcards.' });
+      } catch { /* fall through to array parse */ }
+    }
+
     const match = raw.match(/\[[\s\S]*\]/);
     const flashcards = match ? JSON.parse(match[0]) : [];
     res.json({ flashcards });

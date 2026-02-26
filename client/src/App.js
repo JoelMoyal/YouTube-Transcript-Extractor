@@ -2834,6 +2834,9 @@ const App = () => {
   const [flashcardIndex, setFlashcardIndex]       = useState(0);
   const [flashcardFlipped, setFlashcardFlipped]   = useState(false);
   const [flashcardKnown, setFlashcardKnown]       = useState(new Set());
+  const [flashcardsMoreLoading, setFlashcardsMoreLoading] = useState(false);
+  const [flashcardsExhausted, setFlashcardsExhausted]     = useState(false);
+  const [flashcardsExhaustedReason, setFlashcardsExhaustedReason] = useState('');
   const [expandedCards, setExpandedCards]         = useState(new Set());  // indices expanded in tab view
   const [studyGuide, setStudyGuide]               = useState(null);     // {overview, objectives, keyConcepts, sections, reviewQuestions}
   const [studyGuideLoading, setStudyGuideLoading] = useState(false);
@@ -3250,7 +3253,7 @@ const App = () => {
     setSummary(''); setShowTimestamps(true); setShowTopics(false); setShowQA(false);
     setQaQuestion(''); setQaMessages([]);
     setTimeline(null);
-    setFlashcards([]); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
+    setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
     setActiveTab('transcript');
     setCurrentTitle(''); setCurrentChannel('');
     setSelectedSegment(null); setExportToggle(false);
@@ -3306,7 +3309,7 @@ const App = () => {
     setError(''); setTranscript(''); setTranscriptSource('');
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
     setSummary(''); setTimeline(null); setShowTopics(false);
-    setFlashcards([]); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
+    setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
 
@@ -3384,7 +3387,7 @@ const App = () => {
     const { platform, id: videoId, url: videoCanonical } = parsed;
     setLangRefetching(true);
     setLangRefetchMsg('');
-    setSearch(''); setSummary(''); setTimeline(null); setShowTopics(false); setFlashcards([]); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]);
+    setSearch(''); setSummary(''); setTimeline(null); setShowTopics(false); setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]);
     const apiUrl = platform === 'vimeo'
       ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${newLang}`
       : `/api/transcript?videoId=${videoId}&lang=${newLang}`;
@@ -3516,7 +3519,7 @@ const App = () => {
 
   const generateFlashcards = async () => {
     if (flashcardsLoading) return;
-    setFlashcardsLoading(true); setFlashcards([]);
+    setFlashcardsLoading(true); setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason('');
     try {
       const res = await fetch('/api/flashcards', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -3532,6 +3535,32 @@ const App = () => {
       if (cards.length > 0) { setActiveTab('flashcards'); pauseVideo(); setShowFlashcardModal(true); }
     } catch (err) { setFlashcards([]); }
     finally { setFlashcardsLoading(false); }
+  };
+
+  const generateMoreFlashcards = async () => {
+    if (flashcardsMoreLoading || flashcardsExhausted) return;
+    setFlashcardsMoreLoading(true);
+    try {
+      const existingQuestions = flashcards.map(c => c.question);
+      const res = await fetch('/api/flashcards', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript, existingQuestions }),
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
+      if (!res.ok) throw new Error(data.error || 'Failed to generate more flashcards');
+      if (data.noMore) {
+        setFlashcardsExhausted(true);
+        setFlashcardsExhaustedReason(data.reason || 'No more flashcards can be generated from this transcript.');
+        return;
+      }
+      const newCards = data.flashcards || [];
+      if (newCards.length > 0) {
+        setFlashcards(prev => [...prev, ...newCards]);
+      }
+    } catch (err) { /* silent */ }
+    finally { setFlashcardsMoreLoading(false); }
   };
 
   const generateStudyGuide = async () => {
@@ -5439,6 +5468,29 @@ const App = () => {
                 >Next →</button>
               </div>
             )}
+
+            {/* Generate More / exhausted */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              {flashcardsExhausted ? (
+                <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,0.45)', textAlign: 'center', maxWidth: 400, lineHeight: 1.5, padding: '8px 14px', background: 'rgba(255,255,255,0.06)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)' }}>
+                  {flashcardsExhaustedReason}
+                </div>
+              ) : (
+                <button
+                  onClick={generateMoreFlashcards}
+                  disabled={flashcardsMoreLoading}
+                  style={{ padding: '8px 20px', borderRadius: 10, border: '1.5px solid rgba(255,255,255,0.18)', background: flashcardsMoreLoading ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)', color: flashcardsMoreLoading ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.6)', fontSize: 12.5, fontWeight: 600, cursor: flashcardsMoreLoading ? 'default' : 'pointer', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 6 }}
+                  onMouseEnter={e => { if (!flashcardsMoreLoading) e.currentTarget.style.background = 'rgba(255,255,255,0.14)'; }}
+                  onMouseLeave={e => { if (!flashcardsMoreLoading) e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+                >
+                  {flashcardsMoreLoading ? (
+                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Generating…</>
+                  ) : (
+                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Generate More</>
+                  )}
+                </button>
+              )}
+            </div>
 
             {/* Keyboard hint */}
             <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.02em' }}>
