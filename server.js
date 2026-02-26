@@ -79,7 +79,9 @@ async function aiComplete(prompt, maxTokens = 1024) {
 const LANG_NAMES = { en:'English', es:'Spanish', fr:'French', de:'German', it:'Italian', pt:'Portuguese', ru:'Russian', 'zh-Hans':'Chinese (Simplified)', 'zh-Hant':'Chinese (Traditional)', ja:'Japanese', ko:'Korean', ar:'Arabic', hi:'Hindi', tr:'Turkish', nl:'Dutch', pl:'Polish' };
 
 // Translate segments to targetLang using AI, in parallel batches to stay within token limits
+// DISABLED — translation is on ice until a better solution is found
 async function translateSegments(segments, targetLang, send) {
+  return segments; // no-op: skip all AI translation
   if (!segments.length) return segments;
   if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY) return segments;
   const langName = LANG_NAMES[targetLang] || targetLang;
