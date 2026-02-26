@@ -3832,11 +3832,18 @@ const App = () => {
               }}>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: P.paper, borderRadius: 14, border: `1px solid ${P.border}` }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                      <YouTubeIcon />
-                      <span style={{ width: 1, height: 14, background: P.border, display: 'inline-block' }} />
-                      <VimeoIcon />
-                    </span>
+                    {(() => {
+                      const platform = parseVideoUrl(videoUrl)?.platform;
+                      if (platform === 'youtube') return <YouTubeIcon />;
+                      if (platform === 'vimeo') return <VimeoIcon />;
+                      return (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                          <YouTubeIcon />
+                          <span style={{ width: 1, height: 14, background: P.border, display: 'inline-block' }} />
+                          <VimeoIcon />
+                        </span>
+                      );
+                    })()}
                     <input
                       ref={urlInputRef}
                       type="text"
