@@ -3454,6 +3454,7 @@ const App = () => {
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
       if (!res.ok) throw new Error(data.error || 'Failed to generate study guide');
       setStudyGuide(data);
+      setActiveTab('study-guide');
     } catch (err) { setStudyGuide({ _error: err.message }); }
     finally { setStudyGuideLoading(false); }
   };
@@ -4171,11 +4172,12 @@ const App = () => {
                   { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg> },
                   { key: 'chapters', label: 'Chapters', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> },
                   { key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
+                  ...(studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', color: P.success, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
                 ].map(tab => (
                   <button key={tab.key} onClick={() => { setActiveTab(tab.key); if (tab.key === 'chapters' && chapters.length === 0 && !chaptersLoading) detectChapters(); }} style={{
                     display: 'flex', alignItems: 'center', gap: 6, padding: '5px 13px', borderRadius: 20, border: 'none',
-                    background: activeTab === tab.key ? P.accentLight : 'transparent',
-                    color: activeTab === tab.key ? P.accent : P.muted,
+                    background: activeTab === tab.key ? (tab.color ? 'rgba(15,118,110,0.1)' : P.accentLight) : 'transparent',
+                    color: activeTab === tab.key ? (tab.color || P.accent) : P.muted,
                     fontSize: 13, fontWeight: activeTab === tab.key ? 600 : 500,
                     cursor: 'pointer', transition: 'all 0.15s',
                   }}>
@@ -4402,6 +4404,116 @@ const App = () => {
                       onBlur={e => { e.target.style.borderColor = P.border; }}
                     />
                     <div style={{ marginTop: 8, fontSize: 11, color: P.muted }}>Edit the transcript above. Changes are local only.</div>
+                  </div>
+                )}
+
+                {/* Study Guide tab */}
+                {activeTab === 'study-guide' && (
+                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px' }}>
+                    {studyGuideLoading ? (
+                      <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
+                        <SpinnerIcon size={14} /> Generating study guide…
+                      </div>
+                    ) : studyGuide && !studyGuide._error ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 700, margin: '0 auto' }}>
+                        {/* Header */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.success }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Study Guide</div>
+                              <div style={{ fontSize: 11.5, color: P.muted }}>AI-generated from transcript</div>
+                            </div>
+                          </div>
+                          <button onClick={() => { setStudyGuide(null); setActiveTab('transcript'); }}
+                            style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 6, transition: 'all 0.15s' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+                          >Clear</button>
+                        </div>
+
+                        {/* Overview */}
+                        <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                          <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 8 }}>Overview</div>
+                          <div style={{ fontSize: 14, lineHeight: 1.7, color: P.ink }}>{studyGuide.overview}</div>
+                        </div>
+
+                        {/* Learning Objectives */}
+                        {studyGuide.objectives?.length > 0 && (
+                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                            <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Learning Objectives</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {studyGuide.objectives.map((obj, i) => (
+                                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                  <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                                    <span style={{ fontSize: 10, fontWeight: 700, color: P.success }}>{i + 1}</span>
+                                  </div>
+                                  <div style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink }}>{obj}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Key Concepts */}
+                        {studyGuide.keyConcepts?.length > 0 && (
+                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                            <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Key Concepts</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {studyGuide.keyConcepts.map((kc, i) => (
+                                <div key={i} style={{ paddingBottom: i < studyGuide.keyConcepts.length - 1 ? 10 : 0, borderBottom: i < studyGuide.keyConcepts.length - 1 ? `1px solid ${P.border}` : 'none' }}>
+                                  <span style={{ fontSize: 13.5, fontWeight: 700, color: P.success }}>{kc.term}</span>
+                                  <span style={{ fontSize: 13.5, color: P.muted }}> — </span>
+                                  <span style={{ fontSize: 13.5, color: P.ink, lineHeight: 1.6 }}>{kc.definition}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Sections */}
+                        {studyGuide.sections?.length > 0 && (
+                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                            <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Sections</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                              {studyGuide.sections.map((sec, i) => (
+                                <div key={i} style={{ paddingBottom: i < studyGuide.sections.length - 1 ? 16 : 0, borderBottom: i < studyGuide.sections.length - 1 ? `1px solid ${P.border}` : 'none' }}>
+                                  <div style={{ fontSize: 14, fontWeight: 700, color: P.ink, marginBottom: 6 }}>{sec.title}</div>
+                                  <div style={{ fontSize: 13, lineHeight: 1.65, color: P.muted, marginBottom: sec.keyPoints?.length ? 10 : 0 }}>{sec.summary}</div>
+                                  {sec.keyPoints?.length > 0 && (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                                      {sec.keyPoints.map((pt, j) => (
+                                        <div key={j} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                                          <div style={{ width: 5, height: 5, borderRadius: '50%', background: P.success, flexShrink: 0, marginTop: 6 }} />
+                                          <div style={{ fontSize: 13, lineHeight: 1.6, color: P.ink }}>{pt}</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Review Questions */}
+                        {studyGuide.reviewQuestions?.length > 0 && (
+                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', marginBottom: 16 }}>
+                            <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Review Questions</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {studyGuide.reviewQuestions.map((q, i) => (
+                                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', background: P.paper, borderRadius: 8 }}>
+                                  <span style={{ fontSize: 12, fontWeight: 700, color: P.success, flexShrink: 0, marginTop: 1 }}>Q{i + 1}</span>
+                                  <span style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink }}>{q}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -4632,7 +4744,7 @@ const App = () => {
                     onClick: flashcards.length > 0 ? () => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); } : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
                   { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-                    onClick: generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
+                    onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
                 ].map(item => (
                   <div key={item.title}
                     onClick={item.loading ? undefined : item.onClick}
@@ -4670,56 +4782,19 @@ const App = () => {
                   </div>
                 )}
 
-                {/* Study guide content */}
+                {/* Study guide ready — show jump link */}
                 {studyGuide && !studyGuide._error && (
-                  <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {/* Overview */}
-                    <div style={{ padding: '10px 12px', background: P.paper, borderRadius: 10, border: `1px solid ${P.border}` }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: P.success, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 5 }}>Overview</div>
-                      <div style={{ fontSize: 12.5, lineHeight: 1.65, color: P.ink }}>{studyGuide.overview}</div>
-                    </div>
-                    {/* Learning Objectives */}
-                    {studyGuide.objectives?.length > 0 && (
-                      <div style={{ padding: '10px 12px', background: P.paper, borderRadius: 10, border: `1px solid ${P.border}` }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: P.success, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 7 }}>Learning Objectives</div>
-                        {studyGuide.objectives.map((obj, i) => (
-                          <div key={i} style={{ display: 'flex', gap: 8, marginBottom: i < studyGuide.objectives.length - 1 ? 6 : 0 }}>
-                            <div style={{ width: 18, height: 18, borderRadius: 4, background: 'rgba(15,118,110,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                              <span style={{ fontSize: 9, fontWeight: 700, color: P.success }}>{i + 1}</span>
-                            </div>
-                            <div style={{ fontSize: 12, lineHeight: 1.55, color: P.ink }}>{obj}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {/* Key Concepts */}
-                    {studyGuide.keyConcepts?.length > 0 && (
-                      <div style={{ padding: '10px 12px', background: P.paper, borderRadius: 10, border: `1px solid ${P.border}` }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: P.success, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 7 }}>Key Concepts</div>
-                        {studyGuide.keyConcepts.map((kc, i) => (
-                          <div key={i} style={{ marginBottom: i < studyGuide.keyConcepts.length - 1 ? 7 : 0 }}>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: P.success }}>{kc.term}:</span>
-                            <span style={{ fontSize: 12, color: P.ink, lineHeight: 1.55 }}> {kc.definition}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {/* Review Questions */}
-                    {studyGuide.reviewQuestions?.length > 0 && (
-                      <div style={{ padding: '10px 12px', background: P.paper, borderRadius: 10, border: `1px solid ${P.border}` }}>
-                        <div style={{ fontSize: 10, fontWeight: 700, color: P.success, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 7 }}>Review Questions</div>
-                        {studyGuide.reviewQuestions.map((q, i) => (
-                          <div key={i} style={{ fontSize: 12, lineHeight: 1.55, color: P.ink, marginBottom: i < studyGuide.reviewQuestions.length - 1 ? 6 : 0, paddingLeft: 4 }}>
-                            <span style={{ fontWeight: 600, color: P.muted }}>{i + 1}.</span> {q}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {/* Close */}
-                    <button onClick={() => setStudyGuide(null)} style={{ alignSelf: 'center', border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 14px', borderRadius: 6, transition: 'all 0.15s' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
-                    >Close Study Guide</button>
+                  <div style={{ marginTop: 8 }}>
+                    <button
+                      onClick={() => setActiveTab('study-guide')}
+                      style={{ display: 'flex', alignItems: 'center', gap: 7, width: '100%', padding: '9px 14px', background: 'rgba(15,118,110,0.07)', border: `1px solid rgba(15,118,110,0.2)`, borderRadius: 10, cursor: 'pointer', color: P.success, fontSize: 12.5, fontWeight: 600, transition: 'all 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(15,118,110,0.13)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15,118,110,0.07)'; }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                      View Study Guide
+                      <svg style={{ marginLeft: 'auto' }} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
                   </div>
                 )}
                 {studyGuide?._error && (
