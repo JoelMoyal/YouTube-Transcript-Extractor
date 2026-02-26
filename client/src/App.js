@@ -3555,7 +3555,7 @@ const App = () => {
         setFlashcardsExhaustedReason(data.reason || 'No more flashcards can be generated from this transcript.');
         return;
       }
-      const newCards = data.flashcards || [];
+      const newCards = (data.flashcards || []).filter(c => c && c.question && c.answer);
       if (newCards.length > 0) {
         setFlashcards(prev => [...prev, ...newCards]);
       }
