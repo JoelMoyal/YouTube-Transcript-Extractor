@@ -1000,6 +1000,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   const [prefLangSaved, setPrefLangSaved] = React.useState(false);
   const [copyLinkDone, setCopyLinkDone] = React.useState(false);
   const [copyRefDone, setCopyRefDone] = React.useState(false);
+  const [showAllHistory, setShowAllHistory] = React.useState(false);
 
   // Profile editing
   const [editingName, setEditingName] = React.useState(false);
@@ -2049,7 +2050,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           <button className="ds-topnav-back" onClick={onBack} title="Back to extractor">
             <ChevronIcon size={16} dir="left" />
           </button>
-          {[['overview', 'Overview'], ['history', 'History'], ['settings', '⚙ Settings']].map(([key, label]) => (
+          {[['overview', 'Overview'], ['settings', 'Settings']].map(([key, label]) => (
             <button key={key} className={`ds-topnav-tab ${tab === key ? 'is-active' : ''}`} onClick={() => setTab(key)}>
               {label}
             </button>
@@ -2072,7 +2073,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
             {/* Inline section tabs */}
             <div className="ds-section-tabs">
-              {[['overview', 'Overview'], ['history', 'History'], ['settings', 'Settings']].map(([key, label]) => (
+              {[['overview', 'Overview'], ['settings', 'Settings']].map(([key, label]) => (
                 <button key={key} className={`ds-section-tab ${tab === key ? 'is-active' : ''}`} onClick={() => setTab(key)}>
                   {label}
                 </button>
@@ -2127,7 +2128,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                     </div>
                   ) : (
                     <>
-                      {history.slice(0, 4).map((h, idx) => {
+                      {(showAllHistory ? history : history.slice(0, 4)).map((h, idx) => {
                         const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
                         const title = h.title || h.id;
                         const channel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
@@ -2150,20 +2151,18 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                               </p>
                             </div>
                             <div className="ds-row-actions">
-                              {idx === 0 ? (
-                                <button className="ds-row-btn primary" onClick={() => openTranscript(h)}>Open</button>
-                              ) : (
-                                <button className="ds-row-btn ghost" onClick={() => openTranscript(h)}>More &rsaquo;</button>
-                              )}
+                              <button className="ds-row-btn primary" onClick={() => openTranscript(h)}>Open</button>
                             </div>
                           </div>
                         );
                       })}
-                      <div className="ds-list-footer">
-                        <button className="ds-link-btn" onClick={() => setTab('history')}>
-                          + View all transcripts <ChevronIcon size={11} />
-                        </button>
-                      </div>
+                      {history.length > 4 && (
+                        <div className="ds-list-footer">
+                          <button className="ds-link-btn" onClick={() => setShowAllHistory(v => !v)}>
+                            {showAllHistory ? 'Show less' : `+ View all ${history.length} transcripts`} <ChevronIcon size={11} dir={showAllHistory ? 'up' : 'right'} />
+                          </button>
+                        </div>
+                      )}
                     </>
                   )}
                 </section>
@@ -2228,53 +2227,6 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                   )}
                 </section>
               </div>
-            )}
-
-            {tab === 'history' && (
-              <section className="ds-card ds-list-card">
-                <div className="ds-list-head">
-                  <h2 className="ds-list-title">Transcript History</h2>
-                </div>
-                {history.length === 0 ? (
-                  <div className="ds-empty">
-                    <h3>No history found</h3>
-                    <p>Extract your first video transcript to start your library.</p>
-                    <button onClick={onBack}>Extract transcript</button>
-                  </div>
-                ) : (
-                  <>
-                    {history.map((h, idx) => {
-                      const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
-                      const title = h.title || h.id;
-                      const channel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
-                      return (
-                        <div key={`${h.id}-${idx}`} className="ds-row">
-                          <div className="ds-thumb">
-                            {h.thumbnail ? (
-                              <img src={h.thumbnail} alt={title} loading="lazy" />
-                            ) : (
-                              h.platform === 'vimeo' ? <VimeoIcon size={30} /> : <YouTubeIcon size={30} />
-                            )}
-                          </div>
-                          <div className="ds-row-main" style={{ minWidth: 0 }}>
-                            <p className="ds-row-title">{title}</p>
-                            <p className="ds-row-meta">
-                              {h.platform === 'vimeo' ? <VimeoIcon size={13} /> : <YouTubeIcon size={13} />}
-                              {channel}
-                              {wc > 0 ? `${wc.toLocaleString()} words` : null}
-                              {timeAgo(h.date)}
-                              {h.source ? h.source : null}
-                            </p>
-                          </div>
-                          <div className="ds-row-actions">
-                            <button className="ds-row-btn primary" onClick={() => openTranscript(h)}>Open</button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </>
-                )}
-              </section>
             )}
 
             {tab === 'settings' && (
@@ -2816,10 +2768,14 @@ const App = () => {
   const [chapters, setChapters]           = useState([]);
   const [chaptersLoading, setChaptersLoading] = useState(false);
   const [showChapters, setShowChapters]   = useState(false);
-  const [quotes, setQuotes]               = useState([]);
-  const [quotesLoading, setQuotesLoading] = useState(false);
-  const [showQuotes, setShowQuotes]       = useState(false);
-  const [quotesCopied, setQuotesCopied]   = useState(false);
+  const [flashcards, setFlashcards]               = useState([]);       // [{question, answer, topic}]
+  const [flashcardsLoading, setFlashcardsLoading] = useState(false);
+  const [showFlashcardModal, setShowFlashcardModal] = useState(false);
+  const [flashcardIndex, setFlashcardIndex]       = useState(0);
+  const [flashcardFlipped, setFlashcardFlipped]   = useState(false);
+  const [flashcardKnown, setFlashcardKnown]       = useState(new Set());
+  const [studyGuide, setStudyGuide]               = useState(null);     // {overview, objectives, keyConcepts, sections, reviewQuestions}
+  const [studyGuideLoading, setStudyGuideLoading] = useState(false);
   const [activeTab, setActiveTab]         = useState('transcript'); // 'transcript' | 'chapters' | 'editor'
   const [currentTitle, setCurrentTitle]   = useState('');
   const [currentChannel, setCurrentChannel] = useState('');
@@ -2861,6 +2817,19 @@ const App = () => {
 
   // Keep segmentsRef in sync so intervals can read latest value without stale closure
   useEffect(() => { segmentsRef.current = segments; }, [segments]);
+
+  // Flashcard modal keyboard navigation
+  useEffect(() => {
+    if (!showFlashcardModal) return;
+    const handler = (e) => {
+      if (e.key === 'ArrowRight') fcNext();
+      else if (e.key === 'ArrowLeft') fcPrev();
+      else if (e.key === ' ') { e.preventDefault(); setFlashcardFlipped(f => !f); }
+      else if (e.key === 'Escape') setShowFlashcardModal(false);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [showFlashcardModal, flashcardIndex, flashcards.length]);
 
   // Reset playing segment when transcript changes
   useEffect(() => {
@@ -3189,7 +3158,7 @@ const App = () => {
     setSummary(''); setShowTimestamps(true); setShowQA(false);
     setQaQuestion(''); setQaMessages([]);
     setChapters([]); setShowChapters(false);
-    setQuotes([]); setShowQuotes(false);
+    setFlashcards([]); setStudyGuide(null); setShowFlashcardModal(false);
     setActiveTab('transcript');
     setCurrentTitle(''); setCurrentChannel('');
     setSelectedSegment(null); setExportToggle(false);
@@ -3245,7 +3214,7 @@ const App = () => {
     setError(''); setTranscript(''); setTranscriptSource('');
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
     setSummary(''); setChapters([]); setShowChapters(false);
-    setQuotes([]); setShowQuotes(false); setQaMessages([]); setShowQA(false);
+    setFlashcards([]); setStudyGuide(null); setQaMessages([]); setShowQA(false);
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
 
@@ -3323,7 +3292,7 @@ const App = () => {
     const { platform, id: videoId, url: videoCanonical } = parsed;
     setLangRefetching(true);
     setLangRefetchMsg('');
-    setSearch(''); setSummary(''); setChapters([]); setQuotes([]); setQaMessages([]);
+    setSearch(''); setSummary(''); setChapters([]); setFlashcards([]); setStudyGuide(null); setQaMessages([]);
     const apiUrl = platform === 'vimeo'
       ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${newLang}`
       : `/api/transcript?videoId=${videoId}&lang=${newLang}`;
@@ -3452,21 +3421,58 @@ const App = () => {
     } finally { setChaptersLoading(false); }
   };
 
-  const extractQuotes = async () => {
-    if (quotesLoading) return;
-    setQuotesLoading(true); setQuotes([]);
+  const generateFlashcards = async () => {
+    if (flashcardsLoading) return;
+    setFlashcardsLoading(true); setFlashcards([]);
     try {
-      const res = await fetch('/api/quotes', {
+      const res = await fetch('/api/flashcards', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transcript }),
       });
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
-      if (!res.ok) throw new Error(data.error || 'Failed to extract quotes');
-      setQuotes(data.quotes || []); setShowQuotes(true);
-    } catch (err) { setQuotes([`Error: ${err.message}`]); setShowQuotes(true); }
-    finally { setQuotesLoading(false); }
+      if (!res.ok) throw new Error(data.error || 'Failed to generate flashcards');
+      const cards = data.flashcards || [];
+      setFlashcards(cards);
+      setFlashcardIndex(0); setFlashcardFlipped(false); setFlashcardKnown(new Set());
+      if (cards.length > 0) setShowFlashcardModal(true);
+    } catch (err) { setFlashcards([]); }
+    finally { setFlashcardsLoading(false); }
+  };
+
+  const generateStudyGuide = async () => {
+    if (studyGuideLoading) return;
+    setStudyGuideLoading(true); setStudyGuide(null);
+    try {
+      const res = await fetch('/api/study-guide', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript }),
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
+      if (!res.ok) throw new Error(data.error || 'Failed to generate study guide');
+      setStudyGuide(data);
+    } catch (err) { setStudyGuide({ _error: err.message }); }
+    finally { setStudyGuideLoading(false); }
+  };
+
+  const fcNext = () => {
+    setFlashcardFlipped(false);
+    setTimeout(() => setFlashcardIndex(i => Math.min(i + 1, flashcards.length - 1)), 150);
+  };
+  const fcPrev = () => {
+    setFlashcardFlipped(false);
+    setTimeout(() => setFlashcardIndex(i => Math.max(i - 1, 0)), 150);
+  };
+  const fcMarkKnown = (known) => {
+    setFlashcardKnown(prev => {
+      const next = new Set(prev);
+      if (known) next.add(flashcardIndex); else next.delete(flashcardIndex);
+      return next;
+    });
+    if (flashcardIndex < flashcards.length - 1) fcNext();
   };
 
   const highlightText = (text) => {
@@ -4621,12 +4627,12 @@ const App = () => {
                   { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(45,108,223,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
                     onClick: summarize, active: !!summary, loading: summarizing },
-                  { title: 'Flash Cards', sub: 'Key concepts as cards', color: P.warning, bg: 'rgba(180,83,9,0.1)',
+                  { title: 'Flash Cards', sub: 'Q&A cards with flip mode', color: P.warning, bg: 'rgba(180,83,9,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-                    onClick: extractQuotes, active: quotes.length > 0, loading: quotesLoading },
-                  { title: 'Study Guide', sub: 'Chapters & structure', color: P.success, bg: 'rgba(15,118,110,0.1)',
+                    onClick: flashcards.length > 0 ? () => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); } : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
+                  { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-                    onClick: () => { detectChapters(); setActiveTab('chapters'); }, active: chapters.length > 0, loading: chaptersLoading },
+                    onClick: generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
                 ].map(item => (
                   <div key={item.title}
                     onClick={item.loading ? undefined : item.onClick}
@@ -4648,15 +4654,77 @@ const App = () => {
                   </div>
                 ))}
 
-                {/* Flash cards if generated */}
-                {quotes.length > 0 && (
-                  <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 5 }}>
-                    {quotes.filter(q => !q.startsWith('Error:')).map((q, i) => (
-                      <div key={i} style={{ padding: '8px 10px 8px 12px', background: P.paper, borderRadius: 8, borderLeft: `3px solid ${P.warning}`, border: `1px solid ${P.border}`, borderLeftWidth: 3, borderLeftColor: P.warning }}>
-                        <div style={{ fontSize: 9, fontWeight: 700, color: P.warning, letterSpacing: '0.06em', marginBottom: 3, textTransform: 'uppercase' }}>Card {i + 1}</div>
-                        <div style={{ fontSize: 12.5, lineHeight: 1.6, color: P.ink }}>{q}</div>
+                {/* Flashcards re-open button (cards are in full-screen modal) */}
+                {flashcards.length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    <button
+                      onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 7, width: '100%', padding: '9px 14px', background: 'rgba(180,83,9,0.07)', border: `1px solid rgba(180,83,9,0.2)`, borderRadius: 10, cursor: 'pointer', color: P.warning, fontSize: 12.5, fontWeight: 600, transition: 'all 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,83,9,0.12)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(180,83,9,0.07)'; }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                      Study {flashcards.length} Flashcards
+                      <span style={{ marginLeft: 'auto', fontSize: 11, opacity: 0.7 }}>{flashcardKnown.size}/{flashcards.length} known</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Study guide content */}
+                {studyGuide && !studyGuide._error && (
+                  <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {/* Overview */}
+                    <div style={{ padding: '10px 12px', background: P.paper, borderRadius: 10, border: `1px solid ${P.border}` }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: P.success, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 5 }}>Overview</div>
+                      <div style={{ fontSize: 12.5, lineHeight: 1.65, color: P.ink }}>{studyGuide.overview}</div>
+                    </div>
+                    {/* Learning Objectives */}
+                    {studyGuide.objectives?.length > 0 && (
+                      <div style={{ padding: '10px 12px', background: P.paper, borderRadius: 10, border: `1px solid ${P.border}` }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: P.success, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 7 }}>Learning Objectives</div>
+                        {studyGuide.objectives.map((obj, i) => (
+                          <div key={i} style={{ display: 'flex', gap: 8, marginBottom: i < studyGuide.objectives.length - 1 ? 6 : 0 }}>
+                            <div style={{ width: 18, height: 18, borderRadius: 4, background: 'rgba(15,118,110,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                              <span style={{ fontSize: 9, fontWeight: 700, color: P.success }}>{i + 1}</span>
+                            </div>
+                            <div style={{ fontSize: 12, lineHeight: 1.55, color: P.ink }}>{obj}</div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
+                    {/* Key Concepts */}
+                    {studyGuide.keyConcepts?.length > 0 && (
+                      <div style={{ padding: '10px 12px', background: P.paper, borderRadius: 10, border: `1px solid ${P.border}` }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: P.success, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 7 }}>Key Concepts</div>
+                        {studyGuide.keyConcepts.map((kc, i) => (
+                          <div key={i} style={{ marginBottom: i < studyGuide.keyConcepts.length - 1 ? 7 : 0 }}>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: P.success }}>{kc.term}:</span>
+                            <span style={{ fontSize: 12, color: P.ink, lineHeight: 1.55 }}> {kc.definition}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {/* Review Questions */}
+                    {studyGuide.reviewQuestions?.length > 0 && (
+                      <div style={{ padding: '10px 12px', background: P.paper, borderRadius: 10, border: `1px solid ${P.border}` }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: P.success, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 7 }}>Review Questions</div>
+                        {studyGuide.reviewQuestions.map((q, i) => (
+                          <div key={i} style={{ fontSize: 12, lineHeight: 1.55, color: P.ink, marginBottom: i < studyGuide.reviewQuestions.length - 1 ? 6 : 0, paddingLeft: 4 }}>
+                            <span style={{ fontWeight: 600, color: P.muted }}>{i + 1}.</span> {q}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {/* Close */}
+                    <button onClick={() => setStudyGuide(null)} style={{ alignSelf: 'center', border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 14px', borderRadius: 6, transition: 'all 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+                    >Close Study Guide</button>
+                  </div>
+                )}
+                {studyGuide?._error && (
+                  <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(180,35,24,0.05)', border: `1px solid rgba(180,35,24,0.2)`, borderRadius: 8, fontSize: 12, color: P.error }}>
+                    Failed to generate study guide: {studyGuide._error}
                   </div>
                 )}
 
@@ -4769,6 +4837,143 @@ const App = () => {
           </div>
         </div>
       </footer>}
+
+      {/* ── Flashcard Modal ─────────────────────────────────────────────── */}
+      {showFlashcardModal && flashcards.length > 0 && (() => {
+        const card = flashcards[flashcardIndex];
+        const isLast = flashcardIndex === flashcards.length - 1;
+        const allReviewed = flashcardKnown.size + (flashcards.length - flashcardKnown.size) === flashcards.length && flashcardIndex === isLast;
+        const progressPct = Math.round((flashcardKnown.size / flashcards.length) * 100);
+        return (
+          <div
+            onClick={(e) => { if (e.target === e.currentTarget) setShowFlashcardModal(false); }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(28,25,23,0.72)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+          >
+            {/* Header */}
+            <div style={{ width: '100%', maxWidth: 560, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ display: 'flex', align: 'center', gap: 10 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.01em' }}>
+                  Flashcards
+                </span>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginLeft: 8 }}>
+                  {flashcardIndex + 1} / {flashcards.length}
+                </span>
+              </div>
+              <button
+                onClick={() => setShowFlashcardModal(false)}
+                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 13, fontWeight: 600, padding: '5px 12px', transition: 'all 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.18)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+              >✕ Close</button>
+            </div>
+
+            {/* Progress bar */}
+            <div style={{ width: '100%', maxWidth: 560, marginBottom: 20 }}>
+              <div style={{ height: 4, background: 'rgba(255,255,255,0.12)', borderRadius: 4, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${progressPct}%`, background: '#0F766E', borderRadius: 4, transition: 'width 0.4s ease' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5 }}>
+                <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)' }}>{flashcardKnown.size} known</span>
+                <span style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)' }}>{flashcards.length - flashcardKnown.size} to review</span>
+              </div>
+            </div>
+
+            {/* Card */}
+            <div
+              style={{ width: '100%', maxWidth: 560, height: 280, perspective: '1200px', cursor: 'pointer', marginBottom: 20 }}
+              onClick={() => setFlashcardFlipped(f => !f)}
+            >
+              <div style={{
+                width: '100%', height: '100%', position: 'relative',
+                transformStyle: 'preserve-3d',
+                transform: flashcardFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                transition: 'transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)',
+              }}>
+                {/* Front — Question */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
+                  background: P.surface, borderRadius: 18,
+                  border: `1.5px solid ${P.border}`,
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  padding: '28px 32px', textAlign: 'center',
+                }}>
+                  {card.topic && (
+                    <div style={{ fontSize: 10, fontWeight: 700, color: P.warning, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14, padding: '3px 10px', background: 'rgba(180,83,9,0.08)', borderRadius: 20 }}>
+                      {card.topic}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 18, fontWeight: 600, color: P.ink, lineHeight: 1.5, maxHeight: 160, overflow: 'auto' }}>{card.question}</div>
+                  <div style={{ marginTop: 20, fontSize: 11, color: P.muted, display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                    Tap to reveal answer · Space
+                  </div>
+                </div>
+                {/* Back — Answer */}
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg)',
+                  background: 'linear-gradient(135deg, #0F766E 0%, #0d5e57 100%)', borderRadius: 18,
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  padding: '28px 32px', textAlign: 'center',
+                }}>
+                  {card.topic && (
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14 }}>
+                      {card.topic}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 16, fontWeight: 500, color: '#fff', lineHeight: 1.65, maxHeight: 180, overflow: 'auto' }}>{card.answer}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            {flashcardFlipped ? (
+              <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+                <button
+                  onClick={() => fcMarkKnown(false)}
+                  style={{ padding: '10px 22px', borderRadius: 12, border: '1.5px solid rgba(180,35,24,0.5)', background: 'rgba(180,35,24,0.12)', color: '#ff8f86', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,35,24,0.22)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(180,35,24,0.12)'; }}
+                >✗ Still Learning</button>
+                <button
+                  onClick={() => fcMarkKnown(true)}
+                  style={{ padding: '10px 22px', borderRadius: 12, border: '1.5px solid rgba(15,118,110,0.5)', background: 'rgba(15,118,110,0.18)', color: '#5ee8d2', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(15,118,110,0.28)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15,118,110,0.18)'; }}
+                >✓ I Know This</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+                <button
+                  onClick={fcPrev}
+                  disabled={flashcardIndex === 0}
+                  style={{ padding: '9px 18px', borderRadius: 10, border: '1.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)', color: flashcardIndex === 0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600, cursor: flashcardIndex === 0 ? 'default' : 'pointer', transition: 'all 0.15s' }}
+                >← Prev</button>
+                <button
+                  onClick={() => setFlashcardFlipped(true)}
+                  style={{ padding: '9px 24px', borderRadius: 10, border: '1.5px solid rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.18)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                >Reveal Answer</button>
+                <button
+                  onClick={fcNext}
+                  disabled={isLast}
+                  style={{ padding: '9px 18px', borderRadius: 10, border: '1.5px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)', color: isLast ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600, cursor: isLast ? 'default' : 'pointer', transition: 'all 0.15s' }}
+                >Next →</button>
+              </div>
+            )}
+
+            {/* Keyboard hint */}
+            <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.02em' }}>
+              Space to flip · ← → to navigate · Esc to close
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 };

@@ -33,7 +33,7 @@ async function requireAuth(req, res, next) {
   next();
 }
 
-async function aiComplete(prompt) {
+async function aiComplete(prompt, maxTokens = 1024) {
   // Try Groq first
   if (process.env.GROQ_API_KEY) {
     try {
@@ -41,7 +41,7 @@ async function aiComplete(prompt) {
       const completion = await groq.chat.completions.create({
         model: 'llama-3.1-8b-instant',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 1024,
+        max_tokens: maxTokens,
       });
       return completion.choices[0].message.content;
     } catch (err) {
@@ -62,7 +62,7 @@ async function aiComplete(prompt) {
       body: JSON.stringify({
         model: 'meta-llama/llama-3.1-8b-instruct:free',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 1024,
+        max_tokens: maxTokens,
       }),
     });
     if (!response.ok) {
@@ -618,8 +618,8 @@ app.post('/api/chapters', async (req, res) => {
   }
 });
 
-// ── Key quotes endpoint ───────────────────────────────────────────────────────
-app.post('/api/quotes', async (req, res) => {
+// ── Flashcards endpoint ───────────────────────────────────────────────────────
+app.post('/api/flashcards', async (req, res) => {
   const { transcript } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -628,13 +628,36 @@ app.post('/api/quotes', async (req, res) => {
 
   try {
     const raw = await aiComplete(
-      `You extract memorable, insightful, or impactful quotes from YouTube video transcripts. Return ONLY a valid JSON array of strings — each string is a direct, verbatim quote from the transcript. No explanation, no markdown, no attribution, just the JSON array of quote strings.\n\nExtract 4-7 of the most memorable or insightful quotes from this transcript. Each quote should be a complete sentence or phrase, taken verbatim.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nReturn JSON array only: ["quote one", "quote two", ...]`
+      `You create educational flashcards from YouTube video transcripts. Generate 8-12 question-and-answer flashcard pairs covering the key concepts, facts, and ideas from the video. Each card should test meaningful understanding, not trivial details. Return ONLY a valid JSON array of objects — no explanation, no markdown, just the JSON array.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nReturn JSON array only: [{"question": "What is X?", "answer": "X is...", "topic": "Section Name"}, ...]`,
+      2048
     );
     const match = raw.match(/\[[\s\S]*\]/);
-    const quotes = match ? JSON.parse(match[0]) : [];
-    res.json({ quotes });
+    const flashcards = match ? JSON.parse(match[0]) : [];
+    res.json({ flashcards });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to extract quotes', details: err.message });
+    res.status(500).json({ error: 'Failed to generate flashcards', details: err.message });
+  }
+});
+
+// ── Study guide endpoint ──────────────────────────────────────────────────────
+app.post('/api/study-guide', async (req, res) => {
+  const { transcript } = req.body;
+  if (!transcript || typeof transcript !== 'string')
+    return res.status(400).json({ error: 'Missing transcript' });
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY)
+    return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY or OPENROUTER_API_KEY)' });
+
+  try {
+    const raw = await aiComplete(
+      `You create structured study guides from YouTube video transcripts. Return ONLY a valid JSON object with exactly these fields — no markdown, no explanation:\n- "overview": 1-2 sentence description of what this video teaches\n- "objectives": array of 3-5 learning objectives starting with action verbs (Understand, Identify, Apply, Analyze, Explain)\n- "keyConcepts": array of 4-8 objects with "term" (string) and "definition" (string, 1-2 sentences)\n- "sections": array of 3-5 objects with "title" (string), "summary" (2-3 sentences), and "keyPoints" (array of 2-4 strings)\n- "reviewQuestions": array of 4-6 thoughtful questions to test understanding\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nReturn JSON object only.`,
+      2048
+    );
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Failed to parse study guide response');
+    const studyGuide = JSON.parse(match[0]);
+    res.json(studyGuide);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to generate study guide', details: err.message });
   }
 });
 
