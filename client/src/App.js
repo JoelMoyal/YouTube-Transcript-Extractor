@@ -2837,6 +2837,7 @@ const App = () => {
   const [flashcardsMoreLoading, setFlashcardsMoreLoading] = useState(false);
   const [flashcardsExhausted, setFlashcardsExhausted]     = useState(false);
   const [flashcardsExhaustedReason, setFlashcardsExhaustedReason] = useState('');
+  const [flashcardsTabPulse, setFlashcardsTabPulse]       = useState(false);
   const [expandedCards, setExpandedCards]         = useState(new Set());  // indices expanded in tab view
   const [studyGuide, setStudyGuide]               = useState(null);     // {overview, objectives, keyConcepts, sections, reviewQuestions}
   const [studyGuideLoading, setStudyGuideLoading] = useState(false);
@@ -3564,7 +3565,11 @@ const App = () => {
       const cards = (data.flashcards || []).filter(c => c && c.question && c.answer);
       setFlashcards(cards);
       setFlashcardIndex(0); setFlashcardFlipped(false); setFlashcardKnown(new Set()); setExpandedCards(new Set());
-      if (cards.length > 0) { setActiveTab('flashcards'); pauseVideo(); setShowFlashcardModal(true); }
+      if (cards.length > 0) {
+        setActiveTab('flashcards');
+        setFlashcardsTabPulse(true);
+        setTimeout(() => setFlashcardsTabPulse(false), 1400);
+      }
     } catch (err) { setFlashcards([]); }
     finally { setFlashcardsLoading(false); }
   };
@@ -3726,6 +3731,7 @@ const App = () => {
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         @keyframes logoFlipOut { 0% { transform: perspective(300px) rotateX(0deg); opacity:1; } 100% { transform: perspective(300px) rotateX(-80deg); opacity:0; } }
         @keyframes logoFlipIn  { 0% { transform: perspective(300px) rotateX(80deg);  opacity:0; } 100% { transform: perspective(300px) rotateX(0deg);   opacity:1; } }
+        @keyframes tabHighlight { 0% { box-shadow: 0 0 0 0 rgba(45,108,223,0); } 30% { box-shadow: 0 0 0 3px rgba(45,108,223,0.4), 0 0 10px rgba(45,108,223,0.18); } 100% { box-shadow: 0 0 0 0 rgba(45,108,223,0); } }
         .fade-up { animation: fadeUp 0.3s ease forwards; }
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
@@ -4397,6 +4403,7 @@ const App = () => {
                       background: isActive ? '#FFFFFF' : 'transparent',
                       color: isActive ? P.ink : P.muted, cursor: 'pointer', transition: 'all 0.15s',
                       whiteSpace: 'nowrap',
+                      animation: tab.key === 'flashcards' && flashcardsTabPulse ? 'tabHighlight 1.2s ease-out forwards' : undefined,
                     }}
                       onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; e.currentTarget.style.color = P.ink; }}}
                       onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; }}}
