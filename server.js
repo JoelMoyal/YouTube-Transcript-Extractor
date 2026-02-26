@@ -635,24 +635,24 @@ app.post('/api/flashcards', async (req, res) => {
     let prompt;
     if (isMore) {
       const coveredList = existingQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n');
-      prompt = `Create 6 NEW flashcard Q&A pairs from this transcript that cover different topics than those already generated. Do NOT repeat or rephrase any of the covered questions. Each card must have "question", "answer", and "topic" (a short 1-3 word category label).\n\nIf there is not enough new or distinct content in the transcript to create meaningful additional flashcards, return exactly this JSON object instead of an array: {"noMore":true,"reason":"<one sentence explaining why>"}\n\nTranscript:\n${transcript.slice(0, 12000)}\n\nAlready covered questions (do not repeat these):\n${coveredList}\n\nReturn ONLY a JSON array OR the noMore object — no markdown, no explanation.\nFormat: [{"question":"...","answer":"...","topic":"..."},...]`;
+      prompt = `You are creating additional study flashcards from a YouTube video transcript. Flashcards already generated are listed below — do NOT repeat, rephrase, or closely overlap with any of them.\n\nRules:\n- Only create cards for concepts clearly present in the transcript and NOT already covered\n- Each card must cover a distinct concept — no padding, no trivia, no rephrasing existing cards\n- Generate between 1 and 6 cards — only as many as are genuinely useful\n- It is BETTER to return the noMore signal than to produce weak, redundant, or padded cards\n- If fewer than 2 meaningful new concepts remain, return: {"noMore":true,"reason":"<one clear sentence why>"}\n\nTranscript:\n${transcript.slice(0, 12000)}\n\nAlready covered (do not repeat):\n${coveredList}\n\nReturn ONLY a JSON array OR the noMore object — no markdown, no explanation.\nFormat: [{"question":"...","answer":"...","topic":"<1-3 word label>"},...]`;
     } else {
-      prompt = `Create exactly 6 flashcard Q&A pairs from this transcript. Cover the most important concepts. Return ONLY a JSON array — no markdown, no explanation.\n\nTranscript:\n${transcript.slice(0, 12000)}\n\nReturn: [{"question":"...","answer":"...","topic":"..."},...]`;
+      prompt = `You are creating high-quality study flashcards from a YouTube video transcript.\n\nRules:\n- Generate between 4 and 8 cards covering the most important, distinct concepts\n- Each card must cover a DIFFERENT concept — no duplicates or rephrasing within the set\n- Only create cards for concepts clearly explained in the transcript — do not invent or assume\n- Skip trivial, obvious, or overly broad questions\n- "answer" should be concise but complete (1-3 sentences)\n- "topic" is a short 1-3 word category label\n\nTranscript:\n${transcript.slice(0, 12000)}\n\nReturn ONLY a JSON array — no markdown, no explanation.\nFormat: [{"question":"...","answer":"...","topic":"..."},...]`;
     }
 
-    const raw = await aiComplete(prompt, 1400);
+    const raw = await aiComplete(prompt, 1600);
 
     // Check for noMore signal first
     const noMoreMatch = raw.match(/\{\s*"noMore"\s*:\s*true[\s\S]*?\}/);
     if (noMoreMatch) {
       try {
         const parsed = JSON.parse(noMoreMatch[0]);
-        return res.json({ flashcards: [], noMore: true, reason: parsed.reason || 'This transcript doesn\'t have enough distinct content for more flashcards.' });
+        return res.json({ flashcards: [], noMore: true, reason: parsed.reason || 'All key concepts from this transcript are already covered.' });
       } catch { /* fall through to array parse */ }
     }
 
     const match = raw.match(/\[[\s\S]*\]/);
-    const flashcards = match ? JSON.parse(match[0]) : [];
+    const flashcards = match ? JSON.parse(match[0]).filter(c => c && c.question && c.answer) : [];
     res.json({ flashcards });
   } catch (err) {
     res.status(500).json({ error: 'Failed to generate flashcards', details: err.message });

@@ -3552,13 +3552,19 @@ const App = () => {
       if (!res.ok) throw new Error(data.error || 'Failed to generate more flashcards');
       if (data.noMore) {
         setFlashcardsExhausted(true);
-        setFlashcardsExhaustedReason(data.reason || 'No more flashcards can be generated from this transcript.');
+        setFlashcardsExhaustedReason(data.reason || 'All key concepts from this transcript are already covered.');
         return;
       }
-      const newCards = (data.flashcards || []).filter(c => c && c.question && c.answer);
-      if (newCards.length > 0) {
-        setFlashcards(prev => [...prev, ...newCards]);
+      const existingQNorm = new Set(flashcards.map(c => c.question.trim().toLowerCase()));
+      const newCards = (data.flashcards || [])
+        .filter(c => c && c.question && c.answer)
+        .filter(c => !existingQNorm.has(c.question.trim().toLowerCase()));
+      if (newCards.length === 0) {
+        setFlashcardsExhausted(true);
+        setFlashcardsExhaustedReason('All key concepts from this transcript are already covered.');
+        return;
       }
+      setFlashcards(prev => [...prev, ...newCards]);
     } catch (err) { /* silent */ }
     finally { setFlashcardsMoreLoading(false); }
   };
