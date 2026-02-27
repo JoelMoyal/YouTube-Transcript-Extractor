@@ -4429,7 +4429,26 @@ const App = () => {
               )}
 
               {/* Browser-style tab bar — between video and content */}
-              <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}` }}>
+              <div className="tab-bar-mobile" style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}`, overflowX: isMobile ? 'auto' : 'visible', overflowY: 'hidden', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                {/* Tablet-only: hamburger to open History drawer */}
+                {isTablet && (
+                  <button
+                    onClick={() => setHistoryDrawerOpen(v => !v)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', marginRight: 4,
+                      border: `1px solid ${P.border}`, borderRadius: 7, background: historyDrawerOpen ? P.accentLight : 'transparent',
+                      cursor: 'pointer', fontSize: 11, fontWeight: 600, color: historyDrawerOpen ? P.accent : P.muted,
+                      flexShrink: 0, transition: 'all 0.15s', whiteSpace: 'nowrap',
+                    }}
+                    title="History &amp; Export"
+                    aria-label="Open history drawer"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                    History
+                  </button>
+                )}
                 {[
                   { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> },
                   { key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
