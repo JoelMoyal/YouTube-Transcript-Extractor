@@ -46,8 +46,10 @@ async function aiComplete(prompt, maxTokens = 1024) {
       return completion.choices[0].message.content;
     } catch (err) {
       const msg = err.message || '';
-      if (!msg.includes('429') && !msg.includes('rate') && !msg.includes('quota')) throw err;
-      // Rate limited — fall through to OpenRouter
+      const status = err.status || err.statusCode || 0;
+      // Only hard-fail on auth errors — fall through to OpenRouter for everything else
+      if (status === 401 || msg.includes('401') || msg.includes('invalid_api_key') || msg.includes('unauthorized')) throw err;
+      // Fall through to OpenRouter for rate limits, 5xx, timeouts, model errors, etc.
     }
   }
 
@@ -671,10 +673,11 @@ app.post('/api/study-guide', async (req, res) => {
   try {
     const raw = await aiComplete(
       `You create structured study guides from YouTube video transcripts. Return ONLY a valid JSON object with exactly these fields — no markdown, no explanation:\n- "overview": 1-2 sentence description of what this video teaches\n- "objectives": array of 3-5 learning objectives starting with action verbs (Understand, Identify, Apply, Analyze, Explain)\n- "keyConcepts": array of 4-8 objects with "term" (string) and "definition" (string, 1-2 sentences)\n- "sections": array of 3-5 objects with "title" (string), "summary" (2-3 sentences), and "keyPoints" (array of 2-4 strings)\n- "reviewQuestions": array of 4-6 thoughtful questions to test understanding\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nReturn JSON object only.`,
-      2048
+      4096
     );
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('Failed to parse study guide response');
+    const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
+    const match = stripped.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error(`Failed to parse study guide response. Raw: ${raw.slice(0, 200)}`);
     const studyGuide = JSON.parse(match[0]);
     res.json(studyGuide);
   } catch (err) {
