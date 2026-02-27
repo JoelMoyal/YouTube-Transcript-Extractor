@@ -384,7 +384,7 @@ const ReferralPromoModal = ({ user, onClose }) => {
 };
 
 // ── Credits ───────────────────────────────────────────────────────────────────
-const CREDITS_FREE = 6;   // not signed in
+const CREDITS_FREE = 2;   // not signed in
 const CREDITS_MAX  = 20;  // signed in
 const CREDITS_PERIOD_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -2133,7 +2133,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
             overflow-wrap: anywhere;
           }
           .ds-section-tabs { overflow-x: auto; }
-          .ds-stats { grid-template-columns: 1fr; }
+          /* Keep 2x2 grid on tablet/mobile — avoid 4-tall-cards stack */
+          .ds-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .ds-usage-head { flex-wrap: wrap; }
           /* Keep rows compact — thumbnail stays small, no stacking */
           .ds-thumb { width: 72px; height: 40px; }
@@ -2143,10 +2144,20 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           .ds-profile { padding: 14px 16px; gap: 12px; }
           .ds-avatar { width: 48px; height: 48px; font-size: 20px; }
           .ds-profile-name { font-size: 20px !important; }
-          .ds-topnav-tab { font-size: 13px; padding: 5px 10px; }
+          /* Hide topnav tabs on phone — section-tabs handle navigation */
+          .ds-topnav-tab { display: none; }
           .ds-section-tab { font-size: 12px; padding: 6px 10px; }
           .ds-usage-days { display: none; }
+          /* Keep 2x2 stats grid on phone, compact padding */
+          .ds-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+          .ds-stat { padding: 12px 12px 10px; border-radius: 13px; }
+          .ds-stat-value { font-size: 22px; }
+          .ds-stat-label { font-size: 12px; }
+          .ds-stat-sub { font-size: 11px; }
           .ds-thumb { width: 64px; height: 36px; }
+          .ds-usage { padding: 12px 14px 10px; }
+          .ds-usage-title { font-size: 14px; }
+          .ds-usage-daystats { flex-direction: column; align-items: flex-start; gap: 4px; }
           .ds-credits-mobile { display: block !important; }
         }
       `}</style>
