@@ -4528,7 +4528,7 @@ const App = () => {
                     </div>
                     {/* Translation notice — disabled (on ice) */}
                     {/* Transcript list — 2-column grid: timestamp | text */}
-                    <div ref={transcriptListRef} style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF', position: 'relative' }}>
+                    <div ref={transcriptListRef} style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF', position: 'relative', maxWidth: isDesktop ? 860 : '100%', margin: isDesktop ? '0 auto' : undefined }}>
                       {langRefetching && (
                         <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(246,243,238,0.7)', backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                           <div style={{ display: 'flex', gap: 6 }}>
