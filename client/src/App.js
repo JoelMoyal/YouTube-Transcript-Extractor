@@ -2881,6 +2881,20 @@ const App = () => {
   const chatMessagesRef = useRef(null);
   const recoveryIntentRef = useRef(false);
 
+  // Resize listener — throttled via rAF to handle iOS address-bar collapse events
+  useEffect(() => {
+    let raf;
+    const onResize = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        setWindowWidth(window.innerWidth);
+        setWindowHeight(window.innerHeight);
+      });
+    };
+    window.addEventListener('resize', onResize);
+    return () => { window.removeEventListener('resize', onResize); cancelAnimationFrame(raf); };
+  }, []);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const host = window.location.hostname.toLowerCase();
