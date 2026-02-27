@@ -3744,6 +3744,102 @@ const App = () => {
     transition: 'all 0.15s',
   });
 
+  // Shared sidebar content — rendered in grid (desktop), tablet drawer, and mobile panel
+  const renderSidebarContent = () => (
+    <>
+      {/* Export header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '18px 16px 14px' }}>
+        <span style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Export</span>
+      </div>
+
+      {/* Export format list */}
+      <div style={{ padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {[
+          { label: 'Text', selected: true, fn: downloadTxt, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
+          { label: 'PDF', selected: false, fn: downloadPdf, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 11h4"/><path d="M10 15h4"/></svg> },
+          { label: 'SRT', selected: false, fn: downloadSrt, disabled: segments.length === 0, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+        ].map(item => (
+          <button key={item.label} onClick={item.disabled ? undefined : item.fn} style={{
+            display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10,
+            border: 'none', textAlign: 'left', width: '100%', cursor: item.disabled ? 'default' : 'pointer',
+            background: item.selected ? P.accentLight : 'transparent', transition: 'background 0.12s',
+            opacity: item.disabled ? 0.4 : 1,
+          }}
+            onMouseEnter={e => { if (!item.disabled && !item.selected) e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; }}
+            onMouseLeave={e => { if (!item.selected) e.currentTarget.style.background = 'transparent'; }}
+          >
+            <span style={{ color: item.selected ? P.accent : P.muted, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{item.icon}</span>
+            <span style={{ fontSize: 13, fontWeight: item.selected ? 600 : 500, color: item.selected ? P.accent : P.ink }}>{item.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Divider */}
+      <div style={{ height: 1, background: P.border, margin: '0 16px' }} />
+
+      {/* History header */}
+      {history.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px 8px' }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: P.ink }}>History</span>
+          <button onClick={() => {}} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, padding: 4, display: 'flex', alignItems: 'center', borderRadius: 6, transition: 'background 0.1s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = P.border; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+        </div>
+      )}
+
+      {/* History list */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {history.map((entry) => {
+          const hTitle = entry.title || entry.id;
+          const hChannel = entry.channel || (entry.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
+          const isActive = entry.id === currentVideoId;
+          return (
+            <button key={entry.id} onClick={() => loadFromHistory(entry)} style={{
+              display: 'flex', alignItems: 'flex-start', gap: 11, padding: '10px 12px',
+              borderRadius: 12, border: `1px solid ${isActive ? 'rgba(45,108,223,0.2)' : 'transparent'}`,
+              background: isActive ? P.accentLight : 'transparent',
+              cursor: 'pointer', transition: 'background 0.1s', textAlign: 'left', width: '100%',
+            }}
+              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; e.currentTarget.style.borderColor = P.border; } }}
+              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; } }}
+            >
+              <div style={{ position: 'relative', flexShrink: 0 }}>
+                {entry.thumbnail
+                  ? <img src={entry.thumbnail} alt="" style={{ width: isMobile ? 72 : 96, height: isMobile ? 45 : 60, objectFit: 'cover', borderRadius: 8, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+                  : <div style={{ width: isMobile ? 72 : 96, height: isMobile ? 45 : 60, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{entry.platform === 'vimeo' ? <VimeoIcon /> : <YouTubeIcon />}</div>
+                }
+              </div>
+              <div style={{ minWidth: 0, flex: 1, paddingTop: 2 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.4, marginBottom: 5 }}>{hTitle}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: P.muted, marginBottom: 2 }}>
+                  {entry.platform === 'vimeo' ? <VimeoIcon size={9} /> : <YouTubeIcon />}
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hChannel}</span>
+                </div>
+                <div style={{ fontSize: 10.5, color: P.muted }}>{timeAgo(entry.date)}</div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Back button pinned at bottom */}
+      <div style={{ padding: '10px 12px', borderTop: `1px solid ${P.border}` }}>
+        <button onClick={resetAll} style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%',
+          padding: '8px', border: `1px solid ${P.border}`, borderRadius: 9, background: 'transparent',
+          cursor: 'pointer', fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
+        }}
+          onMouseEnter={e => { e.currentTarget.style.color = P.ink; e.currentTarget.style.background = P.surface; }}
+          onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.background = 'transparent'; }}
+        >
+          <ChevronIcon dir="left" size={11} /> New search
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <>
       <style>{`
@@ -4256,96 +4352,7 @@ const App = () => {
               background: P.paper, borderRight: `1px solid ${P.border}`,
               minHeight: 0,
             }}>
-              {/* Export header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '18px 16px 14px' }}>
-                <span style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Export</span>
-              </div>
-
-              {/* Export format list */}
-              <div style={{ padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {[
-                  { label: 'Text', selected: true, fn: downloadTxt, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
-                  { label: 'PDF', selected: false, fn: downloadPdf, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 11h4"/><path d="M10 15h4"/></svg> },
-                  { label: 'SRT', selected: false, fn: downloadSrt, disabled: segments.length === 0, icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
-                ].map(item => (
-                  <button key={item.label} onClick={item.disabled ? undefined : item.fn} style={{
-                    display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10,
-                    border: 'none', textAlign: 'left', width: '100%', cursor: item.disabled ? 'default' : 'pointer',
-                    background: item.selected ? P.accentLight : 'transparent', transition: 'background 0.12s',
-                    opacity: item.disabled ? 0.4 : 1,
-                  }}
-                    onMouseEnter={e => { if (!item.disabled && !item.selected) e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; }}
-                    onMouseLeave={e => { if (!item.selected) e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <span style={{ color: item.selected ? P.accent : P.muted, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{item.icon}</span>
-                    <span style={{ fontSize: 13, fontWeight: item.selected ? 600 : 500, color: item.selected ? P.accent : P.ink }}>{item.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Divider */}
-              <div style={{ height: 1, background: P.border, margin: '0 16px' }} />
-
-              {/* History header */}
-              {history.length > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px 8px' }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: P.ink }}>History</span>
-                  <button onClick={() => {}} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, padding: 4, display: 'flex', alignItems: 'center', borderRadius: 6, transition: 'background 0.1s' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = P.border; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                  </button>
-                </div>
-              )}
-
-              {/* History list */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                {history.map((entry) => {
-                  const hTitle = entry.title || entry.id;
-                  const hChannel = entry.channel || (entry.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
-                  const isActive = entry.id === currentVideoId;
-                  return (
-                    <button key={entry.id} onClick={() => loadFromHistory(entry)} style={{
-                      display: 'flex', alignItems: 'flex-start', gap: 11, padding: '10px 12px',
-                      borderRadius: 12, border: `1px solid ${isActive ? 'rgba(45,108,223,0.2)' : 'transparent'}`,
-                      background: isActive ? P.accentLight : 'transparent',
-                      cursor: 'pointer', transition: 'background 0.1s', textAlign: 'left', width: '100%',
-                    }}
-                      onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; e.currentTarget.style.borderColor = P.border; } }}
-                      onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; } }}
-                    >
-                      <div style={{ position: 'relative', flexShrink: 0 }}>
-                        {entry.thumbnail
-                          ? <img src={entry.thumbnail} alt="" style={{ width: 96, height: 60, objectFit: 'cover', borderRadius: 8, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
-                          : <div style={{ width: 96, height: 60, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{entry.platform === 'vimeo' ? <VimeoIcon /> : <YouTubeIcon />}</div>
-                        }
-                      </div>
-                      <div style={{ minWidth: 0, flex: 1, paddingTop: 2 }}>
-                        <div style={{ fontSize: 12.5, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.4, marginBottom: 5 }}>{hTitle}</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: P.muted, marginBottom: 2 }}>
-                          {entry.platform === 'vimeo' ? <VimeoIcon size={9} /> : <YouTubeIcon />}
-                          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hChannel}</span>
-                        </div>
-                        <div style={{ fontSize: 10.5, color: P.muted }}>{timeAgo(entry.date)}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Back button pinned at bottom */}
-              <div style={{ padding: '10px 12px', borderTop: `1px solid ${P.border}` }}>
-                <button onClick={resetAll} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%',
-                  padding: '8px', border: `1px solid ${P.border}`, borderRadius: 9, background: 'transparent',
-                  cursor: 'pointer', fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.color = P.ink; e.currentTarget.style.background = P.surface; }}
-                  onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.background = 'transparent'; }}
-                >
-                  <ChevronIcon dir="left" size={11} /> New search
-                </button>
-              </div>
+              {renderSidebarContent()}
             </div>
 
             {/* ── CENTER — col 2, rows 1-2 ─────────────────────────────────────── */}
