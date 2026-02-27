@@ -3304,7 +3304,7 @@ const App = () => {
     try {
       const res = await fetch('/api/ask', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, question: q }),
+        body: JSON.stringify({ transcript, question: q, platform: currentPlatform }),
       });
       const text = await res.text();
       let data;
@@ -3514,7 +3514,7 @@ const App = () => {
     try {
       const res = await fetch('/api/summarize', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript }),
+        body: JSON.stringify({ transcript, platform: currentPlatform }),
       });
       const text = await res.text();
       let data;
@@ -3674,7 +3674,7 @@ const App = () => {
     try {
       const res = await fetch('/api/ask', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, question: q }),
+        body: JSON.stringify({ transcript, question: q, platform: currentPlatform }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed');

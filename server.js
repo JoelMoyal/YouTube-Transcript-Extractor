@@ -580,15 +580,16 @@ app.get('/api/transcript', async (req, res) => {
 
 // ── AI summary endpoint ───────────────────────────────────────────────────────
 app.post('/api/summarize', async (req, res) => {
-  const { transcript } = req.body;
+  const { transcript, platform } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
   if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY)
     return res.status(503).json({ error: 'AI summary is not configured (missing GROQ_API_KEY or OPENROUTER_API_KEY)' });
 
+  const source = platform === 'vimeo' ? 'Vimeo video' : 'YouTube video';
   try {
     const text = await aiComplete(
-      `Summarize the following YouTube video transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 15000)}`
+      `Summarize the following ${source} transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 15000)}`
     );
     res.json({ summary: text });
   } catch (err) {
@@ -683,7 +684,7 @@ app.post('/api/study-guide', async (req, res) => {
 
 // ── Q&A endpoint ─────────────────────────────────────────────────────────────
 app.post('/api/ask', async (req, res) => {
-  const { transcript, question } = req.body;
+  const { transcript, question, platform } = req.body;
   if (!transcript || typeof transcript !== 'string' || !question || typeof question !== 'string')
     return res.status(400).json({ error: 'Missing transcript or question' });
   if (question.length > 500)
@@ -692,8 +693,9 @@ app.post('/api/ask', async (req, res) => {
     return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY or OPENROUTER_API_KEY)' });
 
   try {
+    const source = platform === 'vimeo' ? 'Vimeo video' : 'YouTube video';
     const text = await aiComplete(
-      `You are a helpful assistant that answers questions about YouTube video transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nQuestion: ${question}`
+      `You are a helpful assistant that answers questions about ${source} transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nQuestion: ${question}`
     );
     res.json({ answer: text });
   } catch (err) {
