@@ -2854,16 +2854,13 @@ const App = () => {
   const [playingSegment, setPlayingSegment] = useState(null);
   const [exportToggle, setExportToggle]   = useState(false);
 
-  // ── Responsive viewport state ────────────────────────────────────────────
-  const [windowWidth,  setWindowWidth]          = useState(() => window.innerWidth);
-  const [windowHeight, setWindowHeight]         = useState(() => window.innerHeight);
-  const [mobilePanel,  setMobilePanel]          = useState('transcript'); // 'transcript'|'ai'|'history'
+  // ── Responsive layout state ──────────────────────────────────────────────
+  const [windowWidth, setWindowWidth]         = useState(() => window.innerWidth);
+  const [mobilePanel, setMobilePanel]         = useState('transcript'); // 'transcript'|'ai'|'history'
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
-
-  const isMobile       = windowWidth < 640;
-  const isTablet       = windowWidth >= 640 && windowWidth < 1024;
-  const isSmallDesktop = windowWidth >= 1024 && windowWidth < 1280;
-  const isDesktop      = windowWidth >= 1024;
+  const isMobile  = windowWidth < 640;
+  const isTablet  = windowWidth >= 640 && windowWidth < 1024;
+  const isDesktop = windowWidth >= 1024;
 
   const aiCacheRef         = useRef({});  // keyed by videoId → saved AI state
   const downloadMenuRef    = useRef(null);
@@ -2881,15 +2878,11 @@ const App = () => {
   const chatMessagesRef = useRef(null);
   const recoveryIntentRef = useRef(false);
 
-  // Resize listener — throttled via rAF to handle iOS address-bar collapse events
   useEffect(() => {
     let raf;
     const onResize = () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        setWindowWidth(window.innerWidth);
-        setWindowHeight(window.innerHeight);
-      });
+      raf = requestAnimationFrame(() => setWindowWidth(window.innerWidth));
     };
     window.addEventListener('resize', onResize);
     return () => { window.removeEventListener('resize', onResize); cancelAnimationFrame(raf); };
@@ -3331,7 +3324,7 @@ const App = () => {
     try {
       const res = await fetch('/api/ask', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, question: q, platform: currentPlatform }),
+        body: JSON.stringify({ transcript, question: q }),
       });
       const text = await res.text();
       let data;
@@ -3547,7 +3540,7 @@ const App = () => {
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
-      if (!res.ok) throw new Error(data.error || 'Failed to summarize');
+      if (!res.ok) throw new Error(data.details || data.error || 'Failed to summarize');
       setSummary(data.summary);
       setActiveTab('summary');
     } catch (err) { setSummary(`Error: ${err.message}`); }
@@ -3645,7 +3638,7 @@ const App = () => {
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
-      if (!res.ok) throw new Error(data.details || data.error || 'Failed to generate study guide');
+      if (!res.ok) throw new Error(data.error || 'Failed to generate study guide');
       setStudyGuide(data);
       setActiveTab('study-guide');
     } catch (err) { setStudyGuide({ _error: err.message }); }
@@ -3702,7 +3695,7 @@ const App = () => {
     try {
       const res = await fetch('/api/ask', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, question: q, platform: currentPlatform }),
+        body: JSON.stringify({ transcript, question: q }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed');
@@ -3747,7 +3740,7 @@ const App = () => {
     transition: 'all 0.15s',
   });
 
-  // Shared sidebar content — rendered in grid (desktop), tablet drawer, and mobile panel
+  // ── Shared sidebar content (used in desktop column, tablet drawer, mobile panel) ──
   const renderSidebarContent = () => (
     <>
       {/* Export header */}
@@ -3810,8 +3803,8 @@ const App = () => {
             >
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 {entry.thumbnail
-                  ? <img src={entry.thumbnail} alt="" style={{ width: isMobile ? 72 : 96, height: isMobile ? 45 : 60, objectFit: 'cover', borderRadius: 8, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
-                  : <div style={{ width: isMobile ? 72 : 96, height: isMobile ? 45 : 60, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{entry.platform === 'vimeo' ? <VimeoIcon /> : <YouTubeIcon />}</div>
+                  ? <img src={entry.thumbnail} alt="" style={{ width: 96, height: 60, objectFit: 'cover', borderRadius: 8, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+                  : <div style={{ width: 96, height: 60, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><YouTubeIcon /></div>
                 }
               </div>
               <div style={{ minWidth: 0, flex: 1, paddingTop: 2 }}>
@@ -3859,12 +3852,11 @@ const App = () => {
         .fade-up { animation: fadeUp 0.3s ease forwards; }
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
-        * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: ${P.border} ${P.paper}; }
+        * { box-sizing: border-box; }
         body { margin: 0; background: ${P.paper}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: ${P.paper}; }
         ::-webkit-scrollbar-thumb { background: ${P.border}; border-radius: 3px; }
-        .tab-bar-mobile::-webkit-scrollbar { display: none; }
         input, select, textarea { font-family: inherit; }
         .hero-grad {
           background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(45,108,223,0.12) 0%, transparent 70%),
@@ -3877,7 +3869,7 @@ const App = () => {
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
         .bookmark-banner { animation: slideDown 0.3s ease forwards; }
         @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
-        @media (max-width: 639px) { nav { padding: 0 16px !important; } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
 
       <Navbar
@@ -4036,7 +4028,7 @@ const App = () => {
         />
       )}
 
-      <div style={{ minHeight: '100vh', paddingTop: showBookmarkBanner ? 97 : 56, background: P.paper, transition: 'padding-top 0.3s ease', display: view === 'dashboard' ? 'none' : 'block', paddingBottom: isMobile && transcript ? 56 : 0 }}>
+      <div style={{ minHeight: '100vh', paddingTop: showBookmarkBanner ? 97 : 56, background: P.paper, transition: 'padding-top 0.3s ease', display: view === 'dashboard' ? 'none' : 'block' }}>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* LANDING VIEW */}
@@ -4340,41 +4332,42 @@ const App = () => {
         {/* TRANSCRIPT VIEW — app shell 3-column layout                     */}
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {transcript && (
+          <>
           <div className="fade-up" style={{
             display: 'grid',
-            gridTemplateColumns: isMobile
-              ? '1fr'
-              : isTablet
-              ? '1fr 300px'
-              : isSmallDesktop
-              ? '240px 1fr 300px'
-              : '280px 1fr 360px',
-            gridTemplateRows: 'auto 1fr',
-            height: isMobile
-              ? `${windowHeight - 56 - 56}px`
-              : 'calc(100vh - 56px)',
+            gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 300px' : '280px 1fr 360px',
+            gridTemplateRows: '1fr',
+            height: isMobile ? 'calc(100vh - 56px - 56px)' : 'calc(100vh - 56px)',
             overflow: 'hidden',
           }}>
 
-            {/* ── LEFT SIDEBAR — col 1, spans both rows ────────────────────────── */}
-            <div style={{
-              gridColumn: 1, gridRow: '1 / 3',
-              display: isDesktop ? 'flex' : 'none', flexDirection: 'column',
-              background: P.paper, borderRight: `1px solid ${P.border}`,
-              minHeight: 0,
-            }}>
-              {renderSidebarContent()}
-            </div>
+            {/* ── LEFT SIDEBAR — col 1 (desktop only) ──────────────────────────── */}
+            {isDesktop && (
+              <div style={{
+                gridColumn: 1, gridRow: 1,
+                display: 'flex', flexDirection: 'column',
+                background: P.paper, borderRight: `1px solid ${P.border}`,
+                minHeight: 0, overflowY: 'auto',
+              }}>
+                {renderSidebarContent()}
+              </div>
+            )}
 
-            {/* ── CENTER — col 2, rows 1-2 ─────────────────────────────────────── */}
-            <div style={{ gridColumn: isDesktop ? 2 : 1, gridRow: '1 / 3', display: isMobile ? (mobilePanel === 'transcript' ? 'flex' : 'none') : 'flex', flexDirection: 'column', overflow: 'hidden', background: P.paper, borderRight: !isMobile ? `1px solid ${P.border}` : 'none' }}>
+            {/* ── CENTER — col 2 desktop / col 1 tablet+mobile ─────────────────── */}
+            <div style={{
+              gridColumn: isDesktop ? 2 : 1,
+              gridRow: 1,
+              display: isMobile ? (mobilePanel === 'transcript' ? 'flex' : 'none') : 'flex',
+              flexDirection: 'column', overflow: 'hidden', background: P.paper,
+              borderRight: !isMobile ? `1px solid ${P.border}` : 'none',
+            }}>
 
               {/* Video player card */}
               {currentVideoId && (
                 <div style={{ flexShrink: 0, borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}`, background: P.paper }}>
                   {/* Centered 16:9 player — max 391×220, no black bars, paper sides */}
                   <div style={{ display: 'flex', justifyContent: 'center', background: P.paper }}>
-                    <div style={{ width: isMobile ? '100%' : 'min(100%, 411px)', flexShrink: 0, borderRadius: 0, overflow: 'hidden' }}>
+                    <div style={{ width: 'min(100%, 411px)', flexShrink: 0, borderRadius: 0, overflow: 'hidden' }}>
                       {currentPlatform === 'vimeo' ? (
                         <iframe
                           ref={playerRef}
@@ -4430,23 +4423,14 @@ const App = () => {
               )}
 
               {/* Browser-style tab bar — between video and content */}
-              <div className="tab-bar-mobile" style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}`, overflowX: isMobile ? 'auto' : 'visible', overflowY: 'hidden', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                {/* Tablet-only: hamburger to open History drawer */}
+              <div className="no-scrollbar" style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}`, overflowX: isMobile ? 'auto' : 'visible', overflowY: 'hidden', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 {isTablet && (
-                  <button
-                    onClick={() => setHistoryDrawerOpen(v => !v)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', marginRight: 4,
-                      border: `1px solid ${P.border}`, borderRadius: 7, background: historyDrawerOpen ? P.accentLight : 'transparent',
-                      cursor: 'pointer', fontSize: 11, fontWeight: 600, color: historyDrawerOpen ? P.accent : P.muted,
-                      flexShrink: 0, transition: 'all 0.15s', whiteSpace: 'nowrap',
-                    }}
-                    title="History &amp; Export"
-                    aria-label="Open history drawer"
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
-                    </svg>
+                  <button onClick={() => setHistoryDrawerOpen(v => !v)} style={{
+                    display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', marginRight: 4, flexShrink: 0,
+                    border: `1px solid ${P.border}`, borderRadius: 7, background: historyDrawerOpen ? P.accentLight : 'transparent',
+                    cursor: 'pointer', fontSize: 11, fontWeight: 600, color: historyDrawerOpen ? P.accent : P.muted,
+                  }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                     History
                   </button>
                 )}
@@ -4460,7 +4444,7 @@ const App = () => {
                   const isActive = activeTab === tab.key;
                   return (
                     <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
-                      display: 'flex', alignItems: 'center', gap: 5, padding: isMobile ? '9px 14px' : '5px 12px', fontSize: 12,
+                      display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 12,
                       fontWeight: isActive ? 600 : 500,
                       border: isActive ? `1px solid ${P.border}` : '1px solid transparent',
                       borderBottom: isActive ? '1px solid #FFFFFF' : '1px solid transparent',
@@ -4531,7 +4515,7 @@ const App = () => {
                     {/* Transcript list — 2-column grid: timestamp | text */}
                     <div ref={transcriptListRef} style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF', position: 'relative' }}>
                       {langRefetching && (
-                        <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(246,243,238,0.7)', backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                        <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(246,243,238,0.7)', backdropFilter: 'blur(2px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                           <div style={{ display: 'flex', gap: 6 }}>
                             {[0,1,2].map(i => <span key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: `dot-flicker 1.2s ease-in-out ${i * 0.2}s infinite` }} />)}
                           </div>
@@ -4609,7 +4593,7 @@ const App = () => {
                 {activeTab === 'editor' && (
                   <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '16px' }}>
                     <textarea defaultValue={transcript} style={{
-                      width: '100%', minHeight: isMobile ? 250 : 400, border: `1px solid ${P.border}`, borderRadius: 10,
+                      width: '100%', minHeight: 400, border: `1px solid ${P.border}`, borderRadius: 10,
                       padding: '16px', fontSize: 13.5, lineHeight: 1.85, color: P.ink, background: P.paper,
                       outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
                     }}
@@ -4635,7 +4619,7 @@ const App = () => {
                         </div>
                       </div>
                       <button
-                        onClick={openFlashcardModal}
+                        onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
                         style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, border: 'none', background: P.accent, color: 'white', fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'background 0.15s' }}
                         onMouseEnter={e => { e.currentTarget.style.background = P.accentHover; }}
                         onMouseLeave={e => { e.currentTarget.style.background = P.accent; }}
@@ -4953,8 +4937,13 @@ const App = () => {
               </div>
             </div>
 
-            {/* ── RIGHT SIDEBAR — col 3, spans both rows ───────────────────────── */}
-            <div style={{ gridColumn: isDesktop ? 3 : isMobile ? 1 : 2, gridRow: '1 / 3', display: isMobile ? (mobilePanel === 'ai' ? 'flex' : 'none') : 'flex', flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF' }}>
+            {/* ── RIGHT SIDEBAR — col 3 desktop / col 2 tablet / col 1 mobile ─── */}
+            <div style={{
+              gridColumn: isDesktop ? 3 : isTablet ? 2 : 1,
+              gridRow: 1,
+              display: isMobile ? (mobilePanel === 'ai' ? 'flex' : 'none') : 'flex',
+              flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF',
+            }}>
 
               {/* ScribeSnap AI Chat — TOP of sidebar, composer at top */}
               <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
@@ -5175,7 +5164,7 @@ const App = () => {
                     onClick: summary ? () => setActiveTab('summary') : summarize, active: !!summary, loading: summarizing },
                   { title: 'Flash Cards', sub: 'Q&A cards with flip mode', color: P.warning, bg: 'rgba(180,83,9,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-                    onClick: (flashcards.length > 0 || flashcardsExhausted) ? () => setActiveTab('flashcards') : generateFlashcards, active: flashcards.length > 0 || flashcardsExhausted, loading: flashcardsLoading },
+                    onClick: flashcards.length > 0 ? openFlashcardModal : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
                   { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
                     onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
@@ -5200,11 +5189,11 @@ const App = () => {
                   </div>
                 ))}
 
-                {/* Flashcards re-open button */}
+                {/* Flashcards re-open button (cards are in full-screen modal) */}
                 {flashcards.length > 0 && (
                   <div style={{ marginTop: 8 }}>
                     <button
-                      onClick={() => setActiveTab('flashcards')}
+                      onClick={openFlashcardModal}
                       style={{ display: 'flex', alignItems: 'center', gap: 7, width: '100%', padding: '9px 14px', background: 'rgba(180,83,9,0.07)', border: `1px solid rgba(180,83,9,0.2)`, borderRadius: 10, cursor: 'pointer', color: P.warning, fontSize: 12.5, fontWeight: 600, transition: 'all 0.15s' }}
                       onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,83,9,0.12)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'rgba(180,83,9,0.07)'; }}
@@ -5241,117 +5230,77 @@ const App = () => {
 
             </div>
           </div>
+
+          {/* ── MOBILE BOTTOM NAV ─────────────────────────────────────────────── */}
+          {isMobile && (
+            <div style={{
+              position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+              height: 56, background: '#FFFFFF', borderTop: `1px solid ${P.border}`,
+              display: showFlashcardModal || studyGuideFull ? 'none' : 'flex',
+              alignItems: 'stretch',
+            }}>
+              {[
+                { key: 'transcript', label: 'Transcript', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
+                { key: 'ai', label: 'AI Chat', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+                { key: 'history', label: 'History', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+              ].map(tab => {
+                const isAct = mobilePanel === tab.key;
+                return (
+                  <button key={tab.key} onClick={() => setMobilePanel(tab.key)} style={{
+                    flex: 1, position: 'relative',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
+                    border: 'none', background: 'transparent', cursor: 'pointer',
+                    color: isAct ? P.accent : P.muted,
+                  }}>
+                    {isAct && <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 32, height: 2, borderRadius: '0 0 2px 2px', background: P.accent }} />}
+                    {tab.icon}
+                    <span style={{ fontSize: 10, fontWeight: isAct ? 700 : 500 }}>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ── TABLET HISTORY DRAWER ─────────────────────────────────────────── */}
+          {isTablet && historyDrawerOpen && (
+            <>
+              <div onClick={() => setHistoryDrawerOpen(false)} style={{
+                position: 'fixed', inset: 0, zIndex: 200,
+                background: 'rgba(28,25,23,0.4)',
+                backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)',
+              }} />
+              <div style={{
+                position: 'fixed', top: 56, left: 0, bottom: 0,
+                width: 300, zIndex: 201,
+                background: P.paper, borderRight: `1px solid ${P.border}`,
+                boxShadow: '4px 0 24px rgba(28,25,23,0.12)',
+                animation: 'slideInLeft 0.22s ease',
+                display: 'flex', flexDirection: 'column', overflowY: 'auto',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: `1px solid ${P.border}`, flexShrink: 0 }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>History & Export</span>
+                  <button onClick={() => setHistoryDrawerOpen(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, padding: 4, display: 'flex', borderRadius: 6 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+                {renderSidebarContent()}
+              </div>
+            </>
+          )}
+
+          {/* ── MOBILE HISTORY PANEL ──────────────────────────────────────────── */}
+          {isMobile && mobilePanel === 'history' && (
+            <div style={{
+              position: 'fixed', top: 56, left: 0, right: 0, bottom: 56,
+              zIndex: 50, background: P.paper,
+              display: 'flex', flexDirection: 'column', overflowY: 'auto',
+            }}>
+              {renderSidebarContent()}
+            </div>
+          )}
+          </>
         )}
       </div>
-
-      {/* ── Mobile bottom navigation bar ──────────────────────────────────── */}
-      {isMobile && transcript && (
-        <div style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
-          height: 56,
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          background: '#FFFFFF',
-          borderTop: `1px solid ${P.border}`,
-          display: showFlashcardModal || studyGuideFull ? 'none' : 'flex',
-          alignItems: 'stretch',
-        }}>
-          {[
-            {
-              key: 'transcript',
-              label: 'Transcript',
-              icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
-            },
-            {
-              key: 'ai',
-              label: 'AI Chat',
-              icon: <img src="/scribesnap_icon_wave.svg" alt="" style={{ width: 19, height: 19 }} />,
-            },
-            {
-              key: 'history',
-              label: 'History',
-              icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
-            },
-          ].map(tab => {
-            const isActive = mobilePanel === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setMobilePanel(tab.key)}
-                style={{
-                  flex: 1, position: 'relative',
-                  display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center',
-                  gap: 3, border: 'none', background: 'transparent',
-                  cursor: 'pointer', color: isActive ? P.accent : P.muted,
-                  transition: 'color 0.15s', padding: '6px 0', minHeight: 56,
-                }}
-              >
-                {isActive && (
-                  <span style={{
-                    position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-                    width: 32, height: 2, borderRadius: '0 0 2px 2px', background: P.accent,
-                  }} />
-                )}
-                <span style={{ display: 'flex', alignItems: 'center', color: isActive ? P.accent : P.muted }}>
-                  {tab.icon}
-                </span>
-                <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 500, letterSpacing: '0.01em' }}>
-                  {tab.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* ── Tablet history drawer ──────────────────────────────────────────── */}
-      {isTablet && transcript && historyDrawerOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            onClick={() => setHistoryDrawerOpen(false)}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 200,
-              background: 'rgba(28,25,23,0.4)',
-              backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)',
-            }}
-          />
-          {/* Drawer panel */}
-          <div style={{
-            position: 'fixed', top: 56, left: 0, bottom: 0,
-            width: 300, zIndex: 201,
-            background: P.paper, borderRight: `1px solid ${P.border}`,
-            display: 'flex', flexDirection: 'column',
-            boxShadow: '4px 0 24px rgba(28,25,23,0.12)',
-            animation: 'slideInLeft 0.22s ease',
-          }}>
-            {/* Drawer header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: `1px solid ${P.border}`, flexShrink: 0 }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>History &amp; Export</span>
-              <button
-                onClick={() => setHistoryDrawerOpen(false)}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 22, lineHeight: 1, padding: 4 }}
-                aria-label="Close drawer"
-              >×</button>
-            </div>
-            {renderSidebarContent()}
-          </div>
-        </>
-      )}
-
-      {/* ── Mobile history full-screen panel ──────────────────────────────── */}
-      {isMobile && transcript && mobilePanel === 'history' && (
-        <div style={{
-          position: 'fixed', top: 56, left: 0, right: 0,
-          bottom: 56,
-          zIndex: 50,
-          background: P.paper,
-          display: 'flex', flexDirection: 'column',
-          overflowY: 'auto',
-        }}>
-          {renderSidebarContent()}
-        </div>
-      )}
 
       {/* Footer */}
       {view !== 'dashboard' && <footer style={{
@@ -5443,7 +5392,7 @@ const App = () => {
       {studyGuideFull && studyGuide && !studyGuide._error && (
         <div style={{ position: 'fixed', inset: 0, background: '#FAFAF8', zIndex: 9998, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Toolbar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: isMobile ? '12px 16px' : '14px 24px', borderBottom: `1px solid ${P.border}`, background: '#fff', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 24px', borderBottom: `1px solid ${P.border}`, background: '#fff', flexShrink: 0 }}>
             <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.success, flexShrink: 0 }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
             </div>
@@ -5472,7 +5421,7 @@ const App = () => {
             </button>
           </div>
           {/* Scrollable content */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px 16px' : '28px 40px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '28px 40px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 22, maxWidth: 800, margin: '0 auto' }}>
               {studyGuide.overview && (
                 <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
@@ -5594,10 +5543,10 @@ const App = () => {
         return (
           <div
             onClick={(e) => { if (e.target === e.currentTarget) closeFlashcardModal(); }}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(28,25,23,0.72)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: isMobile ? 12 : 24 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(28,25,23,0.72)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}
           >
             {/* Header */}
-            <div style={{ width: '100%', maxWidth: isMobile ? '100%' : 560, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ width: '100%', maxWidth: 560, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div style={{ display: 'flex', align: 'center', gap: 10 }}>
                 <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.01em' }}>
                   Flashcards
@@ -5615,7 +5564,7 @@ const App = () => {
             </div>
 
             {/* Progress bar */}
-            <div style={{ width: '100%', maxWidth: isMobile ? '100%' : 560, marginBottom: 20 }}>
+            <div style={{ width: '100%', maxWidth: 560, marginBottom: 20 }}>
               <div style={{ height: 4, background: 'rgba(255,255,255,0.12)', borderRadius: 4, overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${progressPct}%`, background: '#0F766E', borderRadius: 4, transition: 'width 0.4s ease' }} />
               </div>
@@ -5627,7 +5576,7 @@ const App = () => {
 
             {/* Card */}
             <div
-              style={{ width: '100%', maxWidth: isMobile ? '100%' : 560, height: isMobile ? 240 : 280, perspective: '1200px', cursor: 'pointer', marginBottom: 20 }}
+              style={{ width: '100%', maxWidth: 560, height: 280, perspective: '1200px', cursor: 'pointer', marginBottom: 20 }}
               onClick={() => setFlashcardFlipped(f => !f)}
             >
               <div style={{
@@ -5644,14 +5593,14 @@ const App = () => {
                   border: `1.5px solid ${P.border}`,
                   boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  padding: isMobile ? '20px 16px' : '28px 32px', textAlign: 'center',
+                  padding: '28px 32px', textAlign: 'center',
                 }}>
                   {card.topic && (
                     <div style={{ fontSize: 10, fontWeight: 700, color: P.warning, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14, padding: '3px 10px', background: 'rgba(180,83,9,0.08)', borderRadius: 20 }}>
                       {card.topic}
                     </div>
                   )}
-                  <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 600, color: P.ink, lineHeight: 1.5, maxHeight: 160, overflow: 'auto' }}>{card.question}</div>
+                  <div style={{ fontSize: 18, fontWeight: 600, color: P.ink, lineHeight: 1.5, maxHeight: 160, overflow: 'auto' }}>{card.question}</div>
                   <div style={{ marginTop: 20, fontSize: 11, color: P.muted, display: 'flex', alignItems: 'center', gap: 5 }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                     Tap to reveal answer · Space
@@ -5665,7 +5614,7 @@ const App = () => {
                   background: 'linear-gradient(135deg, #0F766E 0%, #0d5e57 100%)', borderRadius: 18,
                   boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  padding: isMobile ? '20px 16px' : '28px 32px', textAlign: 'center',
+                  padding: '28px 32px', textAlign: 'center',
                 }}>
                   {card.topic && (
                     <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14 }}>
