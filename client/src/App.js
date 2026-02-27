@@ -4515,7 +4515,7 @@ const App = () => {
                     {/* Transcript list — 2-column grid: timestamp | text */}
                     <div ref={transcriptListRef} style={{ flex: 1, overflowY: 'auto', background: '#FFFFFF', position: 'relative' }}>
                       {langRefetching && (
-                        <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(246,243,238,0.7)', backdropFilter: 'blur(2px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                        <div style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(246,243,238,0.7)', backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                           <div style={{ display: 'flex', gap: 6 }}>
                             {[0,1,2].map(i => <span key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: `dot-flicker 1.2s ease-in-out ${i * 0.2}s infinite` }} />)}
                           </div>
@@ -5392,7 +5392,7 @@ const App = () => {
       {studyGuideFull && studyGuide && !studyGuide._error && (
         <div style={{ position: 'fixed', inset: 0, background: '#FAFAF8', zIndex: 9998, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Toolbar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 24px', borderBottom: `1px solid ${P.border}`, background: '#fff', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: isMobile ? '12px 16px' : '14px 24px', borderBottom: `1px solid ${P.border}`, background: '#fff', flexShrink: 0 }}>
             <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.success, flexShrink: 0 }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
             </div>
@@ -5421,7 +5421,7 @@ const App = () => {
             </button>
           </div>
           {/* Scrollable content */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '28px 40px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px 16px' : '28px 40px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 22, maxWidth: 800, margin: '0 auto' }}>
               {studyGuide.overview && (
                 <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
@@ -5543,7 +5543,7 @@ const App = () => {
         return (
           <div
             onClick={(e) => { if (e.target === e.currentTarget) closeFlashcardModal(); }}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(28,25,23,0.72)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(28,25,23,0.72)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: isMobile ? 12 : 24 }}
           >
             {/* Header */}
             <div style={{ width: '100%', maxWidth: 560, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -5576,7 +5576,7 @@ const App = () => {
 
             {/* Card */}
             <div
-              style={{ width: '100%', maxWidth: 560, height: 280, perspective: '1200px', cursor: 'pointer', marginBottom: 20 }}
+              style={{ width: '100%', maxWidth: 560, height: isMobile ? 220 : 280, perspective: '1200px', cursor: 'pointer', marginBottom: 20 }}
               onClick={() => setFlashcardFlipped(f => !f)}
             >
               <div style={{
@@ -5593,7 +5593,7 @@ const App = () => {
                   border: `1.5px solid ${P.border}`,
                   boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  padding: '28px 32px', textAlign: 'center',
+                  padding: isMobile ? '16px 20px' : '28px 32px', textAlign: 'center',
                 }}>
                   {card.topic && (
                     <div style={{ fontSize: 10, fontWeight: 700, color: P.warning, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14, padding: '3px 10px', background: 'rgba(180,83,9,0.08)', borderRadius: 20 }}>
@@ -5614,7 +5614,7 @@ const App = () => {
                   background: 'linear-gradient(135deg, #0F766E 0%, #0d5e57 100%)', borderRadius: 18,
                   boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  padding: '28px 32px', textAlign: 'center',
+                  padding: isMobile ? '16px 20px' : '28px 32px', textAlign: 'center',
                 }}>
                   {card.topic && (
                     <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14 }}>
