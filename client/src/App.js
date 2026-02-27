@@ -4196,16 +4196,19 @@ const App = () => {
                         Get +3 credits — invite a friend
                       </button>
                     ) : (
-                      <button
-                        onClick={() => { setAuthInitialTab('signup'); setShowAuthModal(true); }}
-                        style={{
-                          fontSize: 12, fontWeight: 700, padding: '5px 12px', borderRadius: 8,
-                          background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)',
-                          color: P.error, cursor: 'pointer', whiteSpace: 'nowrap',
-                        }}
-                      >
-                        Sign up for more credits
-                      </button>
+                      <span style={{ fontSize: 12, color: P.muted, whiteSpace: 'nowrap' }}>
+                        For more credits,{' '}
+                        <button
+                          onClick={() => { setAuthInitialTab('signup'); setShowAuthModal(true); }}
+                          style={{
+                            background: 'none', border: 'none', padding: 0,
+                            fontSize: 12, fontWeight: 700, color: P.accent,
+                            cursor: 'pointer', textDecoration: 'underline',
+                          }}
+                        >
+                          create an account
+                        </button>
+                      </span>
                     )}
                   </div>
                 );
