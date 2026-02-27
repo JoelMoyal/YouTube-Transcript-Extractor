@@ -5338,6 +5338,20 @@ const App = () => {
         </>
       )}
 
+      {/* ── Mobile history full-screen panel ──────────────────────────────── */}
+      {isMobile && transcript && mobilePanel === 'history' && (
+        <div style={{
+          position: 'fixed', top: 56, left: 0, right: 0,
+          bottom: 56,
+          zIndex: 50,
+          background: P.paper,
+          display: 'flex', flexDirection: 'column',
+          overflowY: 'auto',
+        }}>
+          {renderSidebarContent()}
+        </div>
+      )}
+
       {/* Footer */}
       {view !== 'dashboard' && <footer style={{
         background: P.surface, borderTop: `1px solid ${P.border}`,
