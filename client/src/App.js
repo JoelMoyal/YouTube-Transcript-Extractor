@@ -4289,7 +4289,7 @@ const App = () => {
                       <div style={{ position: 'relative', flexShrink: 0 }}>
                         {entry.thumbnail
                           ? <img src={entry.thumbnail} alt="" style={{ width: 96, height: 60, objectFit: 'cover', borderRadius: 8, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
-                          : <div style={{ width: 96, height: 60, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><YouTubeIcon /></div>
+                          : <div style={{ width: 96, height: 60, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{entry.platform === 'vimeo' ? <VimeoIcon /> : <YouTubeIcon />}</div>
                         }
                       </div>
                       <div style={{ minWidth: 0, flex: 1, paddingTop: 2 }}>
