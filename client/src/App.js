@@ -4953,7 +4953,7 @@ const App = () => {
             </div>
 
             {/* ── RIGHT SIDEBAR — col 3, spans both rows ───────────────────────── */}
-            <div style={{ gridColumn: 3, gridRow: '1 / 3', display: 'flex', flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF' }}>
+            <div style={{ gridColumn: isDesktop ? 3 : 2, gridRow: '1 / 3', display: isMobile ? (mobilePanel === 'ai' ? 'flex' : 'none') : 'flex', flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF' }}>
 
               {/* ScribeSnap AI Chat — TOP of sidebar, composer at top */}
               <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
