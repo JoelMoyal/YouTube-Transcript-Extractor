@@ -3645,7 +3645,7 @@ const App = () => {
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
-      if (!res.ok) throw new Error(data.error || 'Failed to generate study guide');
+      if (!res.ok) throw new Error(data.details || data.error || 'Failed to generate study guide');
       setStudyGuide(data);
       setActiveTab('study-guide');
     } catch (err) { setStudyGuide({ _error: err.message }); }
@@ -4954,7 +4954,7 @@ const App = () => {
             </div>
 
             {/* ── RIGHT SIDEBAR — col 3, spans both rows ───────────────────────── */}
-            <div style={{ gridColumn: isDesktop ? 3 : 2, gridRow: '1 / 3', display: isMobile ? (mobilePanel === 'ai' ? 'flex' : 'none') : 'flex', flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF' }}>
+            <div style={{ gridColumn: isDesktop ? 3 : isMobile ? 1 : 2, gridRow: '1 / 3', display: isMobile ? (mobilePanel === 'ai' ? 'flex' : 'none') : 'flex', flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF' }}>
 
               {/* ScribeSnap AI Chat — TOP of sidebar, composer at top */}
               <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
