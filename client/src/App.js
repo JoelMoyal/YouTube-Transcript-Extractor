@@ -1081,9 +1081,9 @@ const PasswordResetModal = ({ onClose }) => {
 };
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLoadTranscript, lang, setLang }) => {
+const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLoadTranscript, lang }) => {
   const [tab, setTab] = React.useState('overview');
-  const [prefLangSaved, setPrefLangSaved] = React.useState(false);
+  // ON ICE: const [prefLangSaved, setPrefLangSaved] = React.useState(false);
   const [copyLinkDone, setCopyLinkDone] = React.useState(false);
   const [copyRefDone, setCopyRefDone] = React.useState(false);
   const [showAllHistory, setShowAllHistory] = React.useState(false);
@@ -1143,11 +1143,11 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
       setTimeout(() => setCopyRefDone(false), 2000);
     });
   };
-  const saveLangPref = (newLang) => {
-    const key = user ? `yte_lang_${user.id}` : 'yte_lang';
-    localStorage.setItem(key, newLang);
-    savePrefsToCloud({ lang: newLang });
-  };
+  // ON ICE: const saveLangPref = (newLang) => {
+  //   const key = user ? `yte_lang_${user.id}` : 'yte_lang';
+  //   localStorage.setItem(key, newLang);
+  //   savePrefsToCloud({ lang: newLang });
+  // };
 
   const used = credits?.used ?? 0;
   const tierMax = credits?.tierMax || CREDITS_MAX;
@@ -2345,24 +2345,18 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                 <div className="ds-card">
                   <h3 className="ds-settings-title">Preferences</h3>
 
-                  {/* Transcript language */}
-                  <div className="ds-setting-row" style={{ alignItems: 'center' }}>
+                  {/* Transcript language — ON ICE, disabled until feature is stable */}
+                  <div className="ds-setting-row" style={{ alignItems: 'center', opacity: 0.45 }}>
                     <span className="ds-setting-label">Transcript language</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <select
                         value={lang}
-                        onChange={e => {
-                          const v = e.target.value;
-                          setLang(v);
-                          saveLangPref(v);
-                          setPrefLangSaved(true);
-                          setTimeout(() => setPrefLangSaved(false), 2000);
-                        }}
-                        style={{ fontSize: 13, padding: '5px 10px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, color: P.ink, cursor: 'pointer', outline: 'none' }}
+                        disabled
+                        style={{ fontSize: 13, padding: '5px 10px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, color: P.ink, cursor: 'not-allowed', outline: 'none' }}
                       >
                         {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
                       </select>
-                      {prefLangSaved && <span style={{ fontSize: 12, color: P.success, fontWeight: 600 }}>Saved ✓</span>}
+                      <span style={{ fontSize: 11, color: P.muted, fontWeight: 500, fontStyle: 'italic' }}>Coming soon</span>
                     </div>
                   </div>
 
@@ -3158,10 +3152,11 @@ const App = () => {
     if (saved) setLang(saved);
   }, [user]);
 
-  const saveLangPref = (newLang) => {
-    const key = user ? `yte_lang_${user.id}` : 'yte_lang';
-    localStorage.setItem(key, newLang);
-  };
+  // ON ICE — language translation disabled; restore when feature is ready
+  // const saveLangPref = (newLang) => {
+  //   const key = user ? `yte_lang_${user.id}` : 'yte_lang';
+  //   localStorage.setItem(key, newLang);
+  // };
 
   // Re-init credits keyed by user when auth changes
   useEffect(() => {
@@ -3428,40 +3423,40 @@ const App = () => {
     };
   };
 
-  // Lightweight re-fetch that stays inside the transcript view (doesn't reset the layout)
-  const refetchWithLang = (newLang) => {
-    const parsed = parseVideoUrl(videoUrl);
-    if (!parsed) return;
-    const { platform, id: videoId, url: videoCanonical } = parsed;
-    setLangRefetching(true);
-    setLangRefetchMsg('');
-    setSearch(''); setSummary(''); setTimeline(null); setShowTopics(false); setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]);
-    const apiUrl = platform === 'vimeo'
-      ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${newLang}`
-      : `/api/transcript?videoId=${videoId}&lang=${newLang}`;
-    const es = new EventSource(apiUrl);
-    const killTimer = setTimeout(() => { es.close(); setLangRefetching(false); setLangRefetchMsg(''); }, 120000);
-    es.addEventListener('progress', (e) => {
-      try { const { message } = JSON.parse(e.data); if (message) setLangRefetchMsg(message); } catch {}
-    });
-    es.addEventListener('done', async (e) => {
-      clearTimeout(killTimer); es.close();
-      try {
-        const data = JSON.parse(e.data);
-        const seen = new Set();
-        const segs = (data.segments || []).filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
-        if (segs.length > 0) {
-          setSegments(segs);
-          setTranscript(data.transcript || segs.map(s => s.text).join(' '));
-          setIsTranslated(data.translated || false);
-          setSelectedSegment(null); setPlayingSegment(null); playingSegmentRef.current = null;
-        }
-      } catch {}
-      setLangRefetching(false); setLangRefetchMsg('');
-    });
-    es.addEventListener('error', () => { clearTimeout(killTimer); es.close(); setLangRefetching(false); setLangRefetchMsg(''); });
-    es.onerror = () => { if (es.readyState === EventSource.CLOSED) return; clearTimeout(killTimer); es.close(); setLangRefetching(false); setLangRefetchMsg(''); };
-  };
+  // ON ICE — language translation disabled; restore refetchWithLang when feature is ready
+  // const refetchWithLang = (newLang) => {
+  //   const parsed = parseVideoUrl(videoUrl);
+  //   if (!parsed) return;
+  //   const { platform, id: videoId, url: videoCanonical } = parsed;
+  //   setLangRefetching(true);
+  //   setLangRefetchMsg('');
+  //   setSearch(''); setSummary(''); setTimeline(null); setShowTopics(false); setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]);
+  //   const apiUrl = platform === 'vimeo'
+  //     ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${newLang}`
+  //     : `/api/transcript?videoId=${videoId}&lang=${newLang}`;
+  //   const es = new EventSource(apiUrl);
+  //   const killTimer = setTimeout(() => { es.close(); setLangRefetching(false); setLangRefetchMsg(''); }, 120000);
+  //   es.addEventListener('progress', (e) => {
+  //     try { const { message } = JSON.parse(e.data); if (message) setLangRefetchMsg(message); } catch {}
+  //   });
+  //   es.addEventListener('done', async (e) => {
+  //     clearTimeout(killTimer); es.close();
+  //     try {
+  //       const data = JSON.parse(e.data);
+  //       const seen = new Set();
+  //       const segs = (data.segments || []).filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
+  //       if (segs.length > 0) {
+  //         setSegments(segs);
+  //         setTranscript(data.transcript || segs.map(s => s.text).join(' '));
+  //         setIsTranslated(data.translated || false);
+  //         setSelectedSegment(null); setPlayingSegment(null); playingSegmentRef.current = null;
+  //       }
+  //     } catch {}
+  //     setLangRefetching(false); setLangRefetchMsg('');
+  //   });
+  //   es.addEventListener('error', () => { clearTimeout(killTimer); es.close(); setLangRefetching(false); setLangRefetchMsg(''); });
+  //   es.onerror = () => { if (es.readyState === EventSource.CLOSED) return; clearTimeout(killTimer); es.close(); setLangRefetching(false); setLangRefetchMsg(''); };
+  // };
 
   const dlName = (ext) => {
     const safe = (currentTitle || 'transcript').replace(/[/\\?%*:|"<>]/g, '-').trim().slice(0, 80);
@@ -4497,17 +4492,12 @@ const App = () => {
                               <div style={{ position: 'absolute', top: 2, left: showTopics ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
                             </div>
                           </div>
-                          {/* Language pill */}
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px 3px 7px', borderRadius: 20, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', position: 'relative', transition: 'border-color 0.15s' }}
-                            onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; }}
-                            onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; }}>
+                          {/* Language pill — ON ICE, disabled until feature is stable */}
+                          <div title="Language translation coming soon" style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px 3px 7px', borderRadius: 20, border: `1px solid ${P.border}`, background: P.paper, cursor: 'not-allowed', position: 'relative', opacity: 0.45 }}>
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                            <span style={{ fontSize: 10.5, fontWeight: 600, color: P.ink, letterSpacing: '0.03em' }}>{(LANGUAGES.find(l => l.code === lang) || LANGUAGES[0]).label.split(' ')[0].toUpperCase().slice(0, 3)}</span>
+                            <span style={{ fontSize: 10.5, fontWeight: 600, color: P.ink, letterSpacing: '0.03em' }}>ENG</span>
                             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                            <select value={lang} onChange={e => { const v = e.target.value; setLang(v); saveLangPref(v); refetchWithLang(v); }} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }}>
-                              {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
-                            </select>
-                          </label>
+                          </div>
                         </div>
                       )}
                     </div>
