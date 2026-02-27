@@ -2152,6 +2152,17 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           }
           .ds-row-btn { flex: 1; }
         }
+        @media (max-width: 639px) {
+          .ds-wrap { padding: 10px 12px 60px; }
+          .ds-profile { padding: 14px 16px; gap: 12px; }
+          .ds-avatar { width: 48px; height: 48px; font-size: 20px; }
+          .ds-profile-name { font-size: 20px !important; }
+          .ds-topnav-tab { font-size: 13px; padding: 5px 10px; }
+          .ds-section-tab { font-size: 12px; padding: 6px 10px; }
+          .ds-usage-days { display: none; }
+          .ds-thumb { height: 120px; }
+          .ds-credits-mobile { display: block !important; }
+        }
       `}</style>
 
       <div className="ds-wrap">
@@ -2180,6 +2191,17 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                 <p className="ds-profile-meta-value">{memberSince}</p>
               </div>
             </section>
+
+            {/* Credits pill — mobile only (hidden on desktop via CSS class) */}
+            <div className="ds-credits-mobile" style={{ display: 'none', margin: '8px 0', padding: '10px 14px', background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, boxShadow: '0 2px 8px rgba(28,25,23,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#1C1917' }}>Free Credits</span>
+                <span style={{ fontSize: 12, color: '#6B645C' }}>{used} / {tierMax} used · resets in {daysLeft}d</span>
+              </div>
+              <div style={{ height: 5, borderRadius: 999, background: '#E7E1D8', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#2D6CDF', transition: 'width 0.4s ease' }} />
+              </div>
+            </div>
 
             {/* Inline section tabs */}
             <div className="ds-section-tabs">
@@ -2733,11 +2755,11 @@ const UserMenu = ({ user, onSignOut, onDashboard }) => {
 };
 
 // ── Navbar ────────────────────────────────────────────────────────────────────
-const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, onDashboard, onHome, onShowReferralPromo }) => (
+const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, onDashboard, onHome, onShowReferralPromo, isMobile }) => (
   <nav style={{
     position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
     height: 56, display: 'flex', alignItems: 'center',
-    padding: '0 28px',
+    padding: isMobile ? '0 16px' : '0 28px',
     background: P.surface,
     borderBottom: `1px solid ${P.border}`,
   }}>
@@ -2757,8 +2779,8 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, on
     <div style={{ flex: 1 }} />
 
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <CreditsWidget credits={credits} onUpgrade={() => onSignIn('signup')} user={user} onShowReferralPromo={onShowReferralPromo} />
-      <div style={{ width: 1, height: 18, background: P.border }} />
+      {!isMobile && <CreditsWidget credits={credits} onUpgrade={() => onSignIn('signup')} user={user} onShowReferralPromo={onShowReferralPromo} />}
+      {!isMobile && <div style={{ width: 1, height: 18, background: P.border }} />}
       {user ? (
         <UserMenu user={user} onSignOut={onSignOut} onDashboard={onDashboard} />
       ) : (
@@ -3880,6 +3902,7 @@ const App = () => {
         onDashboard={() => setView('dashboard')}
         onHome={goHome}
         onShowReferralPromo={() => setShowReferralPromo(true)}
+        isMobile={isMobile}
       />
 
       {showAuthModal && (
@@ -4039,11 +4062,11 @@ const App = () => {
               paddingBottom: 56,
             }}>
             <div style={{
-              maxWidth: 700, margin: '0 auto', padding: '72px 24px 40px',
+              maxWidth: 700, margin: '0 auto', padding: isMobile ? '32px 16px 24px' : '72px 24px 40px',
               textAlign: 'center',
             }}>
               <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
+                display: isMobile ? 'none' : 'inline-flex', alignItems: 'center', gap: 6,
                 padding: '5px 14px', borderRadius: 999, marginBottom: 28,
                 background: 'rgba(45,108,223,0.08)', border: `1px solid rgba(45,108,223,0.18)`,
                 fontSize: 12, fontWeight: 600, color: P.accent,
@@ -4053,8 +4076,8 @@ const App = () => {
               </div>
 
               <h1 style={{
-                fontSize: 'clamp(38px, 6.5vw, 62px)', fontWeight: 800, color: P.ink,
-                letterSpacing: '-0.045em', lineHeight: 1.06, margin: '0 0 22px',
+                fontSize: isMobile ? 'clamp(28px, 9vw, 38px)' : 'clamp(38px, 6.5vw, 62px)', fontWeight: 800, color: P.ink,
+                letterSpacing: '-0.045em', lineHeight: 1.06, margin: isMobile ? '0 0 14px' : '0 0 22px',
               }}>
                 Watch less.<br />
                 <span style={{ color: P.accent }}>Know more.</span>
@@ -4070,7 +4093,7 @@ const App = () => {
                 padding: 10,
               }}>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: P.paper, borderRadius: 14, border: `1px solid ${P.border}` }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: isMobile ? '11px 14px' : '16px 20px', background: P.paper, borderRadius: 14, border: `1px solid ${P.border}` }}>
                     {(() => {
                       const platform = parseVideoUrl(videoUrl)?.platform;
                       if (platform === 'youtube') return <YouTubeIcon />;
@@ -4100,7 +4123,7 @@ const App = () => {
                       placeholder="Paste a YouTube or Vimeo URL…"
                       style={{
                         flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                        fontSize: 17, color: P.ink,
+                        fontSize: isMobile ? 15 : 17, color: P.ink,
                       }}
                     />
                   </div>
@@ -4117,13 +4140,13 @@ const App = () => {
                         onClick={getTranscript}
                         disabled={btnDisabled}
                         style={{
-                          flexShrink: 0, padding: '0 28px', borderRadius: 14, border: 'none',
+                          flexShrink: 0, padding: isMobile ? '0 18px' : '0 28px', borderRadius: 14, border: 'none',
                           background: btnBg,
                           color: outOfCredits ? P.error : 'white',
-                          fontSize: 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
-                          display: 'flex', alignItems: 'center', gap: 9, whiteSpace: 'nowrap',
+                          fontSize: isMobile ? 14 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
+                          display: 'flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap',
                           transition: 'background 0.15s',
-                          minWidth: 148,
+                          minWidth: isMobile ? 90 : 148,
                         }}
                         onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
                         onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
@@ -5752,7 +5775,7 @@ const App = () => {
       })()}
 
       {/* ── Sticky bottom trust bar — only on landing page ── */}
-      {!transcript && (() => {
+      {!transcript && !isMobile && (() => {
         const TRUST_ITEMS = [
           { icon: '🏢', label: 'Silicon Valley startups' },
           { icon: '🎓', label: 'Researchers & academics' },
