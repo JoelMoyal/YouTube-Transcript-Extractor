@@ -4354,8 +4354,6 @@ const App = () => {
               ? `${windowHeight - 56 - 56}px`
               : 'calc(100vh - 56px)',
             overflow: 'hidden',
-            maxWidth: isDesktop ? 1600 : '100%',
-            margin: isDesktop ? '0 auto' : undefined,
           }}>
 
             {/* ── LEFT SIDEBAR — col 1, spans both rows ────────────────────────── */}
