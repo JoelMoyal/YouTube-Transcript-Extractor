@@ -2854,6 +2854,17 @@ const App = () => {
   const [playingSegment, setPlayingSegment] = useState(null);
   const [exportToggle, setExportToggle]   = useState(false);
 
+  // ── Responsive viewport state ────────────────────────────────────────────
+  const [windowWidth,  setWindowWidth]          = useState(() => window.innerWidth);
+  const [windowHeight, setWindowHeight]         = useState(() => window.innerHeight);
+  const [mobilePanel,  setMobilePanel]          = useState('transcript'); // 'transcript'|'ai'|'history'
+  const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
+
+  const isMobile       = windowWidth < 640;
+  const isTablet       = windowWidth >= 640 && windowWidth < 1024;
+  const isSmallDesktop = windowWidth >= 1024 && windowWidth < 1280;
+  const isDesktop      = windowWidth >= 1024;
+
   const aiCacheRef         = useRef({});  // keyed by videoId → saved AI state
   const downloadMenuRef    = useRef(null);
   const qaInputRef         = useRef(null);
