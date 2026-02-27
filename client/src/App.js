@@ -4064,7 +4064,7 @@ const App = () => {
               </div>
 
               <h1 style={{
-                fontSize: isMobile ? 'clamp(28px, 9vw, 38px)' : 'clamp(38px, 6.5vw, 62px)', fontWeight: 800, color: P.ink,
+                fontSize: isMobile ? 'clamp(34px, 11vw, 46px)' : 'clamp(38px, 6.5vw, 62px)', fontWeight: 800, color: P.ink,
                 letterSpacing: '-0.045em', lineHeight: 1.06, margin: isMobile ? '0 0 14px' : '0 0 22px',
               }}>
                 Watch less.<br />
@@ -4128,10 +4128,10 @@ const App = () => {
                         onClick={getTranscript}
                         disabled={btnDisabled}
                         style={{
-                          flexShrink: 0, padding: isMobile ? '14px 18px' : '0 28px', borderRadius: 14, border: 'none',
+                          flexShrink: 0, padding: isMobile ? '9px 18px' : '0 28px', borderRadius: 14, border: 'none',
                           background: btnBg,
                           color: outOfCredits ? P.error : 'white',
-                          fontSize: isMobile ? 15 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
+                          fontSize: isMobile ? 14 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
                           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, whiteSpace: 'nowrap',
                           transition: 'background 0.15s',
                           width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
