@@ -2173,13 +2173,18 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
       {/* ═══ MOBILE LAYOUT (pure inline styles, no CSS class overflow) ═══ */}
       {isMobile && (
         <div style={{ minHeight: 'calc(100vh - 56px)', background: '#F6F3EE', paddingBottom: 60, width: '100%', maxWidth: '100vw', boxSizing: 'border-box', overflowX: 'hidden' }}>
-          {/* Sticky header: back + title + tab pills */}
-          <div style={{ background: '#FFFEFC', borderBottom: '1px solid #E7E1D8', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 6, position: 'sticky', top: 56, zIndex: 10 }}>
+          {/* Sticky header: back + avatar/name + tab pills */}
+          <div style={{ background: '#FFFEFC', borderBottom: '1px solid #E7E1D8', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8, position: 'sticky', top: 56, zIndex: 10 }}>
             <button onClick={onBack} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#6B645C', padding: '4px 6px 4px 0', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
               <ChevronIcon size={16} dir="left" />
             </button>
-            <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: '#1C1917' }}>Account</span>
-            <div style={{ display: 'flex', gap: 2, background: 'rgba(28,25,23,0.06)', borderRadius: 10, padding: 3 }}>
+            {/* Avatar + name/email always visible in header */}
+            <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#2D6CDF', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{initial}</div>
+            <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
+              <div style={{ fontSize: 11, color: '#6B645C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+            </div>
+            <div style={{ display: 'flex', gap: 2, background: 'rgba(28,25,23,0.06)', borderRadius: 10, padding: 3, flexShrink: 0 }}>
               {[['overview', 'Overview'], ['settings', 'Settings']].map(([key, label]) => (
                 <button key={key} onClick={() => setTab(key)} style={{ border: 'none', background: tab === key ? 'white' : 'transparent', color: tab === key ? '#1C1917' : '#6B645C', fontWeight: tab === key ? 700 : 500, fontSize: 13, padding: '5px 12px', borderRadius: 7, cursor: 'pointer', boxShadow: tab === key ? '0 1px 4px rgba(28,25,23,0.1)' : 'none', transition: 'all 0.15s' }}>
                   {label}
@@ -2189,15 +2194,6 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           </div>
 
           <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-
-            {/* Profile row */}
-            <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, overflow: 'hidden' }}>
-              <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#2D6CDF', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, flexShrink: 0 }}>{initial}</div>
-              <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
-                <div style={{ fontSize: 12, color: '#6B645C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
-              </div>
-            </div>
 
             {/* ── Overview ── */}
             {tab === 'overview' && (
