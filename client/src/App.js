@@ -4459,7 +4459,7 @@ const App = () => {
                   const isActive = activeTab === tab.key;
                   return (
                     <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
-                      display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 12,
+                      display: 'flex', alignItems: 'center', gap: 5, padding: isMobile ? '9px 14px' : '5px 12px', fontSize: 12,
                       fontWeight: isActive ? 600 : 500,
                       border: isActive ? `1px solid ${P.border}` : '1px solid transparent',
                       borderBottom: isActive ? '1px solid #FFFFFF' : '1px solid transparent',
