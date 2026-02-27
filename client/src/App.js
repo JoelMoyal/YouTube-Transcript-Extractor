@@ -5596,10 +5596,10 @@ const App = () => {
         return (
           <div
             onClick={(e) => { if (e.target === e.currentTarget) closeFlashcardModal(); }}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(28,25,23,0.72)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(28,25,23,0.72)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: isMobile ? 12 : 24 }}
           >
             {/* Header */}
-            <div style={{ width: '100%', maxWidth: 560, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ width: '100%', maxWidth: isMobile ? '100%' : 560, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div style={{ display: 'flex', align: 'center', gap: 10 }}>
                 <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.01em' }}>
                   Flashcards
@@ -5617,7 +5617,7 @@ const App = () => {
             </div>
 
             {/* Progress bar */}
-            <div style={{ width: '100%', maxWidth: 560, marginBottom: 20 }}>
+            <div style={{ width: '100%', maxWidth: isMobile ? '100%' : 560, marginBottom: 20 }}>
               <div style={{ height: 4, background: 'rgba(255,255,255,0.12)', borderRadius: 4, overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${progressPct}%`, background: '#0F766E', borderRadius: 4, transition: 'width 0.4s ease' }} />
               </div>
@@ -5629,7 +5629,7 @@ const App = () => {
 
             {/* Card */}
             <div
-              style={{ width: '100%', maxWidth: 560, height: 280, perspective: '1200px', cursor: 'pointer', marginBottom: 20 }}
+              style={{ width: '100%', maxWidth: isMobile ? '100%' : 560, height: isMobile ? 240 : 280, perspective: '1200px', cursor: 'pointer', marginBottom: 20 }}
               onClick={() => setFlashcardFlipped(f => !f)}
             >
               <div style={{
@@ -5646,14 +5646,14 @@ const App = () => {
                   border: `1.5px solid ${P.border}`,
                   boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  padding: '28px 32px', textAlign: 'center',
+                  padding: isMobile ? '20px 16px' : '28px 32px', textAlign: 'center',
                 }}>
                   {card.topic && (
                     <div style={{ fontSize: 10, fontWeight: 700, color: P.warning, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14, padding: '3px 10px', background: 'rgba(180,83,9,0.08)', borderRadius: 20 }}>
                       {card.topic}
                     </div>
                   )}
-                  <div style={{ fontSize: 18, fontWeight: 600, color: P.ink, lineHeight: 1.5, maxHeight: 160, overflow: 'auto' }}>{card.question}</div>
+                  <div style={{ fontSize: isMobile ? 16 : 18, fontWeight: 600, color: P.ink, lineHeight: 1.5, maxHeight: 160, overflow: 'auto' }}>{card.question}</div>
                   <div style={{ marginTop: 20, fontSize: 11, color: P.muted, display: 'flex', alignItems: 'center', gap: 5 }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                     Tap to reveal answer · Space
@@ -5667,7 +5667,7 @@ const App = () => {
                   background: 'linear-gradient(135deg, #0F766E 0%, #0d5e57 100%)', borderRadius: 18,
                   boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  padding: '28px 32px', textAlign: 'center',
+                  padding: isMobile ? '20px 16px' : '28px 32px', textAlign: 'center',
                 }}>
                   {card.topic && (
                     <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14 }}>
