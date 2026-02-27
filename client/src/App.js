@@ -4339,10 +4339,20 @@ const App = () => {
         {transcript && (
           <div className="fade-up" style={{
             display: 'grid',
-            gridTemplateColumns: '280px 1fr 360px',
+            gridTemplateColumns: isMobile
+              ? '1fr'
+              : isTablet
+              ? '1fr 300px'
+              : isSmallDesktop
+              ? '240px 1fr 300px'
+              : '280px 1fr 360px',
             gridTemplateRows: 'auto 1fr',
-            height: 'calc(100vh - 56px)',
+            height: isMobile
+              ? `${windowHeight - 56 - 56}px`
+              : 'calc(100vh - 56px)',
             overflow: 'hidden',
+            maxWidth: isDesktop ? 1600 : '100%',
+            margin: isDesktop ? '0 auto' : undefined,
           }}>
 
             {/* ── LEFT SIDEBAR — col 1, spans both rows ────────────────────────── */}
