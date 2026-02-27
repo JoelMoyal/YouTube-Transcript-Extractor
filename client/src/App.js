@@ -2117,7 +2117,6 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         @media (max-width: 760px) {
           .ds-wrap { padding: 16px 14px 44px; max-width: 100%; overflow-x: hidden; }
           .ds-topnav { margin-bottom: 14px; }
-          /* Stack profile vertically so nothing overflows sideways */
           .ds-profile {
             flex-direction: column;
             align-items: center;
@@ -2125,41 +2124,42 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
             padding: 18px 16px;
             gap: 6px;
           }
-          .ds-profile-meta {
-            margin-left: 0;
-            text-align: center;
-          }
-          .ds-profile-email {
-            white-space: normal;
-            overflow-wrap: anywhere;
-            max-width: 100%;
-          }
+          .ds-profile-meta { margin-left: 0; text-align: center; }
+          .ds-profile-email { white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
           .ds-section-tabs { overflow-x: auto; }
-          /* Keep 2x2 grid on tablet/mobile — avoid 4-tall-cards stack */
           .ds-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .ds-usage-head { flex-wrap: wrap; }
-          /* Keep rows compact — thumbnail stays small, no stacking */
           .ds-thumb { width: 72px; height: 40px; }
         }
         @media (max-width: 639px) {
-          .ds-wrap { padding: 10px 12px 60px; }
-          .ds-profile { padding: 14px 16px; gap: 6px; }
-          .ds-avatar { width: 48px; height: 48px; font-size: 20px; }
-          .ds-profile-name { font-size: 20px !important; }
-          /* Hide topnav tabs on phone — section-tabs handle navigation */
+          .ds-wrap { padding: 10px 10px 60px; overflow-x: hidden; }
+          /* Compact horizontal profile: [avatar] [name + email] */
+          .ds-profile {
+            flex-direction: row;
+            align-items: center;
+            text-align: left;
+            padding: 10px 12px;
+            gap: 10px;
+            margin-bottom: 8px;
+          }
+          .ds-profile-meta { display: none; }
+          .ds-profile-info { flex: 1; min-width: 0; overflow: hidden; }
+          .ds-profile-name { font-size: 15px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 1px; }
+          .ds-profile-email { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+          .ds-avatar { width: 38px; height: 38px; font-size: 15px; flex-shrink: 0; }
+          /* Hide topnav tabs — section-tabs handle navigation */
           .ds-topnav-tab { display: none; }
-          .ds-section-tab { font-size: 12px; padding: 6px 10px; }
+          .ds-section-tab { font-size: 13px; padding: 7px 10px; }
+          /* Hide weekly usage card — credits pill covers the same info */
+          .ds-usage { display: none; }
           .ds-usage-days { display: none; }
-          /* Keep 2x2 stats grid on phone, compact padding */
+          /* 2x2 stats grid, compact */
           .ds-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
           .ds-stat { padding: 12px 12px 10px; border-radius: 13px; }
           .ds-stat-value { font-size: 22px; }
           .ds-stat-label { font-size: 12px; }
           .ds-stat-sub { font-size: 11px; }
           .ds-thumb { width: 64px; height: 36px; }
-          .ds-usage { padding: 12px 14px 10px; }
-          .ds-usage-title { font-size: 14px; }
-          .ds-usage-daystats { flex-direction: column; align-items: flex-start; gap: 4px; }
           .ds-credits-mobile { display: block !important; }
         }
       `}</style>
@@ -2181,7 +2181,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           <main>
             <section className="ds-card ds-profile">
               <div className="ds-avatar">{initial}</div>
-              <div style={{ minWidth: 0 }}>
+              <div className="ds-profile-info" style={{ minWidth: 0 }}>
                 <h1 className="ds-profile-name">{displayName}</h1>
                 <p className="ds-profile-email">{user.email}</p>
               </div>
