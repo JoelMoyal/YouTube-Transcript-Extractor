@@ -4373,7 +4373,7 @@ const App = () => {
                 <div style={{ flexShrink: 0, borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}`, background: P.paper }}>
                   {/* Centered 16:9 player — max 391×220, no black bars, paper sides */}
                   <div style={{ display: 'flex', justifyContent: 'center', background: P.paper }}>
-                    <div style={{ width: 'min(100%, 411px)', flexShrink: 0, borderRadius: 0, overflow: 'hidden' }}>
+                    <div style={{ width: isMobile ? '100%' : 'min(100%, 411px)', flexShrink: 0, borderRadius: 0, overflow: 'hidden' }}>
                       {currentPlatform === 'vimeo' ? (
                         <iframe
                           ref={playerRef}
