@@ -4366,7 +4366,7 @@ const App = () => {
             </div>
 
             {/* ── CENTER — col 2, rows 1-2 ─────────────────────────────────────── */}
-            <div style={{ gridColumn: 2, gridRow: '1 / 3', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: P.paper, borderRight: `1px solid ${P.border}` }}>
+            <div style={{ gridColumn: isDesktop ? 2 : 1, gridRow: '1 / 3', display: isMobile ? (mobilePanel === 'transcript' ? 'flex' : 'none') : 'flex', flexDirection: 'column', overflow: 'hidden', background: P.paper, borderRight: !isMobile ? `1px solid ${P.border}` : 'none' }}>
 
               {/* Video player card */}
               {currentVideoId && (
