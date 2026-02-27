@@ -3343,6 +3343,9 @@ const App = () => {
   }, [qaMessages, qaLoading]);
 
   const getTranscript = (langOverride) => {
+    const _used = credits?.used ?? 0;
+    const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+    if (_used >= _max) return;
     const parsed = parseVideoUrl(videoUrl);
     if (!parsed) { setError(funnyTranscriptError('invalid url')); return; }
     const { platform, id: videoId, url: videoCanonical } = parsed;
@@ -4101,29 +4104,89 @@ const App = () => {
                       }}
                     />
                   </div>
-                  <button
-                    onClick={getTranscript}
-                    disabled={loading}
-                    style={{
-                      flexShrink: 0, padding: '0 28px', borderRadius: 14, border: 'none',
-                      background: loading ? `rgba(45,108,223,0.5)` : P.accent,
-                      color: 'white', fontSize: 16, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-                      display: 'flex', alignItems: 'center', gap: 9, whiteSpace: 'nowrap',
-                      transition: 'background 0.15s',
-                      minWidth: 148,
-                    }}
-                    onMouseEnter={e => { if (!loading) e.currentTarget.style.background = P.accentHover; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = loading ? `rgba(45,108,223,0.5)` : P.accent; }}
-                  >
-                    {loading ? <SpinnerIcon /> : (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="5 3 19 12 5 21 5 3"/>
-                      </svg>
-                    )}
-                    {loading ? 'Extracting…' : 'Extract'}
-                  </button>
+                  {(() => {
+                    const _used = credits?.used ?? 0;
+                    const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+                    const outOfCredits = _used >= _max;
+                    const btnDisabled = loading || outOfCredits;
+                    const btnBg = btnDisabled
+                      ? (outOfCredits ? 'rgba(220,38,38,0.1)' : 'rgba(45,108,223,0.5)')
+                      : P.accent;
+                    return (
+                      <button
+                        onClick={getTranscript}
+                        disabled={btnDisabled}
+                        style={{
+                          flexShrink: 0, padding: '0 28px', borderRadius: 14, border: 'none',
+                          background: btnBg,
+                          color: outOfCredits ? P.error : 'white',
+                          fontSize: 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
+                          display: 'flex', alignItems: 'center', gap: 9, whiteSpace: 'nowrap',
+                          transition: 'background 0.15s',
+                          minWidth: 148,
+                        }}
+                        onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
+                      >
+                        {loading ? <SpinnerIcon /> : (
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={outOfCredits ? P.error : 'currentColor'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                          </svg>
+                        )}
+                        {loading ? 'Extracting…' : outOfCredits ? 'No Credits' : 'Extract'}
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
+
+              {/* Credits exhausted banner */}
+              {(() => {
+                const _used = credits?.used ?? 0;
+                const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+                if (_used < _max) return null;
+                const daysLeft = Math.max(0, Math.ceil(((credits?.resetAt ?? Date.now()) - Date.now()) / 86400000));
+                const resetLabel = daysLeft === 0 ? 'less than a day' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''}`;
+                return (
+                  <div className="fade-up" style={{
+                    marginTop: 12, padding: '12px 16px', borderRadius: 12,
+                    background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.18)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={P.error} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                      </svg>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: P.error }}>
+                        No credits left — resets in {resetLabel}
+                      </span>
+                    </div>
+                    {user ? (
+                      <button
+                        onClick={() => setShowReferralPromo(true)}
+                        style={{
+                          fontSize: 12, fontWeight: 700, padding: '5px 12px', borderRadius: 8,
+                          background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)',
+                          color: P.error, cursor: 'pointer', whiteSpace: 'nowrap',
+                        }}
+                      >
+                        Get +3 credits — invite a friend
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => { setAuthInitialTab('signup'); setShowAuthModal(true); }}
+                        style={{
+                          fontSize: 12, fontWeight: 700, padding: '5px 12px', borderRadius: 8,
+                          background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)',
+                          color: P.error, cursor: 'pointer', whiteSpace: 'nowrap',
+                        }}
+                      >
+                        Sign up for more credits
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Progress bar */}
               {loading && (
