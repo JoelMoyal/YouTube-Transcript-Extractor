@@ -5445,7 +5445,7 @@ const App = () => {
       {studyGuideFull && studyGuide && !studyGuide._error && (
         <div style={{ position: 'fixed', inset: 0, background: '#FAFAF8', zIndex: 9998, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {/* Toolbar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 24px', borderBottom: `1px solid ${P.border}`, background: '#fff', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: isMobile ? '12px 16px' : '14px 24px', borderBottom: `1px solid ${P.border}`, background: '#fff', flexShrink: 0 }}>
             <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.success, flexShrink: 0 }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
             </div>
@@ -5474,7 +5474,7 @@ const App = () => {
             </button>
           </div>
           {/* Scrollable content */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '28px 40px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px 16px' : '28px 40px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 22, maxWidth: 800, margin: '0 auto' }}>
               {studyGuide.overview && (
                 <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
