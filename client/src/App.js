@@ -4570,7 +4570,7 @@ const App = () => {
                         </div>
                       </div>
                       <button
-                        onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
+                        onClick={openFlashcardModal}
                         style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, border: 'none', background: P.accent, color: 'white', fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'background 0.15s' }}
                         onMouseEnter={e => { e.currentTarget.style.background = P.accentHover; }}
                         onMouseLeave={e => { e.currentTarget.style.background = P.accent; }}
@@ -5110,7 +5110,7 @@ const App = () => {
                     onClick: summary ? () => setActiveTab('summary') : summarize, active: !!summary, loading: summarizing },
                   { title: 'Flash Cards', sub: 'Q&A cards with flip mode', color: P.warning, bg: 'rgba(180,83,9,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-                    onClick: flashcards.length > 0 ? openFlashcardModal : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
+                    onClick: (flashcards.length > 0 || flashcardsExhausted) ? () => setActiveTab('flashcards') : generateFlashcards, active: flashcards.length > 0 || flashcardsExhausted, loading: flashcardsLoading },
                   { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
                     icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
                     onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
@@ -5135,11 +5135,11 @@ const App = () => {
                   </div>
                 ))}
 
-                {/* Flashcards re-open button (cards are in full-screen modal) */}
+                {/* Flashcards re-open button */}
                 {flashcards.length > 0 && (
                   <div style={{ marginTop: 8 }}>
                     <button
-                      onClick={openFlashcardModal}
+                      onClick={() => setActiveTab('flashcards')}
                       style={{ display: 'flex', alignItems: 'center', gap: 7, width: '100%', padding: '9px 14px', background: 'rgba(180,83,9,0.07)', border: `1px solid rgba(180,83,9,0.2)`, borderRadius: 10, cursor: 'pointer', color: P.warning, fontSize: 12.5, fontWeight: 600, transition: 'all 0.15s' }}
                       onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,83,9,0.12)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'rgba(180,83,9,0.07)'; }}
