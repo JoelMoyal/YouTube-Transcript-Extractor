@@ -4358,7 +4358,7 @@ const App = () => {
             {/* ── LEFT SIDEBAR — col 1, spans both rows ────────────────────────── */}
             <div style={{
               gridColumn: 1, gridRow: '1 / 3',
-              display: 'flex', flexDirection: 'column',
+              display: isDesktop ? 'flex' : 'none', flexDirection: 'column',
               background: P.paper, borderRight: `1px solid ${P.border}`,
               minHeight: 0,
             }}>
