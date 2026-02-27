@@ -4251,7 +4251,13 @@ const App = () => {
                 letterSpacing: '-0.045em', lineHeight: 1.06, margin: isMobile ? '0 0 14px' : '0 0 22px',
               }}>
                 Watch less.<br />
-                <span style={{ color: P.accent }}>Know more.</span>
+                <span style={{ position: 'relative', display: 'inline-block', color: P.accent }}>
+                  Know more.
+                  <svg aria-hidden="true" viewBox="0 0 310 18" preserveAspectRatio="none" style={{ position: 'absolute', left: '-5%', bottom: '-10px', width: '110%', height: '14px', pointerEvents: 'none', overflow: 'visible' }}>
+                    <path d="M 4 13 C 55 4, 115 17, 175 10 C 235 3, 278 16, 306 11" stroke={P.accent} strokeWidth="4.5" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
+                    <path d="M 4 13 C 55 5, 115 16, 175 10 C 235 4, 278 15, 306 11" stroke={P.accent} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
+                  </svg>
+                </span>
               </h1>
               <p style={{ fontSize: 16, color: P.muted, margin: '0 0 40px', lineHeight: 1.7, maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
                 Extract full transcripts from YouTube &amp; Vimeo, then summarize with AI, generate flashcards, ask questions, and build study guides — in seconds.
