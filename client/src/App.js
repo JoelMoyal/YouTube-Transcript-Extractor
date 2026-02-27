@@ -3760,11 +3760,12 @@ const App = () => {
         .fade-up { animation: fadeUp 0.3s ease forwards; }
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: ${P.border} ${P.paper}; }
         body { margin: 0; background: ${P.paper}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: ${P.paper}; }
         ::-webkit-scrollbar-thumb { background: ${P.border}; border-radius: 3px; }
+        .tab-bar-mobile::-webkit-scrollbar { display: none; }
         input, select, textarea { font-family: inherit; }
         .hero-grad {
           background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(45,108,223,0.12) 0%, transparent 70%),
@@ -3776,6 +3777,8 @@ const App = () => {
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(45,108,223,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
         .bookmark-banner { animation: slideDown 0.3s ease forwards; }
+        @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+        @media (max-width: 639px) { nav { padding: 0 16px !important; } }
       `}</style>
 
       <Navbar
