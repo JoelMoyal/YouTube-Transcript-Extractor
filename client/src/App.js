@@ -1259,7 +1259,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           padding-top: 56px;
           background: radial-gradient(ellipse 90% 55% at 50% -15%, rgba(45,108,223,0.1) 0%, transparent 65%), #F6F3EE;
           position: relative;
-          overflow: hidden;
+          overflow-x: hidden;
         }
         .ds-shell::before {
           content: '';
@@ -2115,22 +2115,24 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           .ds-settings { grid-template-columns: 1fr; }
         }
         @media (max-width: 760px) {
-          .ds-wrap { padding: 16px 14px 44px; }
+          .ds-wrap { padding: 16px 14px 44px; max-width: 100%; overflow-x: hidden; }
           .ds-topnav { margin-bottom: 14px; }
+          /* Stack profile vertically so nothing overflows sideways */
           .ds-profile {
-            flex-wrap: wrap;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
-            padding: 20px;
+            padding: 18px 16px;
+            gap: 6px;
           }
           .ds-profile-meta {
             margin-left: 0;
-            width: 100%;
             text-align: center;
           }
           .ds-profile-email {
             white-space: normal;
             overflow-wrap: anywhere;
+            max-width: 100%;
           }
           .ds-section-tabs { overflow-x: auto; }
           /* Keep 2x2 grid on tablet/mobile — avoid 4-tall-cards stack */
@@ -2141,7 +2143,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         }
         @media (max-width: 639px) {
           .ds-wrap { padding: 10px 12px 60px; }
-          .ds-profile { padding: 14px 16px; gap: 12px; }
+          .ds-profile { padding: 14px 16px; gap: 6px; }
           .ds-avatar { width: 48px; height: 48px; font-size: 20px; }
           .ds-profile-name { font-size: 20px !important; }
           /* Hide topnav tabs on phone — section-tabs handle navigation */
