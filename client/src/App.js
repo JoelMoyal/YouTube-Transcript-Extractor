@@ -1087,6 +1087,12 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   const [copyLinkDone, setCopyLinkDone] = React.useState(false);
   const [copyRefDone, setCopyRefDone] = React.useState(false);
   const [showAllHistory, setShowAllHistory] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 640);
+  React.useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // Profile editing
   const [editingName, setEditingName] = React.useState(false);
@@ -2164,7 +2170,171 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         }
       `}</style>
 
-      <div className="ds-wrap">
+      {/* ═══ MOBILE LAYOUT (pure inline styles, no CSS class overflow) ═══ */}
+      {isMobile && (
+        <div style={{ minHeight: 'calc(100vh - 56px)', background: '#F6F3EE', paddingBottom: 60, width: '100%', maxWidth: '100vw', boxSizing: 'border-box', overflowX: 'hidden' }}>
+          {/* Sticky header: back + title + tab pills */}
+          <div style={{ background: '#FFFEFC', borderBottom: '1px solid #E7E1D8', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 6, position: 'sticky', top: 56, zIndex: 10 }}>
+            <button onClick={onBack} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#6B645C', padding: '4px 6px 4px 0', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <ChevronIcon size={16} dir="left" />
+            </button>
+            <span style={{ flex: 1, fontSize: 15, fontWeight: 700, color: '#1C1917' }}>Account</span>
+            <div style={{ display: 'flex', gap: 2, background: 'rgba(28,25,23,0.06)', borderRadius: 10, padding: 3 }}>
+              {[['overview', 'Overview'], ['settings', 'Settings']].map(([key, label]) => (
+                <button key={key} onClick={() => setTab(key)} style={{ border: 'none', background: tab === key ? 'white' : 'transparent', color: tab === key ? '#1C1917' : '#6B645C', fontWeight: tab === key ? 700 : 500, fontSize: 13, padding: '5px 12px', borderRadius: 7, cursor: 'pointer', boxShadow: tab === key ? '0 1px 4px rgba(28,25,23,0.1)' : 'none', transition: 'all 0.15s' }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+            {/* Profile row */}
+            <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '11px 14px', display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, overflow: 'hidden' }}>
+              <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#2D6CDF', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, flexShrink: 0 }}>{initial}</div>
+              <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
+                <div style={{ fontSize: 12, color: '#6B645C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+              </div>
+            </div>
+
+            {/* ── Overview ── */}
+            {tab === 'overview' && (
+              <>
+                {/* Credits bar */}
+                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '11px 14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 7 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1C1917' }}>{used} / {tierMax} credits used</span>
+                    <span style={{ fontSize: 12, color: '#6B645C' }}>resets in {daysLeft}d</span>
+                  </div>
+                  <div style={{ height: 6, borderRadius: 999, background: '#E7E1D8', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#2D6CDF', transition: 'width 0.4s ease' }} />
+                  </div>
+                </div>
+
+                {/* Recent transcripts */}
+                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, overflow: 'hidden' }}>
+                  <div style={{ padding: '11px 14px', borderBottom: '1px solid #E7E1D8' }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#1C1917' }}>Recent Transcripts</span>
+                  </div>
+                  {history.length === 0 ? (
+                    <div style={{ padding: '20px 14px', textAlign: 'center' }}>
+                      <p style={{ margin: '0 0 10px', fontSize: 13, color: '#6B645C' }}>No transcripts yet.</p>
+                      <button onClick={onBack} style={{ border: 'none', borderRadius: 9, background: '#2D6CDF', color: 'white', fontSize: 13, fontWeight: 600, padding: '7px 16px', cursor: 'pointer' }}>Extract one</button>
+                    </div>
+                  ) : (
+                    <>
+                      {(showAllHistory ? history : history.slice(0, 5)).map((h, idx) => {
+                        const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
+                        const title = h.title || h.id;
+                        return (
+                          <div key={`m-${h.id}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderTop: '1px solid #E7E1D8' }}>
+                            <div style={{ width: 60, height: 34, borderRadius: 7, overflow: 'hidden', flexShrink: 0, background: 'rgba(45,108,223,0.06)', border: '1px solid rgba(45,108,223,0.1)' }}>
+                              {h.thumbnail && <img src={h.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                              <div style={{ fontSize: 13, fontWeight: 600, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
+                              <div style={{ fontSize: 11, color: '#6B645C' }}>{wc > 0 ? `${wc.toLocaleString()} words · ` : ''}{timeAgo(h.date)}</div>
+                            </div>
+                            <button onClick={() => openTranscript(h)} style={{ flexShrink: 0, border: 'none', borderRadius: 8, background: '#2D6CDF', color: 'white', fontSize: 12, fontWeight: 700, padding: '6px 12px', cursor: 'pointer' }}>Open</button>
+                          </div>
+                        );
+                      })}
+                      {history.length > 5 && (
+                        <div style={{ padding: '10px 14px 12px', borderTop: '1px solid #E7E1D8' }}>
+                          <button onClick={() => setShowAllHistory(v => !v)} style={{ border: 'none', background: 'none', color: '#2D6CDF', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0 }}>
+                            {showAllHistory ? 'Show less' : `+ View all ${history.length} transcripts`}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* ── Settings ── */}
+            {tab === 'settings' && (
+              <>
+                {/* Profile / Plan */}
+                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Profile</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 3 }}>Display name</div>
+                      {!editingName && <div style={{ fontSize: 14, fontWeight: 600, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>}
+                    </div>
+                    {!editingName && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                        {nameSaved && <span style={{ fontSize: 12, color: P.success, fontWeight: 600 }}>Saved ✓</span>}
+                        <button onClick={() => setEditingName(true)} style={{ border: '1px solid #E7E1D8', background: 'white', color: '#6B645C', fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, cursor: 'pointer' }}>Edit</button>
+                      </div>
+                    )}
+                  </div>
+                  {editingName && (
+                    <div>
+                      <input className="ds-settings-input" value={nameInput} onChange={e => setNameInput(e.target.value)} placeholder="Your display name" autoFocus onKeyDown={e => { if (e.key === 'Enter') saveDisplayName(); if (e.key === 'Escape') { setEditingName(false); setNameError(''); } }} />
+                      {nameError && <div className="ds-settings-feedback error" style={{ marginTop: 4 }}>{nameError}</div>}
+                      <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                        <button className="ds-settings-save-btn" onClick={saveDisplayName} disabled={nameSaving}>{nameSaving ? 'Saving…' : 'Save'}</button>
+                        <button className="ds-settings-cancel-btn" onClick={() => { setEditingName(false); setNameError(''); }}>Cancel</button>
+                      </div>
+                    </div>
+                  )}
+                  <div style={{ height: 1, background: '#E7E1D8' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 3 }}>Plan</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#1C1917' }}>Free · {tierMax} credits / 7 days</div>
+                    </div>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(45,108,223,0.1)', color: '#2D6CDF', flexShrink: 0 }}>Free</span>
+                  </div>
+                </div>
+
+                {/* Preferences */}
+                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 12 }}>Preferences</span>
+                  {[
+                    { label: 'Show timestamps', sub: 'Time markers in transcript', checked: prefTimestamps, onChange: e => { setPrefTimestamps(e.target.checked); try { localStorage.setItem(prefKey('timestamps'), String(e.target.checked)); } catch {} savePrefsToCloud({ timestamps: e.target.checked }); } },
+                    { label: 'Auto-copy transcript', sub: 'Copy to clipboard after extraction', checked: prefAutoCopy, onChange: e => { setPrefAutoCopy(e.target.checked); try { localStorage.setItem(prefKey('autocopy'), String(e.target.checked)); } catch {} savePrefsToCloud({ autocopy: e.target.checked }); } },
+                  ].map((pref, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingTop: i > 0 ? 12 : 0, marginTop: i > 0 ? 12 : 0, borderTop: i > 0 ? '1px solid #E7E1D8' : 'none' }}>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: '#1C1917' }}>{pref.label}</div>
+                        <div style={{ fontSize: 11, color: '#9B9490' }}>{pref.sub}</div>
+                      </div>
+                      <label className="ds-toggle">
+                        <input type="checkbox" checked={pref.checked} onChange={pref.onChange} />
+                        <span className="ds-toggle-track" />
+                      </label>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Sign out */}
+                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px' }}>
+                  {!signOutConfirm ? (
+                    <button onClick={() => setSignOutConfirm(true)} style={{ width: '100%', border: '1px solid rgba(180,35,24,0.26)', background: 'rgba(180,35,24,0.06)', color: '#B42318', fontSize: 13, fontWeight: 600, padding: '10px', borderRadius: 10, cursor: 'pointer' }}>Sign out</button>
+                  ) : (
+                    <div>
+                      <p style={{ margin: '0 0 10px', fontSize: 13, color: '#1C1917' }}>Are you sure you want to sign out?</p>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button className="ds-settings-save-btn" style={{ flex: 1, background: P.error }} onClick={onSignOut}>Yes, sign out</button>
+                        <button className="ds-settings-cancel-btn" onClick={() => setSignOutConfirm(false)}>Cancel</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+          </div>
+        </div>
+      )}
+
+      {/* ═══ DESKTOP LAYOUT ═══ */}
+      <div className="ds-wrap" style={{ display: isMobile ? 'none' : undefined }}>
         {/* Top navigation bar */}
         <nav className="ds-topnav">
           <button className="ds-topnav-back" onClick={onBack} title="Back to extractor">
