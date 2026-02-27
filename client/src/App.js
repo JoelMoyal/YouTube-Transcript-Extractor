@@ -2135,22 +2135,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           .ds-section-tabs { overflow-x: auto; }
           .ds-stats { grid-template-columns: 1fr; }
           .ds-usage-head { flex-wrap: wrap; }
-          .ds-row {
-            flex-wrap: wrap;
-            align-items: flex-start;
-          }
-          .ds-thumb {
-            width: 100%;
-            height: 168px;
-          }
-          .ds-row-main {
-            width: 100%;
-          }
-          .ds-row-actions {
-            width: 100%;
-            margin-left: 0;
-          }
-          .ds-row-btn { flex: 1; }
+          /* Keep rows compact — thumbnail stays small, no stacking */
+          .ds-thumb { width: 72px; height: 40px; }
         }
         @media (max-width: 639px) {
           .ds-wrap { padding: 10px 12px 60px; }
@@ -2160,7 +2146,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           .ds-topnav-tab { font-size: 13px; padding: 5px 10px; }
           .ds-section-tab { font-size: 12px; padding: 6px 10px; }
           .ds-usage-days { display: none; }
-          .ds-thumb { height: 120px; }
+          .ds-thumb { width: 64px; height: 36px; }
           .ds-credits-mobile { display: block !important; }
         }
       `}</style>
@@ -2192,16 +2178,18 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
               </div>
             </section>
 
-            {/* Credits pill — mobile only (hidden on desktop via CSS class) */}
-            <div className="ds-credits-mobile" style={{ display: 'none', margin: '8px 0', padding: '10px 14px', background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, boxShadow: '0 2px 8px rgba(28,25,23,0.06)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#1C1917' }}>Free Credits</span>
-                <span style={{ fontSize: 12, color: '#6B645C' }}>{used} / {tierMax} used · resets in {daysLeft}d</span>
+            {/* Credits pill — mobile only, overview tab only */}
+            {tab === 'overview' && (
+              <div className="ds-credits-mobile" style={{ display: 'none', margin: '8px 0', padding: '10px 14px', background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, boxShadow: '0 2px 8px rgba(28,25,23,0.06)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#1C1917' }}>Free Credits</span>
+                  <span style={{ fontSize: 12, color: '#6B645C' }}>{used} / {tierMax} used · resets in {daysLeft}d</span>
+                </div>
+                <div style={{ height: 5, borderRadius: 999, background: '#E7E1D8', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#2D6CDF', transition: 'width 0.4s ease' }} />
+                </div>
               </div>
-              <div style={{ height: 5, borderRadius: 999, background: '#E7E1D8', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#2D6CDF', transition: 'width 0.4s ease' }} />
-              </div>
-            </div>
+            )}
 
             {/* Inline section tabs */}
             <div className="ds-section-tabs">
@@ -4092,7 +4080,7 @@ const App = () => {
                 borderRadius: 20, boxShadow: '0 12px 56px rgba(28,25,23,0.13)',
                 padding: 10,
               }}>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, flexDirection: isMobile ? 'column' : 'row' }}>
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: isMobile ? '11px 14px' : '16px 20px', background: P.paper, borderRadius: 14, border: `1px solid ${P.border}` }}>
                     {(() => {
                       const platform = parseVideoUrl(videoUrl)?.platform;
@@ -4140,13 +4128,13 @@ const App = () => {
                         onClick={getTranscript}
                         disabled={btnDisabled}
                         style={{
-                          flexShrink: 0, padding: isMobile ? '0 18px' : '0 28px', borderRadius: 14, border: 'none',
+                          flexShrink: 0, padding: isMobile ? '14px 18px' : '0 28px', borderRadius: 14, border: 'none',
                           background: btnBg,
                           color: outOfCredits ? P.error : 'white',
-                          fontSize: isMobile ? 14 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
-                          display: 'flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap',
+                          fontSize: isMobile ? 15 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, whiteSpace: 'nowrap',
                           transition: 'background 0.15s',
-                          minWidth: isMobile ? 90 : 148,
+                          width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
                         }}
                         onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
                         onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
@@ -4366,7 +4354,7 @@ const App = () => {
                     return (
                     <div key={h.id}>
                       {i > 0 && <div style={{ height: 1, background: P.border }} />}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px', transition: 'background 0.1s' }}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: isMobile ? '12px 14px' : '14px 20px', transition: 'background 0.1s', flexWrap: isMobile ? 'wrap' : 'nowrap' }}
                         onMouseEnter={e => e.currentTarget.style.background = P.paper}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
@@ -4385,18 +4373,18 @@ const App = () => {
                             {displayChannel} · {wc.toLocaleString()} words · {timeAgo(h.date)}
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                        <div style={{ display: 'flex', gap: 6, flexShrink: 0, ...(isMobile ? { width: '100%' } : {}) }}>
                           <button
                             onClick={() => loadFromHistory(h)}
-                            style={{ padding: '5px 12px', borderRadius: 7, border: `1px solid ${P.border}`, background: P.surface, fontSize: 12, fontWeight: 600, color: P.ink, cursor: 'pointer', transition: 'all 0.1s' }}
+                            style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${P.border}`, background: P.surface, fontSize: 12, fontWeight: 600, color: P.ink, cursor: 'pointer', transition: 'all 0.1s', ...(isMobile ? { flex: 1, textAlign: 'center' } : {}) }}
                             onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
                             onMouseLeave={e => { e.currentTarget.style.background = P.surface; }}
                           >
-                            View transcript
+                            View
                           </button>
                           <button
                             onClick={(e) => deleteFromHistory(h.id, e)}
-                            style={{ padding: '5px 12px', borderRadius: 7, border: `1px solid ${P.border}`, background: P.surface, fontSize: 12, fontWeight: 600, color: P.muted, cursor: 'pointer', transition: 'all 0.1s' }}
+                            style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${P.border}`, background: P.surface, fontSize: 12, fontWeight: 600, color: P.muted, cursor: 'pointer', transition: 'all 0.1s', ...(isMobile ? { flex: 1, textAlign: 'center' } : {}) }}
                             onMouseEnter={e => { e.currentTarget.style.color = P.error; e.currentTarget.style.borderColor = 'rgba(180,35,24,0.3)'; }}
                             onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}
                           >
