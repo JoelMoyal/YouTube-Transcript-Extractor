@@ -5303,6 +5303,41 @@ const App = () => {
         </div>
       )}
 
+      {/* ── Tablet history drawer ──────────────────────────────────────────── */}
+      {isTablet && transcript && historyDrawerOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setHistoryDrawerOpen(false)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 200,
+              background: 'rgba(28,25,23,0.4)',
+              backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)',
+            }}
+          />
+          {/* Drawer panel */}
+          <div style={{
+            position: 'fixed', top: 56, left: 0, bottom: 0,
+            width: 300, zIndex: 201,
+            background: P.paper, borderRight: `1px solid ${P.border}`,
+            display: 'flex', flexDirection: 'column',
+            boxShadow: '4px 0 24px rgba(28,25,23,0.12)',
+            animation: 'slideInLeft 0.22s ease',
+          }}>
+            {/* Drawer header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: `1px solid ${P.border}`, flexShrink: 0 }}>
+              <span style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>History &amp; Export</span>
+              <button
+                onClick={() => setHistoryDrawerOpen(false)}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 22, lineHeight: 1, padding: 4 }}
+                aria-label="Close drawer"
+              >×</button>
+            </div>
+            {renderSidebarContent()}
+          </div>
+        </>
+      )}
+
       {/* Footer */}
       {view !== 'dashboard' && <footer style={{
         background: P.surface, borderTop: `1px solid ${P.border}`,
