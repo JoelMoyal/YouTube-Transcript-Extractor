@@ -4608,7 +4608,7 @@ const App = () => {
                 {activeTab === 'editor' && (
                   <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '16px' }}>
                     <textarea defaultValue={transcript} style={{
-                      width: '100%', minHeight: 400, border: `1px solid ${P.border}`, borderRadius: 10,
+                      width: '100%', minHeight: isMobile ? 250 : 400, border: `1px solid ${P.border}`, borderRadius: 10,
                       padding: '16px', fontSize: 13.5, lineHeight: 1.85, color: P.ink, background: P.paper,
                       outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box',
                     }}
