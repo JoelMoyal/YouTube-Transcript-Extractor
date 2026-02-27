@@ -3297,6 +3297,7 @@ const App = () => {
     setStudyGuideFull(false);
     setShowFlashcardModal(false);
     setActiveTab(cached?.activeTab ?? 'transcript');
+    setMobilePanel('transcript'); setHistoryDrawerOpen(false);
   };
 
   const resetAll = () => {
@@ -3309,6 +3310,7 @@ const App = () => {
     setActiveTab('transcript');
     setCurrentTitle(''); setCurrentChannel('');
     setSelectedSegment(null); setExportToggle(false);
+    setMobilePanel('transcript'); setHistoryDrawerOpen(false);
   };
 
   const goHome = () => {
@@ -3362,6 +3364,7 @@ const App = () => {
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
     setSummary(''); setTimeline(null); setShowTopics(false);
     setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
+    setMobilePanel('transcript'); setHistoryDrawerOpen(false);
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
 
