@@ -2210,7 +2210,32 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                   <div style={{ height: 6, borderRadius: 999, background: '#E7E1D8', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#2D6CDF', transition: 'width 0.4s ease' }} />
                   </div>
+                  <div style={{ marginTop: 6, fontSize: 12, color: '#6B645C' }}>{remaining} credits remaining</div>
                 </div>
+
+                {/* Continue where you left off */}
+                {latest && (
+                  <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, overflow: 'hidden' }}>
+                    <div style={{ padding: '11px 14px', borderBottom: '1px solid #E7E1D8' }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: '#1C1917' }}>Continue where you left off</span>
+                    </div>
+                    <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div style={{ width: 72, height: 42, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: 'rgba(45,108,223,0.06)', border: '1px solid rgba(45,108,223,0.1)' }}>
+                        {latest.thumbnail && <img src={latest.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{latest.title || latest.id}</div>
+                        <div style={{ fontSize: 11, color: '#6B645C' }}>{latestWc > 0 ? `${latestWc.toLocaleString()} words · ` : ''}{timeAgo(latest.date)}</div>
+                      </div>
+                      <button onClick={() => openTranscript(latest)} style={{ flexShrink: 0, border: 'none', borderRadius: 8, background: '#2D6CDF', color: 'white', fontSize: 12, fontWeight: 700, padding: '6px 12px', cursor: 'pointer' }}>Open</button>
+                    </div>
+                    <div style={{ padding: '0 14px 12px', display: 'flex', gap: 6 }}>
+                      {['Summarize', 'Flashcards', 'Study guide'].map(action => (
+                        <button key={action} onClick={() => openTranscript(latest)} style={{ flex: 1, border: '1px solid #E7E1D8', background: '#F6F3EE', color: '#6B645C', fontSize: 11, fontWeight: 600, padding: '6px 0', borderRadius: 8, cursor: 'pointer' }}>{action}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Recent transcripts */}
                 <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, overflow: 'hidden' }}>
@@ -2250,50 +2275,86 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                     </>
                   )}
                 </div>
+
+                {/* Invite friends */}
+                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(45,108,223,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2D6CDF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#1C1917' }}>Invite friends, earn credits</div>
+                      <div style={{ fontSize: 11, color: '#6B645C' }}>+3 free credits per friend who signs up</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <div style={{ flex: 1, minWidth: 0, background: '#F6F3EE', border: '1px solid #E7E1D8', borderRadius: 8, padding: '7px 10px', fontSize: 11, color: '#6B645C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{refLink}</div>
+                    <button onClick={copyRefLink} style={{ flexShrink: 0, border: 'none', borderRadius: 8, background: copyRefDone ? '#0F766E' : '#2D6CDF', color: 'white', fontSize: 12, fontWeight: 700, padding: '7px 12px', cursor: 'pointer', transition: 'background 0.2s' }}>{copyRefDone ? '✓ Copied' : 'Copy'}</button>
+                  </div>
+                </div>
               </>
             )}
 
             {/* ── Settings ── */}
             {tab === 'settings' && (
               <>
-                {/* Profile / Plan */}
-                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Profile</span>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 3 }}>Display name</div>
-                      {!editingName && <div style={{ fontSize: 14, fontWeight: 600, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>}
-                    </div>
-                    {!editingName && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                        {nameSaved && <span style={{ fontSize: 12, color: P.success, fontWeight: 600 }}>Saved ✓</span>}
-                        <button onClick={() => setEditingName(true)} style={{ border: '1px solid #E7E1D8', background: 'white', color: '#6B645C', fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, cursor: 'pointer' }}>Edit</button>
+                {/* Profile */}
+                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10 }}>Profile</span>
+                  {/* Display name */}
+                  <div style={{ paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid #E7E1D8' }}>
+                    <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 4 }}>Display name</div>
+                    {!editingName ? (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{displayName}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                          {nameSaved && <span style={{ fontSize: 12, color: P.success, fontWeight: 600 }}>Saved ✓</span>}
+                          <button onClick={() => setEditingName(true)} style={{ border: '1px solid #E7E1D8', background: 'white', color: '#6B645C', fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, cursor: 'pointer' }}>Edit</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <input className="ds-settings-input" value={nameInput} onChange={e => setNameInput(e.target.value)} placeholder="Your display name" autoFocus onKeyDown={e => { if (e.key === 'Enter') saveDisplayName(); if (e.key === 'Escape') { setEditingName(false); setNameError(''); } }} />
+                        {nameError && <div className="ds-settings-feedback error" style={{ marginTop: 4 }}>{nameError}</div>}
+                        <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                          <button className="ds-settings-save-btn" onClick={saveDisplayName} disabled={nameSaving}>{nameSaving ? 'Saving…' : 'Save'}</button>
+                          <button className="ds-settings-cancel-btn" onClick={() => { setEditingName(false); setNameError(''); }}>Cancel</button>
+                        </div>
                       </div>
                     )}
                   </div>
-                  {editingName && (
-                    <div>
-                      <input className="ds-settings-input" value={nameInput} onChange={e => setNameInput(e.target.value)} placeholder="Your display name" autoFocus onKeyDown={e => { if (e.key === 'Enter') saveDisplayName(); if (e.key === 'Escape') { setEditingName(false); setNameError(''); } }} />
-                      {nameError && <div className="ds-settings-feedback error" style={{ marginTop: 4 }}>{nameError}</div>}
-                      <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-                        <button className="ds-settings-save-btn" onClick={saveDisplayName} disabled={nameSaving}>{nameSaving ? 'Saving…' : 'Save'}</button>
-                        <button className="ds-settings-cancel-btn" onClick={() => { setEditingName(false); setNameError(''); }}>Cancel</button>
-                      </div>
+                  {/* Email */}
+                  <div style={{ paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid #E7E1D8' }}>
+                    <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 3 }}>Email</div>
+                    <div style={{ fontSize: 14, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+                  </div>
+                  {/* Member since */}
+                  <div style={{ paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid #E7E1D8' }}>
+                    <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 3 }}>Member since</div>
+                    <div style={{ fontSize: 14, color: '#1C1917' }}>{memberSince}</div>
+                  </div>
+                  {/* Plan */}
+                  <div>
+                    <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 3 }}>Plan</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(45,108,223,0.1)', color: '#2D6CDF' }}>Free</span>
+                      <span style={{ fontSize: 14, color: '#1C1917' }}>{tierMax} credits / 7 days</span>
                     </div>
-                  )}
-                  <div style={{ height: 1, background: '#E7E1D8' }} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 3 }}>Plan</div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: '#1C1917' }}>Free · {tierMax} credits / 7 days</div>
-                    </div>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(45,108,223,0.1)', color: '#2D6CDF', flexShrink: 0 }}>Free</span>
                   </div>
                 </div>
 
                 {/* Preferences */}
                 <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 0 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 12 }}>Preferences</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10 }}>Preferences</span>
+                  {/* Export format */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingBottom: 12, marginBottom: 12, borderBottom: '1px solid #E7E1D8' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#1C1917' }}>Export format</div>
+                    <select value={prefFormat} onChange={e => { setPrefFormat(e.target.value); try { localStorage.setItem(prefKey('format'), e.target.value); } catch {} savePrefsToCloud({ format: e.target.value }); }} style={{ fontSize: 13, padding: '5px 8px', borderRadius: 8, border: '1px solid #E7E1D8', background: '#F6F3EE', color: '#1C1917', cursor: 'pointer', outline: 'none' }}>
+                      <option value="plain">Plain text</option>
+                      <option value="srt">Subtitles (.srt)</option>
+                      <option value="pdf">Document (.pdf)</option>
+                    </select>
+                  </div>
                   {[
                     { label: 'Show timestamps', sub: 'Time markers in transcript', checked: prefTimestamps, onChange: e => { setPrefTimestamps(e.target.checked); try { localStorage.setItem(prefKey('timestamps'), String(e.target.checked)); } catch {} savePrefsToCloud({ timestamps: e.target.checked }); } },
                     { label: 'Auto-copy transcript', sub: 'Copy to clipboard after extraction', checked: prefAutoCopy, onChange: e => { setPrefAutoCopy(e.target.checked); try { localStorage.setItem(prefKey('autocopy'), String(e.target.checked)); } catch {} savePrefsToCloud({ autocopy: e.target.checked }); } },
@@ -2309,6 +2370,75 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                       </label>
                     </div>
                   ))}
+                </div>
+
+                {/* Security */}
+                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Security</span>
+                  {pwStep === 'idle' && (
+                    <button className="ds-settings-btn" onClick={() => { setPwStep('form'); setPwError(''); }}>Change password</button>
+                  )}
+                  {(pwStep === 'form' || pwStep === 'confirm') && (
+                    <div className="ds-settings-form">
+                      <div>
+                        <label className="ds-settings-form-label">Current password</label>
+                        <input className="ds-settings-input" type="password" value={pwCurrent} onChange={e => setPwCurrent(e.target.value)} placeholder="Enter current password" />
+                      </div>
+                      <div>
+                        <label className="ds-settings-form-label">New password</label>
+                        <input className="ds-settings-input" type="password" value={pwNew} onChange={e => setPwNew(e.target.value)} placeholder="Min. 6 characters" />
+                      </div>
+                      <div>
+                        <label className="ds-settings-form-label">Confirm new password</label>
+                        <input className="ds-settings-input" type="password" value={pwConfirm} onChange={e => setPwConfirm(e.target.value)} placeholder="Repeat new password" />
+                      </div>
+                      {pwError && <div className="ds-settings-feedback error">{pwError}</div>}
+                      {pwStep === 'form' && (
+                        <div className="ds-settings-row-actions">
+                          <button className="ds-settings-save-btn" style={{ flex: 1 }} onClick={() => { if (!pwCurrent) { setPwError('Enter your current password.'); return; } if (pwNew.length < 6) { setPwError('New password must be at least 6 characters.'); return; } if (pwNew !== pwConfirm) { setPwError('New passwords do not match.'); return; } setPwError(''); setPwStep('confirm'); }}>Continue</button>
+                          <button className="ds-settings-cancel-btn" onClick={() => { setPwStep('idle'); setPwCurrent(''); setPwNew(''); setPwConfirm(''); setPwError(''); }}>Cancel</button>
+                        </div>
+                      )}
+                      {pwStep === 'confirm' && (
+                        <div className="ds-settings-confirm-box neutral">
+                          <p className="ds-settings-confirm-text">Are you sure you want to change your password?</p>
+                          <div className="ds-settings-confirm-row">
+                            <button className="ds-settings-save-btn" style={{ flex: 1 }} onClick={handlePasswordChange}>Yes, change it</button>
+                            <button className="ds-settings-cancel-btn" onClick={() => setPwStep('form')}>Go back</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {pwStep === 'loading' && <div className="ds-settings-feedback loading">Updating your password…</div>}
+                  {pwStep === 'success' && <div className="ds-settings-feedback success">Password updated successfully ✓</div>}
+                </div>
+
+                {/* Data & Storage */}
+                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Data & Storage</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                    <span style={{ color: '#6B645C' }}>Saved transcripts</span>
+                    <span style={{ fontWeight: 600, color: '#1C1917' }}>{history.length} / 10</span>
+                  </div>
+                  <button className="ds-settings-btn" onClick={exportHistory} disabled={history.length === 0} style={{ opacity: history.length === 0 ? 0.45 : 1 }}>Export history as JSON</button>
+                  {!clearConfirm ? (
+                    <button className="ds-settings-btn danger" onClick={() => setClearConfirm(true)} disabled={history.length === 0} style={{ opacity: history.length === 0 ? 0.45 : 1 }}>Clear all history</button>
+                  ) : (
+                    <div className="ds-settings-confirm-box">
+                      {clearDone ? (
+                        <div className="ds-settings-feedback success" style={{ margin: 0 }}>History cleared ✓</div>
+                      ) : (
+                        <>
+                          <p className="ds-settings-confirm-text">This will permanently delete all {history.length} saved transcript{history.length !== 1 ? 's' : ''}. This cannot be undone.</p>
+                          <div className="ds-settings-confirm-row">
+                            <button className="ds-settings-save-btn" style={{ flex: 1, background: P.error }} onClick={handleClearHistory}>Yes, clear all</button>
+                            <button className="ds-settings-cancel-btn" onClick={() => setClearConfirm(false)}>Cancel</button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Sign out */}
