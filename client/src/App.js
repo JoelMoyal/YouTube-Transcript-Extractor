@@ -1,6 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 import { supabase } from './supabase';
+import ReactGA from 'react-ga4';
+
+ReactGA.initialize('G-34EYP3ZVZQ');
+ReactGA.send({ hitType: 'pageview', page: window.location.pathname });
 
 // ── Palette ────────────────────────────────────────────────────────────────────
 const P = {
