@@ -2172,9 +2172,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
       {/* ═══ MOBILE LAYOUT (pure inline styles, no CSS class overflow) ═══ */}
       {isMobile && (
-        <div style={{ minHeight: 'calc(100vh - 56px)', background: '#F6F3EE', paddingBottom: 60, width: '100%', maxWidth: '100vw', boxSizing: 'border-box', overflowX: 'hidden' }}>
-          {/* Sticky header: 2 rows — profile on top, tabs below */}
-          <div style={{ background: '#FFFEFC', borderBottom: '1px solid #E7E1D8', position: 'sticky', top: 56, zIndex: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 56px)', background: '#F6F3EE', width: '100%', overflow: 'hidden' }}>
+          {/* Fixed header: flex-shrink:0 means it NEVER scrolls — no sticky/overflow issues */}
+          <div style={{ background: '#FFFEFC', borderBottom: '1px solid #E7E1D8', flexShrink: 0 }}>
             {/* Row 1: back button + avatar + name/email */}
             <div style={{ padding: '10px 14px 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
               <button onClick={onBack} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#6B645C', padding: '4px 4px 4px 0', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
@@ -2196,7 +2196,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
             </div>
           </div>
 
-          <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
 
             {/* ── Overview ── */}
             {tab === 'overview' && (
