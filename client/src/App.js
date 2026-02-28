@@ -4382,13 +4382,9 @@ const App = () => {
                 Watch less.<br />
                 <span style={{ position: 'relative', display: 'inline-block', color: P.accent }}>
                   Know more.
-                  <svg aria-hidden="true" viewBox="0 0 320 28" preserveAspectRatio="none" style={{ position: 'absolute', left: '-6%', bottom: '-14px', width: '112%', height: '22px', pointerEvents: 'none', overflow: 'visible' }}>
-                    {/* main paint body — filled closed shape, thick in center, tapered ends */}
-                    <path d="M 3 17 C 18 11, 52 14, 90 11 C 128 8, 160 14, 195 11 C 230 8, 268 13, 313 11 L 316 15 C 272 19, 234 22, 198 19 C 162 16, 130 21, 95 18 C 60 15, 25 19, 3 18 Z" fill={P.accent} opacity="0.92" />
-                    {/* mid layer — slightly offset, gives paint depth */}
-                    <path d="M 8 16 C 40 12, 85 15, 130 13 C 175 11, 215 15, 265 12 L 268 16 C 220 19, 178 21, 135 19 C 90 17, 45 19, 8 18 Z" fill="#1a4fba" opacity="0.28" />
-                    {/* thin bright highlight — mimics wet paint sheen */}
-                    <path d="M 20 14 C 60 11, 120 13, 180 12 C 240 11, 280 13, 305 12" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                  <svg aria-hidden="true" viewBox="0 0 310 18" preserveAspectRatio="none" style={{ position: 'absolute', left: '-5%', bottom: '-10px', width: '110%', height: '14px', pointerEvents: 'none', overflow: 'visible' }}>
+                    <path d="M 4 13 C 55 4, 115 17, 175 10 C 235 3, 278 16, 306 11" stroke={P.accent} strokeWidth="4.5" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
+                    <path d="M 4 13 C 55 5, 115 16, 175 10 C 235 4, 278 15, 306 11" stroke={P.accent} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
                   </svg>
                 </span>
               </h1>
