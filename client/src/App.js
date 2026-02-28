@@ -2173,20 +2173,23 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
       {/* ═══ MOBILE LAYOUT (pure inline styles, no CSS class overflow) ═══ */}
       {isMobile && (
         <div style={{ minHeight: 'calc(100vh - 56px)', background: '#F6F3EE', paddingBottom: 60, width: '100%', maxWidth: '100vw', boxSizing: 'border-box', overflowX: 'hidden' }}>
-          {/* Sticky header: back + avatar/name + tab pills */}
-          <div style={{ background: '#FFFEFC', borderBottom: '1px solid #E7E1D8', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8, position: 'sticky', top: 56, zIndex: 10 }}>
-            <button onClick={onBack} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#6B645C', padding: '4px 6px 4px 0', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-              <ChevronIcon size={16} dir="left" />
-            </button>
-            {/* Avatar + name/email always visible in header */}
-            <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#2D6CDF', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{initial}</div>
-            <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
-              <div style={{ fontSize: 11, color: '#6B645C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+          {/* Sticky header: 2 rows — profile on top, tabs below */}
+          <div style={{ background: '#FFFEFC', borderBottom: '1px solid #E7E1D8', position: 'sticky', top: 56, zIndex: 10 }}>
+            {/* Row 1: back button + avatar + name/email */}
+            <div style={{ padding: '10px 14px 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <button onClick={onBack} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#6B645C', padding: '4px 4px 4px 0', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                <ChevronIcon size={16} dir="left" />
+              </button>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#2D6CDF', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, flexShrink: 0 }}>{initial}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
+                <div style={{ fontSize: 12, color: '#6B645C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: 2, background: 'rgba(28,25,23,0.06)', borderRadius: 10, padding: 3, flexShrink: 0 }}>
+            {/* Row 2: full-width tab pills */}
+            <div style={{ padding: '0 14px 10px', display: 'flex', gap: 6 }}>
               {[['overview', 'Overview'], ['settings', 'Settings']].map(([key, label]) => (
-                <button key={key} onClick={() => setTab(key)} style={{ border: 'none', background: tab === key ? 'white' : 'transparent', color: tab === key ? '#1C1917' : '#6B645C', fontWeight: tab === key ? 700 : 500, fontSize: 13, padding: '5px 12px', borderRadius: 7, cursor: 'pointer', boxShadow: tab === key ? '0 1px 4px rgba(28,25,23,0.1)' : 'none', transition: 'all 0.15s' }}>
+                <button key={key} onClick={() => setTab(key)} style={{ flex: 1, border: 'none', background: tab === key ? '#2D6CDF' : 'rgba(28,25,23,0.06)', color: tab === key ? 'white' : '#6B645C', fontWeight: tab === key ? 700 : 500, fontSize: 13, padding: '7px 0', borderRadius: 9, cursor: 'pointer', transition: 'all 0.15s' }}>
                   {label}
                 </button>
               ))}
