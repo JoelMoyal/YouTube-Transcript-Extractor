@@ -3187,6 +3187,7 @@ const App = () => {
   const isDesktop = windowWidth >= 1024;
 
   const aiCacheRef         = useRef({});  // keyed by videoId → saved AI state
+  const mobileNavRef       = useRef(null);
   const downloadMenuRef    = useRef(null);
   const qaInputRef         = useRef(null);
   const playerRef          = useRef(null);
@@ -4609,7 +4610,6 @@ const App = () => {
                   { icon: '⚡', text: 'Instant extraction' },
                   { icon: '🤖', text: 'AI-powered insights' },
                   { icon: '🔒', text: 'No account needed' },
-                  { icon: '🏢', text: 'Trusted by SV teams' },
                 ].map(p => (
                   <span key={p.text} style={{
                     display: 'inline-flex', alignItems: 'center', gap: 5,
@@ -4621,64 +4621,47 @@ const App = () => {
                   </span>
                 ))}
               </div>
-            </div>
-            </div>{/* end hero-grad */}
 
-            {/* ── Trust bar — in-flow, scrolls with page ── */}
-            {!isMobile && (() => {
-              const TRUST_ITEMS = [
-                { icon: '🏢', label: 'Silicon Valley startups' },
-                { icon: '🎓', label: 'Researchers & academics' },
-                { icon: '🚀', label: 'Startup founders' },
-                { icon: '🎙️', label: 'Podcast creators' },
-                { icon: '📚', label: 'Educators & students' },
-                { icon: '🗞️', label: 'Journalists & writers' },
-                { icon: '💼', label: 'Product managers' },
-                { icon: '🌍', label: '120+ countries' },
-              ];
-              return (
-                <div style={{
-                  height: 48,
-                  background: P.surface,
-                  borderTop: `1px solid ${P.border}`,
-                  borderBottom: `1px solid ${P.border}`,
-                  display: 'flex', alignItems: 'center',
-                  overflow: 'hidden',
-                }}>
-                  {/* Static label */}
-                  <div style={{
-                    padding: '0 20px', flexShrink: 0,
-                    fontSize: 10.5, fontWeight: 700, color: P.muted,
-                    letterSpacing: '0.09em', textTransform: 'uppercase',
-                    borderRight: `1px solid ${P.border}`,
-                    height: '100%', display: 'flex', alignItems: 'center',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    Trusted by
+              {/* Trusted by Silicon Valley — styled social proof */}
+              {!isMobile && (
+                <div style={{ marginTop: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+                  {/* Avatar stack */}
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {[
+                      { bg: '#E2C9A8', fill: '#7A4A1E' },
+                      { bg: '#A8C2D6', fill: '#1E4A7A' },
+                      { bg: '#B2D4AC', fill: '#2A6B30' },
+                      { bg: '#D4ACCC', fill: '#7A2A6B' },
+                      { bg: '#BEB2D4', fill: '#3A2A7A' },
+                    ].map((face, i) => (
+                      <div key={i} style={{
+                        width: 32, height: 32, borderRadius: '50%',
+                        background: face.bg,
+                        border: `2.5px solid ${P.paper}`,
+                        marginLeft: i === 0 ? 0 : -10,
+                        overflow: 'hidden', flexShrink: 0,
+                        position: 'relative', zIndex: 5 - i,
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.09)',
+                      }}>
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                          <circle cx="16" cy="12" r="6" fill={face.fill} opacity="0.8"/>
+                          <path d="M4 32c0-6.627 5.373-12 12-12s12 5.373 12 12" fill={face.fill} opacity="0.8"/>
+                        </svg>
+                      </div>
+                    ))}
                   </div>
-                  {/* Marquee area */}
-                  <div style={{ flex: 1, overflow: 'hidden', position: 'relative', height: '100%', display: 'flex', alignItems: 'center' }}>
-                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 48, background: `linear-gradient(to right, ${P.surface}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
-                    <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: `linear-gradient(to left, ${P.surface}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
-                    <div className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: 6, width: 'max-content' }}>
-                      {[...TRUST_ITEMS, ...TRUST_ITEMS].map((item, i) => (
-                        <span key={i} style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 6,
-                          padding: '4px 13px', borderRadius: 999,
-                          border: `1px solid rgba(28,25,23,0.1)`,
-                          fontSize: 12, fontWeight: 500, color: P.ink,
-                          whiteSpace: 'nowrap', flexShrink: 0,
-                          background: 'rgba(255,255,255,0.7)',
-                        }}>
-                          <span style={{ fontSize: 13 }}>{item.icon}</span>
-                          {item.label}
-                        </span>
-                      ))}
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, letterSpacing: '-0.01em' }}>
+                      Trusted by Silicon Valley teams
+                    </div>
+                    <div style={{ fontSize: 11, color: P.muted, marginTop: 2 }}>
+                      10,000+ researchers, founders &amp; creators
                     </div>
                   </div>
                 </div>
-              );
-            })()}
+              )}
+            </div>
+            </div>{/* end hero-grad */}
 
             {/* Capability cards */}
             <div style={{ maxWidth: 820, margin: '0 auto', padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14 }}>
@@ -5849,42 +5832,66 @@ const App = () => {
           </div>
 
           {/* ── MOBILE BOTTOM NAV ─────────────────────────────────────────────── */}
-          {isMobile && (
-            <div className="no-scrollbar" style={{
-              position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
-              height: 56, background: '#FFFFFF', borderTop: `1px solid ${P.border}`,
-              display: showFlashcardModal || studyGuideFull ? 'none' : 'flex',
-              alignItems: 'stretch', overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none',
-            }}>
-              {[
-                { key: 'transcript', label: 'Transcript', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
-                { key: 'ai', label: 'AI Chat', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
-                { key: 'insights', label: 'Insights', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
-                ...(summary || summarizing ? [{ key: 'summary', label: 'Summary', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
-                ...(flashcards.length > 0 || flashcardsExhausted || flashcardsLoading ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
-                ...(studyGuide || studyGuideLoading ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
-                { key: 'history', label: 'History', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
-              ].map(tab => {
-                const isAct = mobilePanel === tab.key;
-                return (
-                  <button key={tab.key} onClick={() => {
-                    setMobilePanel(tab.key);
-                    if (tab.key === 'ai') setSidebarTab('ai');
-                    if (tab.key === 'insights') setSidebarTab('insights');
-                  }} style={{
-                    flex: '0 0 auto', minWidth: 64, position: 'relative',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
-                    border: 'none', background: 'transparent', cursor: 'pointer',
-                    color: isAct ? P.accent : P.muted, padding: '0 4px',
-                  }}>
-                    {isAct && <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 32, height: 2, borderRadius: '0 0 2px 2px', background: P.accent }} />}
-                    {tab.icon}
-                    <span style={{ fontSize: 9.5, fontWeight: isAct ? 700 : 500, whiteSpace: 'nowrap' }}>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          {isMobile && (() => {
+            const mobileTabs = [
+              { key: 'transcript', label: 'Transcript', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
+              { key: 'ai', label: 'AI Chat', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+              { key: 'insights', label: 'Insights', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+              ...(summary || summarizing ? [{ key: 'summary', label: 'Summary', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
+              ...(flashcards.length > 0 || flashcardsExhausted || flashcardsLoading ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
+              ...(studyGuide || studyGuideLoading ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
+              { key: 'history', label: 'History', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+            ];
+            const hasDynamic = mobileTabs.length > 4;
+            return (
+              <div ref={mobileNavRef} className="no-scrollbar" style={{
+                position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+                height: 60,
+                background: 'linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%)',
+                borderTop: `1.5px solid rgba(45,108,223,0.18)`,
+                boxShadow: '0 -2px 16px rgba(45,108,223,0.08)',
+                display: showFlashcardModal || studyGuideFull ? 'none' : 'flex',
+                alignItems: 'center',
+                justifyContent: hasDynamic ? 'flex-start' : 'center',
+                overflowX: hasDynamic ? 'auto' : 'visible',
+                scrollbarWidth: 'none', msOverflowStyle: 'none',
+                padding: '0 6px',
+                gap: 2,
+              }}>
+                {mobileTabs.map(tab => {
+                  const isAct = mobilePanel === tab.key;
+                  return (
+                    <button key={tab.key} data-nav-key={tab.key} onClick={() => {
+                      setMobilePanel(tab.key);
+                      if (tab.key === 'ai') setSidebarTab('ai');
+                      if (tab.key === 'insights') setSidebarTab('insights');
+                      // scroll this tab into view
+                      setTimeout(() => {
+                        const el = mobileNavRef.current?.querySelector(`[data-nav-key="${tab.key}"]`);
+                        el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                      }, 40);
+                    }} style={{
+                      flex: hasDynamic ? '0 0 auto' : '1',
+                      minWidth: hasDynamic ? 66 : 0,
+                      maxWidth: hasDynamic ? 90 : undefined,
+                      position: 'relative',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
+                      border: 'none', cursor: 'pointer',
+                      padding: '5px 6px',
+                      borderRadius: 12,
+                      background: isAct ? 'rgba(45,108,223,0.1)' : 'transparent',
+                      color: isAct ? P.accent : P.muted,
+                      transition: 'background 0.18s, color 0.18s',
+                    }}>
+                      {isAct && <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 28, height: 2.5, borderRadius: '0 0 3px 3px', background: P.accent }} />}
+                      <div style={{ color: isAct ? P.accent : P.muted, transition: 'color 0.18s' }}>{tab.icon}</div>
+                      <span style={{ fontSize: 9.5, fontWeight: isAct ? 700 : 500, whiteSpace: 'nowrap', color: isAct ? P.accent : P.muted }}>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })()}
 
           {/* ── TABLET HISTORY DRAWER ─────────────────────────────────────────── */}
           {isTablet && historyDrawerOpen && (
@@ -5926,7 +5933,7 @@ const App = () => {
 
           {/* ── MOBILE SUMMARY PANEL ──────────────────────────────────────────── */}
           {isMobile && mobilePanel === 'summary' && (
-            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 56, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               <div style={{ padding: '16px 18px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Summary</div>
@@ -5954,7 +5961,7 @@ const App = () => {
 
           {/* ── MOBILE FLASHCARDS PANEL ───────────────────────────────────────── */}
           {isMobile && mobilePanel === 'flashcards' && (
-            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 56, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               <div style={{ padding: '16px 18px 24px' }}>
                 {flashcardsLoading ? (
                   <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
@@ -6030,7 +6037,7 @@ const App = () => {
 
           {/* ── MOBILE STUDY GUIDE PANEL ──────────────────────────────────────── */}
           {isMobile && mobilePanel === 'study-guide' && (
-            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 56, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               <div style={{ padding: '16px 18px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Study Guide</div>
                 {studyGuideLoading ? (
