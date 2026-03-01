@@ -4802,7 +4802,7 @@ const App = () => {
             </div>{/* end hero-grad */}
 
             {/* Capability cards */}
-            <div style={{ maxWidth: isMobile ? 820 : 1100, margin: '0 auto', padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14 }}>
+            <div style={{ maxWidth: 820, margin: '0 auto', padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14 }}>
               {[
                 {
                   emoji: '⚡',
