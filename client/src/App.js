@@ -1091,9 +1091,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   const [copyLinkDone, setCopyLinkDone] = React.useState(false);
   const [copyRefDone, setCopyRefDone] = React.useState(false);
   const [showAllHistory, setShowAllHistory] = React.useState(false);
-  const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 640);
+  const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 900);
   React.useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 640);
+    const onResize = () => setIsMobile(window.innerWidth < 900);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
@@ -1797,6 +1797,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           cursor: pointer;
           transition: all 0.15s;
           text-align: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .ds-continue-quick-btn:hover { border-color: rgba(45,108,223,0.3); color: #2D6CDF; background: rgba(45,108,223,0.04); }
         .ds-continue-empty {
@@ -2176,7 +2179,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
       {/* ═══ MOBILE LAYOUT (pure inline styles, no CSS class overflow) ═══ */}
       {isMobile && (
-        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 56px)', background: '#F6F3EE', width: '100%', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 56px)', background: '#F6F3EE', width: '100%', overflowX: 'hidden', overflowY: 'hidden' }}>
           {/* Fixed header: flex-shrink:0 means it NEVER scrolls — no sticky/overflow issues */}
           <div style={{ background: '#FFFEFC', borderBottom: '1px solid #E7E1D8', flexShrink: 0 }}>
             {/* Row 1: back button + avatar + name/email */}
@@ -2200,7 +2203,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
             </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', padding: '12px 14px', paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))', display: 'flex', flexDirection: 'column', gap: 10 }}>
 
             {/* ── Overview ── */}
             {tab === 'overview' && (
@@ -2235,7 +2238,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                     </div>
                     <div style={{ padding: '0 14px 12px', display: 'flex', gap: 6 }}>
                       {['Summarize', 'Flashcards', 'Study guide'].map(action => (
-                        <button key={action} onClick={() => openTranscript(latest)} style={{ flex: 1, border: '1px solid #E7E1D8', background: '#F6F3EE', color: '#6B645C', fontSize: 11, fontWeight: 600, padding: '6px 0', borderRadius: 8, cursor: 'pointer' }}>{action}</button>
+                        <button key={action} onClick={() => openTranscript(latest)} style={{ flex: 1, border: '1px solid #E7E1D8', background: '#F6F3EE', color: '#6B645C', fontSize: 11, fontWeight: 600, padding: '6px 2px', borderRadius: 8, cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{action}</button>
                       ))}
                     </div>
                   </div>
