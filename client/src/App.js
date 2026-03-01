@@ -4628,11 +4628,11 @@ const App = () => {
                   {/* Avatar stack — real photos */}
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     {[
-                      'https://randomuser.me/api/portraits/women/44.jpg',
-                      'https://randomuser.me/api/portraits/men/32.jpg',
-                      'https://randomuser.me/api/portraits/women/68.jpg',
-                      'https://randomuser.me/api/portraits/men/75.jpg',
-                      'https://randomuser.me/api/portraits/women/90.jpg',
+                      '/avatar1.jpg',
+                      '/avatar2.jpg',
+                      '/avatar3.jpg',
+                      '/avatar4.jpg',
+                      '/avatar5.jpg',
                     ].map((src, i) => (
                       <img key={i} src={src} alt="" style={{
                         width: 32, height: 32, borderRadius: '50%',
