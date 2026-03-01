@@ -2498,8 +2498,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                     </div>
                   )}
                 </div>
-                <div style={{ textAlign: 'center', paddingTop: 2, paddingBottom: 4 }}>
-                  <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, textDecoration: 'underline', opacity: 0.55, padding: 0 }}>delete account</button>
+                <div style={{ textAlign: 'center', paddingTop: 8, paddingBottom: 4, borderTop: `1px solid ${P.border}`, marginTop: 8 }}>
+                  <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, textDecoration: 'underline', padding: 0 }}>Delete account</button>
                 </div>
               </>
             )}
@@ -2851,8 +2851,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                       </div>
                     )}
                   </div>
-                  <div style={{ textAlign: 'center', paddingTop: 4 }}>
-                    <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, textDecoration: 'underline', opacity: 0.55, padding: 0 }}>delete account</button>
+                  <div style={{ textAlign: 'center', paddingTop: 8, marginTop: 4 }}>
+                    <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, textDecoration: 'underline', padding: 0 }}>Delete account</button>
                   </div>
                 </div>
 
