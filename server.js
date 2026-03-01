@@ -174,7 +174,15 @@ app.use(express.json({ limit: '5mb' }));
 // Serve static files from React app
 // `index: false` prevents `/` from resolving to client/public/index.html (template).
 app.use(express.static(path.join(__dirname, 'client/public'), { index: false }));
-app.use(express.static(path.join(__dirname, 'client/build')));
+app.use(express.static(path.join(__dirname, 'client/build'), {
+  setHeaders: (res, filePath) => {
+    // Never cache index.html — browsers must always fetch the latest so
+    // new content-hashed JS/CSS filenames are picked up after each deploy.
+    if (path.basename(filePath) === 'index.html') {
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+  },
+}));
 
 function parseTimestamp(ts) {
   const parts = ts.trim().replace(',', '.').split(':');
