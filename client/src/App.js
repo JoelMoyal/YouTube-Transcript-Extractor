@@ -3197,6 +3197,8 @@ const App = () => {
   const qaRef           = useRef(null);
   const chatMessagesRef = useRef(null);
   const recoveryIntentRef = useRef(false);
+  const [marqueeSpeed, setMarqueeSpeed] = useState(35);
+  const scrollTimerRef = useRef(null);
 
   useEffect(() => {
     let raf;
@@ -3206,6 +3208,17 @@ const App = () => {
     };
     window.addEventListener('resize', onResize);
     return () => { window.removeEventListener('resize', onResize); cancelAnimationFrame(raf); };
+  }, []);
+
+  // Scroll-driven marquee: speed up while scrolling, ease back when stopped
+  useEffect(() => {
+    const handleScroll = () => {
+      setMarqueeSpeed(7);
+      clearTimeout(scrollTimerRef.current);
+      scrollTimerRef.current = setTimeout(() => setMarqueeSpeed(35), 700);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => { window.removeEventListener('scroll', handleScroll); clearTimeout(scrollTimerRef.current); };
   }, []);
 
   useEffect(() => {
@@ -4174,7 +4187,7 @@ const App = () => {
         @keyframes logoFlipIn  { 0% { transform: perspective(300px) rotateX(80deg);  opacity:0; } 100% { transform: perspective(300px) rotateX(0deg);   opacity:1; } }
         @keyframes tabHighlight { 0% { box-shadow: 0 0 0 0 rgba(45,108,223,0); } 30% { box-shadow: 0 0 0 3px rgba(45,108,223,0.4), 0 0 10px rgba(45,108,223,0.18); } 100% { box-shadow: 0 0 0 0 rgba(45,108,223,0); } }
         .fade-up { animation: fadeUp 0.3s ease forwards; }
-        .marquee-track { animation: marquee 28s linear infinite; }
+        .marquee-track { animation: marquee var(--mq-spd, 35s) linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
         * { box-sizing: border-box; }
         body { margin: 0; background: ${P.paper}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
@@ -6090,54 +6103,96 @@ const App = () => {
       {/* ── Sticky bottom trust bar — only on landing page ── */}
       {!transcript && !isMobile && (() => {
         const TRUST_ITEMS = [
-          { icon: '🏢', label: 'Silicon Valley startups' },
-          { icon: '🎓', label: 'Researchers & academics' },
-          { icon: '🚀', label: 'Startup founders' },
-          { icon: '🎙️', label: 'Podcast creators' },
-          { icon: '📚', label: 'Educators & students' },
-          { icon: '🗞️', label: 'Journalists & writers' },
-          { icon: '💼', label: 'Product managers' },
-          { icon: '🌍', label: '120+ countries' },
+          'Silicon Valley teams',
+          'Researchers & academics',
+          'Startup founders',
+          'Podcast creators',
+          'Educators worldwide',
+          'Product managers',
+          'Journalists & writers',
+          '120+ countries',
+        ];
+        const FACES = [
+          { bg: '#E2C9A8', fill: '#7A4A1E' },
+          { bg: '#A8C2D6', fill: '#1E4A7A' },
+          { bg: '#B2D4AC', fill: '#2A6B30' },
+          { bg: '#D4ACCC', fill: '#7A2A6B' },
+          { bg: '#D6C8A4', fill: '#6B561A' },
+          { bg: '#BEB2D4', fill: '#3A2A7A' },
         ];
         return (
           <div style={{
             position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
-            height: 48,
-            background: 'rgba(250,250,248,0.88)',
-            backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)',
-            borderTop: `1px solid ${P.border}`,
+            height: 72,
+            background: 'rgba(253,251,247,0.93)',
+            backdropFilter: 'blur(28px)', WebkitBackdropFilter: 'blur(28px)',
+            borderTop: `1px solid rgba(28,25,23,0.07)`,
+            boxShadow: '0 -2px 32px rgba(0,0,0,0.045)',
             display: 'flex', alignItems: 'center',
             overflow: 'hidden',
           }}>
-            {/* Static label */}
+            {/* Left: label + avatar stack + count */}
             <div style={{
-              padding: '0 20px', flexShrink: 0,
-              fontSize: 10.5, fontWeight: 700, color: P.muted,
-              letterSpacing: '0.09em', textTransform: 'uppercase',
-              borderRight: `1px solid ${P.border}`,
-              height: '100%', display: 'flex', alignItems: 'center',
-              whiteSpace: 'nowrap',
+              padding: '0 32px', flexShrink: 0,
+              borderRight: `1px solid rgba(28,25,23,0.07)`,
+              height: '100%', display: 'flex', flexDirection: 'column',
+              alignItems: 'flex-start', justifyContent: 'center', gap: 7,
+              minWidth: 210,
             }}>
-              Trusted by
+              <span style={{
+                fontSize: 9, fontWeight: 800, color: P.muted,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+              }}>
+                Trusted by
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {/* Avatar stack */}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {FACES.map((face, i) => (
+                    <div key={i} style={{
+                      width: 30, height: 30, borderRadius: '50%',
+                      background: face.bg,
+                      border: '2.5px solid rgba(253,251,247,1)',
+                      marginLeft: i === 0 ? 0 : -10,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      overflow: 'hidden', flexShrink: 0,
+                      position: 'relative', zIndex: FACES.length - i,
+                      boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
+                    }}>
+                      <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+                        <circle cx="15" cy="11" r="5.5" fill={face.fill} opacity="0.82"/>
+                        <path d="M4 30c0-6.075 4.925-11 11-11s11 4.925 11 11" fill={face.fill} opacity="0.82"/>
+                      </svg>
+                    </div>
+                  ))}
+                </div>
+                <span style={{
+                  fontSize: 12, fontWeight: 600, color: P.ink, whiteSpace: 'nowrap', letterSpacing: '-0.01em',
+                }}>
+                  10,000+ professionals
+                </span>
+              </div>
             </div>
+
             {/* Marquee area */}
             <div style={{ flex: 1, overflow: 'hidden', position: 'relative', height: '100%', display: 'flex', alignItems: 'center' }}>
               {/* fade left */}
-              <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 48, background: 'linear-gradient(to right, rgba(250,250,248,0.95), transparent)', zIndex: 2, pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 64, background: 'linear-gradient(to right, rgba(253,251,247,0.98), transparent)', zIndex: 2, pointerEvents: 'none' }} />
               {/* fade right */}
-              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to left, rgba(250,250,248,0.95), transparent)', zIndex: 2, pointerEvents: 'none' }} />
-              <div className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: 6, width: 'max-content' }}>
-                {[...TRUST_ITEMS, ...TRUST_ITEMS].map((item, i) => (
+              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to left, rgba(253,251,247,0.98), transparent)', zIndex: 2, pointerEvents: 'none' }} />
+              <div className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: 12, width: 'max-content', paddingLeft: 28, '--mq-spd': `${marqueeSpeed}s` }}>
+                {[...TRUST_ITEMS, ...TRUST_ITEMS].map((label, i) => (
                   <span key={i} style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    padding: '4px 13px', borderRadius: 999,
-                    border: `1px solid rgba(28,25,23,0.1)`,
-                    fontSize: 12, fontWeight: 500, color: P.ink,
+                    display: 'inline-flex', alignItems: 'center',
+                    padding: '7px 20px', borderRadius: 999,
+                    border: `1px solid rgba(28,25,23,0.09)`,
+                    fontSize: 13, fontWeight: 500, color: P.ink,
                     whiteSpace: 'nowrap', flexShrink: 0,
-                    background: 'rgba(255,255,255,0.7)',
+                    background: 'rgba(255,255,255,0.72)',
+                    letterSpacing: '0.01em',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                   }}>
-                    <span style={{ fontSize: 13 }}>{item.icon}</span>
-                    {item.label}
+                    {label}
                   </span>
                 ))}
               </div>
