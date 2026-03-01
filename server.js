@@ -774,6 +774,18 @@ app.post('/api/referral/claim', requireAuth, async (req, res) => {
   res.json({ ok: true, bonus: BONUS });
 });
 
+// ── Delete account endpoint ───────────────────────────────────────────────────
+app.delete('/api/delete-account', requireAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ error: 'Service not configured' });
+  try {
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(req.user.id);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Privacy policy static route
 app.get('/privacy', (_req, res) => {
   res.sendFile(path.join(__dirname, 'client/build', 'privacy.html'));

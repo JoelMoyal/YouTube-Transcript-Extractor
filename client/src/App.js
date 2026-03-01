@@ -1119,6 +1119,20 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   const [clearConfirm, setClearConfirm] = React.useState(false);
   const [clearDone, setClearDone] = React.useState(false);
 
+  // Delete account flow
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [deleteStep, setDeleteStep] = React.useState('reason'); // 'reason' | 'countdown' | 'typing' | 'deleting' | 'error'
+  const [deleteReason, setDeleteReason] = React.useState('');
+  const [deleteTyped, setDeleteTyped] = React.useState('');
+  const [deleteCountdown, setDeleteCountdown] = React.useState(8);
+  const [deleteError, setDeleteError] = React.useState('');
+
+  React.useEffect(() => {
+    if (deleteStep !== 'countdown' || deleteCountdown <= 0) return;
+    const t = setTimeout(() => setDeleteCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [deleteStep, deleteCountdown]);
+
   // Extra preferences — read from Supabase user_metadata first, fall back to localStorage
   const prefKey = (k) => user ? `yte_pref_${k}_${user.id}` : `yte_pref_${k}`;
   const cloudPrefs = user.user_metadata?.prefs || {};
@@ -1242,6 +1256,28 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
     if (setHistory) setHistory([]);
     setClearDone(true);
     setTimeout(() => { setClearConfirm(false); setClearDone(false); }, 2000);
+  };
+
+  // Delete account
+  const handleDeleteAccount = async () => {
+    setDeleteStep('deleting');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await fetch('/api/delete-account', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (!resp.ok) {
+        const d = await resp.json().catch(() => ({}));
+        setDeleteError(d.error || 'Something went wrong. Please try again.');
+        setDeleteStep('error');
+        return;
+      }
+      await onSignOut();
+    } catch (err) {
+      setDeleteError('Network error. Please try again.');
+      setDeleteStep('error');
+    }
   };
 
   // Export history as JSON
@@ -2462,6 +2498,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                     </div>
                   )}
                 </div>
+                <div style={{ textAlign: 'center', paddingTop: 2, paddingBottom: 4 }}>
+                  <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, textDecoration: 'underline', opacity: 0.55, padding: 0 }}>delete account</button>
+                </div>
               </>
             )}
 
@@ -2812,6 +2851,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                       </div>
                     )}
                   </div>
+                  <div style={{ textAlign: 'center', paddingTop: 4 }}>
+                    <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, textDecoration: 'underline', opacity: 0.55, padding: 0 }}>delete account</button>
+                  </div>
                 </div>
 
                 {/* ── Card 4: Data & Storage ── */}
@@ -2988,6 +3030,86 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           )}
         </div>
       </div>
+
+      {/* ── Delete Account Modal ── */}
+      {showDeleteModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: P.paper, borderRadius: 20, padding: '28px 24px', maxWidth: 420, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+
+            {/* Step 1: Why are you leaving? */}
+            {deleteStep === 'reason' && (
+              <>
+                <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                  <div style={{ fontSize: 30, marginBottom: 8 }}>👋</div>
+                  <h2 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 700, color: P.ink }}>Before you go...</h2>
+                  <p style={{ margin: 0, fontSize: 13, color: P.muted }}>Why are you leaving? It only takes a second.</p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                  {["I don't use it anymore", "It's too expensive", "Missing features I need", "Privacy concerns", "Found something better", "Just testing it out"].map(reason => (
+                    <button key={reason} onClick={() => setDeleteReason(reason)} style={{ textAlign: 'left', padding: '10px 14px', borderRadius: 10, cursor: 'pointer', border: `1.5px solid ${deleteReason === reason ? P.accent : P.border}`, background: deleteReason === reason ? P.accentLight : P.surface, color: deleteReason === reason ? P.accent : P.ink, fontSize: 13, fontWeight: deleteReason === reason ? 600 : 400, transition: 'all 0.15s' }}>{reason}</button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => setShowDeleteModal(false)} style={{ flex: 1, padding: '10px', border: `1px solid ${P.border}`, borderRadius: 10, background: 'transparent', color: P.muted, fontSize: 13, cursor: 'pointer' }}>Never mind</button>
+                  <button disabled={!deleteReason} onClick={() => { setDeleteCountdown(8); setDeleteStep('countdown'); }} style={{ flex: 1, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 600, border: 'none', background: deleteReason ? P.ink : P.border, color: deleteReason ? P.paper : P.muted, opacity: deleteReason ? 1 : 0.5, cursor: deleteReason ? 'pointer' : 'not-allowed', transition: 'all 0.15s' }}>Continue</button>
+                </div>
+              </>
+            )}
+
+            {/* Step 2: Countdown warning */}
+            {deleteStep === 'countdown' && (
+              <>
+                <div style={{ textAlign: 'center', marginBottom: 18 }}>
+                  <div style={{ fontSize: 30, marginBottom: 8 }}>⚠️</div>
+                  <h2 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 700, color: P.error }}>This cannot be undone</h2>
+                  <p style={{ margin: 0, fontSize: 13, color: P.muted }}>Deleting your account will permanently remove:</p>
+                </div>
+                <div style={{ background: 'rgba(180,35,24,0.06)', border: '1px solid rgba(180,35,24,0.15)', borderRadius: 12, padding: '12px 14px', marginBottom: 18 }}>
+                  {['Your account and login', 'All saved preferences', 'Your referral credits', 'Access to all features'].map(item => (
+                    <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', fontSize: 13, color: P.ink }}><span style={{ color: P.error, fontSize: 11 }}>✕</span>{item}</div>
+                  ))}
+                </div>
+                <button disabled={deleteCountdown > 0} onClick={() => { setDeleteTyped(''); setDeleteStep('typing'); }} style={{ width: '100%', padding: '11px', borderRadius: 10, fontSize: 13, fontWeight: 600, border: 'none', background: deleteCountdown > 0 ? P.border : 'rgba(180,35,24,0.1)', color: deleteCountdown > 0 ? P.muted : P.error, marginBottom: 8, cursor: deleteCountdown > 0 ? 'not-allowed' : 'pointer', transition: 'all 0.3s' }}>{deleteCountdown > 0 ? `I understand, continue (${deleteCountdown}s)` : 'I understand, continue →'}</button>
+                <button onClick={() => setDeleteStep('reason')} style={{ width: '100%', padding: '9px', border: `1px solid ${P.border}`, borderRadius: 10, background: 'transparent', color: P.muted, fontSize: 13, cursor: 'pointer' }}>Go back</button>
+              </>
+            )}
+
+            {/* Step 3: Type to confirm */}
+            {deleteStep === 'typing' && (
+              <>
+                <div style={{ textAlign: 'center', marginBottom: 18 }}>
+                  <h2 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 700, color: P.ink }}>Final confirmation</h2>
+                  <p style={{ margin: 0, fontSize: 13, color: P.muted }}>Type <strong style={{ color: P.ink }}>delete my account</strong> to confirm.</p>
+                </div>
+                <input value={deleteTyped} onChange={e => setDeleteTyped(e.target.value)} placeholder="delete my account" style={{ width: '100%', padding: '10px 12px', borderRadius: 10, fontSize: 13, border: `1.5px solid ${deleteTyped.toLowerCase() === 'delete my account' ? P.error : P.border}`, background: P.surface, color: P.ink, outline: 'none', boxSizing: 'border-box', marginBottom: 14 }} />
+                <button disabled={deleteTyped.toLowerCase() !== 'delete my account'} onClick={handleDeleteAccount} style={{ width: '100%', padding: '11px', borderRadius: 10, fontSize: 13, fontWeight: 700, border: 'none', background: deleteTyped.toLowerCase() === 'delete my account' ? P.error : P.border, color: deleteTyped.toLowerCase() === 'delete my account' ? 'white' : P.muted, marginBottom: 8, cursor: deleteTyped.toLowerCase() === 'delete my account' ? 'pointer' : 'not-allowed', transition: 'all 0.15s' }}>Delete my account permanently</button>
+                <button onClick={() => setDeleteStep('countdown')} style={{ width: '100%', padding: '9px', border: `1px solid ${P.border}`, borderRadius: 10, background: 'transparent', color: P.muted, fontSize: 13, cursor: 'pointer' }}>Go back</button>
+              </>
+            )}
+
+            {/* Deleting… */}
+            {deleteStep === 'deleting' && (
+              <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                <p style={{ margin: 0, fontSize: 14, color: P.muted }}>Deleting your account…</p>
+              </div>
+            )}
+
+            {/* Error */}
+            {deleteStep === 'error' && (
+              <>
+                <div style={{ textAlign: 'center', marginBottom: 18 }}>
+                  <div style={{ fontSize: 30, marginBottom: 8 }}>😕</div>
+                  <h2 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 700, color: P.ink }}>Something went wrong</h2>
+                  <p style={{ margin: 0, fontSize: 13, color: P.muted }}>{deleteError}</p>
+                </div>
+                <button onClick={() => setDeleteStep('typing')} style={{ width: '100%', padding: '10px', border: `1px solid ${P.border}`, borderRadius: 10, background: 'transparent', color: P.ink, fontSize: 13, cursor: 'pointer' }}>Try again</button>
+              </>
+            )}
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
@@ -4382,7 +4504,7 @@ const App = () => {
               paddingBottom: 56,
             }}>
             <div style={{
-              maxWidth: 700, margin: '0 auto', padding: isMobile ? '32px 16px 24px' : '72px 24px 40px',
+              maxWidth: isMobile ? 700 : 1100, margin: '0 auto', padding: isMobile ? '32px 16px 24px' : '72px 24px 40px',
               textAlign: 'center',
             }}>
               <div style={{
@@ -4702,7 +4824,7 @@ const App = () => {
 
             {/* Recent transcripts */}
             {history.length > 0 && (
-              <div style={{ maxWidth: 780, margin: '0 auto', padding: '0 24px 48px' }}>
+              <div style={{ maxWidth: isMobile ? 780 : 1100, margin: '0 auto', padding: '0 24px 48px' }}>
                 <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 16, overflow: 'hidden' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${P.border}` }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: P.ink }}>Recent transcripts</span>
