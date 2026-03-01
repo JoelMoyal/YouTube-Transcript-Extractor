@@ -2203,42 +2203,42 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
             </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', padding: '12px 14px', paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', padding: '12px 14px', paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))', display: 'flex', flexDirection: 'column', gap: 10 }}>
 
             {/* ── Overview ── */}
             {tab === 'overview' && (
               <>
                 {/* Credits bar */}
-                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '11px 14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 7 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1C1917' }}>{used} / {tierMax} credits used</span>
-                    <span style={{ fontSize: 12, color: '#6B645C' }}>resets in {daysLeft}d</span>
+                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '9px 12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#1C1917' }}>{used} / {tierMax} credits used</span>
+                    <span style={{ fontSize: 11, color: '#6B645C' }}>resets in {daysLeft}d</span>
                   </div>
-                  <div style={{ height: 6, borderRadius: 999, background: '#E7E1D8', overflow: 'hidden' }}>
+                  <div style={{ height: 5, borderRadius: 999, background: '#E7E1D8', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#2D6CDF', transition: 'width 0.4s ease' }} />
                   </div>
-                  <div style={{ marginTop: 6, fontSize: 12, color: '#6B645C' }}>{remaining} credits remaining</div>
+                  <div style={{ marginTop: 4, fontSize: 11, color: '#6B645C' }}>{remaining} credits remaining</div>
                 </div>
 
                 {/* Continue where you left off */}
                 {latest && (
                   <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, overflow: 'hidden' }}>
-                    <div style={{ padding: '11px 14px', borderBottom: '1px solid #E7E1D8' }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: '#1C1917' }}>Continue where you left off</span>
+                    <div style={{ padding: '9px 12px 8px', borderBottom: '1px solid #E7E1D8' }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#1C1917' }}>Continue where you left off</span>
                     </div>
-                    <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 72, height: 42, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: 'rgba(45,108,223,0.06)', border: '1px solid rgba(45,108,223,0.1)' }}>
+                    <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 60, height: 34, borderRadius: 7, overflow: 'hidden', flexShrink: 0, background: 'rgba(45,108,223,0.06)', border: '1px solid rgba(45,108,223,0.1)' }}>
                         {latest.thumbnail && <img src={latest.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 13, fontWeight: 600, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{latest.title || latest.id}</div>
                         <div style={{ fontSize: 11, color: '#6B645C' }}>{latestWc > 0 ? `${latestWc.toLocaleString()} words · ` : ''}{timeAgo(latest.date)}</div>
                       </div>
-                      <button onClick={() => openTranscript(latest)} style={{ flexShrink: 0, border: 'none', borderRadius: 8, background: '#2D6CDF', color: 'white', fontSize: 12, fontWeight: 700, padding: '6px 12px', cursor: 'pointer' }}>Open</button>
+                      <button onClick={() => openTranscript(latest)} style={{ flexShrink: 0, border: 'none', borderRadius: 7, background: '#2D6CDF', color: 'white', fontSize: 12, fontWeight: 700, padding: '5px 11px', cursor: 'pointer' }}>Open</button>
                     </div>
-                    <div style={{ padding: '0 14px 12px', display: 'flex', gap: 6 }}>
+                    <div style={{ padding: '0 12px 9px', display: 'flex', gap: 5 }}>
                       {['Summarize', 'Flashcards', 'Study guide'].map(action => (
-                        <button key={action} onClick={() => openTranscript(latest)} style={{ flex: 1, border: '1px solid #E7E1D8', background: '#F6F3EE', color: '#6B645C', fontSize: 11, fontWeight: 600, padding: '6px 2px', borderRadius: 8, cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{action}</button>
+                        <button key={action} onClick={() => openTranscript(latest)} style={{ flex: 1, border: '1px solid #E7E1D8', background: '#F6F3EE', color: '#6B645C', fontSize: 11, fontWeight: 600, padding: '5px 2px', borderRadius: 7, cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{action}</button>
                       ))}
                     </div>
                   </div>
@@ -2246,35 +2246,35 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
                 {/* Recent transcripts */}
                 <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, overflow: 'hidden' }}>
-                  <div style={{ padding: '11px 14px', borderBottom: '1px solid #E7E1D8' }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#1C1917' }}>Recent Transcripts</span>
+                  <div style={{ padding: '9px 12px 8px', borderBottom: '1px solid #E7E1D8' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1C1917' }}>Recent Transcripts</span>
                   </div>
                   {history.length === 0 ? (
-                    <div style={{ padding: '20px 14px', textAlign: 'center' }}>
+                    <div style={{ padding: '16px 12px', textAlign: 'center' }}>
                       <p style={{ margin: '0 0 10px', fontSize: 13, color: '#6B645C' }}>No transcripts yet.</p>
                       <button onClick={onBack} style={{ border: 'none', borderRadius: 9, background: '#2D6CDF', color: 'white', fontSize: 13, fontWeight: 600, padding: '7px 16px', cursor: 'pointer' }}>Extract one</button>
                     </div>
                   ) : (
                     <>
-                      {(showAllHistory ? history : history.slice(0, 5)).map((h, idx) => {
+                      {(showAllHistory ? history : history.slice(0, 3)).map((h, idx) => {
                         const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
                         const title = h.title || h.id;
                         return (
-                          <div key={`m-${h.id}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderTop: '1px solid #E7E1D8' }}>
-                            <div style={{ width: 60, height: 34, borderRadius: 7, overflow: 'hidden', flexShrink: 0, background: 'rgba(45,108,223,0.06)', border: '1px solid rgba(45,108,223,0.1)' }}>
+                          <div key={`m-${h.id}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderTop: '1px solid #E7E1D8' }}>
+                            <div style={{ width: 54, height: 30, borderRadius: 6, overflow: 'hidden', flexShrink: 0, background: 'rgba(45,108,223,0.06)', border: '1px solid rgba(45,108,223,0.1)' }}>
                               {h.thumbnail && <img src={h.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />}
                             </div>
                             <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                              <div style={{ fontSize: 13, fontWeight: 600, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
-                              <div style={{ fontSize: 11, color: '#6B645C' }}>{wc > 0 ? `${wc.toLocaleString()} words · ` : ''}{timeAgo(h.date)}</div>
+                              <div style={{ fontSize: 12, fontWeight: 600, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
+                              <div style={{ fontSize: 10, color: '#6B645C' }}>{wc > 0 ? `${wc.toLocaleString()} words · ` : ''}{timeAgo(h.date)}</div>
                             </div>
-                            <button onClick={() => openTranscript(h)} style={{ flexShrink: 0, border: 'none', borderRadius: 8, background: '#2D6CDF', color: 'white', fontSize: 12, fontWeight: 700, padding: '6px 12px', cursor: 'pointer' }}>Open</button>
+                            <button onClick={() => openTranscript(h)} style={{ flexShrink: 0, border: 'none', borderRadius: 7, background: '#2D6CDF', color: 'white', fontSize: 11, fontWeight: 700, padding: '5px 10px', cursor: 'pointer' }}>Open</button>
                           </div>
                         );
                       })}
-                      {history.length > 5 && (
-                        <div style={{ padding: '10px 14px 12px', borderTop: '1px solid #E7E1D8' }}>
-                          <button onClick={() => setShowAllHistory(v => !v)} style={{ border: 'none', background: 'none', color: '#2D6CDF', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0 }}>
+                      {history.length > 3 && (
+                        <div style={{ padding: '8px 12px 10px', borderTop: '1px solid #E7E1D8' }}>
+                          <button onClick={() => setShowAllHistory(v => !v)} style={{ border: 'none', background: 'none', color: '#2D6CDF', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0 }}>
                             {showAllHistory ? 'Show less' : `+ View all ${history.length} transcripts`}
                           </button>
                         </div>
