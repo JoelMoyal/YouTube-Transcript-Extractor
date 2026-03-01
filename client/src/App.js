@@ -4628,11 +4628,11 @@ const App = () => {
                   {/* Avatar stack */}
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     {[
-                      { bg: '#E2C9A8', fill: '#7A4A1E' },
-                      { bg: '#A8C2D6', fill: '#1E4A7A' },
-                      { bg: '#B2D4AC', fill: '#2A6B30' },
-                      { bg: '#D4ACCC', fill: '#7A2A6B' },
-                      { bg: '#BEB2D4', fill: '#3A2A7A' },
+                      { bg: '#F5E6D3', emoji: '👩🏽' },
+                      { bg: '#D6E8F5', emoji: '👨🏻' },
+                      { bg: '#D5EDD4', emoji: '👩🏿' },
+                      { bg: '#F5D6EC', emoji: '👨🏾' },
+                      { bg: '#E8E0F5', emoji: '👩🏼' },
                     ].map((face, i) => (
                       <div key={i} style={{
                         width: 32, height: 32, borderRadius: '50%',
@@ -4642,11 +4642,9 @@ const App = () => {
                         overflow: 'hidden', flexShrink: 0,
                         position: 'relative', zIndex: 5 - i,
                         boxShadow: '0 1px 4px rgba(0,0,0,0.09)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
-                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                          <circle cx="16" cy="12" r="6" fill={face.fill} opacity="0.8"/>
-                          <path d="M4 32c0-6.627 5.373-12 12-12s12 5.373 12 12" fill={face.fill} opacity="0.8"/>
-                        </svg>
+                        <span style={{ fontSize: 19, lineHeight: 1, marginTop: 4 }}>{face.emoji}</span>
                       </div>
                     ))}
                   </div>
