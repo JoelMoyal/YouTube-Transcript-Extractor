@@ -773,6 +773,13 @@ app.post('/api/referral/claim', requireAuth, async (req, res) => {
 app.delete('/api/delete-account', requireAuth, async (req, res) => {
   if (!supabaseAdmin) return res.status(503).json({ error: 'Service not configured' });
   try {
+    const { reason } = req.body || {};
+    // Save deletion reason before removing the user
+    await supabaseAdmin.from('deletion_reasons').insert({
+      user_id: req.user.id,
+      email: req.user.email,
+      reason: reason || 'No reason given',
+    });
     const { error } = await supabaseAdmin.auth.admin.deleteUser(req.user.id);
     if (error) return res.status(500).json({ error: error.message });
     res.json({ ok: true });

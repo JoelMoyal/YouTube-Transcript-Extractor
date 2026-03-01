@@ -1265,7 +1265,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
       const { data: { session } } = await supabase.auth.getSession();
       const resp = await fetch('/api/delete-account', {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${session?.access_token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ reason: deleteReason }),
       });
       if (!resp.ok) {
         const d = await resp.json().catch(() => ({}));
