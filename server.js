@@ -715,11 +715,6 @@ app.post('/api/ask', async (req, res) => {
   }
 });
 
-// Unknown API routes should return JSON 404
-app.all('/api/*', (_req, res) => {
-  res.status(404).json({ error: 'API route not found' });
-});
-
 // ── Referral claim ────────────────────────────────────────────────────────────
 // Called after a new user signs in for the first time.
 // Awards +3 referral_bonus to both the new user and the referrer.
@@ -784,6 +779,11 @@ app.delete('/api/delete-account', requireAuth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Unknown API routes should return JSON 404
+app.all('/api/*', (_req, res) => {
+  res.status(404).json({ error: 'API route not found' });
 });
 
 // Privacy policy static route
