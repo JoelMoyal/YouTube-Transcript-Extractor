@@ -2498,8 +2498,10 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                     </div>
                   )}
                 </div>
-                <div style={{ textAlign: 'center', paddingTop: 8, paddingBottom: 4, borderTop: `1px solid ${P.border}`, marginTop: 8 }}>
-                  <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, textDecoration: 'underline', padding: 0 }}>Delete account</button>
+                {/* Danger zone */}
+                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px' }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Danger zone</span>
+                  <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} style={{ width: '100%', border: '1px solid rgba(180,35,24,0.3)', background: 'rgba(180,35,24,0.05)', color: '#B42318', fontSize: 13, fontWeight: 600, padding: '10px', borderRadius: 10, cursor: 'pointer', textAlign: 'left' }}>Delete account</button>
                 </div>
               </>
             )}
@@ -2851,8 +2853,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                       </div>
                     )}
                   </div>
-                  <div style={{ textAlign: 'center', paddingTop: 8, marginTop: 4 }}>
-                    <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, textDecoration: 'underline', padding: 0 }}>Delete account</button>
+                  <div style={{ borderTop: `1px solid ${P.border}`, paddingTop: 10, marginTop: 6 }}>
+                    <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} className="ds-settings-btn danger">Delete account</button>
                   </div>
                 </div>
 
