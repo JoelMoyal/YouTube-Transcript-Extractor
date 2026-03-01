@@ -3176,7 +3176,8 @@ const App = () => {
 
   // ── Responsive layout state ──────────────────────────────────────────────
   const [windowWidth, setWindowWidth]         = useState(() => window.innerWidth);
-  const [mobilePanel, setMobilePanel]         = useState('transcript'); // 'transcript'|'ai'|'history'
+  const [mobilePanel, setMobilePanel]         = useState('transcript'); // 'transcript'|'ai'|'insights'|'history'
+  const [sidebarTab, setSidebarTab]           = useState('ai'); // 'ai'|'insights'|'summary'|'flashcards'|'study-guide'
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
   const isMobile  = windowWidth < 640;
   const isTablet  = windowWidth >= 640 && windowWidth < 1024;
@@ -3611,6 +3612,7 @@ const App = () => {
     setStudyGuideFull(false);
     setShowFlashcardModal(false);
     setActiveTab(cached?.activeTab ?? 'transcript');
+    setSidebarTab('ai');
     setMobilePanel('transcript'); setHistoryDrawerOpen(false);
   };
 
@@ -3867,6 +3869,7 @@ const App = () => {
       if (!res.ok) throw new Error(data.details || data.error || 'Failed to summarize');
       setSummary(data.summary);
       setActiveTab('summary');
+      setSidebarTab('summary');
     } catch (err) { setSummary(`Error: ${err.message}`); }
     finally { setSummarizing(false); }
   };
@@ -3905,6 +3908,7 @@ const App = () => {
         setFlashcardsExhausted(true);
         setFlashcardsExhaustedReason(data.reason || 'This content doesn\'t have educational concepts suitable for flashcards.');
         setActiveTab('flashcards');
+        setSidebarTab('flashcards');
         return;
       }
       const cards = (data.flashcards || []).filter(c => c && c.question && c.answer);
@@ -3912,6 +3916,7 @@ const App = () => {
       setFlashcardIndex(0); setFlashcardFlipped(false); setFlashcardKnown(new Set()); setExpandedCards(new Set());
       if (cards.length > 0) {
         setActiveTab('flashcards');
+        setSidebarTab('flashcards');
         setFlashcardsTabPulse(true);
         setTimeout(() => setFlashcardsTabPulse(false), 1400);
       }
@@ -3965,6 +3970,7 @@ const App = () => {
       if (!res.ok) throw new Error(data.error || 'Failed to generate study guide');
       setStudyGuide(data);
       setActiveTab('study-guide');
+      setSidebarTab('study-guide');
     } catch (err) { setStudyGuide({ _error: err.message }); }
     finally { setStudyGuideLoading(false); }
   };
@@ -4611,6 +4617,62 @@ const App = () => {
             </div>
             </div>{/* end hero-grad */}
 
+            {/* ── Trust bar — in-flow, scrolls with page ── */}
+            {!isMobile && (() => {
+              const TRUST_ITEMS = [
+                { icon: '🏢', label: 'Silicon Valley startups' },
+                { icon: '🎓', label: 'Researchers & academics' },
+                { icon: '🚀', label: 'Startup founders' },
+                { icon: '🎙️', label: 'Podcast creators' },
+                { icon: '📚', label: 'Educators & students' },
+                { icon: '🗞️', label: 'Journalists & writers' },
+                { icon: '💼', label: 'Product managers' },
+                { icon: '🌍', label: '120+ countries' },
+              ];
+              return (
+                <div style={{
+                  height: 48,
+                  background: P.surface,
+                  borderTop: `1px solid ${P.border}`,
+                  borderBottom: `1px solid ${P.border}`,
+                  display: 'flex', alignItems: 'center',
+                  overflow: 'hidden',
+                }}>
+                  {/* Static label */}
+                  <div style={{
+                    padding: '0 20px', flexShrink: 0,
+                    fontSize: 10.5, fontWeight: 700, color: P.muted,
+                    letterSpacing: '0.09em', textTransform: 'uppercase',
+                    borderRight: `1px solid ${P.border}`,
+                    height: '100%', display: 'flex', alignItems: 'center',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    Trusted by
+                  </div>
+                  {/* Marquee area */}
+                  <div style={{ flex: 1, overflow: 'hidden', position: 'relative', height: '100%', display: 'flex', alignItems: 'center' }}>
+                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 48, background: `linear-gradient(to right, ${P.surface}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+                    <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: `linear-gradient(to left, ${P.surface}, transparent)`, zIndex: 2, pointerEvents: 'none' }} />
+                    <div className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: 6, width: 'max-content' }}>
+                      {[...TRUST_ITEMS, ...TRUST_ITEMS].map((item, i) => (
+                        <span key={i} style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 6,
+                          padding: '4px 13px', borderRadius: 999,
+                          border: `1px solid rgba(28,25,23,0.1)`,
+                          fontSize: 12, fontWeight: 500, color: P.ink,
+                          whiteSpace: 'nowrap', flexShrink: 0,
+                          background: 'rgba(255,255,255,0.7)',
+                        }}>
+                          <span style={{ fontSize: 13 }}>{item.icon}</span>
+                          {item.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Capability cards */}
             <div style={{ maxWidth: 820, margin: '0 auto', padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14 }}>
               {[
@@ -4761,23 +4823,23 @@ const App = () => {
                 <div style={{ flexShrink: 0, borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}`, background: P.paper }}>
                   {/* Centered 16:9 player — max 391×220, no black bars, paper sides */}
                   <div style={{ display: 'flex', justifyContent: 'center', background: P.paper }}>
-                    <div style={{ width: 'min(100%, 411px)', flexShrink: 0, borderRadius: 0, overflow: 'hidden' }}>
+                    <div style={{ width: 'min(100%, 411px)', flexShrink: 0, borderRadius: 0, overflow: 'hidden', ...(isMobile ? { maxHeight: 160 } : {}) }}>
                       {currentPlatform === 'vimeo' ? (
                         <iframe
                           ref={playerRef}
                           src={`https://player.vimeo.com/video/${currentVideoId}?api=1`}
-                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block' }}
+                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block', ...(isMobile ? { maxHeight: 160 } : {}) }}
                           allow="autoplay; fullscreen; picture-in-picture"
                           allowFullScreen
                           title="Video player"
                         />
                       ) : (
-                        <div ref={ytPlayerDivRef} style={{ width: '100%', aspectRatio: '16/9', display: 'block' }} />
+                        <div ref={ytPlayerDivRef} style={{ width: '100%', aspectRatio: '16/9', display: 'block', ...(isMobile ? { maxHeight: 160 } : {}) }} />
                       )}
                     </div>
                   </div>
                   {/* Slim meta bar */}
-                  <div style={{ padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 10, background: '#FFFFFF' }}>
+                  <div style={{ padding: isMobile ? '6px 12px' : '9px 14px', display: 'flex', alignItems: 'center', gap: 10, background: '#FFFFFF' }}>
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {currentTitle || currentChannel || currentVideoId}
@@ -4831,9 +4893,6 @@ const App = () => {
                 {[
                   { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> },
                   { key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
-                  ...(flashcards.length > 0 || flashcardsExhausted ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
-                  ...(summary ? [{ key: 'summary', label: 'Summary', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
-                  ...(studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
                 ].map(tab => {
                   const isActive = activeTab === tab.key;
                   return (
@@ -5330,12 +5389,41 @@ const App = () => {
             <div style={{
               gridColumn: isDesktop ? 3 : isTablet ? 2 : 1,
               gridRow: 1,
-              display: isMobile ? (mobilePanel === 'ai' ? 'flex' : 'none') : 'flex',
-              flexDirection: 'column', overflowY: 'auto', background: '#FFFFFF',
+              display: isMobile ? ((mobilePanel === 'ai' || mobilePanel === 'insights') ? 'flex' : 'none') : 'flex',
+              flexDirection: 'column', overflowY: 'hidden', background: '#FFFFFF',
             }}>
+              {/* ── Sidebar tab bar ── */}
+              <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}`, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                {[
+                  { key: 'ai', label: 'AI Chat', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+                  { key: 'insights', label: 'Insights', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+                  ...(summary || summarizing ? [{ key: 'summary', label: 'Summary', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
+                  ...(flashcards.length > 0 || flashcardsExhausted || flashcardsLoading ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
+                  ...(studyGuide || studyGuideLoading ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
+                ].map(tab => {
+                  const isAct = sidebarTab === tab.key;
+                  return (
+                    <button key={tab.key} onClick={() => { setSidebarTab(tab.key); if (isMobile) setMobilePanel(tab.key === 'ai' ? 'ai' : 'insights'); }} style={{
+                      display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11.5,
+                      fontWeight: isAct ? 600 : 500,
+                      border: isAct ? `1px solid ${P.border}` : '1px solid transparent',
+                      borderBottom: isAct ? '1px solid #FFFFFF' : '1px solid transparent',
+                      borderRadius: '7px 7px 0 0', marginBottom: '-1px',
+                      background: isAct ? '#FFFFFF' : 'transparent',
+                      color: isAct ? P.ink : P.muted, cursor: 'pointer', transition: 'all 0.15s',
+                      whiteSpace: 'nowrap',
+                    }}
+                      onMouseEnter={e => { if (!isAct) { e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; e.currentTarget.style.color = P.ink; }}}
+                      onMouseLeave={e => { if (!isAct) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; }}}
+                    >
+                      {tab.icon}{tab.label}
+                    </button>
+                  );
+                })}
+              </div>
 
-              {/* ScribeSnap AI Chat — TOP of sidebar, composer at top */}
-              <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+              {/* ScribeSnap AI Chat — shown when sidebarTab === 'ai' */}
+              {sidebarTab === 'ai' && <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
 
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '13px 18px 11px', borderBottom: `1px solid ${P.border}` }}>
@@ -5533,89 +5621,222 @@ const App = () => {
                   </div>
                 )}
 
-              </div>
+              </div>}
 
-              {/* Divider */}
-              <div style={{ height: 1, background: P.border, margin: '0 18px' }} />
-
-              {/* Insights card — below chat */}
-              <div style={{ padding: '14px 18px 16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                  </div>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: P.ink }}>Insights</span>
+              {/* Insights tab */}
+              {sidebarTab === 'insights' && (
+                <div style={{ flex: 1, overflowY: 'auto', padding: '14px 18px 16px' }}>
+                  {[
+                    { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(45,108,223,0.1)',
+                      icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+                      onClick: summary ? () => setSidebarTab('summary') : summarize, active: !!summary, loading: summarizing },
+                    { title: 'Flash Cards', sub: 'Q&A cards with flip mode', color: P.warning, bg: 'rgba(180,83,9,0.1)',
+                      icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+                      onClick: flashcards.length > 0 ? () => setSidebarTab('flashcards') : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
+                    { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
+                      icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+                      onClick: studyGuide && !studyGuide._error ? () => setSidebarTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
+                  ].map(item => (
+                    <div key={item.title}
+                      onClick={item.loading ? undefined : item.onClick}
+                      style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 10px', borderRadius: 11, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 3 }}
+                      onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                      <div style={{ width: 42, height: 42, borderRadius: 12, background: item.active ? item.bg : (item.bg.replace('0.1', '0.07')), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color, transition: 'background 0.15s' }}>
+                        {item.loading ? <SpinnerIcon size={14} /> : item.icon}
+                      </div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: 13.5, fontWeight: 600, color: item.active ? item.color : P.ink }}>{item.title}</div>
+                        <div style={{ fontSize: 11.5, color: P.muted, marginTop: 1 }}>{item.sub}</div>
+                      </div>
+                      {item.active
+                        ? <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
+                        : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.4 }}><polyline points="9 18 15 12 9 6"/></svg>
+                      }
+                    </div>
+                  ))}
+                  {studyGuide?._error && (
+                    <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(180,35,24,0.05)', border: `1px solid rgba(180,35,24,0.2)`, borderRadius: 8, fontSize: 12, color: P.error }}>
+                      Failed to generate study guide: {studyGuide._error}
+                    </div>
+                  )}
                 </div>
+              )}
 
-                {[
-                  { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(45,108,223,0.1)',
-                    icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-                    onClick: summary ? () => setActiveTab('summary') : summarize, active: !!summary, loading: summarizing },
-                  { title: 'Flash Cards', sub: 'Q&A cards with flip mode', color: P.warning, bg: 'rgba(180,83,9,0.1)',
-                    icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-                    onClick: flashcards.length > 0 ? openFlashcardModal : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
-                  { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
-                    icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-                    onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
-                ].map(item => (
-                  <div key={item.title}
-                    onClick={item.loading ? undefined : item.onClick}
-                    style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 10px', borderRadius: 11, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 3 }}
-                    onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <div style={{ width: 42, height: 42, borderRadius: 12, background: item.active ? item.bg : (item.bg.replace('0.1', '0.07')), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color, transition: 'background 0.15s' }}>
-                      {item.loading ? <SpinnerIcon size={14} /> : item.icon}
+              {/* Summary sidebar tab */}
+              {sidebarTab === 'summary' && (
+                <div style={{ flex: 1, overflowY: 'auto', padding: '20px 18px' }}>
+                  {summarizing ? (
+                    <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
+                      <SpinnerIcon size={14} /> Summarizing…
                     </div>
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: 13.5, fontWeight: 600, color: item.active ? item.color : P.ink }}>{item.title}</div>
-                      <div style={{ fontSize: 11.5, color: P.muted, marginTop: 1 }}>{item.sub}</div>
+                  ) : summary ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: P.ink }}>AI-generated summary</div>
+                        <div style={{ display: 'flex', gap: 5 }}>
+                          <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 4, border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', borderRadius: 6, padding: '4px 9px', fontSize: 11, fontWeight: 600, color: summaryCopied ? P.success : P.muted }}>
+                            {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
+                          </button>
+                          <button onClick={() => { setSummary(''); setSidebarTab('insights'); }}
+                            style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6 }}>Clear</button>
+                        </div>
+                      </div>
+                      <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', fontSize: 13.5, lineHeight: 1.75, color: P.ink, whiteSpace: 'pre-wrap' }}>{summary}</div>
                     </div>
-                    {item.active
-                      ? <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
-                      : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.4 }}><polyline points="9 18 15 12 9 6"/></svg>
-                    }
-                  </div>
-                ))}
+                  ) : null}
+                </div>
+              )}
 
-                {/* Flashcards re-open button (cards are in full-screen modal) */}
-                {flashcards.length > 0 && (
-                  <div style={{ marginTop: 8 }}>
-                    <button
-                      onClick={openFlashcardModal}
-                      style={{ display: 'flex', alignItems: 'center', gap: 7, width: '100%', padding: '9px 14px', background: 'rgba(180,83,9,0.07)', border: `1px solid rgba(180,83,9,0.2)`, borderRadius: 10, cursor: 'pointer', color: P.warning, fontSize: 12.5, fontWeight: 600, transition: 'all 0.15s' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,83,9,0.12)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(180,83,9,0.07)'; }}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                      Study {flashcards.length} Flashcards
-                      <span style={{ marginLeft: 'auto', fontSize: 11, opacity: 0.7 }}>{flashcardKnown.size}/{flashcards.length} known</span>
-                    </button>
-                  </div>
-                )}
+              {/* Flashcards sidebar tab */}
+              {sidebarTab === 'flashcards' && (
+                <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px' }}>
+                  {flashcardsLoading ? (
+                    <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
+                      <SpinnerIcon size={14} /> Generating flashcards…
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: P.ink }}>{flashcards.length} cards · {flashcardKnown.size} known</div>
+                        {flashcards.length > 0 && (
+                          <button onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 7, border: 'none', background: P.accent, color: 'white', fontSize: 11.5, fontWeight: 600, cursor: 'pointer' }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            Study
+                          </button>
+                        )}
+                      </div>
+                      {flashcards.length > 0 && (
+                        <div style={{ height: 5, borderRadius: 3, background: P.border, marginBottom: 14, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', borderRadius: 3, background: P.success, width: `${(flashcardKnown.size / flashcards.length) * 100}%`, transition: 'width 0.4s' }} />
+                        </div>
+                      )}
+                      {flashcardsExhausted && (
+                        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.07)', marginBottom: 10 }}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                          <div style={{ fontSize: 12, color: P.muted, lineHeight: 1.5 }}>{flashcardsExhaustedReason}</div>
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {flashcards.map((card, i) => {
+                          const isExpanded = expandedCards.has(i);
+                          const isKnown = flashcardKnown.has(i);
+                          return (
+                            <div key={i} style={{ borderRadius: 9, border: `1px solid ${isKnown ? 'rgba(15,118,110,0.3)' : P.border}`, background: isKnown ? 'rgba(15,118,110,0.04)' : '#fff', overflow: 'hidden' }}>
+                              <div onClick={() => setExpandedCards(prev => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; })}
+                                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', cursor: 'pointer', userSelect: 'none' }}>
+                                <div style={{ width: 22, height: 22, borderRadius: 5, background: isKnown ? 'rgba(15,118,110,0.12)' : P.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                  <span style={{ fontSize: 9.5, fontWeight: 700, color: isKnown ? P.success : P.muted }}>{i + 1}</span>
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: isExpanded ? 'normal' : 'nowrap' }}>{card.question}</div>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
+                              </div>
+                              {isExpanded && (
+                                <div style={{ borderTop: `1px solid ${P.border}`, padding: '10px 12px', background: P.paper }}>
+                                  {card.topic && <div style={{ fontSize: 10, fontWeight: 700, color: '#D97706', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{card.topic}</div>}
+                                  <div style={{ fontSize: 12.5, lineHeight: 1.6, color: P.ink }}>{card.answer}</div>
+                                  <button onClick={e => { e.stopPropagation(); setFlashcardKnown(prev => { const next = new Set(prev); if (isKnown) next.delete(i); else next.add(i); return next; }); }}
+                                    style={{ marginTop: 8, width: '100%', padding: '5px 0', borderRadius: 6, border: `1px solid ${isKnown ? 'rgba(15,118,110,0.4)' : P.border}`, background: isKnown ? 'rgba(15,118,110,0.08)' : 'none', color: isKnown ? P.success : P.muted, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
+                                    {isKnown ? '✓ Known' : 'Mark as Known'}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {!flashcardsExhausted && (
+                        <button onClick={generateMoreFlashcards} disabled={flashcardsMoreLoading}
+                          style={{ marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: '7px 0', borderRadius: 7, border: `1.5px dashed ${P.border}`, background: 'none', color: P.ink, fontSize: 12, fontWeight: 600, cursor: flashcardsMoreLoading ? 'default' : 'pointer', opacity: flashcardsMoreLoading ? 0.6 : 1 }}>
+                          {flashcardsMoreLoading ? <><SpinnerIcon size={11} />Generating…</> : <>+ More Cards</>}
+                        </button>
+                      )}
+                      {flashcardKnown.size > 0 && (
+                        <button onClick={() => setFlashcardKnown(new Set())}
+                          style={{ marginTop: 6, display: 'block', width: '100%', padding: '7px 0', borderRadius: 7, border: `1px solid ${P.border}`, background: 'none', color: P.muted, fontSize: 11.5, fontWeight: 600, cursor: 'pointer' }}>
+                          Reset Progress
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
 
-                {/* Study guide ready — show jump link */}
-                {studyGuide && !studyGuide._error && (
-                  <div style={{ marginTop: 8 }}>
-                    <button
-                      onClick={() => setActiveTab('study-guide')}
-                      style={{ display: 'flex', alignItems: 'center', gap: 7, width: '100%', padding: '9px 14px', background: 'rgba(15,118,110,0.07)', border: `1px solid rgba(15,118,110,0.2)`, borderRadius: 10, cursor: 'pointer', color: P.success, fontSize: 12.5, fontWeight: 600, transition: 'all 0.15s' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(15,118,110,0.13)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(15,118,110,0.07)'; }}
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                      View Study Guide
-                      <svg style={{ marginLeft: 'auto' }} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                    </button>
-                  </div>
-                )}
-                {studyGuide?._error && (
-                  <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(180,35,24,0.05)', border: `1px solid rgba(180,35,24,0.2)`, borderRadius: 8, fontSize: 12, color: P.error }}>
-                    Failed to generate study guide: {studyGuide._error}
-                  </div>
-                )}
-
-              </div>
+              {/* Study Guide sidebar tab */}
+              {sidebarTab === 'study-guide' && (
+                <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px' }}>
+                  {studyGuideLoading ? (
+                    <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
+                      <SpinnerIcon size={14} /> Generating study guide…
+                    </div>
+                  ) : studyGuide && !studyGuide._error ? (() => {
+                    const sg = studyGuide;
+                    return (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        {sg.overview && (
+                          <div style={{ padding: '14px 16px', background: P.accentLight, borderRadius: 12, border: `1px solid rgba(45,108,223,0.15)` }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: P.accent, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Overview</div>
+                            <div style={{ fontSize: 13, lineHeight: 1.65, color: P.ink }}>{sg.overview}</div>
+                          </div>
+                        )}
+                        {sg.objectives && sg.objectives.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: P.ink, marginBottom: 8 }}>Learning Objectives</div>
+                            <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                              {sg.objectives.map((obj, i) => <li key={i} style={{ fontSize: 12.5, color: P.ink, lineHeight: 1.55 }}>{obj}</li>)}
+                            </ul>
+                          </div>
+                        )}
+                        {sg.keyConcepts && sg.keyConcepts.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: P.ink, marginBottom: 8 }}>Key Concepts</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              {sg.keyConcepts.map((kc, i) => (
+                                <div key={i} style={{ padding: '10px 12px', background: '#fff', borderRadius: 9, border: `1px solid ${P.border}` }}>
+                                  <div style={{ fontSize: 12.5, fontWeight: 700, color: P.ink, marginBottom: 3 }}>{kc.concept}</div>
+                                  <div style={{ fontSize: 12, color: P.muted, lineHeight: 1.5 }}>{kc.explanation}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {sg.sections && sg.sections.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: P.ink, marginBottom: 8 }}>Sections</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                              {sg.sections.map((sec, i) => (
+                                <div key={i} style={{ padding: '12px 14px', background: '#fff', borderRadius: 10, border: `1px solid ${P.border}` }}>
+                                  <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, marginBottom: 5 }}>{sec.title}</div>
+                                  {sec.points && sec.points.length > 0 && (
+                                    <ul style={{ margin: 0, paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                      {sec.points.map((pt, j) => <li key={j} style={{ fontSize: 12, color: P.ink, lineHeight: 1.5 }}>{pt}</li>)}
+                                    </ul>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {sg.reviewQuestions && sg.reviewQuestions.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: P.ink, marginBottom: 8 }}>Review Questions</div>
+                            <ol style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 5 }}>
+                              {sg.reviewQuestions.map((q, i) => <li key={i} style={{ fontSize: 12.5, color: P.ink, lineHeight: 1.55 }}>{q}</li>)}
+                            </ol>
+                          </div>
+                        )}
+                        <button onClick={() => { setStudyGuide(null); setSidebarTab('insights'); }}
+                          style={{ marginTop: 4, border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11.5, fontWeight: 600, padding: '6px 14px', borderRadius: 7 }}>
+                          Clear Study Guide
+                        </button>
+                      </div>
+                    );
+                  })() : null}
+                </div>
+              )}
 
             </div>
           </div>
@@ -5631,11 +5852,16 @@ const App = () => {
               {[
                 { key: 'transcript', label: 'Transcript', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
                 { key: 'ai', label: 'AI Chat', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+                { key: 'insights', label: 'Insights', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
                 { key: 'history', label: 'History', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
               ].map(tab => {
                 const isAct = mobilePanel === tab.key;
                 return (
-                  <button key={tab.key} onClick={() => setMobilePanel(tab.key)} style={{
+                  <button key={tab.key} onClick={() => {
+                    setMobilePanel(tab.key);
+                    if (tab.key === 'ai') setSidebarTab('ai');
+                    if (tab.key === 'insights') setSidebarTab('insights');
+                  }} style={{
                     flex: 1, position: 'relative',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
                     border: 'none', background: 'transparent', cursor: 'pointer',
@@ -6087,64 +6313,6 @@ const App = () => {
         );
       })()}
 
-      {/* ── Sticky bottom trust bar — only on landing page ── */}
-      {!transcript && !isMobile && (() => {
-        const TRUST_ITEMS = [
-          { icon: '🏢', label: 'Silicon Valley startups' },
-          { icon: '🎓', label: 'Researchers & academics' },
-          { icon: '🚀', label: 'Startup founders' },
-          { icon: '🎙️', label: 'Podcast creators' },
-          { icon: '📚', label: 'Educators & students' },
-          { icon: '🗞️', label: 'Journalists & writers' },
-          { icon: '💼', label: 'Product managers' },
-          { icon: '🌍', label: '120+ countries' },
-        ];
-        return (
-          <div style={{
-            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 40,
-            height: 48,
-            background: 'rgba(250,250,248,0.88)',
-            backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)',
-            borderTop: `1px solid ${P.border}`,
-            display: 'flex', alignItems: 'center',
-            overflow: 'hidden',
-          }}>
-            {/* Static label */}
-            <div style={{
-              padding: '0 20px', flexShrink: 0,
-              fontSize: 10.5, fontWeight: 700, color: P.muted,
-              letterSpacing: '0.09em', textTransform: 'uppercase',
-              borderRight: `1px solid ${P.border}`,
-              height: '100%', display: 'flex', alignItems: 'center',
-              whiteSpace: 'nowrap',
-            }}>
-              Trusted by
-            </div>
-            {/* Marquee area */}
-            <div style={{ flex: 1, overflow: 'hidden', position: 'relative', height: '100%', display: 'flex', alignItems: 'center' }}>
-              {/* fade left */}
-              <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 48, background: 'linear-gradient(to right, rgba(250,250,248,0.95), transparent)', zIndex: 2, pointerEvents: 'none' }} />
-              {/* fade right */}
-              <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to left, rgba(250,250,248,0.95), transparent)', zIndex: 2, pointerEvents: 'none' }} />
-              <div className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: 6, width: 'max-content' }}>
-                {[...TRUST_ITEMS, ...TRUST_ITEMS].map((item, i) => (
-                  <span key={i} style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    padding: '4px 13px', borderRadius: 999,
-                    border: `1px solid rgba(28,25,23,0.1)`,
-                    fontSize: 12, fontWeight: 500, color: P.ink,
-                    whiteSpace: 'nowrap', flexShrink: 0,
-                    background: 'rgba(255,255,255,0.7)',
-                  }}>
-                    <span style={{ fontSize: 13 }}>{item.icon}</span>
-                    {item.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
     </>
   );
 };
