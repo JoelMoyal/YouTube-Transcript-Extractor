@@ -4625,27 +4625,24 @@ const App = () => {
               {/* Trusted by Silicon Valley — styled social proof */}
               {!isMobile && (
                 <div style={{ marginTop: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                  {/* Avatar stack */}
+                  {/* Avatar stack — real photos */}
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     {[
-                      { bg: '#F5E6D3', emoji: '👩🏽' },
-                      { bg: '#D6E8F5', emoji: '👨🏻' },
-                      { bg: '#D5EDD4', emoji: '👩🏿' },
-                      { bg: '#F5D6EC', emoji: '👨🏾' },
-                      { bg: '#E8E0F5', emoji: '👩🏼' },
-                    ].map((face, i) => (
-                      <div key={i} style={{
+                      'https://randomuser.me/api/portraits/women/44.jpg',
+                      'https://randomuser.me/api/portraits/men/32.jpg',
+                      'https://randomuser.me/api/portraits/women/68.jpg',
+                      'https://randomuser.me/api/portraits/men/75.jpg',
+                      'https://randomuser.me/api/portraits/women/90.jpg',
+                    ].map((src, i) => (
+                      <img key={i} src={src} alt="" style={{
                         width: 32, height: 32, borderRadius: '50%',
-                        background: face.bg,
                         border: `2.5px solid ${P.paper}`,
                         marginLeft: i === 0 ? 0 : -10,
-                        overflow: 'hidden', flexShrink: 0,
+                        flexShrink: 0,
                         position: 'relative', zIndex: 5 - i,
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.09)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
-                        <span style={{ fontSize: 19, lineHeight: 1, marginTop: 4 }}>{face.emoji}</span>
-                      </div>
+                        boxShadow: '0 1px 5px rgba(0,0,0,0.13)',
+                        objectFit: 'cover', display: 'block',
+                      }} />
                     ))}
                   </div>
                   <div style={{ textAlign: 'left' }}>
