@@ -699,7 +699,7 @@ app.post('/api/ask', async (req, res) => {
   try {
     const source = platform === 'vimeo' ? 'Vimeo video' : 'YouTube video';
     const text = await aiComplete(
-      `You are a helpful assistant that answers questions about ${source} transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nQuestion: ${question}`
+      `You are a helpful assistant that answers questions about ${source} transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.\n\nIMPORTANT FEATURE GUIDANCE: If the user asks about flashcards, making flashcards, or studying with flashcards — tell them to click the "Insights" tab and then click the "Flashcards" button there. If the user asks about a study guide, study notes, or a structured summary — tell them to click the "Insights" tab and then click the "Study Guide" button there.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nQuestion: ${question}`
     );
     res.json({ answer: text });
   } catch (err) {
