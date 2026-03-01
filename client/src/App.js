@@ -4141,17 +4141,17 @@ const App = () => {
             >
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 {entry.thumbnail
-                  ? <img src={entry.thumbnail} alt="" style={{ width: 96, height: 60, objectFit: 'cover', borderRadius: 8, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
-                  : <div style={{ width: 96, height: 60, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><YouTubeIcon /></div>
+                  ? <img src={entry.thumbnail} alt="" style={{ width: 112, height: 70, objectFit: 'cover', borderRadius: 8, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+                  : <div style={{ width: 112, height: 70, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><YouTubeIcon /></div>
                 }
               </div>
               <div style={{ minWidth: 0, flex: 1, paddingTop: 2 }}>
-                <div style={{ fontSize: 12.5, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.4, marginBottom: 5 }}>{hTitle}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: P.muted, marginBottom: 2 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.4, marginBottom: 5 }}>{hTitle}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: P.muted, marginBottom: 2 }}>
                   {entry.platform === 'vimeo' ? <VimeoIcon size={9} /> : <YouTubeIcon />}
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hChannel}</span>
                 </div>
-                <div style={{ fontSize: 10.5, color: P.muted }}>{timeAgo(entry.date)}</div>
+                <div style={{ fontSize: 11, color: P.muted }}>{timeAgo(entry.date)}</div>
               </div>
             </button>
           );
@@ -4776,7 +4776,7 @@ const App = () => {
           <>
           <div className="fade-up" style={{
             display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 300px' : '280px 1fr 360px',
+            gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 300px' : '320px 1fr 360px',
             gridTemplateRows: '1fr',
             height: isMobile ? 'calc(100vh - 56px - 60px)' : 'calc(100vh - 56px)',
             overflow: 'hidden',
