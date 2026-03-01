@@ -181,6 +181,9 @@ let nodePath = 'node';
 try { nodePath = execFileSync('which', ['node'], { encoding: 'utf8' }).trim(); } catch {}
 const jsRuntimeArgs = ['--js-runtimes', `node:${nodePath}`];
 
+// Webshare residential proxy (bypasses YouTube datacenter IP blocking)
+const proxyArgs = process.env.WEBSHARE_PROXY_URL ? ['--proxy', process.env.WEBSHARE_PROXY_URL] : [];
+
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
@@ -366,7 +369,7 @@ app.get('/api/transcript', async (req, res) => {
       try {
         await execFileAsync('yt-dlp', [
           '--skip-download', '--write-subs', '--write-auto-sub',
-          ...jsRuntimeArgs,
+          ...jsRuntimeArgs, ...proxyArgs,
           '-o', outputTemplate,
           vimeoUrl,
         ], { timeout: 45000 });
@@ -400,7 +403,7 @@ app.get('/api/transcript', async (req, res) => {
       try {
         await execFileAsync('yt-dlp', [
           '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '5',
-          ...jsRuntimeArgs,
+          ...jsRuntimeArgs, ...proxyArgs,
           '-o', audioBase,
           vimeoUrl,
         ], { timeout: 300000 });
@@ -522,7 +525,7 @@ app.get('/api/transcript', async (req, res) => {
       try {
         await execFileAsync('yt-dlp', [
           '--skip-download', '--write-auto-sub', '--write-subs',
-          ...jsRuntimeArgs, ...cookieArgs, ...langArgs,
+          ...jsRuntimeArgs, ...proxyArgs, ...cookieArgs, ...langArgs,
           '-o', outputTemplate,
           `https://www.youtube.com/watch?v=${videoId}`
         ], { timeout: 45000 });
@@ -571,7 +574,7 @@ app.get('/api/transcript', async (req, res) => {
     const audioBase = path.join(tmpDir, `${videoId}_audio`);
     await execFileAsync('yt-dlp', [
       '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '5',
-      ...jsRuntimeArgs, ...cookieArgs,
+      ...jsRuntimeArgs, ...proxyArgs, ...cookieArgs,
       '-o', audioBase,
       `https://www.youtube.com/watch?v=${videoId}`
     ], { timeout: 300000 });
