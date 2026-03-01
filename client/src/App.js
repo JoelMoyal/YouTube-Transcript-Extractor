@@ -4525,7 +4525,7 @@ const App = () => {
               paddingBottom: 56,
             }}>
             <div style={{
-              maxWidth: isMobile ? 700 : 1100, margin: '0 auto', padding: isMobile ? '32px 16px 24px' : '72px 24px 40px',
+              maxWidth: 700, margin: '0 auto', padding: isMobile ? '32px 16px 24px' : '72px 24px 40px',
               textAlign: 'center',
             }}>
               <div style={{
