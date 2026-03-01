@@ -4625,36 +4625,36 @@ const App = () => {
               </div>
 
               {/* Trusted by Silicon Valley — styled social proof */}
-              <div style={{ marginTop: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                  {/* Avatar stack — real photos */}
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {[
-                      '/avatar1.jpg',
-                      '/avatar2.jpg',
-                      '/avatar3.jpg',
-                      '/avatar4.jpg',
-                      '/avatar5.jpg',
-                    ].map((src, i) => (
-                      <img key={i} src={src} alt="" style={{
-                        width: 32, height: 32, borderRadius: '50%',
-                        border: `2.5px solid ${P.paper}`,
-                        marginLeft: i === 0 ? 0 : -10,
-                        flexShrink: 0,
-                        position: 'relative', zIndex: 5 - i,
-                        boxShadow: '0 1px 5px rgba(0,0,0,0.13)',
-                        objectFit: 'cover', display: 'block',
-                      }} />
-                    ))}
+              <div style={{
+                marginTop: 28,
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: isMobile ? 8 : 12,
+              }}>
+                {/* Avatar stack — real photos */}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {['/avatar1.jpg','/avatar2.jpg','/avatar3.jpg','/avatar4.jpg','/avatar5.jpg'].map((src, i) => (
+                    <img key={i} src={src} alt="" style={{
+                      width: isMobile ? 28 : 32, height: isMobile ? 28 : 32, borderRadius: '50%',
+                      border: `2.5px solid ${P.paper}`,
+                      marginLeft: i === 0 ? 0 : -9,
+                      flexShrink: 0, position: 'relative', zIndex: 5 - i,
+                      boxShadow: '0 1px 5px rgba(0,0,0,0.13)',
+                      objectFit: 'cover', display: 'block',
+                    }} />
+                  ))}
+                </div>
+                <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
+                  <div style={{ fontSize: isMobile ? 12 : 13, fontWeight: 700, color: P.ink, letterSpacing: '-0.01em' }}>
+                    Trusted by Silicon Valley teams
                   </div>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, letterSpacing: '-0.01em' }}>
-                      Trusted by Silicon Valley teams
-                    </div>
-                    <div style={{ fontSize: 11, color: P.muted, marginTop: 2 }}>
-                      10,000+ researchers, founders &amp; creators
-                    </div>
+                  <div style={{ fontSize: 11, color: P.muted, marginTop: 2 }}>
+                    10,000+ researchers, founders &amp; creators
                   </div>
                 </div>
+              </div>
             </div>
             </div>{/* end hero-grad */}
 
