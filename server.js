@@ -774,16 +774,27 @@ app.delete('/api/delete-account', requireAuth, async (req, res) => {
   if (!supabaseAdmin) return res.status(503).json({ error: 'Service not configured' });
   try {
     const { reason } = req.body || {};
-    // Save deletion reason before removing the user
-    await supabaseAdmin.from('deletion_reasons').insert({
-      user_id: req.user.id,
-      email: req.user.email,
+    const userId = req.user.id;
+    const email = req.user.email;
+    console.log(`[delete-account] Starting deletion for user ${userId} (${email}), reason: ${reason}`);
+
+    // Save deletion reason (best-effort — don't block deletion if this fails)
+    const { error: insertErr } = await supabaseAdmin.from('deletion_reasons').insert({
+      user_id: userId,
+      email,
       reason: reason || 'No reason given',
     });
-    const { error } = await supabaseAdmin.auth.admin.deleteUser(req.user.id);
-    if (error) return res.status(500).json({ error: error.message });
+    if (insertErr) console.warn('[delete-account] Could not save reason:', insertErr.message);
+
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (error) {
+      console.error('[delete-account] deleteUser failed:', error.message);
+      return res.status(500).json({ error: error.message });
+    }
+    console.log(`[delete-account] Successfully deleted user ${userId}`);
     res.json({ ok: true });
   } catch (err) {
+    console.error('[delete-account] Unexpected error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
