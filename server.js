@@ -23,12 +23,22 @@ if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
 // Validates the Bearer JWT from the client. Attaches req.user if valid.
 // Returns 401 if no valid token. Not applied to any routes yet (future use).
 async function requireAuth(req, res, next) {
-  if (!supabaseAdmin) return res.status(503).json({ error: 'Auth not configured' });
+  console.log(`[requireAuth] ${req.method} ${req.path}`);
+  if (!supabaseAdmin) {
+    console.error('[requireAuth] supabaseAdmin is null — SUPABASE_SERVICE_ROLE_KEY missing?');
+    return res.status(503).json({ error: 'Auth not configured' });
+  }
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  if (!token) {
+    console.error('[requireAuth] No Bearer token in request');
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !user) return res.status(401).json({ error: 'Invalid or expired token' });
+  if (error || !user) {
+    console.error('[requireAuth] Token invalid:', error?.message);
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
   req.user = user;
   next();
 }
