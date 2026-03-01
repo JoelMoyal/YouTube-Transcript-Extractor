@@ -4210,18 +4210,20 @@ const App = () => {
         .no-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
 
-      <Navbar
-        onAskAI={onNavAskAI}
-        hasTranscript={!!transcript}
-        credits={credits}
-        user={user}
-        onSignIn={(tab = 'signin') => { setAuthInitialTab(tab); setShowAuthModal(true); }}
-        onSignOut={handleSignOut}
-        onDashboard={() => setView('dashboard')}
-        onHome={goHome}
-        onShowReferralPromo={() => setShowReferralPromo(true)}
-        isMobile={isMobile}
-      />
+      {(!isMobile || !transcript) && (
+        <Navbar
+          onAskAI={onNavAskAI}
+          hasTranscript={!!transcript}
+          credits={credits}
+          user={user}
+          onSignIn={(tab = 'signin') => { setAuthInitialTab(tab); setShowAuthModal(true); }}
+          onSignOut={handleSignOut}
+          onDashboard={() => setView('dashboard')}
+          onHome={goHome}
+          onShowReferralPromo={() => setShowReferralPromo(true)}
+          isMobile={isMobile}
+        />
+      )}
 
       {showAuthModal && (
         <AuthModal
@@ -4776,7 +4778,7 @@ const App = () => {
             display: 'grid',
             gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 300px' : '320px 1fr 360px',
             gridTemplateRows: '1fr',
-            height: isMobile ? 'calc(100vh - 56px - 60px)' : 'calc(100vh - 56px)',
+            height: isMobile ? 'calc(100vh - 60px)' : 'calc(100vh - 56px)',
             overflow: 'hidden',
           }}>
 
@@ -5974,7 +5976,7 @@ const App = () => {
           {/* ── MOBILE HISTORY PANEL ──────────────────────────────────────────── */}
           {isMobile && mobilePanel === 'history' && (
             <div style={{
-              position: 'fixed', top: 56, left: 0, right: 0, bottom: 60,
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 60,
               zIndex: 50, background: P.paper,
               display: 'flex', flexDirection: 'column', overflowY: 'auto',
             }}>
@@ -5984,7 +5986,7 @@ const App = () => {
 
           {/* ── MOBILE SUMMARY PANEL ──────────────────────────────────────────── */}
           {isMobile && mobilePanel === 'summary' && (
-            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               <div style={{ padding: '16px 18px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Summary</div>
@@ -6012,7 +6014,7 @@ const App = () => {
 
           {/* ── MOBILE FLASHCARDS PANEL ───────────────────────────────────────── */}
           {isMobile && mobilePanel === 'flashcards' && (
-            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               <div style={{ padding: '16px 18px 24px' }}>
                 {flashcardsLoading ? (
                   <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
@@ -6088,7 +6090,7 @@ const App = () => {
 
           {/* ── MOBILE STUDY GUIDE PANEL ──────────────────────────────────────── */}
           {isMobile && mobilePanel === 'study-guide' && (
-            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               <div style={{ padding: '16px 18px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Study Guide</div>
                 {studyGuideLoading ? (
