@@ -3873,6 +3873,7 @@ const App = () => {
       setSummary(data.summary);
       setActiveTab('summary');
       setSidebarTab('summary');
+      setMobilePanel('summary');
     } catch (err) { setSummary(`Error: ${err.message}`); }
     finally { setSummarizing(false); }
   };
@@ -3912,6 +3913,7 @@ const App = () => {
         setFlashcardsExhaustedReason(data.reason || 'This content doesn\'t have educational concepts suitable for flashcards.');
         setActiveTab('flashcards');
         setSidebarTab('flashcards');
+        setMobilePanel('flashcards');
         return;
       }
       const cards = (data.flashcards || []).filter(c => c && c.question && c.answer);
@@ -3920,6 +3922,7 @@ const App = () => {
       if (cards.length > 0) {
         setActiveTab('flashcards');
         setSidebarTab('flashcards');
+        setMobilePanel('flashcards');
         setFlashcardsTabPulse(true);
         setTimeout(() => setFlashcardsTabPulse(false), 1400);
       }
@@ -3974,6 +3977,7 @@ const App = () => {
       setStudyGuide(data);
       setActiveTab('study-guide');
       setSidebarTab('study-guide');
+      setMobilePanel('study-guide');
     } catch (err) { setStudyGuide({ _error: err.message }); }
     finally { setStudyGuideLoading(false); }
   };
@@ -5846,16 +5850,19 @@ const App = () => {
 
           {/* ── MOBILE BOTTOM NAV ─────────────────────────────────────────────── */}
           {isMobile && (
-            <div style={{
+            <div className="no-scrollbar" style={{
               position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
               height: 56, background: '#FFFFFF', borderTop: `1px solid ${P.border}`,
               display: showFlashcardModal || studyGuideFull ? 'none' : 'flex',
-              alignItems: 'stretch',
+              alignItems: 'stretch', overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none',
             }}>
               {[
                 { key: 'transcript', label: 'Transcript', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
                 { key: 'ai', label: 'AI Chat', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
                 { key: 'insights', label: 'Insights', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+                ...(summary || summarizing ? [{ key: 'summary', label: 'Summary', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
+                ...(flashcards.length > 0 || flashcardsExhausted || flashcardsLoading ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
+                ...(studyGuide || studyGuideLoading ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
                 { key: 'history', label: 'History', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
               ].map(tab => {
                 const isAct = mobilePanel === tab.key;
@@ -5865,14 +5872,14 @@ const App = () => {
                     if (tab.key === 'ai') setSidebarTab('ai');
                     if (tab.key === 'insights') setSidebarTab('insights');
                   }} style={{
-                    flex: 1, position: 'relative',
+                    flex: '0 0 auto', minWidth: 64, position: 'relative',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
                     border: 'none', background: 'transparent', cursor: 'pointer',
-                    color: isAct ? P.accent : P.muted,
+                    color: isAct ? P.accent : P.muted, padding: '0 4px',
                   }}>
                     {isAct && <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 32, height: 2, borderRadius: '0 0 2px 2px', background: P.accent }} />}
                     {tab.icon}
-                    <span style={{ fontSize: 10, fontWeight: isAct ? 700 : 500 }}>{tab.label}</span>
+                    <span style={{ fontSize: 9.5, fontWeight: isAct ? 700 : 500, whiteSpace: 'nowrap' }}>{tab.label}</span>
                   </button>
                 );
               })}
@@ -5914,6 +5921,186 @@ const App = () => {
               display: 'flex', flexDirection: 'column', overflowY: 'auto',
             }}>
               {renderSidebarContent()}
+            </div>
+          )}
+
+          {/* ── MOBILE SUMMARY PANEL ──────────────────────────────────────────── */}
+          {isMobile && mobilePanel === 'summary' && (
+            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 56, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+              <div style={{ padding: '16px 18px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Summary</div>
+                  {summary && (
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', borderRadius: 6, padding: '5px 10px', fontSize: 12, fontWeight: 600, color: summaryCopied ? P.success : P.muted }}>
+                        {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
+                      </button>
+                      <button onClick={() => { setSummary(''); setMobilePanel('transcript'); }}
+                        style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, fontWeight: 600, padding: '5px 12px', borderRadius: 6 }}>Clear</button>
+                    </div>
+                  )}
+                </div>
+                {summarizing ? (
+                  <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
+                    <SpinnerIcon size={14} /> Summarizing…
+                  </div>
+                ) : summary ? (
+                  <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, fontSize: 14, lineHeight: 1.8, color: P.ink, whiteSpace: 'pre-wrap' }}>{summary}</div>
+                ) : null}
+              </div>
+            </div>
+          )}
+
+          {/* ── MOBILE FLASHCARDS PANEL ───────────────────────────────────────── */}
+          {isMobile && mobilePanel === 'flashcards' && (
+            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 56, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+              <div style={{ padding: '16px 18px 24px' }}>
+                {flashcardsLoading ? (
+                  <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
+                    <SpinnerIcon size={14} /> Generating flashcards…
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Flashcards · {flashcards.length} cards</div>
+                      {flashcards.length > 0 && (
+                        <button onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, border: 'none', background: P.accent, color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                          Study
+                        </button>
+                      )}
+                    </div>
+                    {flashcards.length > 0 && (
+                      <div style={{ height: 5, borderRadius: 3, background: P.border, marginBottom: 14, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', borderRadius: 3, background: P.success, width: `${(flashcardKnown.size / flashcards.length) * 100}%`, transition: 'width 0.4s' }} />
+                      </div>
+                    )}
+                    {flashcardsExhausted && (
+                      <div style={{ display: 'flex', gap: 10, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.07)', marginBottom: 12, fontSize: 12.5, color: P.muted, lineHeight: 1.5 }}>
+                        {flashcardsExhaustedReason}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                      {flashcards.map((card, i) => {
+                        const isExpanded = expandedCards.has(i);
+                        const isKnown = flashcardKnown.has(i);
+                        return (
+                          <div key={i} style={{ borderRadius: 10, border: `1px solid ${isKnown ? 'rgba(15,118,110,0.3)' : P.border}`, background: isKnown ? 'rgba(15,118,110,0.04)' : '#fff', overflow: 'hidden' }}>
+                            <div onClick={() => setExpandedCards(prev => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; })}
+                              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', cursor: 'pointer', userSelect: 'none' }}>
+                              <div style={{ width: 24, height: 24, borderRadius: 6, background: isKnown ? 'rgba(15,118,110,0.12)' : P.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <span style={{ fontSize: 10, fontWeight: 700, color: isKnown ? P.success : P.muted }}>{i + 1}</span>
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: isExpanded ? 'normal' : 'nowrap' }}>{card.question}</div>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            {isExpanded && (
+                              <div style={{ borderTop: `1px solid ${P.border}`, padding: '12px 14px', background: P.paper }}>
+                                {card.topic && <div style={{ fontSize: 10.5, fontWeight: 700, color: '#D97706', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{card.topic}</div>}
+                                <div style={{ fontSize: 13.5, lineHeight: 1.65, color: P.ink }}>{card.answer}</div>
+                                <button onClick={e => { e.stopPropagation(); setFlashcardKnown(prev => { const next = new Set(prev); if (isKnown) next.delete(i); else next.add(i); return next; }); }}
+                                  style={{ marginTop: 10, width: '100%', padding: '7px 0', borderRadius: 7, border: `1px solid ${isKnown ? 'rgba(15,118,110,0.4)' : P.border}`, background: isKnown ? 'rgba(15,118,110,0.08)' : 'none', color: isKnown ? P.success : P.muted, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
+                                  {isKnown ? '✓ Known' : 'Mark as Known'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {!flashcardsExhausted && (
+                      <button onClick={generateMoreFlashcards} disabled={flashcardsMoreLoading}
+                        style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: '9px 0', borderRadius: 9, border: `1.5px dashed ${P.border}`, background: 'none', color: P.ink, fontSize: 13, fontWeight: 600, cursor: flashcardsMoreLoading ? 'default' : 'pointer', opacity: flashcardsMoreLoading ? 0.6 : 1 }}>
+                        {flashcardsMoreLoading ? <><SpinnerIcon size={12} /> Generating…</> : <>+ More Cards</>}
+                      </button>
+                    )}
+                    {flashcardKnown.size > 0 && (
+                      <button onClick={() => setFlashcardKnown(new Set())}
+                        style={{ marginTop: 8, display: 'block', width: '100%', padding: '8px 0', borderRadius: 8, border: `1px solid ${P.border}`, background: 'none', color: P.muted, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
+                        Reset Progress
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── MOBILE STUDY GUIDE PANEL ──────────────────────────────────────── */}
+          {isMobile && mobilePanel === 'study-guide' && (
+            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 56, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+              <div style={{ padding: '16px 18px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Study Guide</div>
+                {studyGuideLoading ? (
+                  <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
+                    <SpinnerIcon size={14} /> Generating study guide…
+                  </div>
+                ) : studyGuide && !studyGuide._error ? (() => {
+                  const sg = studyGuide;
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      {sg.overview && (
+                        <div style={{ padding: '14px 16px', background: P.accentLight, borderRadius: 12, border: `1px solid rgba(45,108,223,0.15)` }}>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: P.accent, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Overview</div>
+                          <div style={{ fontSize: 13.5, lineHeight: 1.7, color: P.ink }}>{sg.overview}</div>
+                        </div>
+                      )}
+                      {sg.objectives && sg.objectives.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, marginBottom: 8 }}>Learning Objectives</div>
+                          <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {sg.objectives.map((obj, i) => <li key={i} style={{ fontSize: 13.5, color: P.ink, lineHeight: 1.6 }}>{obj}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                      {sg.keyConcepts && sg.keyConcepts.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, marginBottom: 8 }}>Key Concepts</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            {sg.keyConcepts.map((kc, i) => (
+                              <div key={i} style={{ padding: '12px 14px', background: '#fff', borderRadius: 10, border: `1px solid ${P.border}` }}>
+                                <div style={{ fontSize: 13.5, fontWeight: 700, color: P.ink, marginBottom: 4 }}>{kc.concept}</div>
+                                <div style={{ fontSize: 13, color: P.muted, lineHeight: 1.6 }}>{kc.explanation}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {sg.sections && sg.sections.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, marginBottom: 8 }}>Sections</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            {sg.sections.map((sec, i) => (
+                              <div key={i} style={{ padding: '14px 16px', background: '#fff', borderRadius: 10, border: `1px solid ${P.border}` }}>
+                                <div style={{ fontSize: 14, fontWeight: 700, color: P.ink, marginBottom: 6 }}>{sec.title}</div>
+                                {sec.points && sec.points.length > 0 && (
+                                  <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    {sec.points.map((pt, j) => <li key={j} style={{ fontSize: 13, color: P.ink, lineHeight: 1.6 }}>{pt}</li>)}
+                                  </ul>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {sg.reviewQuestions && sg.reviewQuestions.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: P.ink, marginBottom: 8 }}>Review Questions</div>
+                          <ol style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {sg.reviewQuestions.map((q, i) => <li key={i} style={{ fontSize: 13.5, color: P.ink, lineHeight: 1.6 }}>{q}</li>)}
+                          </ol>
+                        </div>
+                      )}
+                      <button onClick={() => { setStudyGuide(null); setMobilePanel('transcript'); }}
+                        style={{ marginTop: 4, border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 13, fontWeight: 600, padding: '8px 16px', borderRadius: 8 }}>
+                        Clear Study Guide
+                      </button>
+                    </div>
+                  );
+                })() : null}
+              </div>
             </div>
           )}
           </>
