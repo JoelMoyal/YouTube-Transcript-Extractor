@@ -2179,7 +2179,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
       {/* ═══ MOBILE LAYOUT (pure inline styles, no CSS class overflow) ═══ */}
       {isMobile && (
-        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 56px)', background: '#F6F3EE', width: '100%', overflowX: 'hidden', overflowY: 'hidden' }}>
+        <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', background: '#F6F3EE', overflowX: 'hidden', overflowY: 'hidden' }}>
           {/* Fixed header: flex-shrink:0 means it NEVER scrolls — no sticky/overflow issues */}
           <div style={{ background: '#FFFEFC', borderBottom: '1px solid #E7E1D8', flexShrink: 0 }}>
             {/* Row 1: back button + avatar + name/email */}
@@ -4313,7 +4313,7 @@ const App = () => {
         <ReferralPromoModal user={user} onClose={() => setShowReferralPromo(false)} />
       )}
 
-      {showBookmarkBanner && (
+      {showBookmarkBanner && !isMobile && (
         <div className="bookmark-banner" style={{
           position: 'fixed', top: 56, left: 0, right: 0, zIndex: 90,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
@@ -4366,7 +4366,7 @@ const App = () => {
         />
       )}
 
-      <div style={{ minHeight: '100vh', paddingTop: showBookmarkBanner ? 97 : 56, background: P.paper, transition: 'padding-top 0.3s ease', display: view === 'dashboard' ? 'none' : 'block' }}>
+      <div style={{ minHeight: '100vh', paddingTop: (showBookmarkBanner && !isMobile) ? 97 : 56, background: P.paper, transition: 'padding-top 0.3s ease', display: view === 'dashboard' ? 'none' : 'block' }}>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* LANDING VIEW */}
