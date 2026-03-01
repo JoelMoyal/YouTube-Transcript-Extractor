@@ -4623,8 +4623,7 @@ const App = () => {
               </div>
 
               {/* Trusted by Silicon Valley — styled social proof */}
-              {!isMobile && (
-                <div style={{ marginTop: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+              <div style={{ marginTop: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
                   {/* Avatar stack — real photos */}
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     {[
@@ -4654,7 +4653,6 @@ const App = () => {
                     </div>
                   </div>
                 </div>
-              )}
             </div>
             </div>{/* end hero-grad */}
 
