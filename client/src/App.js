@@ -4878,6 +4878,9 @@ const App = () => {
                 {[
                   { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> },
                   { key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
+                  ...(!isMobile && (flashcards.length > 0 || flashcardsExhausted) ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
+                  ...(!isMobile && summary ? [{ key: 'summary', label: 'Summary', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
+                  ...(!isMobile && studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
                 ].map(tab => {
                   const isActive = activeTab === tab.key;
                   return (
@@ -5375,10 +5378,10 @@ const App = () => {
               gridColumn: isDesktop ? 3 : isTablet ? 2 : 1,
               gridRow: 1,
               display: isMobile ? ((mobilePanel === 'ai' || mobilePanel === 'insights') ? 'flex' : 'none') : 'flex',
-              flexDirection: 'column', overflowY: 'hidden', background: '#FFFFFF',
+              flexDirection: 'column', overflowY: isDesktop ? 'auto' : 'hidden', background: '#FFFFFF',
             }}>
-              {/* ── Sidebar tab bar ── */}
-              <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}`, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {/* ── Sidebar tab bar — mobile/tablet only ── */}
+              {!isDesktop && <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}`, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 {[
                   { key: 'ai', label: 'AI Chat', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
                   { key: 'insights', label: 'Insights', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
@@ -5405,10 +5408,10 @@ const App = () => {
                     </button>
                   );
                 })}
-              </div>
+              </div>}
 
-              {/* ScribeSnap AI Chat — shown when sidebarTab === 'ai' */}
-              {sidebarTab === 'ai' && <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+              {/* ScribeSnap AI Chat — always on desktop, tab-gated on mobile */}
+              {(isDesktop || sidebarTab === 'ai') && <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
 
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '13px 18px 11px', borderBottom: `1px solid ${P.border}` }}>
@@ -5608,96 +5611,104 @@ const App = () => {
 
               </div>}
 
-              {/* Insights tab */}
-              {sidebarTab === 'insights' && (
-                <div style={{ flex: 1, overflowY: 'auto', padding: '18px 16px 20px' }}>
-                  {/* Header */}
-                  <div style={{ marginBottom: 18 }}>
-                    <div style={{ fontSize: isMobile ? 18 : 15, fontWeight: 800, color: P.ink, letterSpacing: '-0.02em', marginBottom: 4 }}>AI Insights</div>
-                    <div style={{ fontSize: 12.5, color: P.muted, lineHeight: 1.5 }}>Generate smart study tools from this video in seconds.</div>
-                  </div>
-
-                  {/* Cards grid */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* Insights — always on desktop (original design), tab-gated on mobile (rich cards) */}
+              {isDesktop && <div style={{ height: 1, background: P.border, margin: '0 18px' }} />}
+              {(isDesktop || sidebarTab === 'insights') && (
+                isDesktop ? (
+                  /* ── Desktop: original compact row list ── */
+                  <div style={{ padding: '14px 18px 16px' }}>
                     {[
-                      {
-                        title: 'Summary', sub: 'Key points & bullet overview', color: P.accent,
-                        bg: 'linear-gradient(135deg, rgba(45,108,223,0.12) 0%, rgba(45,108,223,0.06) 100%)',
-                        border: 'rgba(45,108,223,0.2)',
-                        icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-                        label: summary ? 'View Summary' : summarizing ? 'Generating…' : 'Generate',
-                        onClick: summary ? () => { setSidebarTab('summary'); if (isMobile) setMobilePanel('summary'); } : summarize,
-                        active: !!summary, loading: summarizing,
-                        badge: summary ? 'Ready' : null,
-                      },
-                      {
-                        title: 'Flashcards', sub: 'Q&A cards — flip to reveal answers', color: '#D97706',
-                        bg: 'linear-gradient(135deg, rgba(217,119,6,0.12) 0%, rgba(217,119,6,0.06) 100%)',
-                        border: 'rgba(217,119,6,0.2)',
-                        icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-                        label: flashcards.length > 0 ? 'View Cards' : flashcardsLoading ? 'Generating…' : 'Generate',
-                        onClick: flashcards.length > 0 ? () => { setSidebarTab('flashcards'); if (isMobile) setMobilePanel('flashcards'); } : generateFlashcards,
-                        active: flashcards.length > 0, loading: flashcardsLoading,
-                        badge: flashcards.length > 0 ? `${flashcards.length} cards` : null,
-                      },
-                      {
-                        title: 'Study Guide', sub: 'Objectives, key concepts & review', color: P.success,
-                        bg: 'linear-gradient(135deg, rgba(15,118,110,0.12) 0%, rgba(15,118,110,0.06) 100%)',
-                        border: 'rgba(15,118,110,0.2)',
-                        icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-                        label: (studyGuide && !studyGuide._error) ? 'View Guide' : studyGuideLoading ? 'Generating…' : 'Generate',
-                        onClick: (studyGuide && !studyGuide._error) ? () => { setSidebarTab('study-guide'); if (isMobile) setMobilePanel('study-guide'); } : generateStudyGuide,
-                        active: !!(studyGuide && !studyGuide._error), loading: studyGuideLoading,
-                        badge: (studyGuide && !studyGuide._error) ? 'Ready' : null,
-                      },
+                      { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(45,108,223,0.1)',
+                        icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+                        onClick: summary ? () => setActiveTab('summary') : summarize, active: !!summary, loading: summarizing },
+                      { title: 'Flash Cards', sub: 'Q&A cards with flip mode', color: P.warning, bg: 'rgba(180,83,9,0.1)',
+                        icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+                        onClick: flashcards.length > 0 ? () => setActiveTab('flashcards') : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
+                      { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
+                        icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+                        onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
                     ].map(item => (
-                      <div key={item.title}
-                        onClick={item.loading ? undefined : item.onClick}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 14,
-                          padding: isMobile ? '16px 16px' : '13px 14px',
-                          borderRadius: 16, cursor: item.loading ? 'default' : 'pointer',
-                          background: item.active ? item.bg : (isMobile ? '#fff' : 'transparent'),
-                          border: `1.5px solid ${item.active ? item.border : P.border}`,
-                          transition: 'all 0.18s',
-                          boxShadow: item.active ? `0 2px 12px ${item.border}` : '0 1px 4px rgba(28,25,23,0.05)',
-                        }}
-                        onMouseEnter={e => { if (!item.loading) e.currentTarget.style.borderColor = item.border; }}
-                        onMouseLeave={e => { if (!item.loading) e.currentTarget.style.borderColor = item.active ? item.border : P.border; }}
+                      <div key={item.title} onClick={item.loading ? undefined : item.onClick}
+                        style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 10px', borderRadius: 11, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 3 }}
+                        onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                       >
-                        <div style={{
-                          width: isMobile ? 52 : 44, height: isMobile ? 52 : 44, borderRadius: 14, flexShrink: 0,
-                          background: item.active ? item.bg : `rgba(0,0,0,0.04)`,
-                          border: `1.5px solid ${item.active ? item.border : 'transparent'}`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          color: item.active ? item.color : P.muted,
-                        }}>
-                          {item.loading ? <SpinnerIcon size={16} /> : item.icon}
+                        <div style={{ width: 42, height: 42, borderRadius: 12, background: item.active ? item.bg : item.bg.replace('0.1', '0.07'), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color }}>
+                          {item.loading ? <SpinnerIcon size={14} /> : item.icon}
                         </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 }}>
-                            <span style={{ fontSize: isMobile ? 15 : 13.5, fontWeight: 700, color: item.active ? item.color : P.ink }}>{item.title}</span>
-                            {item.badge && <span style={{ fontSize: 10, fontWeight: 700, color: item.color, background: item.bg, border: `1px solid ${item.border}`, padding: '1px 7px', borderRadius: 99 }}>{item.badge}</span>}
-                          </div>
-                          <div style={{ fontSize: isMobile ? 12.5 : 11.5, color: P.muted, lineHeight: 1.4 }}>{item.sub}</div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ fontSize: 13.5, fontWeight: 600, color: item.active ? item.color : P.ink }}>{item.title}</div>
+                          <div style={{ fontSize: 11.5, color: P.muted, marginTop: 1 }}>{item.sub}</div>
                         </div>
-                        <div style={{ flexShrink: 0, padding: '6px 14px', borderRadius: 10, fontSize: isMobile ? 12.5 : 11.5, fontWeight: 600, border: `1.5px solid ${item.active ? item.border : P.border}`, background: item.active ? item.bg : 'transparent', color: item.active ? item.color : P.muted, whiteSpace: 'nowrap' }}>
-                          {item.label}
-                        </div>
+                        {item.active
+                          ? <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
+                          : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.4 }}><polyline points="9 18 15 12 9 6"/></svg>
+                        }
                       </div>
                     ))}
+                    {studyGuide?._error && (
+                      <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(180,35,24,0.05)', border: `1px solid rgba(180,35,24,0.2)`, borderRadius: 8, fontSize: 12, color: P.error }}>
+                        Failed to generate study guide: {studyGuide._error}
+                      </div>
+                    )}
                   </div>
-
-                  {studyGuide?._error && (
-                    <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(180,35,24,0.05)', border: `1px solid rgba(180,35,24,0.2)`, borderRadius: 10, fontSize: 12.5, color: P.error }}>
-                      Failed to generate study guide: {studyGuide._error}
+                ) : (
+                  /* ── Mobile: rich card design ── */
+                  <div style={{ flex: 1, overflowY: 'auto', padding: '18px 16px 20px' }}>
+                    <div style={{ marginBottom: 18 }}>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: P.ink, letterSpacing: '-0.02em', marginBottom: 4 }}>AI Insights</div>
+                      <div style={{ fontSize: 12.5, color: P.muted, lineHeight: 1.5 }}>Generate smart study tools from this video in seconds.</div>
                     </div>
-                  )}
-                </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      {[
+                        { title: 'Summary', sub: 'Key points & bullet overview', color: P.accent,
+                          bg: 'linear-gradient(135deg,rgba(45,108,223,0.12),rgba(45,108,223,0.06))', border: 'rgba(45,108,223,0.2)',
+                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+                          label: summary ? 'View' : summarizing ? 'Generating…' : 'Generate',
+                          onClick: summary ? () => setMobilePanel('summary') : summarize,
+                          active: !!summary, loading: summarizing, badge: summary ? 'Ready' : null },
+                        { title: 'Flashcards', sub: 'Q&A cards — flip to reveal', color: '#D97706',
+                          bg: 'linear-gradient(135deg,rgba(217,119,6,0.12),rgba(217,119,6,0.06))', border: 'rgba(217,119,6,0.2)',
+                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+                          label: flashcards.length > 0 ? 'View' : flashcardsLoading ? 'Generating…' : 'Generate',
+                          onClick: flashcards.length > 0 ? () => setMobilePanel('flashcards') : generateFlashcards,
+                          active: flashcards.length > 0, loading: flashcardsLoading, badge: flashcards.length > 0 ? `${flashcards.length} cards` : null },
+                        { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success,
+                          bg: 'linear-gradient(135deg,rgba(15,118,110,0.12),rgba(15,118,110,0.06))', border: 'rgba(15,118,110,0.2)',
+                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+                          label: (studyGuide && !studyGuide._error) ? 'View' : studyGuideLoading ? 'Generating…' : 'Generate',
+                          onClick: (studyGuide && !studyGuide._error) ? () => setMobilePanel('study-guide') : generateStudyGuide,
+                          active: !!(studyGuide && !studyGuide._error), loading: studyGuideLoading, badge: (studyGuide && !studyGuide._error) ? 'Ready' : null },
+                      ].map(item => (
+                        <div key={item.title} onClick={item.loading ? undefined : item.onClick}
+                          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px', borderRadius: 16, cursor: item.loading ? 'default' : 'pointer', background: item.active ? item.bg : '#fff', border: `1.5px solid ${item.active ? item.border : P.border}`, boxShadow: item.active ? `0 2px 12px ${item.border}` : '0 1px 4px rgba(28,25,23,0.05)', transition: 'all 0.18s' }}>
+                          <div style={{ width: 52, height: 52, borderRadius: 14, flexShrink: 0, background: item.active ? item.bg : 'rgba(0,0,0,0.04)', border: `1.5px solid ${item.active ? item.border : 'transparent'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.active ? item.color : P.muted }}>
+                            {item.loading ? <SpinnerIcon size={16} /> : item.icon}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 }}>
+                              <span style={{ fontSize: 15, fontWeight: 700, color: item.active ? item.color : P.ink }}>{item.title}</span>
+                              {item.badge && <span style={{ fontSize: 10, fontWeight: 700, color: item.color, background: item.bg, border: `1px solid ${item.border}`, padding: '1px 7px', borderRadius: 99 }}>{item.badge}</span>}
+                            </div>
+                            <div style={{ fontSize: 12.5, color: P.muted, lineHeight: 1.4 }}>{item.sub}</div>
+                          </div>
+                          <div style={{ flexShrink: 0, padding: '6px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 600, border: `1.5px solid ${item.active ? item.border : P.border}`, background: item.active ? item.bg : 'transparent', color: item.active ? item.color : P.muted, whiteSpace: 'nowrap' }}>
+                            {item.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {studyGuide?._error && (
+                      <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(180,35,24,0.05)', border: `1px solid rgba(180,35,24,0.2)`, borderRadius: 10, fontSize: 12.5, color: P.error }}>
+                        Failed to generate study guide: {studyGuide._error}
+                      </div>
+                    )}
+                  </div>
+                )
               )}
 
-              {/* Summary sidebar tab */}
-              {sidebarTab === 'summary' && (
+              {/* Summary sidebar tab — mobile/tablet only */}
+              {!isDesktop && sidebarTab === 'summary' && (
                 <div style={{ flex: 1, overflowY: 'auto', padding: '20px 18px' }}>
                   {summarizing ? (
                     <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
@@ -5722,8 +5733,8 @@ const App = () => {
                 </div>
               )}
 
-              {/* Flashcards sidebar tab */}
-              {sidebarTab === 'flashcards' && (
+              {/* Flashcards sidebar tab — mobile/tablet only */}
+              {!isDesktop && sidebarTab === 'flashcards' && (
                 <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px' }}>
                   {flashcardsLoading ? (
                     <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
@@ -5797,8 +5808,8 @@ const App = () => {
                 </div>
               )}
 
-              {/* Study Guide sidebar tab */}
-              {sidebarTab === 'study-guide' && (
+              {/* Study Guide sidebar tab — mobile/tablet only */}
+              {!isDesktop && sidebarTab === 'study-guide' && (
                 <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px' }}>
                   {studyGuideLoading ? (
                     <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
