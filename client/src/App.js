@@ -3197,7 +3197,7 @@ const App = () => {
   const qaRef           = useRef(null);
   const chatMessagesRef = useRef(null);
   const recoveryIntentRef = useRef(false);
-  const [marqueeSpeed, setMarqueeSpeed] = useState(35);
+  const marqueeTrackRef = useRef(null);
   const scrollTimerRef = useRef(null);
 
   useEffect(() => {
@@ -3210,12 +3210,13 @@ const App = () => {
     return () => { window.removeEventListener('resize', onResize); cancelAnimationFrame(raf); };
   }, []);
 
-  // Scroll-driven marquee: speed up while scrolling, ease back when stopped
+  // Scroll-driven marquee: speed up while scrolling, ease back when stopped (no re-render)
   useEffect(() => {
+    const setSpeed = (s) => marqueeTrackRef.current?.style.setProperty('--mq-spd', s);
     const handleScroll = () => {
-      setMarqueeSpeed(7);
+      setSpeed('7s');
       clearTimeout(scrollTimerRef.current);
-      scrollTimerRef.current = setTimeout(() => setMarqueeSpeed(35), 700);
+      scrollTimerRef.current = setTimeout(() => setSpeed('35s'), 700);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => { window.removeEventListener('scroll', handleScroll); clearTimeout(scrollTimerRef.current); };
@@ -6180,7 +6181,7 @@ const App = () => {
               <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 64, background: 'linear-gradient(to right, rgba(253,251,247,0.98), transparent)', zIndex: 2, pointerEvents: 'none' }} />
               {/* fade right */}
               <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 80, background: 'linear-gradient(to left, rgba(253,251,247,0.98), transparent)', zIndex: 2, pointerEvents: 'none' }} />
-              <div className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: 12, width: 'max-content', paddingLeft: 28, '--mq-spd': `${marqueeSpeed}s` }}>
+              <div ref={marqueeTrackRef} className="marquee-track" style={{ display: 'flex', alignItems: 'center', gap: 12, width: 'max-content', paddingLeft: 28 }}>
                 {[...TRUST_ITEMS, ...TRUST_ITEMS].map((label, i) => (
                   <span key={i} style={{
                     display: 'inline-flex', alignItems: 'center',
