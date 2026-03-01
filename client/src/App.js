@@ -3591,6 +3591,21 @@ const App = () => {
             }
           } catch (_) { /* network error — will retry next sign-in */ }
         }
+
+        // Restore credits if this is a re-registration after account deletion
+        try {
+          const restoreResp = await fetch('/api/restore-account', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${session.access_token}` },
+          });
+          if (restoreResp.ok) {
+            const d = await restoreResp.json();
+            if (d.restored) {
+              const { data: { user: refreshed } } = await supabase.auth.getUser();
+              if (refreshed) setUser(refreshed);
+            }
+          }
+        } catch (_) { /* best-effort */ }
       }
     });
     return () => {

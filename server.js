@@ -5,9 +5,12 @@ const fsPromises = require('fs').promises;
 const os = require('os');
 const { execFile } = require('child_process');
 const { promisify } = require('util');
+const crypto = require('crypto');
 const Groq = require('groq-sdk');
 const { Supadata } = require('@supadata/js');
 const { createClient } = require('@supabase/supabase-js');
+
+const hashEmail = (email) => crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
 
 // ── Supabase admin client (server-side only, uses service role key) ───────────
 let supabaseAdmin = null;
@@ -788,13 +791,22 @@ app.delete('/api/delete-account', requireAuth, async (req, res) => {
     const email = req.user.email;
     console.log(`[delete-account] Starting deletion for user ${userId} (${email}), reason: ${reason}`);
 
-    // Save deletion reason (best-effort — don't block deletion if this fails)
+    // Save deletion reason (best-effort)
     const { error: insertErr } = await supabaseAdmin.from('deletion_reasons').insert({
       user_id: userId,
       email,
       reason: reason || 'No reason given',
     });
     if (insertErr) console.warn('[delete-account] Could not save reason:', insertErr.message);
+
+    // Save hashed email + credits for potential re-registration restore (GDPR-safe)
+    const meta = req.user.user_metadata || {};
+    const { error: deletedErr } = await supabaseAdmin.from('deleted_accounts').insert({
+      email_hash: hashEmail(email),
+      referral_bonus: meta.referral_bonus || 0,
+      referral_count: meta.referral_count || 0,
+    });
+    if (deletedErr) console.warn('[delete-account] Could not save deleted_accounts:', deletedErr.message);
 
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
     if (error) {
@@ -805,6 +817,42 @@ app.delete('/api/delete-account', requireAuth, async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error('[delete-account] Unexpected error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Restore account credits on re-registration ───────────────────────────────
+app.post('/api/restore-account', requireAuth, async (req, res) => {
+  if (!supabaseAdmin) return res.status(503).json({ error: 'Service not configured' });
+  try {
+    const hash = hashEmail(req.user.email);
+    const { data, error } = await supabaseAdmin
+      .from('deleted_accounts')
+      .select('*')
+      .eq('email_hash', hash)
+      .is('restored_at', null)
+      .order('deleted_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error || !data) return res.json({ restored: false });
+
+    // Restore referral credits to new account
+    const meta = req.user.user_metadata || {};
+    await supabaseAdmin.auth.admin.updateUserById(req.user.id, {
+      user_metadata: {
+        ...meta,
+        referral_bonus: (meta.referral_bonus || 0) + data.referral_bonus,
+        referral_count: data.referral_count,
+      },
+    });
+
+    // Mark as restored so it only happens once
+    await supabaseAdmin.from('deleted_accounts').update({ restored_at: new Date().toISOString() }).eq('id', data.id);
+
+    console.log(`[restore-account] Restored ${data.referral_bonus} bonus credits to re-registered user ${req.user.id}`);
+    res.json({ restored: true, referral_bonus: data.referral_bonus });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
