@@ -3037,7 +3037,10 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
       {/* ── Delete Account Modal ── */}
       {showDeleteModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div style={{ background: P.paper, borderRadius: 20, padding: '28px 24px', maxWidth: 420, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+          <div style={{ background: P.paper, borderRadius: 20, padding: '28px 24px', maxWidth: 420, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', position: 'relative' }}>
+            {deleteStep !== 'deleting' && (
+              <button onClick={() => setShowDeleteModal(false)} style={{ position: 'absolute', top: 14, right: 14, background: 'none', border: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: 4, borderRadius: 6 }} title="Close">✕</button>
+            )}
 
             {/* Step 1: Why are you leaving? */}
             {deleteStep === 'reason' && (
