@@ -4845,7 +4845,7 @@ const App = () => {
 
             {/* Recent transcripts */}
             {history.length > 0 && (
-              <div style={{ maxWidth: isMobile ? 780 : 1100, margin: '0 auto', padding: '0 24px 48px' }}>
+              <div style={{ maxWidth: 780, margin: '0 auto', padding: '0 24px 48px' }}>
                 <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 16, overflow: 'hidden' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${P.border}` }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: P.ink }}>Recent transcripts</span>
