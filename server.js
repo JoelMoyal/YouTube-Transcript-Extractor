@@ -325,6 +325,7 @@ async function whisperTranscribe(audioFile, safeLang) {
 // ── SSE transcript endpoint ───────────────────────────────────────────────────
 app.get('/api/transcript', async (req, res) => {
   const { videoId, url, platform = 'youtube' } = req.query; // lang param ignored while translation is on ice
+  console.log(`[transcript] platform=${platform} videoId=${videoId || url} proxy=${!!process.env.WEBSHARE_PROXY_URL}`);
   // LANGUAGE TRANSLATION ON ICE — force English until the feature is stable
   const safeLang = 'en'; // was: lang && /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,10})?$/.test(lang) ? lang : 'en';
   const tmpDir = os.tmpdir();
