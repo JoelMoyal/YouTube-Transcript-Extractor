@@ -2240,7 +2240,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
             </div>
           </div>
 
-          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', padding: '12px 14px', paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', padding: '12px 14px', paddingBottom: 'max(80px, calc(env(safe-area-inset-bottom, 0px) + 60px))', display: 'flex', flexDirection: 'column', gap: 10 }}>
 
             {/* ── Overview ── */}
             {tab === 'overview' && (
@@ -5020,7 +5020,7 @@ const App = () => {
                 )}
                 {[
                   { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> },
-                  { key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
+                  ...(!isMobile ? [{ key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> }] : []),
                   ...(!isMobile && (flashcards.length > 0 || flashcardsExhausted) ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
                   ...(!isMobile && summary ? [{ key: 'summary', label: 'Summary', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
                   ...(!isMobile && studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
@@ -5523,8 +5523,8 @@ const App = () => {
               display: isMobile ? ((mobilePanel === 'ai' || mobilePanel === 'insights') ? 'flex' : 'none') : 'flex',
               flexDirection: 'column', overflowY: isDesktop ? 'auto' : 'hidden', background: '#FFFFFF',
             }}>
-              {/* ── Sidebar tab bar — mobile/tablet only ── */}
-              {!isDesktop && <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}`, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {/* ── Sidebar tab bar — tablet only (mobile uses bottom nav) ── */}
+              {isTablet && <div style={{ flexShrink: 0, display: 'flex', alignItems: 'flex-end', gap: 2, padding: '6px 10px 0', background: P.paper, borderBottom: `1px solid ${P.border}`, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                 {[
                   { key: 'ai', label: 'AI Chat', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
                   { key: 'insights', label: 'Insights', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
@@ -6036,7 +6036,6 @@ const App = () => {
               ...(summary || summarizing ? [{ key: 'summary', label: 'Summary', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
               ...(flashcards.length > 0 || flashcardsExhausted || flashcardsLoading ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
               ...(studyGuide || studyGuideLoading ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
-              { key: 'history', label: 'History', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
             ];
             const hasDynamic = mobileTabs.length > 4;
             return (
@@ -6116,17 +6115,6 @@ const App = () => {
             </>
           )}
 
-          {/* ── MOBILE HISTORY PANEL ──────────────────────────────────────────── */}
-          {isMobile && mobilePanel === 'history' && (
-            <div style={{
-              position: 'fixed', top: 0, left: 0, right: 0, bottom: 60,
-              zIndex: 50, background: P.paper,
-              display: 'flex', flexDirection: 'column', overflowY: 'auto',
-            }}>
-              {renderSidebarContent()}
-            </div>
-          )}
-
           {/* ── MOBILE SUMMARY PANEL ──────────────────────────────────────────── */}
           {isMobile && mobilePanel === 'summary' && (
             <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
@@ -6179,51 +6167,6 @@ const App = () => {
                       <div style={{ height: 5, borderRadius: 3, background: P.border, marginBottom: 14, overflow: 'hidden' }}>
                         <div style={{ height: '100%', borderRadius: 3, background: P.success, width: `${(flashcardKnown.size / flashcards.length) * 100}%`, transition: 'width 0.4s' }} />
                       </div>
-                    )}
-                    {flashcardsExhausted && (
-                      <div style={{ display: 'flex', gap: 10, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.07)', marginBottom: 12, fontSize: 12.5, color: P.muted, lineHeight: 1.5 }}>
-                        {flashcardsExhaustedReason}
-                      </div>
-                    )}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                      {flashcards.map((card, i) => {
-                        const isExpanded = expandedCards.has(i);
-                        const isKnown = flashcardKnown.has(i);
-                        return (
-                          <div key={i} style={{ borderRadius: 10, border: `1px solid ${isKnown ? 'rgba(15,118,110,0.3)' : P.border}`, background: isKnown ? 'rgba(15,118,110,0.04)' : '#fff', overflow: 'hidden' }}>
-                            <div onClick={() => setExpandedCards(prev => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; })}
-                              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', cursor: 'pointer', userSelect: 'none' }}>
-                              <div style={{ width: 24, height: 24, borderRadius: 6, background: isKnown ? 'rgba(15,118,110,0.12)' : P.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                <span style={{ fontSize: 10, fontWeight: 700, color: isKnown ? P.success : P.muted }}>{i + 1}</span>
-                              </div>
-                              <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: isExpanded ? 'normal' : 'nowrap' }}>{card.question}</div>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
-                            </div>
-                            {isExpanded && (
-                              <div style={{ borderTop: `1px solid ${P.border}`, padding: '12px 14px', background: P.paper }}>
-                                {card.topic && <div style={{ fontSize: 10.5, fontWeight: 700, color: '#D97706', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{card.topic}</div>}
-                                <div style={{ fontSize: 13.5, lineHeight: 1.65, color: P.ink }}>{card.answer}</div>
-                                <button onClick={e => { e.stopPropagation(); setFlashcardKnown(prev => { const next = new Set(prev); if (isKnown) next.delete(i); else next.add(i); return next; }); }}
-                                  style={{ marginTop: 10, width: '100%', padding: '7px 0', borderRadius: 7, border: `1px solid ${isKnown ? 'rgba(15,118,110,0.4)' : P.border}`, background: isKnown ? 'rgba(15,118,110,0.08)' : 'none', color: isKnown ? P.success : P.muted, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
-                                  {isKnown ? '✓ Known' : 'Mark as Known'}
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {!flashcardsExhausted && (
-                      <button onClick={generateMoreFlashcards} disabled={flashcardsMoreLoading}
-                        style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: '9px 0', borderRadius: 9, border: `1.5px dashed ${P.border}`, background: 'none', color: P.ink, fontSize: 13, fontWeight: 600, cursor: flashcardsMoreLoading ? 'default' : 'pointer', opacity: flashcardsMoreLoading ? 0.6 : 1 }}>
-                        {flashcardsMoreLoading ? <><SpinnerIcon size={12} /> Generating…</> : <>+ More Cards</>}
-                      </button>
-                    )}
-                    {flashcardKnown.size > 0 && (
-                      <button onClick={() => setFlashcardKnown(new Set())}
-                        style={{ marginTop: 8, display: 'block', width: '100%', padding: '8px 0', borderRadius: 8, border: `1px solid ${P.border}`, background: 'none', color: P.muted, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
-                        Reset Progress
-                      </button>
                     )}
                   </>
                 )}
