@@ -4883,14 +4883,14 @@ const App = () => {
             </div>
             </div>{/* end hero-grad */}
 
-            {/* Capability cards */}
-            <div style={{ maxWidth: 960, margin: '0 auto', padding: '8px 24px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 16 }}>
+            {/* Capability cards — bento grid with watermark numbers */}
+            <div style={{ maxWidth: 960, margin: '0 auto', padding: '8px 24px 20px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
               {[
                 {
                   num: '01',
                   label: 'Transcript in Seconds',
                   tagline: 'Paste a link. Done.',
-                  desc: 'Full transcript from any YouTube or Vimeo video, with clickable timestamps and auto English translation.',
+                  desc: 'Full transcript from any YouTube or Vimeo video — complete with clickable timestamps and automatic English translation.',
                   accent: P.accent,
                   accentBg: P.accentLight,
                   features: ['YouTube & Vimeo', 'Clickable timestamps', 'Auto-translate'],
@@ -4899,7 +4899,7 @@ const App = () => {
                   num: '02',
                   label: 'AI Summaries & Chapters',
                   tagline: 'Skim in seconds.',
-                  desc: 'Get an instant overview of any video — broken into chapters with key takeaways so you only watch what matters.',
+                  desc: 'Get an instant overview of any video, broken into chapters with key takeaways so you only watch what matters.',
                   accent: '#7C3AED',
                   accentBg: 'rgba(124,58,237,0.07)',
                   features: ['Smart summary', 'Chapter breakdown', 'Key takeaways'],
@@ -4908,7 +4908,7 @@ const App = () => {
                   num: '03',
                   label: 'Flashcards & Study Guides',
                   tagline: 'Actually retain it.',
-                  desc: 'Turn any lecture or talk into a structured study guide and auto-generated flashcards — ready to review instantly.',
+                  desc: 'Turn any lecture or talk into a structured study guide with auto-generated flashcards, ready to review instantly.',
                   accent: P.warning,
                   accentBg: 'rgba(180,83,9,0.07)',
                   features: ['Auto flashcards', 'Study guide', 'Review questions'],
@@ -4917,7 +4917,7 @@ const App = () => {
                   num: '04',
                   label: 'Chat With Any Video',
                   tagline: 'Like Ctrl+F, but smarter.',
-                  desc: 'Ask anything. Get precise answers with timestamp links that jump straight to the exact moment in the video.',
+                  desc: 'Ask anything about the video and get precise answers with timestamp links that jump straight to the exact moment.',
                   accent: P.success,
                   accentBg: 'rgba(15,118,110,0.07)',
                   features: ['Ask anything', 'Cited timestamps', 'Pull quotes'],
@@ -4926,45 +4926,48 @@ const App = () => {
                 <div key={card.label} className="feature-card" style={{
                   background: P.surface,
                   border: `1.5px solid ${P.border}`,
-                  borderRadius: 18,
+                  borderRadius: 20,
                   display: 'flex',
                   flexDirection: 'column',
-                  boxShadow: '0 4px 16px rgba(28,25,23,0.07), 0 1px 3px rgba(28,25,23,0.05)',
-                  padding: '24px 22px 26px',
+                  boxShadow: '0 6px 24px rgba(28,25,23,0.08), 0 1px 4px rgba(28,25,23,0.05)',
+                  padding: '28px 26px 26px',
                   position: 'relative',
                   overflow: 'hidden',
+                  minHeight: 220,
                 }}>
-                  {/* Subtle left accent stripe */}
-                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: card.accent, borderRadius: '18px 0 0 18px' }} />
-                  {/* Number badge */}
+                  {/* Giant faded watermark number */}
                   <div style={{
-                    alignSelf: 'flex-start',
-                    fontSize: 10.5, fontWeight: 800, color: card.accent,
-                    background: card.accentBg,
-                    padding: '3px 8px', borderRadius: 6,
-                    letterSpacing: '0.06em', marginBottom: 18,
+                    position: 'absolute', right: -8, bottom: -20,
+                    fontSize: 110, fontWeight: 900, lineHeight: 1,
+                    color: card.accent, opacity: 0.055,
+                    letterSpacing: '-0.05em', userSelect: 'none', pointerEvents: 'none',
+                    fontVariantNumeric: 'tabular-nums',
                   }}>
                     {card.num}
                   </div>
                   {/* Tagline */}
-                  <div style={{ fontSize: 11, fontWeight: 700, color: card.accent, letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 7 }}>
+                  <div style={{
+                    fontSize: 10.5, fontWeight: 700, color: card.accent,
+                    letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12,
+                  }}>
                     {card.tagline}
                   </div>
                   {/* Title */}
-                  <div style={{ fontSize: 15.5, fontWeight: 800, color: P.ink, marginBottom: 10, letterSpacing: '-0.025em', lineHeight: 1.3 }}>
+                  <div style={{ fontSize: 16.5, fontWeight: 800, color: P.ink, marginBottom: 10, letterSpacing: '-0.03em', lineHeight: 1.25 }}>
                     {card.label}
                   </div>
                   {/* Description */}
-                  <div style={{ fontSize: 13, color: P.muted, lineHeight: 1.7, marginBottom: 18, flex: 1 }}>
+                  <div style={{ fontSize: 13, color: P.muted, lineHeight: 1.72, marginBottom: 20, flex: 1 }}>
                     {card.desc}
                   </div>
-                  {/* Feature pills */}
+                  {/* Outlined feature tags */}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {card.features.map(f => (
                       <span key={f} style={{
                         fontSize: 11, fontWeight: 600, color: card.accent,
-                        background: card.accentBg, borderRadius: 6,
-                        padding: '3px 8px',
+                        border: `1px solid ${card.accent}`,
+                        borderRadius: 6, padding: '2px 8px',
+                        opacity: 0.75,
                       }}>{f}</span>
                     ))}
                   </div>
@@ -4972,52 +4975,49 @@ const App = () => {
               ))}
             </div>
 
-            {/* Testimonials */}
-            <div style={{ maxWidth: 960, margin: '0 auto', padding: '16px 24px 56px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-              {[
-                {
-                  avatar: '/avatar2.jpg',
-                  name: 'Priya Nair',
-                  role: 'PhD Student, UC Berkeley',
-                  quote: 'I used ScribeSnap to extract transcripts from three hours of lecture recordings and turned them into flashcards overnight. Saved my thesis.',
-                },
-                {
-                  avatar: '/avatar4.jpg',
-                  name: 'Marcus Webb',
-                  role: 'Co-founder, Launchpad AI',
-                  quote: 'We research competitor talks and investor interviews constantly. ScribeSnap cuts that research time in half — the AI chat feature is a game changer.',
-                },
-              ].map(t => (
-                <div key={t.name} style={{
-                  background: P.surface,
-                  border: `1.5px solid ${P.border}`,
-                  borderRadius: 18,
-                  padding: '24px 24px 26px',
-                  boxShadow: '0 4px 16px rgba(28,25,23,0.07), 0 1px 3px rgba(28,25,23,0.04)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 16,
-                }}>
-                  {/* Quote mark */}
-                  <div style={{ fontSize: 36, lineHeight: 1, color: P.border, fontFamily: 'Georgia, serif', marginBottom: -8 }}>"</div>
-                  {/* Quote text */}
-                  <div style={{ fontSize: 14, color: P.ink, lineHeight: 1.75, fontStyle: 'italic' }}>
-                    {t.quote}
-                  </div>
-                  {/* Person */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
-                    <img src={t.avatar} alt={t.name} style={{
-                      width: 40, height: 40, borderRadius: '50%',
-                      objectFit: 'cover', border: `2px solid ${P.border}`,
-                      flexShrink: 0,
-                    }} />
-                    <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: P.ink }}>{t.name}</div>
-                      <div style={{ fontSize: 12, color: P.muted, marginTop: 1 }}>{t.role}</div>
-                    </div>
+            {/* Testimonials — integrated band */}
+            <div style={{ background: P.surface, borderTop: `1px solid ${P.border}`, borderBottom: `1px solid ${P.border}`, padding: '40px 24px 44px', marginBottom: 0 }}>
+              <div style={{ maxWidth: 840, margin: '0 auto' }}>
+                {/* Section label */}
+                <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                  <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, color: P.muted, letterSpacing: '0.1em', textTransform: 'uppercase', borderBottom: `2px solid ${P.border}`, paddingBottom: 6 }}>
+                    What people are saying
                   </div>
                 </div>
-              ))}
+                {/* Quotes side by side */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 40 }}>
+                  {[
+                    {
+                      avatar: '/avatar2.jpg',
+                      role: 'PhD Student',
+                      quote: 'I extracted transcripts from three hours of lecture recordings and turned them into flashcards overnight. Saved my thesis.',
+                    },
+                    {
+                      avatar: '/avatar4.jpg',
+                      role: 'Co-founder',
+                      quote: 'We research competitor talks and investor interviews constantly. ScribeSnap cuts that research time in half — the chat feature is a game changer.',
+                    },
+                  ].map((t, i) => (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      {/* Large quote mark */}
+                      <div style={{ fontSize: 48, lineHeight: 0.8, color: P.border, fontFamily: 'Georgia, serif', userSelect: 'none' }}>"</div>
+                      {/* Quote */}
+                      <div style={{ fontSize: 14.5, color: P.ink, lineHeight: 1.78, fontStyle: 'italic', letterSpacing: '-0.01em' }}>
+                        {t.quote}
+                      </div>
+                      {/* Avatar + role */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
+                        <img src={t.avatar} alt="" style={{
+                          width: 34, height: 34, borderRadius: '50%',
+                          objectFit: 'cover', border: `2px solid ${P.border}`,
+                          flexShrink: 0,
+                        }} />
+                        <div style={{ fontSize: 12.5, color: P.muted, fontWeight: 600 }}>{t.role}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Recent transcripts */}
