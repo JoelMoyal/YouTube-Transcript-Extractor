@@ -4721,11 +4721,11 @@ const App = () => {
               {/* Input card */}
               <div style={{
                 background: P.surface, border: `1px solid ${P.border}`,
-                borderRadius: 20, boxShadow: '0 12px 56px rgba(28,25,23,0.13)',
-                padding: 10,
+                borderRadius: isMobile ? 16 : 20, boxShadow: '0 12px 56px rgba(28,25,23,0.13)',
+                padding: isMobile ? '7px 7px 7px 7px' : 10,
               }}>
-                <div style={{ display: 'flex', gap: 8, flexDirection: isMobile ? 'column' : 'row' }}>
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: isMobile ? '11px 14px' : '16px 20px', background: P.paper, borderRadius: 14, border: `1px solid ${P.border}` }}>
+                <div style={{ display: 'flex', gap: isMobile ? 6 : 8, flexDirection: 'row' }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: isMobile ? '10px 12px' : '16px 20px', background: P.paper, borderRadius: isMobile ? 11 : 14, border: `1px solid ${P.border}` }}>
                     {(() => {
                       const platform = parseVideoUrl(videoUrl)?.platform;
                       if (platform) return <PlatformIcon platform={platform} />;
@@ -4771,13 +4771,13 @@ const App = () => {
                         onClick={getTranscript}
                         disabled={btnDisabled}
                         style={{
-                          flexShrink: 0, padding: isMobile ? '9px 18px' : '0 28px', borderRadius: 14, border: 'none',
+                          flexShrink: 0, padding: isMobile ? '10px 16px' : '0 28px', borderRadius: isMobile ? 11 : 14, border: 'none',
                           background: btnBg,
                           color: outOfCredits ? P.error : 'white',
-                          fontSize: isMobile ? 14 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, whiteSpace: 'nowrap',
+                          fontSize: isMobile ? 13 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, whiteSpace: 'nowrap',
                           transition: 'background 0.15s',
-                          width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
+                          minWidth: isMobile ? 88 : 148,
                         }}
                         onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
                         onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
@@ -5083,7 +5083,7 @@ const App = () => {
             display: 'grid',
             gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 300px' : '320px 1fr 360px',
             gridTemplateRows: '1fr',
-            height: isMobile ? 'calc(100vh - 60px)' : 'calc(100vh - 56px)',
+            height: isMobile ? 'calc(100vh - 116px)' : 'calc(100vh - 56px)',
             overflow: 'hidden',
           }}>
 
@@ -5271,8 +5271,8 @@ const App = () => {
                               <div style={{ position: 'absolute', top: 2, left: showTimestamps ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
                             </div>
                           </div>
-                          {/* Topics toggle */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                          {/* Topics toggle — desktop/tablet only */}
+                          {!isMobile && <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                             <span style={{ fontSize: 11, color: P.muted, whiteSpace: 'nowrap' }}>Topics</span>
                             <div onClick={() => {
                               const next = !showTopics;
@@ -5281,13 +5281,13 @@ const App = () => {
                             }} style={{ width: 28, height: 16, borderRadius: 8, background: showTopics ? '#7C3AED' : P.border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
                               <div style={{ position: 'absolute', top: 2, left: showTopics ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
                             </div>
-                          </div>
-                          {/* Language pill — ON ICE, disabled until feature is stable */}
-                          <div title="Language translation coming soon" style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px 3px 7px', borderRadius: 20, border: `1px solid ${P.border}`, background: P.paper, cursor: 'not-allowed', position: 'relative', opacity: 0.45 }}>
+                          </div>}
+                          {/* Language pill — ON ICE, desktop/tablet only */}
+                          {!isMobile && <div title="Language translation coming soon" style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px 3px 7px', borderRadius: 20, border: `1px solid ${P.border}`, background: P.paper, cursor: 'not-allowed', position: 'relative', opacity: 0.45 }}>
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                             <span style={{ fontSize: 10.5, fontWeight: 600, color: P.ink, letterSpacing: '0.03em' }}>ENG</span>
                             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                          </div>
+                          </div>}
                         </div>
                       )}
                     </div>
@@ -6190,42 +6190,24 @@ const App = () => {
                     )}
                   </div>
                 ) : (
-                  /* ── Mobile: rich card design ── */
-                  <div style={{ flex: 1, overflowY: 'auto', padding: '18px 16px 20px' }}>
-                    <div style={{ marginBottom: 18 }}>
-                      <div style={{ fontSize: 18, fontWeight: 800, color: P.ink, letterSpacing: '-0.02em', marginBottom: 4 }}>AI Insights</div>
-                      <div style={{ fontSize: 12.5, color: P.muted, lineHeight: 1.5 }}>Generate smart study tools from this video in seconds.</div>
+                  /* ── Mobile: Academic Insights card only ── */
+                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '12px 16px 20px' }}>
+                    <div style={{ marginBottom: 12 }}>
+                      <div style={{ fontSize: 15, fontWeight: 800, color: P.ink, letterSpacing: '-0.01em', marginBottom: 2 }}>Academic Insights</div>
+                      <div style={{ fontSize: 12, color: P.muted, lineHeight: 1.4 }}>References, claims & glossary from this video.</div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {[
-                        { title: 'Summary', sub: 'Key points & bullet overview', color: P.accent,
-                          bg: 'linear-gradient(135deg,rgba(45,108,223,0.12),rgba(45,108,223,0.06))', border: 'rgba(45,108,223,0.2)',
-                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-                          label: summary ? 'View' : summarizing ? 'Generating…' : 'Generate',
-                          onClick: summary ? () => setMobilePanel('summary') : summarize,
-                          active: !!summary, loading: summarizing, badge: summary ? 'Ready' : null },
-                        { title: 'Flashcards', sub: 'Q&A cards — flip to reveal', color: '#D97706',
-                          bg: 'linear-gradient(135deg,rgba(217,119,6,0.12),rgba(217,119,6,0.06))', border: 'rgba(217,119,6,0.2)',
-                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-                          label: flashcards.length > 0 ? 'View' : flashcardsLoading ? 'Generating…' : 'Generate',
-                          onClick: flashcards.length > 0 ? () => setMobilePanel('flashcards') : generateFlashcards,
-                          active: flashcards.length > 0, loading: flashcardsLoading, badge: flashcards.length > 0 ? `${flashcards.length} cards` : null },
-                        { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success,
-                          bg: 'linear-gradient(135deg,rgba(15,118,110,0.12),rgba(15,118,110,0.06))', border: 'rgba(15,118,110,0.2)',
-                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-                          label: (studyGuide && !studyGuide._error) ? 'View' : studyGuideLoading ? 'Generating…' : 'Generate',
-                          onClick: (studyGuide && !studyGuide._error) ? () => setMobilePanel('study-guide') : generateStudyGuide,
-                          active: !!(studyGuide && !studyGuide._error), loading: studyGuideLoading, badge: (studyGuide && !studyGuide._error) ? 'Ready' : null },
-                        { title: 'Academic', sub: 'References, claims & glossary', color: '#7C3AED',
+                        { title: 'Academic Insights', sub: 'Key claims, references & glossary', color: '#7C3AED',
                           bg: 'linear-gradient(135deg,rgba(124,58,237,0.12),rgba(124,58,237,0.06))', border: 'rgba(124,58,237,0.2)',
-                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+                          icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>,
                           label: (academicInsights && !academicInsights._error) ? 'View' : academicInsightsLoading ? 'Generating…' : 'Generate',
                           onClick: (academicInsights && !academicInsights._error) ? () => setMobilePanel('academic') : generateAcademicInsights,
                           active: !!(academicInsights && !academicInsights._error), loading: academicInsightsLoading, badge: (academicInsights && !academicInsights._error) ? 'Ready' : null },
                       ].map(item => (
                         <div key={item.title} onClick={item.loading ? undefined : item.onClick}
                           style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px', borderRadius: 16, cursor: item.loading ? 'default' : 'pointer', background: item.active ? item.bg : '#fff', border: `1.5px solid ${item.active ? item.border : P.border}`, boxShadow: item.active ? `0 2px 12px ${item.border}` : '0 1px 4px rgba(28,25,23,0.05)', transition: 'all 0.18s' }}>
-                          <div style={{ width: 52, height: 52, borderRadius: 14, flexShrink: 0, background: item.active ? item.bg : 'rgba(0,0,0,0.04)', border: `1.5px solid ${item.active ? item.border : 'transparent'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.active ? item.color : P.muted }}>
+                          <div style={{ width: 52, height: 52, borderRadius: 14, flexShrink: 0, background: item.active ? item.bg : 'rgba(124,58,237,0.07)', border: `1.5px solid ${item.active ? item.border : 'rgba(124,58,237,0.15)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.active ? item.color : '#7C3AED' }}>
                             {item.loading ? <SpinnerIcon size={16} /> : item.icon}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
@@ -6634,6 +6616,51 @@ const App = () => {
                       <div style={{ height: 5, borderRadius: 3, background: P.border, marginBottom: 14, overflow: 'hidden' }}>
                         <div style={{ height: '100%', borderRadius: 3, background: P.success, width: `${(flashcardKnown.size / flashcards.length) * 100}%`, transition: 'width 0.4s' }} />
                       </div>
+                    )}
+                    {flashcardsExhausted && (
+                      <div style={{ display: 'flex', gap: 10, padding: '10px 12px', borderRadius: 10, border: '1px solid rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.07)', marginBottom: 12, fontSize: 12.5, color: P.muted, lineHeight: 1.5 }}>
+                        {flashcardsExhaustedReason}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                      {flashcards.map((card, i) => {
+                        const isExpanded = expandedCards.has(i);
+                        const isKnown = flashcardKnown.has(i);
+                        return (
+                          <div key={i} style={{ borderRadius: 10, border: `1px solid ${isKnown ? 'rgba(15,118,110,0.3)' : P.border}`, background: isKnown ? 'rgba(15,118,110,0.04)' : '#fff', overflow: 'hidden' }}>
+                            <div onClick={() => setExpandedCards(prev => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; })}
+                              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', cursor: 'pointer', userSelect: 'none' }}>
+                              <div style={{ width: 24, height: 24, borderRadius: 6, background: isKnown ? 'rgba(15,118,110,0.12)' : P.surface, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <span style={{ fontSize: 10, fontWeight: 700, color: isKnown ? P.success : P.muted }}>{i + 1}</span>
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: isExpanded ? 'normal' : 'nowrap' }}>{card.question}</div>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            {isExpanded && (
+                              <div style={{ borderTop: `1px solid ${P.border}`, padding: '12px 14px', background: P.paper }}>
+                                {card.topic && <div style={{ fontSize: 10.5, fontWeight: 700, color: '#D97706', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{card.topic}</div>}
+                                <div style={{ fontSize: 13.5, lineHeight: 1.65, color: P.ink }}>{card.answer}</div>
+                                <button onClick={e => { e.stopPropagation(); setFlashcardKnown(prev => { const next = new Set(prev); if (isKnown) next.delete(i); else next.add(i); return next; }); }}
+                                  style={{ marginTop: 10, width: '100%', padding: '7px 0', borderRadius: 7, border: `1px solid ${isKnown ? 'rgba(15,118,110,0.4)' : P.border}`, background: isKnown ? 'rgba(15,118,110,0.08)' : 'none', color: isKnown ? P.success : P.muted, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
+                                  {isKnown ? '✓ Known' : 'Mark as Known'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {!flashcardsExhausted && flashcards.length > 0 && (
+                      <button onClick={generateMoreFlashcards} disabled={flashcardsMoreLoading}
+                        style={{ marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: '9px 0', borderRadius: 9, border: `1.5px dashed ${P.border}`, background: 'none', color: P.ink, fontSize: 13, fontWeight: 600, cursor: flashcardsMoreLoading ? 'default' : 'pointer', opacity: flashcardsMoreLoading ? 0.6 : 1 }}>
+                        {flashcardsMoreLoading ? <><SpinnerIcon size={12} /> Generating…</> : <>+ More Cards</>}
+                      </button>
+                    )}
+                    {flashcardKnown.size > 0 && (
+                      <button onClick={() => setFlashcardKnown(new Set())}
+                        style={{ marginTop: 8, display: 'block', width: '100%', padding: '8px 0', borderRadius: 8, border: `1px solid ${P.border}`, background: 'none', color: P.muted, fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>
+                        Reset Progress
+                      </button>
                     )}
                   </>
                 )}
