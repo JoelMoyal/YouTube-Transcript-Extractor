@@ -4016,7 +4016,8 @@ const App = () => {
     }
   };
 
-  // Renders a single line of AI chat text, turning [M:SS] timestamps into clickable chips
+  // Renders a single line of AI chat text, turning [M:SS] timestamps into clickable links
+  // that seek the video AND scroll the transcript panel to that segment
   const renderChatLine = (line) => {
     const parts = line.split(/(\[\d+:\d{2}(?::\d{2})?\])/g);
     if (parts.length === 1) return line;
@@ -4026,10 +4027,35 @@ const App = () => {
         const secs = m[3]
           ? parseInt(m[1]) * 3600 + parseInt(m[2]) * 60 + parseInt(m[3])
           : parseInt(m[1]) * 60 + parseInt(m[2]);
+        const handleTimestampClick = () => {
+          // Seek the video
+          seekToTime(secs);
+          // Find the nearest segment index
+          if (segments.length > 0) {
+            let idx = 0;
+            for (let j = 0; j < segments.length; j++) {
+              if (segments[j].seconds <= secs) idx = j;
+              else break;
+            }
+            // Highlight the segment
+            setSelectedSegment(idx);
+            // Scroll the transcript panel to that segment
+            const el = segmentRefs.current[idx];
+            const listEl = transcriptListRef.current;
+            if (el && listEl) {
+              const elRect = el.getBoundingClientRect();
+              const listRect = listEl.getBoundingClientRect();
+              const relativeTop = elRect.top - listRect.top + listEl.scrollTop;
+              listEl.scrollTo({ top: Math.max(0, relativeTop - listEl.clientHeight / 3), behavior: 'smooth' });
+            }
+          }
+        };
+        // Format as MM:SS for display (strip the brackets)
+        const label = part.slice(1, -1);
         return (
-          <span key={i} onClick={() => seekToTime(secs)} title="Jump to this point in the video"
-            style={{ display: 'inline-block', color: P.accent, background: P.accentLight, border: `1px solid rgba(45,108,223,0.25)`, borderRadius: 5, padding: '0 5px', fontSize: '0.82em', fontWeight: 700, cursor: 'pointer', margin: '0 2px', lineHeight: 1.6 }}>
-            {part}
+          <span key={i} onClick={handleTimestampClick} title="Jump to this point in the video and transcript"
+            style={{ color: P.accent, fontFamily: 'monospace', fontWeight: 700, fontSize: '0.88em', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', textUnderlineOffset: 3 }}>
+            {label}
           </span>
         );
       }
