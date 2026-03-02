@@ -4724,7 +4724,7 @@ const App = () => {
                 borderRadius: isMobile ? 16 : 20, boxShadow: '0 12px 56px rgba(28,25,23,0.13)',
                 padding: isMobile ? '7px 7px 7px 7px' : 10,
               }}>
-                <div style={{ display: 'flex', gap: isMobile ? 6 : 8, flexDirection: 'row' }}>
+                <div style={{ display: 'flex', gap: isMobile ? 6 : 8, flexDirection: isMobile ? 'column' : 'row' }}>
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: isMobile ? '10px 12px' : '16px 20px', background: P.paper, borderRadius: isMobile ? 11 : 14, border: `1px solid ${P.border}` }}>
                     {(() => {
                       const platform = parseVideoUrl(videoUrl)?.platform;
@@ -4771,13 +4771,13 @@ const App = () => {
                         onClick={getTranscript}
                         disabled={btnDisabled}
                         style={{
-                          flexShrink: 0, padding: isMobile ? '10px 16px' : '0 28px', borderRadius: isMobile ? 11 : 14, border: 'none',
+                          flexShrink: 0, padding: isMobile ? '9px 18px' : '0 28px', borderRadius: isMobile ? 11 : 14, border: 'none',
                           background: btnBg,
                           color: outOfCredits ? P.error : 'white',
-                          fontSize: isMobile ? 13 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, whiteSpace: 'nowrap',
+                          fontSize: isMobile ? 14 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, whiteSpace: 'nowrap',
                           transition: 'background 0.15s',
-                          minWidth: isMobile ? 88 : 148,
+                          width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
                         }}
                         onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
                         onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
