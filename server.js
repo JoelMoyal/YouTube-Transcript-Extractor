@@ -211,14 +211,14 @@ function parseTimestamp(ts) {
 
 function parseVTT(content) {
   const lines = content.split('\n');
-  const segments = [];
+  const rawSegments = [];
   let currentSeconds = null;
   let currentTexts = [];
 
   const flush = () => {
     if (currentSeconds !== null && currentTexts.length > 0) {
       const text = currentTexts.join(' ').replace(/\s+/g, ' ').trim();
-      if (text) segments.push({ seconds: currentSeconds, text });
+      if (text) rawSegments.push({ seconds: currentSeconds, text });
     }
     currentTexts = [];
     currentSeconds = null;
@@ -242,37 +242,62 @@ function parseVTT(content) {
   }
   flush();
 
-  const seen = new Set();
-  const deduped = segments.filter(s => {
-    if (seen.has(s.text)) return false;
-    seen.add(s.text);
-    return true;
-  });
+  // Strip rolling overlaps: YouTube auto-captions repeat previous line in each block.
+  // For each segment, remove words at the start that already appeared at the end of the previous segment.
+  const segments = [];
+  let lastText = '';
+  for (const seg of rawSegments) {
+    const words = seg.text.split(/\s+/);
+    const lastWords = lastText.split(/\s+/);
+    let overlap = 0;
+    for (let len = Math.min(words.length, lastWords.length); len > 0; len--) {
+      if (lastWords.slice(-len).join(' ').toLowerCase() === words.slice(0, len).join(' ').toLowerCase()) {
+        overlap = len;
+        break;
+      }
+    }
+    const newWords = words.slice(overlap);
+    if (newWords.length === 0) { lastText = seg.text; continue; }
+    segments.push({ seconds: seg.seconds, text: newWords.join(' ') });
+    lastText = seg.text;
+  }
 
-  const transcript = deduped.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-  return { transcript, segments: deduped };
+  const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
+  return { transcript, segments };
 }
 
 function parseJSON3(content) {
   const json3 = JSON.parse(content);
-  const segments = [];
+  const rawSegments = [];
 
   for (const event of json3.events) {
     if (!event.segs) continue;
     const seconds = Math.floor((event.tStartMs || 0) / 1000);
     const text = event.segs.map(s => s.utf8 || '').join('').replace(/\n/g, ' ').trim();
-    if (text) segments.push({ seconds, text });
+    if (text) rawSegments.push({ seconds, text });
   }
 
-  const seen = new Set();
-  const deduped = segments.filter(s => {
-    if (seen.has(s.text)) return false;
-    seen.add(s.text);
-    return true;
-  });
+  // Same rolling overlap removal as VTT
+  const segments = [];
+  let lastText = '';
+  for (const seg of rawSegments) {
+    const words = seg.text.split(/\s+/);
+    const lastWords = lastText.split(/\s+/);
+    let overlap = 0;
+    for (let len = Math.min(words.length, lastWords.length); len > 0; len--) {
+      if (lastWords.slice(-len).join(' ').toLowerCase() === words.slice(0, len).join(' ').toLowerCase()) {
+        overlap = len;
+        break;
+      }
+    }
+    const newWords = words.slice(overlap);
+    if (newWords.length === 0) { lastText = seg.text; continue; }
+    segments.push({ seconds: seg.seconds, text: newWords.join(' ') });
+    lastText = seg.text;
+  }
 
-  const transcript = deduped.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-  return { transcript, segments: deduped };
+  const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
+  return { transcript, segments };
 }
 
 function toWhisperLang(lang) {
