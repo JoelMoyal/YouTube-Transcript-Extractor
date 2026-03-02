@@ -3295,6 +3295,7 @@ const App = () => {
   const [studyGuideFull, setStudyGuideFull]       = useState(false);
   const [academicInsights, setAcademicInsights]               = useState(null); // {references, claims, glossary, researchGaps}
   const [academicInsightsLoading, setAcademicInsightsLoading] = useState(false);
+  const [academicInsightsFull, setAcademicInsightsFull]       = useState(false);
   const [activeLogo, setActiveLogo]               = useState('youtube'); // 'youtube' | 'vimeo'
   const [logoFlip, setLogoFlip]                   = useState('idle');    // 'idle' | 'out' | 'in'
   const [sgQuestion, setSgQuestion]               = useState('');
@@ -3370,6 +3371,14 @@ const App = () => {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [studyGuideFull]);
+
+  // Academic insights fullscreen — Escape to close
+  useEffect(() => {
+    if (!academicInsightsFull) return;
+    const handler = (e) => { if (e.key === 'Escape') setAcademicInsightsFull(false); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [academicInsightsFull]);
 
   // Flashcard modal keyboard navigation
   useEffect(() => {
@@ -3772,7 +3781,7 @@ const App = () => {
     setQaQuestion(''); setQaMessages([]);
     setTimeline(null);
     setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
-    setAcademicInsights(null); setAcademicInsightsLoading(false);
+    setAcademicInsights(null); setAcademicInsightsLoading(false); setAcademicInsightsFull(false);
     setActiveTab('transcript');
     setCurrentTitle(''); setCurrentChannel('');
     setSelectedSegment(null); setExportToggle(false);
@@ -3833,7 +3842,7 @@ const App = () => {
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
     setSummary(''); setTimeline(null); setShowTopics(false);
     setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
-    setAcademicInsights(null); setAcademicInsightsLoading(false);
+    setAcademicInsights(null); setAcademicInsightsLoading(false); setAcademicInsightsFull(false);
     setMobilePanel('transcript'); setHistoryDrawerOpen(false);
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
@@ -5048,6 +5057,7 @@ const App = () => {
                   ...(!isMobile && (flashcards.length > 0 || flashcardsExhausted) ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
                   ...(!isMobile && summary ? [{ key: 'summary', label: 'Summary', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
                   ...(!isMobile && studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
+                  ...(!isMobile && academicInsights && !academicInsights._error ? [{ key: 'academic', label: 'Academic', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }] : []),
                 ].map(tab => {
                   const isActive = activeTab === tab.key;
                   return (
@@ -5542,119 +5552,186 @@ const App = () => {
                 {activeTab === 'academic' && (
                   <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px' }}>
                     {academicInsightsLoading ? (
-                      <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#7C3AED', fontSize: 13 }}>
-                        <SpinnerIcon size={14} /> Generating academic insights…
-                      </div>
-                    ) : academicInsights && !academicInsights._error ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 700, margin: '0 auto' }}>
-                        {/* Header */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED' }}>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                            </div>
-                            <div>
-                              <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Academic Insights</div>
-                              <div style={{ fontSize: 11.5, color: P.muted }}>AI-extracted from transcript</div>
-                            </div>
-                          </div>
-                          <button onClick={() => { setAcademicInsights(null); setActiveTab('transcript'); }}
-                            style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 6, transition: 'all 0.15s' }}
-                            onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
-                          >Clear</button>
+                      <div style={{ padding: '60px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+                        <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <SpinnerIcon size={18} style={{ color: '#7C3AED' }} />
                         </div>
-
-                        {/* References */}
-                        {academicInsights.references?.length > 0 && (
-                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
-                            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>References Mentioned ({academicInsights.references.length})</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                              {academicInsights.references.map((ref, i) => (
-                                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', paddingBottom: i < academicInsights.references.length - 1 ? 10 : 0, borderBottom: i < academicInsights.references.length - 1 ? `1px solid ${P.border}` : 'none' }}>
-                                  <div style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(124,58,237,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                                  </div>
-                                  <div style={{ minWidth: 0, flex: 1 }}>
-                                    <div style={{ fontSize: 13.5, fontWeight: 600, color: P.ink, lineHeight: 1.4 }}>
-                                      {ref.title || ref.author}
-                                    </div>
-                                    <div style={{ fontSize: 12, color: P.muted, marginTop: 2 }}>
-                                      {[ref.author, ref.year].filter(Boolean).join(' · ')}
-                                      {ref.type && ref.type !== 'other' && <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.08)', padding: '1px 6px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{ref.type}</span>}
-                                    </div>
-                                  </div>
-                                  <a href={`https://scholar.google.com/scholar?q=${encodeURIComponent([ref.title, ref.author].filter(Boolean).join(' '))}`} target="_blank" rel="noopener noreferrer"
-                                    style={{ flexShrink: 0, fontSize: 11, fontWeight: 600, color: '#7C3AED', border: '1px solid rgba(124,58,237,0.25)', padding: '3px 9px', borderRadius: 5, textDecoration: 'none', whiteSpace: 'nowrap' }}
-                                    onClick={e => e.stopPropagation()}>
-                                    Search
-                                  </a>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Key Claims */}
-                        {academicInsights.claims?.length > 0 && (
-                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
-                            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Key Claims</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                              {academicInsights.claims.map((c, i) => (
-                                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', background: c.supported ? 'rgba(15,118,110,0.04)' : 'rgba(180,35,24,0.04)', borderRadius: 9, border: `1px solid ${c.supported ? 'rgba(15,118,110,0.15)' : 'rgba(180,35,24,0.15)'}` }}>
-                                  <div style={{ flexShrink: 0, marginTop: 2, width: 16, height: 16, borderRadius: '50%', background: c.supported ? 'rgba(15,118,110,0.12)' : 'rgba(180,35,24,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {c.supported
-                                      ? <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                      : <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={P.error} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                    }
-                                  </div>
-                                  <div style={{ minWidth: 0 }}>
-                                    <div style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink }}>{c.claim}</div>
-                                    {c.evidence && <div style={{ fontSize: 12, color: P.muted, marginTop: 4, lineHeight: 1.5 }}>Evidence: {c.evidence}</div>}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Glossary */}
-                        {academicInsights.glossary?.length > 0 && (
-                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
-                            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Glossary</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                              {academicInsights.glossary.map((g, i) => (
-                                <div key={i} style={{ paddingBottom: i < academicInsights.glossary.length - 1 ? 10 : 0, borderBottom: i < academicInsights.glossary.length - 1 ? `1px solid ${P.border}` : 'none' }}>
-                                  <span style={{ fontSize: 13.5, fontWeight: 700, color: '#7C3AED' }}>{g.term}</span>
-                                  <span style={{ fontSize: 13.5, color: P.muted }}> — </span>
-                                  <span style={{ fontSize: 13.5, color: P.ink, lineHeight: 1.6 }}>{g.definition}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Research Gaps */}
-                        {academicInsights.researchGaps?.length > 0 && (
-                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
-                            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Research Gaps & Open Questions</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                              {academicInsights.researchGaps.map((gap, i) => (
-                                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', background: 'rgba(124,58,237,0.04)', borderRadius: 9, border: '1px solid rgba(124,58,237,0.12)' }}>
-                                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#7C3AED', flexShrink: 0, marginTop: 7 }} />
-                                  <div style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink }}>{gap}</div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Empty state */}
-                        {!academicInsights.references?.length && !academicInsights.claims?.length && !academicInsights.glossary?.length && !academicInsights.researchGaps?.length && (
-                          <div style={{ padding: '32px 0', textAlign: 'center', color: P.muted, fontSize: 13 }}>No academic content detected in this transcript.</div>
-                        )}
+                        <div style={{ fontSize: 13, color: P.muted }}>Extracting academic insights…</div>
                       </div>
-                    ) : academicInsights?._error ? (
+                    ) : academicInsights && !academicInsights._error ? (() => {
+                      const ai = academicInsights;
+                      const supportedCount = ai.claims?.filter(c => c.supported).length || 0;
+                      const unsupportedCount = (ai.claims?.length || 0) - supportedCount;
+                      return (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 720, margin: '0 auto' }}>
+                          {/* Header */}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div style={{ width: 36, height: 36, borderRadius: 11, background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED' }}>
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Academic Insights</div>
+                                <div style={{ fontSize: 11.5, color: P.muted }}>AI-extracted from transcript</div>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <button onClick={() => setAcademicInsightsFull(true)}
+                                style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 5 }}
+                                onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                                Full Screen
+                              </button>
+                              <button onClick={() => { setAcademicInsights(null); setActiveTab('transcript'); }}
+                                style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 6, transition: 'all 0.15s' }}
+                                onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}>Clear</button>
+                            </div>
+                          </div>
+
+                          {/* Stats bar */}
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            {ai.references?.length > 0 && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', background: 'rgba(124,58,237,0.07)', borderRadius: 99, border: '1px solid rgba(124,58,237,0.15)' }}>
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED' }}>{ai.references.length} References</span>
+                              </div>
+                            )}
+                            {ai.claims?.length > 0 && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', background: 'rgba(28,25,23,0.04)', borderRadius: 99, border: `1px solid ${P.border}` }}>
+                                <span style={{ fontSize: 11.5, fontWeight: 600, color: P.success }}>{supportedCount} supported</span>
+                                <span style={{ width: 1, height: 10, background: P.border }} />
+                                <span style={{ fontSize: 11.5, fontWeight: 600, color: unsupportedCount > 0 ? P.error : P.muted }}>{unsupportedCount} unsupported</span>
+                              </div>
+                            )}
+                            {ai.glossary?.length > 0 && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', background: 'rgba(124,58,237,0.07)', borderRadius: 99, border: '1px solid rgba(124,58,237,0.15)' }}>
+                                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED' }}>{ai.glossary.length} Terms</span>
+                              </div>
+                            )}
+                            {ai.researchGaps?.length > 0 && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', background: 'rgba(124,58,237,0.07)', borderRadius: 99, border: '1px solid rgba(124,58,237,0.15)' }}>
+                                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED' }}>{ai.researchGaps.length} Open Questions</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* References */}
+                          {ai.references?.length > 0 && (
+                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', overflow: 'hidden' }}>
+                              <div style={{ padding: '14px 18px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>References Mentioned</span>
+                                <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.1)', padding: '1px 7px', borderRadius: 99 }}>{ai.references.length}</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {ai.references.map((ref, i) => (
+                                  <div key={i} style={{ display: 'flex', gap: 13, alignItems: 'center', padding: '12px 18px', borderBottom: i < ai.references.length - 1 ? `1px solid ${P.border}` : 'none', transition: 'background 0.12s' }}
+                                    onMouseEnter={e => e.currentTarget.style.background = P.paper}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(124,58,237,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#7C3AED' }}>
+                                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                                    </div>
+                                    <div style={{ minWidth: 0, flex: 1 }}>
+                                      <div style={{ fontSize: 13.5, fontWeight: 600, color: P.ink, lineHeight: 1.35 }}>{ref.title || ref.author}</div>
+                                      <div style={{ fontSize: 12, color: P.muted, marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        {[ref.author, ref.year].filter(Boolean).join(' · ')}
+                                        {ref.type && ref.type !== 'other' && <span style={{ fontSize: 10, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.08)', padding: '1px 6px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{ref.type}</span>}
+                                      </div>
+                                    </div>
+                                    <a href={`https://scholar.google.com/scholar?q=${encodeURIComponent([ref.title, ref.author].filter(Boolean).join(' '))}`} target="_blank" rel="noopener noreferrer"
+                                      style={{ flexShrink: 0, fontSize: 11, fontWeight: 600, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', padding: '5px 11px', borderRadius: 7, textDecoration: 'none', whiteSpace: 'nowrap', transition: 'all 0.12s' }}
+                                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; }}
+                                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.07)'; }}
+                                      onClick={e => e.stopPropagation()}>
+                                      Search →
+                                    </a>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Key Claims */}
+                          {ai.claims?.length > 0 && (
+                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', overflow: 'hidden' }}>
+                              <div style={{ padding: '14px 18px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Key Claims</span>
+                                <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+                                  {supportedCount > 0 && <span style={{ fontSize: 10.5, fontWeight: 700, color: P.success, background: 'rgba(15,118,110,0.08)', padding: '2px 8px', borderRadius: 99 }}>✓ {supportedCount}</span>}
+                                  {unsupportedCount > 0 && <span style={{ fontSize: 10.5, fontWeight: 700, color: P.error, background: 'rgba(180,35,24,0.08)', padding: '2px 8px', borderRadius: 99 }}>⚠ {unsupportedCount}</span>}
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                                {ai.claims.map((c, i) => (
+                                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '13px 18px', borderBottom: i < ai.claims.length - 1 ? `1px solid ${P.border}` : 'none', borderLeft: `3px solid ${c.supported ? P.success : P.error}` }}>
+                                    <div style={{ flexShrink: 0, marginTop: 3, width: 18, height: 18, borderRadius: '50%', background: c.supported ? 'rgba(15,118,110,0.1)' : 'rgba(180,35,24,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                      {c.supported
+                                        ? <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                        : <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={P.error} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                      }
+                                    </div>
+                                    <div style={{ minWidth: 0 }}>
+                                      <div style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink, fontWeight: 500 }}>{c.claim}</div>
+                                      {c.evidence && <div style={{ fontSize: 12, color: P.muted, marginTop: 5, lineHeight: 1.55, paddingTop: 5, borderTop: `1px solid ${P.border}` }}>
+                                        <span style={{ fontWeight: 600, color: P.ink }}>Evidence: </span>{c.evidence}
+                                      </div>}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Glossary */}
+                          {ai.glossary?.length > 0 && (
+                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', overflow: 'hidden' }}>
+                              <div style={{ padding: '14px 18px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Glossary</span>
+                                <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.1)', padding: '1px 7px', borderRadius: 99 }}>{ai.glossary.length} terms</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {ai.glossary.map((g, i) => (
+                                  <div key={i} style={{ display: 'flex', gap: 0, padding: '12px 18px', borderBottom: i < ai.glossary.length - 1 ? `1px solid ${P.border}` : 'none', transition: 'background 0.12s' }}
+                                    onMouseEnter={e => e.currentTarget.style.background = P.paper}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                                    <div style={{ minWidth: 160, flexShrink: 0, fontSize: 13.5, fontWeight: 700, color: '#7C3AED', lineHeight: 1.5, paddingRight: 16 }}>{g.term}</div>
+                                    <div style={{ fontSize: 13.5, color: P.ink, lineHeight: 1.65 }}>{g.definition}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Research Gaps */}
+                          {ai.researchGaps?.length > 0 && (
+                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', overflow: 'hidden' }}>
+                              <div style={{ padding: '14px 18px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Open Questions & Research Gaps</span>
+                                <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.1)', padding: '1px 7px', borderRadius: 99 }}>{ai.researchGaps.length}</span>
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                {ai.researchGaps.map((gap, i) => (
+                                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '13px 18px', borderBottom: i < ai.researchGaps.length - 1 ? `1px solid ${P.border}` : 'none', borderLeft: '3px solid rgba(124,58,237,0.35)' }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2, opacity: 0.6 }}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                    <div style={{ fontSize: 13.5, lineHeight: 1.65, color: P.ink }}>{gap}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Empty state */}
+                          {!ai.references?.length && !ai.claims?.length && !ai.glossary?.length && !ai.researchGaps?.length && (
+                            <div style={{ padding: '48px 0', textAlign: 'center', color: P.muted, fontSize: 13 }}>No academic content detected in this transcript.</div>
+                          )}
+                        </div>
+                      );
+                    })() : academicInsights?._error ? (
                       <div style={{ padding: '32px 24px', color: P.error, fontSize: 13 }}>Failed to generate: {academicInsights._error}</div>
                     ) : null}
                   </div>
@@ -6268,7 +6345,7 @@ const App = () => {
                 background: 'linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%)',
                 borderTop: `1.5px solid rgba(45,108,223,0.18)`,
                 boxShadow: '0 -2px 16px rgba(45,108,223,0.08)',
-                display: showFlashcardModal || studyGuideFull ? 'none' : 'flex',
+                display: showFlashcardModal || studyGuideFull || academicInsightsFull ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: hasDynamic ? 'flex-start' : 'center',
                 overflowX: hasDynamic ? 'auto' : 'visible',
@@ -6784,6 +6861,140 @@ const App = () => {
           </div>
         </div>
       )}
+
+      {/* ── Academic Insights Fullscreen ────────────────────────────────── */}
+      {academicInsightsFull && academicInsights && !academicInsights._error && (() => {
+        const ai = academicInsights;
+        const supportedCount = ai.claims?.filter(c => c.supported).length || 0;
+        const unsupportedCount = (ai.claims?.length || 0) - supportedCount;
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: '#FAFAF8', zIndex: 9998, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            {/* Toolbar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: isMobile ? '12px 16px' : '14px 24px', borderBottom: `1px solid ${P.border}`, background: '#fff', flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED', flexShrink: 0 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              </div>
+              <div>
+                <div style={{ fontSize: 14.5, fontWeight: 700, color: P.ink, lineHeight: 1.2 }}>Academic Insights</div>
+                <div style={{ fontSize: 11, color: P.muted, marginTop: 1 }}>{currentTitle || 'Extracted from transcript'}</div>
+              </div>
+              {/* Stats */}
+              <div style={{ display: 'flex', gap: 8, marginLeft: 16, flexWrap: 'wrap' }}>
+                {ai.references?.length > 0 && <span style={{ fontSize: 11, fontWeight: 600, color: '#7C3AED', background: 'rgba(124,58,237,0.08)', padding: '3px 9px', borderRadius: 99 }}>{ai.references.length} References</span>}
+                {ai.claims?.length > 0 && <span style={{ fontSize: 11, fontWeight: 600, color: P.success, background: 'rgba(15,118,110,0.08)', padding: '3px 9px', borderRadius: 99 }}>✓ {supportedCount}</span>}
+                {unsupportedCount > 0 && <span style={{ fontSize: 11, fontWeight: 600, color: P.error, background: 'rgba(180,35,24,0.08)', padding: '3px 9px', borderRadius: 99 }}>⚠ {unsupportedCount}</span>}
+                {ai.glossary?.length > 0 && <span style={{ fontSize: 11, fontWeight: 600, color: '#7C3AED', background: 'rgba(124,58,237,0.08)', padding: '3px 9px', borderRadius: 99 }}>{ai.glossary.length} Terms</span>}
+              </div>
+              <button onClick={() => setAcademicInsightsFull(false)}
+                style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 7, padding: '9px 18px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, cursor: 'pointer', color: P.muted, fontSize: 13, fontWeight: 600, transition: 'all 0.15s', flexShrink: 0 }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,35,24,0.06)'; e.currentTarget.style.borderColor = 'rgba(180,35,24,0.28)'; e.currentTarget.style.color = P.error; }}
+                onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.borderColor = P.border; e.currentTarget.style.color = P.muted; }}
+                title="Close (Esc)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Close <span style={{ fontSize: 10, opacity: 0.5, fontWeight: 500, marginLeft: 2 }}>Esc</span>
+              </button>
+            </div>
+            {/* Scrollable content */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px 16px' : '28px 40px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 22, maxWidth: 800, margin: '0 auto' }}>
+                {/* References */}
+                {ai.references?.length > 0 && (
+                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)', overflow: 'hidden' }}>
+                    <div style={{ padding: '14px 22px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>References Mentioned</span>
+                      <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.1)', padding: '1px 7px', borderRadius: 99 }}>{ai.references.length}</span>
+                    </div>
+                    {ai.references.map((ref, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '14px 22px', borderBottom: i < ai.references.length - 1 ? `1px solid ${P.border}` : 'none', transition: 'background 0.12s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = P.paper}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(124,58,237,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#7C3AED' }}>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <div style={{ fontSize: 14.5, fontWeight: 600, color: P.ink, lineHeight: 1.35 }}>{ref.title || ref.author}</div>
+                          <div style={{ fontSize: 12.5, color: P.muted, marginTop: 3, display: 'flex', alignItems: 'center', gap: 6 }}>
+                            {[ref.author, ref.year].filter(Boolean).join(' · ')}
+                            {ref.type && ref.type !== 'other' && <span style={{ fontSize: 10, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.08)', padding: '1px 7px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{ref.type}</span>}
+                          </div>
+                        </div>
+                        <a href={`https://scholar.google.com/scholar?q=${encodeURIComponent([ref.title, ref.author].filter(Boolean).join(' '))}`} target="_blank" rel="noopener noreferrer"
+                          style={{ flexShrink: 0, fontSize: 12, fontWeight: 600, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', padding: '7px 14px', borderRadius: 8, textDecoration: 'none', whiteSpace: 'nowrap', transition: 'all 0.12s' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.14)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(124,58,237,0.07)'; }}>
+                          Search →
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* Key Claims */}
+                {ai.claims?.length > 0 && (
+                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)', overflow: 'hidden' }}>
+                    <div style={{ padding: '14px 22px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Key Claims</span>
+                      <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+                        {supportedCount > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: P.success, background: 'rgba(15,118,110,0.08)', padding: '2px 9px', borderRadius: 99 }}>✓ {supportedCount} supported</span>}
+                        {unsupportedCount > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: P.error, background: 'rgba(180,35,24,0.08)', padding: '2px 9px', borderRadius: 99 }}>⚠ {unsupportedCount} unsupported</span>}
+                      </div>
+                    </div>
+                    {ai.claims.map((c, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '15px 22px', borderBottom: i < ai.claims.length - 1 ? `1px solid ${P.border}` : 'none', borderLeft: `3px solid ${c.supported ? P.success : P.error}` }}>
+                        <div style={{ flexShrink: 0, marginTop: 3, width: 20, height: 20, borderRadius: '50%', background: c.supported ? 'rgba(15,118,110,0.1)' : 'rgba(180,35,24,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {c.supported
+                            ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            : <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={P.error} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          }
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: 14.5, lineHeight: 1.65, color: P.ink, fontWeight: 500 }}>{c.claim}</div>
+                          {c.evidence && <div style={{ fontSize: 13, color: P.muted, marginTop: 6, lineHeight: 1.6, paddingTop: 6, borderTop: `1px solid ${P.border}` }}><span style={{ fontWeight: 600, color: P.ink }}>Evidence: </span>{c.evidence}</div>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* Glossary */}
+                {ai.glossary?.length > 0 && (
+                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)', overflow: 'hidden' }}>
+                    <div style={{ padding: '14px 22px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Glossary</span>
+                      <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.1)', padding: '1px 7px', borderRadius: 99 }}>{ai.glossary.length} terms</span>
+                    </div>
+                    {ai.glossary.map((g, i) => (
+                      <div key={i} style={{ display: 'flex', padding: '13px 22px', borderBottom: i < ai.glossary.length - 1 ? `1px solid ${P.border}` : 'none', transition: 'background 0.12s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = P.paper}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <div style={{ minWidth: 190, flexShrink: 0, fontSize: 14.5, fontWeight: 700, color: '#7C3AED', lineHeight: 1.5, paddingRight: 20 }}>{g.term}</div>
+                        <div style={{ fontSize: 14.5, color: P.ink, lineHeight: 1.7 }}>{g.definition}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* Research Gaps */}
+                {ai.researchGaps?.length > 0 && (
+                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)', overflow: 'hidden', marginBottom: 24 }}>
+                    <div style={{ padding: '14px 22px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Open Questions & Research Gaps</span>
+                      <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.1)', padding: '1px 7px', borderRadius: 99 }}>{ai.researchGaps.length}</span>
+                    </div>
+                    {ai.researchGaps.map((gap, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '15px 22px', borderBottom: i < ai.researchGaps.length - 1 ? `1px solid ${P.border}` : 'none', borderLeft: '3px solid rgba(124,58,237,0.35)' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2, opacity: 0.6 }}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <div style={{ fontSize: 14.5, lineHeight: 1.7, color: P.ink }}>{gap}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Flashcard Modal ─────────────────────────────────────────────── */}
       {showFlashcardModal && flashcards.length > 0 && (() => {
