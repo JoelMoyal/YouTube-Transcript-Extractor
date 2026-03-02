@@ -60,7 +60,6 @@ const PLATFORM_BRAND = {
   twitter:     { icon: '#000000', stat: '#1D9BF0', bg: 'rgba(29,155,240,0.12)', bgSoft: 'rgba(29,155,240,0.09)' },
   instagram:   { icon: '#E1306C', stat: '#C13584', bg: 'rgba(193,53,132,0.12)', bgSoft: 'rgba(193,53,132,0.09)' },
   dailymotion: { icon: '#00B4F0', stat: '#0065A3', bg: 'rgba(0,101,163,0.12)',  bgSoft: 'rgba(0,101,163,0.09)'  },
-  twitch:      { icon: '#9146FF', stat: '#9146FF', bg: 'rgba(145,70,255,0.12)', bgSoft: 'rgba(145,70,255,0.09)' },
   facebook:    { icon: '#1877F2', stat: '#1877F2', bg: 'rgba(24,119,242,0.12)', bgSoft: 'rgba(24,119,242,0.09)' },
   loom:        { icon: '#625DF5', stat: '#625DF5', bg: 'rgba(98,93,245,0.12)',  bgSoft: 'rgba(98,93,245,0.09)'  },
   wistia:      { icon: '#54ABCC', stat: '#54ABCC', bg: 'rgba(84,171,204,0.12)', bgSoft: 'rgba(84,171,204,0.09)' },
@@ -188,17 +187,6 @@ function parseVideoUrl(input) {
     if (h === 'dailymotion.com' || h === 'dai.ly') {
       const m = u.pathname.match(/\/(?:video\/)?([a-zA-Z0-9]+)/);
       return { platform: 'dailymotion', id: m ? m[1] : trimmed, url: trimmed };
-    }
-
-    // Twitch — encode type+id so player knows whether it's a VOD or clip
-    if (h === 'twitch.tv' || h === 'clips.twitch.tv') {
-      const vodM = u.pathname.match(/\/videos\/(\d+)/);
-      if (vodM) return { platform: 'twitch', id: `v${vodM[1]}`, url: trimmed };
-      const clipM = h === 'clips.twitch.tv'
-        ? u.pathname.match(/^\/([^/]+)/)
-        : u.pathname.match(/\/clip\/([^/]+)/);
-      if (clipM) return { platform: 'twitch', id: `c_${clipM[1]}`, url: trimmed };
-      return { platform: 'twitch', id: trimmed, url: trimmed };
     }
 
     // Facebook
@@ -342,11 +330,6 @@ const DailymotionIcon = ({ size = 18 }) => (
     <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.5 16.5a4.5 4.5 0 0 1-4.5-4.5V6h2v3.17A4.49 4.49 0 0 1 16.5 8v2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 2.5-2.5H21a4.5 4.5 0 0 1-4.5 4z"/>
   </svg>
 );
-const TwitchIcon = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.twitch.icon}>
-    <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
-  </svg>
-);
 const FacebookIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.facebook.icon}>
     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -354,7 +337,7 @@ const FacebookIcon = ({ size = 18 }) => (
 );
 const LoomIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.loom.icon}>
-    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 12a5.568 5.568 0 1 1-5.137-5.548v2.085a3.484 3.484 0 1 0 3.052 3.463zm-5.137-5.548V4.364l3.923 2.265-1.042 1.806a3.484 3.484 0 0 0-2.881-.983zm3.923 2.265 1.042-1.806 1.97 3.415h-2.085a3.484 3.484 0 0 0-.927-1.609zM18.466 12h2.085l-1.97 3.415-1.042-1.806A3.484 3.484 0 0 0 18.466 12zm-1.927 1.609 1.042 1.806-3.923 2.265v-2.088a3.484 3.484 0 0 0 2.881-.983zm-3.923 2.265v2.088l-3.923-2.265 1.042-1.806a3.484 3.484 0 0 0 2.881.983zM5.534 12c0-.61.102-1.196.288-1.745l1.806 1.042A3.484 3.484 0 0 0 8.432 12c0 .24.024.474.072.7L6.698 13.744A5.536 5.536 0 0 1 5.534 12zm2.553-3.415-1.042-1.806 1.97-3.415v2.085a3.484 3.484 0 0 0-.928 1.136zm-1.042-1.806 1.042 1.806A3.484 3.484 0 0 0 7.015 12H4.93l1.97-3.415 1.146.194zM8.58 15.61a3.484 3.484 0 0 0 2.884.98v2.046l-3.923-2.265 1.04-1.805V15.61z"/>
+    <path d="M22.001 10.802h-5.773l4.101-2.394-1.196-2.07-4.108 2.397 2.394-4.108-2.07-1.196-2.394 4.101V1.759h-2.388v5.773L8.173 3.43 6.104 4.628l2.394 4.108-4.108-2.397-1.196 2.07 4.101 2.394H1.523v2.389h5.772l-4.101 2.393 1.196 2.071 4.108-2.397-2.394 4.107 2.07 1.196 2.394-4.1v5.772h2.388v-5.773l2.394 4.101 2.07-1.196-2.394-4.107 4.107 2.397 1.197-2.071-4.102-2.393h5.773v-2.389z"/>
   </svg>
 );
 const WistiaIcon = ({ size = 18 }) => (
@@ -369,7 +352,6 @@ const PlatformIcon = ({ platform, size = 18 }) => {
   if (platform === 'twitter')     return <TwitterIcon size={size} />;
   if (platform === 'instagram')   return <InstagramIcon size={size} />;
   if (platform === 'dailymotion') return <DailymotionIcon size={size} />;
-  if (platform === 'twitch')      return <TwitchIcon size={size} />;
   if (platform === 'facebook')    return <FacebookIcon size={size} />;
   if (platform === 'loom')        return <LoomIcon size={size} />;
   if (platform === 'wistia')      return <WistiaIcon size={size} />;
@@ -3503,7 +3485,7 @@ const App = () => {
     const id = setInterval(() => {
       setLogoFlip('out');
       const t1 = setTimeout(() => {
-        const LOGO_CYCLE = ['youtube', 'tiktok', 'twitch', 'loom', 'vimeo', 'twitter', 'instagram'];
+        const LOGO_CYCLE = ['youtube', 'tiktok', 'loom', 'vimeo', 'dailymotion', 'instagram'];
         setActiveLogo(p => { const i = LOGO_CYCLE.indexOf(p); return LOGO_CYCLE[(i + 1) % LOGO_CYCLE.length]; });
         setLogoFlip('in');
         const t2 = setTimeout(() => setLogoFlip('idle'), FLIP_DURATION);
@@ -4769,7 +4751,7 @@ const App = () => {
                       onChange={e => setVideoUrl(e.target.value)}
                       onFocus={handleInputFocus}
                       onKeyDown={e => e.key === 'Enter' && !loading && getTranscript()}
-                      placeholder="Paste a YouTube, TikTok, Twitch, Loom, Vimeo URL…"
+                      placeholder="Paste a YouTube, TikTok, Loom, Vimeo, Dailymotion URL…"
                       style={{
                         flex: 1, border: 'none', background: 'transparent', outline: 'none',
                         fontSize: isMobile ? 15 : 17, color: P.ink,
@@ -5150,21 +5132,6 @@ const App = () => {
                           allow="autoplay; encrypted-media; fullscreen"
                           allowFullScreen
                           title="TikTok player"
-                        />
-                      ) : currentPlatform === 'twitch' ? (
-                        <iframe
-                          src={(() => {
-                            const parent = window.location.hostname;
-                            if (currentVideoId.startsWith('v'))
-                              return `https://player.twitch.tv/?video=${currentVideoId.slice(1)}&parent=${parent}&autoplay=false`;
-                            if (currentVideoId.startsWith('c_'))
-                              return `https://clips.twitch.tv/embed?clip=${currentVideoId.slice(2)}&parent=${parent}&autoplay=false`;
-                            return `https://player.twitch.tv/?channel=${currentVideoId}&parent=${parent}&autoplay=false`;
-                          })()}
-                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block', ...(isMobile ? { maxHeight: 160 } : {}) }}
-                          allow="autoplay; fullscreen"
-                          allowFullScreen
-                          title="Twitch player"
                         />
                       ) : currentPlatform === 'dailymotion' ? (
                         <iframe

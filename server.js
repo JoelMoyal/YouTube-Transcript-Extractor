@@ -512,7 +512,7 @@ app.get('/api/transcript', async (req, res) => {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // GENERIC PLATFORM (TikTok, Twitter/X, Instagram, Twitch, Facebook, Loom,
+  // GENERIC PLATFORM (TikTok, Twitter/X, Instagram, Facebook, Loom,
   //                   Wistia, Dailymotion, and any other yt-dlp-supported URL)
   if (isGeneric) {
     const filePrefix = `gen_${Date.now()}`;
