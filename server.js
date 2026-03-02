@@ -183,6 +183,8 @@ const jsRuntimeArgs = ['--js-runtimes', `node:${nodePath}`];
 
 // Webshare residential proxy (bypasses YouTube datacenter IP blocking)
 const proxyArgs = process.env.WEBSHARE_PROXY_URL ? ['--proxy', process.env.WEBSHARE_PROXY_URL] : [];
+if (process.env.WEBSHARE_PROXY_URL) console.log('Webshare proxy loaded');
+else console.log('No proxy configured — running without proxy');
 
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
