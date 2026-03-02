@@ -3799,6 +3799,7 @@ const App = () => {
   const askQuestion = async (overrideQ) => {
     const q = (overrideQ || qaQuestion).trim();
     if (!q || qaLoading) return;
+    const history = qaMessages; // snapshot before state update
     setShowQA(true);
     setQaMessages(prev => [...prev, { role: 'user', text: q }]);
     setQaQuestion('');
@@ -3806,7 +3807,7 @@ const App = () => {
     try {
       const res = await fetch('/api/ask', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, segments: segments.some(s => s.seconds > 0) ? segments : [], question: q }),
+        body: JSON.stringify({ transcript, segments: segments.some(s => s.seconds > 0) ? segments : [], question: q, history }),
       });
       const text = await res.text();
       let data;
@@ -4250,13 +4251,14 @@ const App = () => {
   const askSgQuestion = async (overrideQ) => {
     const q = (overrideQ || sgQuestion).trim();
     if (!q || sgLoading) return;
+    const history = sgMessages; // snapshot before state update
     setSgMessages(prev => [...prev, { role: 'user', text: q }]);
     setSgQuestion('');
     setSgLoading(true);
     try {
       const res = await fetch('/api/ask', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, segments: segments.some(s => s.seconds > 0) ? segments : [], question: q }),
+        body: JSON.stringify({ transcript, segments: segments.some(s => s.seconds > 0) ? segments : [], question: q, history }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed');

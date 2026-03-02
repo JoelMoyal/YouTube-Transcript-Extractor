@@ -91,6 +91,46 @@ async function aiComplete(prompt, maxTokens = 1024) {
   throw new Error('No AI provider configured (GROQ_API_KEY or OPENROUTER_API_KEY required)');
 }
 
+// Multi-turn chat — accepts a full messages array (system / user / assistant)
+async function aiChat(messages, maxTokens = 1024) {
+  if (process.env.GROQ_API_KEY) {
+    try {
+      const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+      const completion = await groq.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
+        messages,
+        max_tokens: maxTokens,
+      });
+      return completion.choices[0].message.content;
+    } catch (err) {
+      const msg = err.message || '';
+      const status = err.status || err.statusCode || 0;
+      if (status === 401 || msg.includes('401') || msg.includes('invalid_api_key') || msg.includes('unauthorized')) throw err;
+    }
+  }
+  if (process.env.OPENROUTER_API_KEY) {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.1-8b-instruct:free',
+        messages,
+        max_tokens: maxTokens,
+      }),
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error?.message || `OpenRouter error: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.choices[0].message.content;
+  }
+  throw new Error('No AI provider configured (GROQ_API_KEY or OPENROUTER_API_KEY required)');
+}
+
 const LANG_NAMES = { en:'English', es:'Spanish', fr:'French', de:'German', it:'Italian', pt:'Portuguese', ru:'Russian', 'zh-Hans':'Chinese (Simplified)', 'zh-Hant':'Chinese (Traditional)', ja:'Japanese', ko:'Korean', ar:'Arabic', hi:'Hindi', tr:'Turkish', nl:'Dutch', pl:'Polish' };
 
 // Translate segments to targetLang using AI, in parallel batches to stay within token limits
@@ -763,7 +803,7 @@ app.post('/api/academic-insights', async (req, res) => {
 
 // ── Q&A endpoint ─────────────────────────────────────────────────────────────
 app.post('/api/ask', async (req, res) => {
-  const { transcript, question, platform, segments } = req.body;
+  const { transcript, question, platform, segments, history } = req.body;
   if (!transcript || typeof transcript !== 'string' || !question || typeof question !== 'string')
     return res.status(400).json({ error: 'Missing transcript or question' });
   if (question.length > 500)
@@ -789,12 +829,21 @@ app.post('/api/ask', async (req, res) => {
     }
 
     const timestampInstruction = hasTimestamps
-      ? ' The transcript lines are prefixed with time codes like [1:23]. When relevant, include the time code inline in your answer in that exact format (e.g. "this is discussed at [1:23]") so the user can jump to that moment. Never quote the transcript text as a timestamp — only use the bracketed time code. Use only time codes that appear in the transcript.'
+      ? ' Each transcript line is prefixed with a time code like [1:23]. Whenever you locate or quote something from the transcript, always include its time code inline (e.g. "he mentions this at [1:23]"). Never quote transcript text as a timestamp — only use the bracketed time code. Only use time codes that appear in the transcript.'
       : ' This transcript is plain text with no time codes. Do not mention, estimate, or guess any timestamps or time positions in your answer.';
 
-    const text = await aiComplete(
-      `You are a helpful assistant that answers questions about ${source} transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.${timestampInstruction}\n\nIMPORTANT FEATURE GUIDANCE: If the user asks about flashcards, making flashcards, or studying with flashcards — tell them to click the "Insights" tab and then click the "Flashcards" button there. If the user asks about a study guide, study notes, or a structured summary — tell them to click the "Insights" tab and then click the "Study Guide" button there.\n\nTranscript:\n${transcriptContext}\n\nQuestion: ${question}`
-    );
+    const systemPrompt = `You are a helpful assistant that answers questions about ${source} transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.${timestampInstruction}\n\nIMPORTANT FEATURE GUIDANCE: If the user asks about flashcards, making flashcards, or studying with flashcards — tell them to click the "Insights" tab and then click the "Flashcards" button there. If the user asks about a study guide, study notes, or a structured summary — tell them to click the "Insights" tab and then click the "Study Guide" button there.\n\nTranscript:\n${transcriptContext}`;
+
+    // Build multi-turn message list (system + up to last 10 history messages + current question)
+    const messages = [{ role: 'system', content: systemPrompt }];
+    if (Array.isArray(history)) {
+      for (const msg of history.slice(-10)) {
+        messages.push({ role: msg.role === 'ai' ? 'assistant' : 'user', content: msg.text });
+      }
+    }
+    messages.push({ role: 'user', content: question });
+
+    const text = await aiChat(messages);
     res.json({ answer: text });
   } catch (err) {
     res.status(500).json({ error: 'Failed to answer', details: err.message });
