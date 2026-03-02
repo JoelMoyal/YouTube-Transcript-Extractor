@@ -4425,8 +4425,8 @@ const App = () => {
           background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(45,108,223,0.12) 0%, transparent 70%),
                       ${P.paper};
         }
-        .feature-card { transition: box-shadow 0.2s, transform 0.2s; }
-        .feature-card:hover { box-shadow: 0 8px 32px rgba(28,25,23,0.1); transform: translateY(-2px); }
+        .feature-card { transition: box-shadow 0.28s cubic-bezier(.22,.68,0,1.2), transform 0.28s cubic-bezier(.22,.68,0,1.2); cursor: default; }
+        .feature-card:hover { box-shadow: 0 20px 48px rgba(28,25,23,0.14), 0 4px 12px rgba(28,25,23,0.08); transform: translateY(-8px) scale(1.025); }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(45,108,223,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
@@ -4884,71 +4884,87 @@ const App = () => {
             </div>{/* end hero-grad */}
 
             {/* Capability cards */}
-            <div style={{ maxWidth: 860, margin: '0 auto', padding: '8px 24px 48px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 18 }}>
+            <div style={{ maxWidth: 920, margin: '0 auto', padding: '8px 24px 56px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
               {[
                 {
                   emoji: '⚡',
                   label: 'Instant Transcript',
-                  desc: 'Paste any YouTube or Vimeo link and get the full transcript with timestamps in seconds. Auto-translated to English.',
-                  accent: P.accent,
-                  iconBg: 'rgba(45,108,223,0.10)',
-                  topBar: P.accent,
-                  bullets: ['YouTube & Vimeo support', 'Click timestamps to jump', 'Auto English translation'],
+                  desc: 'Paste any YouTube or Vimeo link and get the full transcript with timestamps in seconds.',
+                  tag: 'YouTube & Vimeo',
+                  gradient: 'linear-gradient(135deg, #4F8EF7 0%, #2D6CDF 100%)',
+                  glow: 'rgba(45,108,223,0.22)',
+                  chipColor: 'rgba(255,255,255,0.22)',
+                  bullets: ['Full text + timestamps', 'Auto English translation', 'Click to jump in video'],
                 },
                 {
                   emoji: '✨',
                   label: 'AI Insights',
-                  desc: 'Let AI do the heavy lifting — get summaries, chapter breakdowns, flashcards and study guides on demand.',
-                  accent: '#7C3AED',
-                  iconBg: 'rgba(124,58,237,0.10)',
-                  topBar: '#7C3AED',
+                  desc: 'Summaries, chapter breakdowns, flashcards and study guides — generated on demand.',
+                  tag: 'Powered by AI',
+                  gradient: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%)',
+                  glow: 'rgba(124,58,237,0.22)',
+                  chipColor: 'rgba(255,255,255,0.22)',
                   bullets: ['Smart summaries', 'Flashcards & study guides', 'Chapter breakdowns'],
                 },
                 {
                   emoji: '💬',
-                  label: 'Chat With Any Video',
-                  desc: 'Ask anything about the video. Get precise answers with inline timestamps that take you straight to the source.',
-                  accent: P.success,
-                  iconBg: 'rgba(15,118,110,0.10)',
-                  topBar: P.success,
+                  label: 'Chat With Video',
+                  desc: 'Ask anything about the video and get precise answers with timestamps straight to the source.',
+                  tag: 'AI Chat',
+                  gradient: 'linear-gradient(135deg, #34D399 0%, #0F766E 100%)',
+                  glow: 'rgba(15,118,110,0.22)',
+                  chipColor: 'rgba(255,255,255,0.22)',
                   bullets: ['Ask any question', 'Timestamped answers', 'Pull exact quotes'],
                 },
               ].map(card => (
                 <div key={card.label} className="feature-card" style={{
-                  background: P.surface,
-                  border: `1px solid ${P.border}`,
-                  borderRadius: 20,
+                  background: card.gradient,
+                  borderRadius: 24,
                   overflow: 'hidden',
                   display: 'flex',
                   flexDirection: 'column',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+                  boxShadow: `0 8px 32px ${card.glow}, 0 2px 8px rgba(0,0,0,0.08)`,
+                  position: 'relative',
                 }}>
-                  {/* Colored top accent bar */}
-                  <div style={{ height: 4, background: card.topBar }} />
-                  <div style={{ padding: '24px 24px 26px' }}>
-                    {/* Icon badge */}
+                  {/* Subtle sheen overlay */}
+                  <div style={{
+                    position: 'absolute', inset: 0, pointerEvents: 'none',
+                    background: 'linear-gradient(160deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 60%)',
+                    borderRadius: 24,
+                  }} />
+                  <div style={{ padding: '28px 26px 30px', position: 'relative', zIndex: 1 }}>
+                    {/* Tag chip */}
                     <div style={{
-                      width: 48, height: 48, borderRadius: 14,
-                      background: card.iconBg,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 24, marginBottom: 18,
+                      display: 'inline-block', background: card.chipColor,
+                      color: '#fff', fontSize: 11, fontWeight: 600,
+                      padding: '3px 10px', borderRadius: 20, marginBottom: 20,
+                      letterSpacing: '0.03em', backdropFilter: 'blur(4px)',
                     }}>
-                      {card.emoji}
+                      {card.tag}
                     </div>
+                    {/* Emoji */}
+                    <div style={{ fontSize: 38, lineHeight: 1, marginBottom: 14 }}>{card.emoji}</div>
                     {/* Title */}
-                    <div style={{ fontSize: 15.5, fontWeight: 700, color: P.ink, marginBottom: 8, letterSpacing: '-0.02em' }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 10, letterSpacing: '-0.03em' }}>
                       {card.label}
                     </div>
                     {/* Description */}
-                    <div style={{ fontSize: 13.5, color: P.muted, lineHeight: 1.65, marginBottom: 18 }}>
+                    <div style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.82)', lineHeight: 1.65, marginBottom: 22 }}>
                       {card.desc}
                     </div>
                     {/* Bullet list */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {card.bullets.map(b => (
-                        <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{ width: 6, height: 6, borderRadius: '50%', background: card.accent, flexShrink: 0 }} />
-                          <span style={{ fontSize: 12.5, color: P.muted, fontWeight: 500 }}>{b}</span>
+                        <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                          <div style={{
+                            width: 18, height: 18, borderRadius: '50%',
+                            background: 'rgba(255,255,255,0.25)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0,
+                          }}>
+                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />
+                          </div>
+                          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>{b}</span>
                         </div>
                       ))}
                     </div>
