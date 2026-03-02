@@ -459,13 +459,13 @@ app.get('/api/transcript', async (req, res) => {
       // Always try target language first — YouTube provides auto-translated captions
       // for most languages. This handles both directions: en→de AND de→en instantly.
       try {
-        const attempt = await withTimeout(YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang }), 8000);
+        const attempt = await withTimeout(YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang }), 3000);
         if (attempt && attempt.length > 0) { raw = attempt; gotTargetLang = true; }
       } catch {}
 
       // Fall back to any available captions (video's native language)
       if (!gotTargetLang) {
-        try { raw = await withTimeout(YoutubeTranscript.fetchTranscript(videoId), 8000); } catch {}
+        try { raw = await withTimeout(YoutubeTranscript.fetchTranscript(videoId), 3000); } catch {}
       }
 
       if (raw && raw.length > 0) {
