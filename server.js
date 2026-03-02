@@ -763,7 +763,7 @@ app.post('/api/academic-insights', async (req, res) => {
 
 // ── Q&A endpoint ─────────────────────────────────────────────────────────────
 app.post('/api/ask', async (req, res) => {
-  const { transcript, question, platform } = req.body;
+  const { transcript, question, platform, segments } = req.body;
   if (!transcript || typeof transcript !== 'string' || !question || typeof question !== 'string')
     return res.status(400).json({ error: 'Missing transcript or question' });
   if (question.length > 500)
@@ -773,8 +773,26 @@ app.post('/api/ask', async (req, res) => {
 
   try {
     const source = platform === 'vimeo' ? 'Vimeo video' : 'YouTube video';
+
+    // Build timestamped transcript if segments are available
+    const hasTimestamps = Array.isArray(segments) && segments.length > 0;
+    let transcriptContext;
+    if (hasTimestamps) {
+      transcriptContext = segments.map(s => {
+        const mins = Math.floor(s.seconds / 60);
+        const secs = Math.floor(s.seconds % 60).toString().padStart(2, '0');
+        return `[${mins}:${secs}] ${s.text}`;
+      }).join('\n').slice(0, 15000);
+    } else {
+      transcriptContext = transcript.slice(0, 15000);
+    }
+
+    const timestampInstruction = hasTimestamps
+      ? ' When relevant, cite the exact timestamp from the transcript in [M:SS] format (e.g. [1:23]) so the user can jump to that part of the video. Only cite timestamps that actually appear in the transcript.'
+      : '';
+
     const text = await aiComplete(
-      `You are a helpful assistant that answers questions about ${source} transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.\n\nIMPORTANT FEATURE GUIDANCE: If the user asks about flashcards, making flashcards, or studying with flashcards — tell them to click the "Insights" tab and then click the "Flashcards" button there. If the user asks about a study guide, study notes, or a structured summary — tell them to click the "Insights" tab and then click the "Study Guide" button there.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nQuestion: ${question}`
+      `You are a helpful assistant that answers questions about ${source} transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.${timestampInstruction}\n\nIMPORTANT FEATURE GUIDANCE: If the user asks about flashcards, making flashcards, or studying with flashcards — tell them to click the "Insights" tab and then click the "Flashcards" button there. If the user asks about a study guide, study notes, or a structured summary — tell them to click the "Insights" tab and then click the "Study Guide" button there.\n\nTranscript:\n${transcriptContext}\n\nQuestion: ${question}`
     );
     res.json({ answer: text });
   } catch (err) {
