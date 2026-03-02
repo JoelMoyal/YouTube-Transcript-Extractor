@@ -3293,6 +3293,8 @@ const App = () => {
   const [studyGuide, setStudyGuide]               = useState(null);     // {overview, objectives, keyConcepts, sections, reviewQuestions}
   const [studyGuideLoading, setStudyGuideLoading] = useState(false);
   const [studyGuideFull, setStudyGuideFull]       = useState(false);
+  const [academicInsights, setAcademicInsights]               = useState(null); // {references, claims, glossary, researchGaps}
+  const [academicInsightsLoading, setAcademicInsightsLoading] = useState(false);
   const [activeLogo, setActiveLogo]               = useState('youtube'); // 'youtube' | 'vimeo'
   const [logoFlip, setLogoFlip]                   = useState('idle');    // 'idle' | 'out' | 'in'
   const [sgQuestion, setSgQuestion]               = useState('');
@@ -3770,6 +3772,7 @@ const App = () => {
     setQaQuestion(''); setQaMessages([]);
     setTimeline(null);
     setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
+    setAcademicInsights(null); setAcademicInsightsLoading(false);
     setActiveTab('transcript');
     setCurrentTitle(''); setCurrentChannel('');
     setSelectedSegment(null); setExportToggle(false);
@@ -3830,6 +3833,7 @@ const App = () => {
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
     setSummary(''); setTimeline(null); setShowTopics(false);
     setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
+    setAcademicInsights(null); setAcademicInsightsLoading(false);
     setMobilePanel('transcript'); setHistoryDrawerOpen(false);
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
@@ -4124,6 +4128,26 @@ const App = () => {
       setMobilePanel('study-guide');
     } catch (err) { setStudyGuide({ _error: err.message }); }
     finally { setStudyGuideLoading(false); }
+  };
+
+  const generateAcademicInsights = async () => {
+    if (academicInsightsLoading) return;
+    setAcademicInsightsLoading(true); setAcademicInsights(null);
+    try {
+      const res = await fetch('/api/academic-insights', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript }),
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
+      if (!res.ok) throw new Error(data.error || 'Failed to generate academic insights');
+      setAcademicInsights(data);
+      setActiveTab('academic');
+      setSidebarTab('academic');
+      setMobilePanel('academic');
+    } catch (err) { setAcademicInsights({ _error: err.message }); }
+    finally { setAcademicInsightsLoading(false); }
   };
 
   const pauseVideo = () => {
@@ -5513,6 +5537,128 @@ const App = () => {
                     })() : null}
                   </div>
                 )}
+
+                {/* ── Academic Insights tab — desktop only ── */}
+                {activeTab === 'academic' && (
+                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px' }}>
+                    {academicInsightsLoading ? (
+                      <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#7C3AED', fontSize: 13 }}>
+                        <SpinnerIcon size={14} /> Generating academic insights…
+                      </div>
+                    ) : academicInsights && !academicInsights._error ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 700, margin: '0 auto' }}>
+                        {/* Header */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED' }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Academic Insights</div>
+                              <div style={{ fontSize: 11.5, color: P.muted }}>AI-extracted from transcript</div>
+                            </div>
+                          </div>
+                          <button onClick={() => { setAcademicInsights(null); setActiveTab('transcript'); }}
+                            style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 6, transition: 'all 0.15s' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+                          >Clear</button>
+                        </div>
+
+                        {/* References */}
+                        {academicInsights.references?.length > 0 && (
+                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>References Mentioned ({academicInsights.references.length})</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {academicInsights.references.map((ref, i) => (
+                                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', paddingBottom: i < academicInsights.references.length - 1 ? 10 : 0, borderBottom: i < academicInsights.references.length - 1 ? `1px solid ${P.border}` : 'none' }}>
+                                  <div style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(124,58,237,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                                  </div>
+                                  <div style={{ minWidth: 0, flex: 1 }}>
+                                    <div style={{ fontSize: 13.5, fontWeight: 600, color: P.ink, lineHeight: 1.4 }}>
+                                      {ref.title || ref.author}
+                                    </div>
+                                    <div style={{ fontSize: 12, color: P.muted, marginTop: 2 }}>
+                                      {[ref.author, ref.year].filter(Boolean).join(' · ')}
+                                      {ref.type && ref.type !== 'other' && <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.08)', padding: '1px 6px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{ref.type}</span>}
+                                    </div>
+                                  </div>
+                                  <a href={`https://scholar.google.com/scholar?q=${encodeURIComponent([ref.title, ref.author].filter(Boolean).join(' '))}`} target="_blank" rel="noopener noreferrer"
+                                    style={{ flexShrink: 0, fontSize: 11, fontWeight: 600, color: '#7C3AED', border: '1px solid rgba(124,58,237,0.25)', padding: '3px 9px', borderRadius: 5, textDecoration: 'none', whiteSpace: 'nowrap' }}
+                                    onClick={e => e.stopPropagation()}>
+                                    Search
+                                  </a>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Key Claims */}
+                        {academicInsights.claims?.length > 0 && (
+                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Key Claims</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {academicInsights.claims.map((c, i) => (
+                                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', background: c.supported ? 'rgba(15,118,110,0.04)' : 'rgba(180,35,24,0.04)', borderRadius: 9, border: `1px solid ${c.supported ? 'rgba(15,118,110,0.15)' : 'rgba(180,35,24,0.15)'}` }}>
+                                  <div style={{ flexShrink: 0, marginTop: 2, width: 16, height: 16, borderRadius: '50%', background: c.supported ? 'rgba(15,118,110,0.12)' : 'rgba(180,35,24,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {c.supported
+                                      ? <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                      : <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={P.error} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    }
+                                  </div>
+                                  <div style={{ minWidth: 0 }}>
+                                    <div style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink }}>{c.claim}</div>
+                                    {c.evidence && <div style={{ fontSize: 12, color: P.muted, marginTop: 4, lineHeight: 1.5 }}>Evidence: {c.evidence}</div>}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Glossary */}
+                        {academicInsights.glossary?.length > 0 && (
+                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Glossary</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {academicInsights.glossary.map((g, i) => (
+                                <div key={i} style={{ paddingBottom: i < academicInsights.glossary.length - 1 ? 10 : 0, borderBottom: i < academicInsights.glossary.length - 1 ? `1px solid ${P.border}` : 'none' }}>
+                                  <span style={{ fontSize: 13.5, fontWeight: 700, color: '#7C3AED' }}>{g.term}</span>
+                                  <span style={{ fontSize: 13.5, color: P.muted }}> — </span>
+                                  <span style={{ fontSize: 13.5, color: P.ink, lineHeight: 1.6 }}>{g.definition}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Research Gaps */}
+                        {academicInsights.researchGaps?.length > 0 && (
+                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Research Gaps & Open Questions</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                              {academicInsights.researchGaps.map((gap, i) => (
+                                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', background: 'rgba(124,58,237,0.04)', borderRadius: 9, border: '1px solid rgba(124,58,237,0.12)' }}>
+                                  <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#7C3AED', flexShrink: 0, marginTop: 7 }} />
+                                  <div style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink }}>{gap}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Empty state */}
+                        {!academicInsights.references?.length && !academicInsights.claims?.length && !academicInsights.glossary?.length && !academicInsights.researchGaps?.length && (
+                          <div style={{ padding: '32px 0', textAlign: 'center', color: P.muted, fontSize: 13 }}>No academic content detected in this transcript.</div>
+                        )}
+                      </div>
+                    ) : academicInsights?._error ? (
+                      <div style={{ padding: '32px 24px', color: P.error, fontSize: 13 }}>Failed to generate: {academicInsights._error}</div>
+                    ) : null}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -5531,6 +5677,7 @@ const App = () => {
                   ...(summary || summarizing ? [{ key: 'summary', label: 'Summary', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
                   ...(flashcards.length > 0 || flashcardsExhausted || flashcardsLoading ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
                   ...(studyGuide || studyGuideLoading ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
+                  ...(academicInsights || academicInsightsLoading ? [{ key: 'academic', label: 'Academic', icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }] : []),
                 ].map(tab => {
                   const isAct = sidebarTab === tab.key;
                   return (
@@ -5770,6 +5917,9 @@ const App = () => {
                       { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
                         icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
                         onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
+                      { title: 'Academic', sub: 'References, claims & glossary', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
+                        icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+                        onClick: academicInsights && !academicInsights._error ? () => setActiveTab('academic') : generateAcademicInsights, active: !!academicInsights && !academicInsights._error, loading: academicInsightsLoading },
                     ].map(item => (
                       <div key={item.title} onClick={item.loading ? undefined : item.onClick}
                         style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 10px', borderRadius: 11, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 3 }}
@@ -5822,6 +5972,12 @@ const App = () => {
                           label: (studyGuide && !studyGuide._error) ? 'View' : studyGuideLoading ? 'Generating…' : 'Generate',
                           onClick: (studyGuide && !studyGuide._error) ? () => setMobilePanel('study-guide') : generateStudyGuide,
                           active: !!(studyGuide && !studyGuide._error), loading: studyGuideLoading, badge: (studyGuide && !studyGuide._error) ? 'Ready' : null },
+                        { title: 'Academic', sub: 'References, claims & glossary', color: '#7C3AED',
+                          bg: 'linear-gradient(135deg,rgba(124,58,237,0.12),rgba(124,58,237,0.06))', border: 'rgba(124,58,237,0.2)',
+                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+                          label: (academicInsights && !academicInsights._error) ? 'View' : academicInsightsLoading ? 'Generating…' : 'Generate',
+                          onClick: (academicInsights && !academicInsights._error) ? () => setMobilePanel('academic') : generateAcademicInsights,
+                          active: !!(academicInsights && !academicInsights._error), loading: academicInsightsLoading, badge: (academicInsights && !academicInsights._error) ? 'Ready' : null },
                       ].map(item => (
                         <div key={item.title} onClick={item.loading ? undefined : item.onClick}
                           style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px', borderRadius: 16, cursor: item.loading ? 'default' : 'pointer', background: item.active ? item.bg : '#fff', border: `1.5px solid ${item.active ? item.border : P.border}`, boxShadow: item.active ? `0 2px 12px ${item.border}` : '0 1px 4px rgba(28,25,23,0.05)', transition: 'all 0.18s' }}>
@@ -5951,6 +6107,72 @@ const App = () => {
                 </div>
               )}
 
+              {/* Academic Insights sidebar tab — mobile/tablet only */}
+              {!isDesktop && sidebarTab === 'academic' && (
+                <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px' }}>
+                  {academicInsightsLoading ? (
+                    <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#7C3AED', fontSize: 13 }}>
+                      <SpinnerIcon size={14} /> Generating academic insights…
+                    </div>
+                  ) : academicInsights && !academicInsights._error ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                      {academicInsights.references?.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: '#7C3AED', marginBottom: 8 }}>References ({academicInsights.references.length})</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            {academicInsights.references.map((ref, i) => (
+                              <div key={i} style={{ padding: '10px 12px', background: '#fff', borderRadius: 9, border: `1px solid ${P.border}` }}>
+                                <div style={{ fontSize: 12.5, fontWeight: 600, color: P.ink }}>{ref.title || ref.author}</div>
+                                <div style={{ fontSize: 11.5, color: P.muted, marginTop: 2 }}>{[ref.author, ref.year].filter(Boolean).join(' · ')}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {academicInsights.claims?.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: '#7C3AED', marginBottom: 8 }}>Key Claims</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {academicInsights.claims.map((c, i) => (
+                              <div key={i} style={{ padding: '9px 11px', background: c.supported ? 'rgba(15,118,110,0.05)' : 'rgba(180,35,24,0.05)', borderRadius: 8, border: `1px solid ${c.supported ? 'rgba(15,118,110,0.15)' : 'rgba(180,35,24,0.15)'}`, fontSize: 12.5, color: P.ink, lineHeight: 1.5 }}>
+                                <span style={{ color: c.supported ? P.success : P.error, fontWeight: 700, marginRight: 5 }}>{c.supported ? '✓' : '⚠'}</span>{c.claim}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {academicInsights.glossary?.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: '#7C3AED', marginBottom: 8 }}>Glossary</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {academicInsights.glossary.map((g, i) => (
+                              <div key={i} style={{ padding: '10px 12px', background: '#fff', borderRadius: 9, border: `1px solid ${P.border}` }}>
+                                <div style={{ fontSize: 12.5, fontWeight: 700, color: '#7C3AED', marginBottom: 3 }}>{g.term}</div>
+                                <div style={{ fontSize: 12, color: P.muted, lineHeight: 1.5 }}>{g.definition}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {academicInsights.researchGaps?.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: '#7C3AED', marginBottom: 8 }}>Research Gaps</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {academicInsights.researchGaps.map((gap, i) => (
+                              <div key={i} style={{ padding: '9px 11px', background: 'rgba(124,58,237,0.05)', borderRadius: 8, border: '1px solid rgba(124,58,237,0.12)', fontSize: 12.5, color: P.ink, lineHeight: 1.5 }}>{gap}</div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <button onClick={() => { setAcademicInsights(null); setSidebarTab('insights'); }}
+                        style={{ marginTop: 4, border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11.5, fontWeight: 600, padding: '6px 14px', borderRadius: 7 }}>
+                        Clear
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+
               {/* Study Guide sidebar tab — mobile/tablet only */}
               {!isDesktop && sidebarTab === 'study-guide' && (
                 <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px' }}>
@@ -6036,6 +6258,7 @@ const App = () => {
               ...(summary || summarizing ? [{ key: 'summary', label: 'Summary', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
               ...(flashcards.length > 0 || flashcardsExhausted || flashcardsLoading ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
               ...(studyGuide || studyGuideLoading ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
+              ...(academicInsights || academicInsightsLoading ? [{ key: 'academic', label: 'Academic', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }] : []),
             ];
             const hasDynamic = mobileTabs.length > 4;
             return (
@@ -6170,6 +6393,83 @@ const App = () => {
                     )}
                   </>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* ── MOBILE ACADEMIC INSIGHTS PANEL ───────────────────────────────── */}
+          {isMobile && mobilePanel === 'academic' && (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+              <div style={{ padding: '16px 18px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Academic Insights</div>
+                  {academicInsights && !academicInsights._error && (
+                    <button onClick={() => { setAcademicInsights(null); setMobilePanel('transcript'); }}
+                      style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, fontWeight: 600, padding: '5px 12px', borderRadius: 6 }}>Clear</button>
+                  )}
+                </div>
+                {academicInsightsLoading ? (
+                  <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#7C3AED', fontSize: 13 }}>
+                    <SpinnerIcon size={14} /> Generating academic insights…
+                  </div>
+                ) : academicInsights && !academicInsights._error ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {academicInsights.references?.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#7C3AED', marginBottom: 8 }}>References ({academicInsights.references.length})</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {academicInsights.references.map((ref, i) => (
+                            <div key={i} style={{ padding: '12px 14px', background: '#fff', borderRadius: 10, border: `1px solid ${P.border}` }}>
+                              <div style={{ fontSize: 13.5, fontWeight: 600, color: P.ink }}>{ref.title || ref.author}</div>
+                              <div style={{ fontSize: 12, color: P.muted, marginTop: 2 }}>{[ref.author, ref.year].filter(Boolean).join(' · ')}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {academicInsights.claims?.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#7C3AED', marginBottom: 8 }}>Key Claims</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {academicInsights.claims.map((c, i) => (
+                            <div key={i} style={{ padding: '12px 14px', background: c.supported ? 'rgba(15,118,110,0.05)' : 'rgba(180,35,24,0.05)', borderRadius: 10, border: `1px solid ${c.supported ? 'rgba(15,118,110,0.2)' : 'rgba(180,35,24,0.2)'}` }}>
+                              <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                                <span style={{ color: c.supported ? P.success : P.error, fontWeight: 700, fontSize: 13, flexShrink: 0 }}>{c.supported ? '✓' : '⚠'}</span>
+                                <div>
+                                  <div style={{ fontSize: 13.5, color: P.ink, lineHeight: 1.6 }}>{c.claim}</div>
+                                  {c.evidence && <div style={{ fontSize: 12, color: P.muted, marginTop: 4 }}>{c.evidence}</div>}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {academicInsights.glossary?.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#7C3AED', marginBottom: 8 }}>Glossary</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {academicInsights.glossary.map((g, i) => (
+                            <div key={i} style={{ padding: '12px 14px', background: '#fff', borderRadius: 10, border: `1px solid ${P.border}` }}>
+                              <div style={{ fontSize: 13.5, fontWeight: 700, color: '#7C3AED', marginBottom: 4 }}>{g.term}</div>
+                              <div style={{ fontSize: 13, color: P.muted, lineHeight: 1.6 }}>{g.definition}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {academicInsights.researchGaps?.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#7C3AED', marginBottom: 8 }}>Research Gaps</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {academicInsights.researchGaps.map((gap, i) => (
+                            <div key={i} style={{ padding: '12px 14px', background: 'rgba(124,58,237,0.05)', borderRadius: 10, border: '1px solid rgba(124,58,237,0.15)', fontSize: 13.5, color: P.ink, lineHeight: 1.6 }}>{gap}</div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
               </div>
             </div>
           )}

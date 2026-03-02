@@ -738,6 +738,29 @@ app.post('/api/study-guide', async (req, res) => {
   }
 });
 
+// ── Academic Insights endpoint ────────────────────────────────────────────────
+app.post('/api/academic-insights', async (req, res) => {
+  const { transcript } = req.body;
+  if (!transcript || typeof transcript !== 'string')
+    return res.status(400).json({ error: 'Missing transcript' });
+  if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY)
+    return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY or OPENROUTER_API_KEY)' });
+
+  try {
+    const raw = await aiComplete(
+      `You extract academic information from video transcripts. Return ONLY a valid JSON object with exactly these fields — no markdown, no explanation:\n- "references": array of objects with "author" (string, e.g. "Vaswani et al." or "John Smith"), "year" (string or null), "title" (string or null), "type" ("paper"|"book"|"article"|"other"). Include every academic work, author, or publication mentioned. Empty array if none.\n- "claims": array of objects with "claim" (string — the specific claim made), "supported" (boolean — true if evidence or data is cited alongside it, false if stated without support), "evidence" (string or null — what evidence was provided). Include 3-8 notable claims only.\n- "glossary": array of objects with "term" (string) and "definition" (string, 1-2 sentences derived from the transcript context). Include 4-10 domain-specific terms that are defined or explained. Empty array if none.\n- "researchGaps": array of strings — paraphrases of places where the speaker mentions open problems, future work, unsolved questions, or limitations. Empty array if none.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nReturn JSON object only.`,
+      3000
+    );
+    const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
+    const match = stripped.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Failed to parse academic insights response');
+    const insights = JSON.parse(match[0]);
+    res.json(insights);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to generate academic insights', details: err.message });
+  }
+});
+
 // ── Q&A endpoint ─────────────────────────────────────────────────────────────
 app.post('/api/ask', async (req, res) => {
   const { transcript, question, platform } = req.body;
