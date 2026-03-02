@@ -395,11 +395,15 @@ app.get('/api/transcript', async (req, res) => {
   const safeLang = 'en'; // was: lang && /^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,10})?$/.test(lang) ? lang : 'en';
   const tmpDir = os.tmpdir();
   const isVimeo = platform === 'vimeo';
+  const isYouTube = platform === 'youtube';
+  const isGeneric = !isVimeo && !isYouTube; // TikTok, Twitter, Instagram, Twitch, etc.
   const vimeoMatch = isVimeo ? (url || '').match(/vimeo\.com\/(\d+)/) : null;
 
   // Validate inputs before starting SSE response to avoid headers-sent crashes.
   if (isVimeo) {
     if (!vimeoMatch) return res.status(400).json({ error: 'Invalid Vimeo URL' });
+  } else if (isGeneric) {
+    if (!url) return res.status(400).json({ error: 'Missing url parameter' });
   } else {
     if (!videoId) return res.status(400).json({ error: 'Missing videoId parameter' });
     if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId))
@@ -508,8 +512,95 @@ app.get('/api/transcript', async (req, res) => {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
+  // GENERIC PLATFORM (TikTok, Twitter/X, Instagram, Twitch, Facebook, Loom,
+  //                   Wistia, Dailymotion, and any other yt-dlp-supported URL)
+  if (isGeneric) {
+    const filePrefix = `gen_${Date.now()}`;
+    const outputTemplate = path.join(tmpDir, filePrefix);
+
+    // Thumbnail via noembed.com (supports most platforms)
+    const thumbnailPromise = fetch(`https://noembed.com/embed?url=${encodeURIComponent(url)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d?.thumbnail_url || null)
+      .catch(() => null);
+
+    try {
+      // ── Stage 1: yt-dlp subtitles ─────────────────────────────────────────
+      send('progress', { stage: 'subtitles', message: 'Looking for captions…', percent: 15 });
+      try {
+        await execFileAsync('yt-dlp', [
+          '--skip-download', '--write-auto-sub', '--write-subs',
+          ...jsRuntimeArgs, ...proxyArgs,
+          '-o', outputTemplate,
+          url,
+        ], { timeout: 45000 });
+      } catch {}
+
+      const subFile = (await fsPromises.readdir(tmpDir)).find(
+        f => f.startsWith(filePrefix) && (f.endsWith('.vtt') || f.endsWith('.json3') || f.endsWith('.srt'))
+      );
+
+      if (subFile) {
+        send('progress', { stage: 'subtitles', message: 'Parsing captions…', percent: 80 });
+        const content = await fsPromises.readFile(path.join(tmpDir, subFile), 'utf-8');
+        await fsPromises.unlink(path.join(tmpDir, subFile)).catch(() => {});
+        const result = subFile.endsWith('.json3') ? parseJSON3(content) : parseVTT(content);
+        const thumbnail = await thumbnailPromise;
+        send('done', { transcript: result.transcript, segments: result.segments, source: 'subtitles', thumbnail });
+        res.end();
+        return;
+      }
+
+      // ── Stage 2: Audio download ───────────────────────────────────────────
+      if (!process.env.GROQ_API_KEY) {
+        send('error', { error: 'No captions found for this video and AI transcription is not configured.' });
+        res.end();
+        return;
+      }
+
+      send('progress', { stage: 'audio', message: 'No captions — downloading audio for AI transcription…', percent: 30 });
+      const audioBase = path.join(tmpDir, `${filePrefix}_audio`);
+
+      try {
+        await execFileAsync('yt-dlp', [
+          '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '5',
+          ...jsRuntimeArgs, ...proxyArgs,
+          '-o', audioBase,
+          url,
+        ], { timeout: 300000 });
+      } catch (err) {
+        const friendly = classifyYtdlpError(err);
+        send('error', { error: friendly || 'Failed to download audio', details: friendly ? undefined : err.message });
+        res.end();
+        return;
+      }
+
+      // ── Stage 3: Groq Whisper ─────────────────────────────────────────────
+      send('progress', { stage: 'whisper', message: 'Transcribing with Groq Whisper AI…', percent: 60 });
+      const audioFile = `${audioBase}.mp3`;
+      const audioStat = await fsPromises.stat(audioFile).catch(() => null);
+      if (!audioStat || audioStat.size > 24 * 1024 * 1024) {
+        await fsPromises.unlink(audioFile).catch(() => {});
+        send('error', { error: 'Audio file too large for AI transcription (max ~25 min). Try a shorter video.' });
+        res.end();
+        return;
+      }
+
+      send('progress', { stage: 'whisper', message: 'Finalising transcript…', percent: 90 });
+      const { transcript, segments } = await whisperTranscribe(audioFile, safeLang);
+      const thumbnail = await thumbnailPromise;
+      send('done', { transcript, segments, source: 'whisper', thumbnail });
+      res.end();
+
+    } catch (error) {
+      await cleanup(tmpDir, filePrefix);
+      send('error', { error: 'Failed to fetch transcript', details: error.message });
+      res.end();
+    }
+    return;
+  }
+
   // YOUTUBE
-  // ══════════════════════════════════════════════════════════════════════════
   const outputTemplate = path.join(tmpDir, videoId);
 
   try {

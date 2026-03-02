@@ -54,18 +54,16 @@ const CANONICAL_APP_ORIGIN = 'https://scribesnap.ai';
 const CANONICAL_APP_HOST = new URL(CANONICAL_APP_ORIGIN).hostname.toLowerCase();
 const LOCAL_DEV_HOSTS = new Set(['localhost', '127.0.0.1']);
 const PLATFORM_BRAND = {
-  youtube: {
-    icon: '#FF0000',
-    stat: '#1F6BFF',
-    bg: 'rgba(123,211,255,0.22)',
-    bgSoft: 'rgba(123,211,255,0.18)',
-  },
-  vimeo: {
-    icon: '#1AB7EA',
-    stat: '#3C8CFF',
-    bg: 'rgba(60,140,255,0.16)',
-    bgSoft: 'rgba(60,140,255,0.14)',
-  },
+  youtube:     { icon: '#FF0000', stat: '#1F6BFF', bg: 'rgba(123,211,255,0.22)', bgSoft: 'rgba(123,211,255,0.18)' },
+  vimeo:       { icon: '#1AB7EA', stat: '#3C8CFF', bg: 'rgba(60,140,255,0.16)',  bgSoft: 'rgba(60,140,255,0.14)' },
+  tiktok:      { icon: '#010101', stat: '#FF0050', bg: 'rgba(255,0,80,0.10)',    bgSoft: 'rgba(255,0,80,0.08)'   },
+  twitter:     { icon: '#000000', stat: '#1D9BF0', bg: 'rgba(29,155,240,0.12)', bgSoft: 'rgba(29,155,240,0.09)' },
+  instagram:   { icon: '#E1306C', stat: '#C13584', bg: 'rgba(193,53,132,0.12)', bgSoft: 'rgba(193,53,132,0.09)' },
+  dailymotion: { icon: '#00B4F0', stat: '#0065A3', bg: 'rgba(0,101,163,0.12)',  bgSoft: 'rgba(0,101,163,0.09)'  },
+  twitch:      { icon: '#9146FF', stat: '#9146FF', bg: 'rgba(145,70,255,0.12)', bgSoft: 'rgba(145,70,255,0.09)' },
+  facebook:    { icon: '#1877F2', stat: '#1877F2', bg: 'rgba(24,119,242,0.12)', bgSoft: 'rgba(24,119,242,0.09)' },
+  loom:        { icon: '#625DF5', stat: '#625DF5', bg: 'rgba(98,93,245,0.12)',  bgSoft: 'rgba(98,93,245,0.09)'  },
+  wistia:      { icon: '#54ABCC', stat: '#54ABCC', bg: 'rgba(84,171,204,0.12)', bgSoft: 'rgba(84,171,204,0.09)' },
 };
 
 function getAuthRedirectUrl() {
@@ -157,29 +155,69 @@ function cleanupAuthUrl() {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-// Returns { platform: 'youtube'|'vimeo', id, url } or null
+// Returns { platform, id, url } or null
 function parseVideoUrl(input) {
   if (!input) return null;
   const trimmed = input.trim();
 
-  // Vimeo
   try {
     const u = new URL(trimmed);
-    if (u.hostname.includes('vimeo.com')) {
+    const h = u.hostname.replace(/^www\./, '');
+
+    // Vimeo
+    if (h.includes('vimeo.com')) {
       const m = u.pathname.match(/\/(\d+)/);
       if (m) return { platform: 'vimeo', id: m[1], url: `https://vimeo.com/${m[1]}` };
     }
-  } catch {}
 
-  // YouTube bare ID
-  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed))
-    return { platform: 'youtube', id: trimmed, url: `https://youtube.com/watch?v=${trimmed}` };
+    // TikTok — extract numeric video ID for embed
+    if (h === 'tiktok.com' || h === 'vm.tiktok.com' || h === 'vt.tiktok.com') {
+      const m = u.pathname.match(/\/video\/(\d+)/);
+      return { platform: 'tiktok', id: m ? m[1] : trimmed, url: trimmed };
+    }
 
-  // YouTube URL
-  try {
-    const u = new URL(trimmed);
+    // Twitter / X
+    if (h === 'twitter.com' || h === 'x.com' || h === 't.co')
+      return { platform: 'twitter', id: trimmed, url: trimmed };
+
+    // Instagram
+    if (h === 'instagram.com')
+      return { platform: 'instagram', id: trimmed, url: trimmed };
+
+    // Dailymotion — extract video ID for embed
+    if (h === 'dailymotion.com' || h === 'dai.ly') {
+      const m = u.pathname.match(/\/(?:video\/)?([a-zA-Z0-9]+)/);
+      return { platform: 'dailymotion', id: m ? m[1] : trimmed, url: trimmed };
+    }
+
+    // Twitch — encode type+id so player knows whether it's a VOD or clip
+    if (h === 'twitch.tv' || h === 'clips.twitch.tv') {
+      const vodM = u.pathname.match(/\/videos\/(\d+)/);
+      if (vodM) return { platform: 'twitch', id: `v${vodM[1]}`, url: trimmed };
+      const clipM = h === 'clips.twitch.tv'
+        ? u.pathname.match(/^\/([^/]+)/)
+        : u.pathname.match(/\/clip\/([^/]+)/);
+      if (clipM) return { platform: 'twitch', id: `c_${clipM[1]}`, url: trimmed };
+      return { platform: 'twitch', id: trimmed, url: trimmed };
+    }
+
+    // Facebook
+    if (h === 'facebook.com' || h === 'fb.watch' || h === 'fb.com')
+      return { platform: 'facebook', id: trimmed, url: trimmed };
+
+    // Loom — extract UUID for embed
+    if (h === 'loom.com' || h === 'www.loom.com') {
+      const m = u.pathname.match(/\/(?:share|embed)\/([a-zA-Z0-9]+)/);
+      return { platform: 'loom', id: m ? m[1] : trimmed, url: trimmed };
+    }
+
+    // Wistia / Brightcove
+    if (h.includes('wistia.com') || h === 'wi.st' || h.includes('brightcove.com'))
+      return { platform: 'wistia', id: trimmed, url: trimmed };
+
+    // YouTube
     let id = u.searchParams.get('v');
-    if (!id && u.hostname === 'youtu.be') id = u.pathname.slice(1).split('?')[0];
+    if (!id && h === 'youtu.be') id = u.pathname.slice(1).split('?')[0];
     if (!id) {
       const m = u.pathname.match(/\/(shorts|embed|v)\/([a-zA-Z0-9_-]{11})/);
       if (m) id = m[2];
@@ -187,6 +225,10 @@ function parseVideoUrl(input) {
     if (id && /^[a-zA-Z0-9_-]{11}$/.test(id))
       return { platform: 'youtube', id, url: `https://youtube.com/watch?v=${id}` };
   } catch {}
+
+  // YouTube bare ID
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed))
+    return { platform: 'youtube', id: trimmed, url: `https://youtube.com/watch?v=${trimmed}` };
 
   return null;
 }
@@ -218,15 +260,12 @@ function timeAgo(dateStr) {
 }
 
 async function fetchVideoMeta(platform, canonicalUrl) {
+  const noembedUrl = `https://noembed.com/embed?url=${encodeURIComponent(canonicalUrl)}`;
   const endpoints = platform === 'vimeo'
-    ? [
-        `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(canonicalUrl)}`,
-        `https://noembed.com/embed?url=${encodeURIComponent(canonicalUrl)}`,
-      ]
-    : [
-        `https://www.youtube.com/oembed?url=${encodeURIComponent(canonicalUrl)}&format=json`,
-        `https://noembed.com/embed?url=${encodeURIComponent(canonicalUrl)}`,
-      ];
+    ? [`https://vimeo.com/api/oembed.json?url=${encodeURIComponent(canonicalUrl)}`, noembedUrl]
+    : platform === 'youtube'
+    ? [`https://www.youtube.com/oembed?url=${encodeURIComponent(canonicalUrl)}&format=json`, noembedUrl]
+    : [noembedUrl]; // all other platforms: noembed.com handles TikTok, Twitter, Instagram, etc.
 
   for (const endpoint of endpoints) {
     try {
@@ -283,6 +322,64 @@ const VimeoIcon = ({ size = 18 }) => (
     <path d="M23.977 6.416c-.105 2.338-1.739 5.543-4.894 9.609-3.268 4.247-6.026 6.37-8.29 6.37-1.409 0-2.578-1.294-3.553-3.881L5.322 11.4C4.603 8.816 3.834 7.522 3.01 7.522c-.179 0-.806.378-1.881 1.132L0 7.197c1.185-1.044 2.351-2.084 3.501-3.128C5.08 2.701 6.266 1.984 7.055 1.91c1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.507.539 2.45 1.131 3.674 1.776 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.868 3.434-5.757 6.762-5.637 2.473.06 3.628 1.664 3.48 4.807z"/>
   </svg>
 );
+const TikTokIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.tiktok.icon}>
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/>
+  </svg>
+);
+const TwitterIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.twitter.icon}>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+  </svg>
+);
+const InstagramIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.instagram.icon}>
+    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+  </svg>
+);
+const DailymotionIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.dailymotion.icon}>
+    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.5 16.5a4.5 4.5 0 0 1-4.5-4.5V6h2v3.17A4.49 4.49 0 0 1 16.5 8v2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 2.5-2.5H21a4.5 4.5 0 0 1-4.5 4z"/>
+  </svg>
+);
+const TwitchIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.twitch.icon}>
+    <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
+  </svg>
+);
+const FacebookIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.facebook.icon}>
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+  </svg>
+);
+const LoomIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.loom.icon}>
+    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 12a5.568 5.568 0 1 1-5.137-5.548v2.085a3.484 3.484 0 1 0 3.052 3.463zm-5.137-5.548V4.364l3.923 2.265-1.042 1.806a3.484 3.484 0 0 0-2.881-.983zm3.923 2.265 1.042-1.806 1.97 3.415h-2.085a3.484 3.484 0 0 0-.927-1.609zM18.466 12h2.085l-1.97 3.415-1.042-1.806A3.484 3.484 0 0 0 18.466 12zm-1.927 1.609 1.042 1.806-3.923 2.265v-2.088a3.484 3.484 0 0 0 2.881-.983zm-3.923 2.265v2.088l-3.923-2.265 1.042-1.806a3.484 3.484 0 0 0 2.881.983zM5.534 12c0-.61.102-1.196.288-1.745l1.806 1.042A3.484 3.484 0 0 0 8.432 12c0 .24.024.474.072.7L6.698 13.744A5.536 5.536 0 0 1 5.534 12zm2.553-3.415-1.042-1.806 1.97-3.415v2.085a3.484 3.484 0 0 0-.928 1.136zm-1.042-1.806 1.042 1.806A3.484 3.484 0 0 0 7.015 12H4.93l1.97-3.415 1.146.194zM8.58 15.61a3.484 3.484 0 0 0 2.884.98v2.046l-3.923-2.265 1.04-1.805V15.61z"/>
+  </svg>
+);
+const WistiaIcon = ({ size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.wistia.icon}>
+    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1.25 16.518l-4.5-4.319 1.396-1.435 3.078 2.937 6.105-6.437 1.429 1.403-7.508 7.851z"/>
+  </svg>
+);
+const PlatformIcon = ({ platform, size = 18 }) => {
+  if (platform === 'youtube')     return <YouTubeIcon size={size} />;
+  if (platform === 'vimeo')       return <VimeoIcon size={size} />;
+  if (platform === 'tiktok')      return <TikTokIcon size={size} />;
+  if (platform === 'twitter')     return <TwitterIcon size={size} />;
+  if (platform === 'instagram')   return <InstagramIcon size={size} />;
+  if (platform === 'dailymotion') return <DailymotionIcon size={size} />;
+  if (platform === 'twitch')      return <TwitchIcon size={size} />;
+  if (platform === 'facebook')    return <FacebookIcon size={size} />;
+  if (platform === 'loom')        return <LoomIcon size={size} />;
+  if (platform === 'wistia')      return <WistiaIcon size={size} />;
+  // Generic video icon fallback
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2"/><polygon points="8 21 16 21 12 17"/>
+    </svg>
+  );
+};
 const GitHubIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
@@ -2612,20 +2709,20 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                       {(showAllHistory ? history : history.slice(0, 4)).map((h, idx) => {
                         const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
                         const title = h.title || h.id;
-                        const channel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
+                        const channel = h.channel || (h.platform ? h.platform.charAt(0).toUpperCase() + h.platform.slice(1) : 'YouTube');
                         return (
                           <div key={`${h.id}-${idx}`} className="ds-row">
                             <div className="ds-thumb">
                               {h.thumbnail ? (
                                 <img src={h.thumbnail} alt={title} loading="lazy" />
                               ) : (
-                                h.platform === 'vimeo' ? <VimeoIcon size={30} /> : <YouTubeIcon size={30} />
+                                <PlatformIcon platform={h.platform || 'youtube'} size={30} />
                               )}
                             </div>
                             <div className="ds-row-main" style={{ minWidth: 0 }}>
                               <p className="ds-row-title">{title}</p>
                               <p className="ds-row-meta">
-                                {h.platform === 'vimeo' ? <VimeoIcon size={13} /> : <YouTubeIcon size={13} />}
+                                <PlatformIcon platform={h.platform || 'youtube'} size={13} />
                                 {channel}
                                 {wc > 0 ? `${wc.toLocaleString()} words` : null}
                                 {timeAgo(h.date)}
@@ -2918,7 +3015,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                         <img src={latest.thumbnail} alt={latest.title || 'Video'} loading="lazy" />
                       ) : (
                         <div style={{ color: 'rgba(45,108,223,0.3)' }}>
-                          {latest.platform === 'vimeo' ? <VimeoIcon size={48} /> : <YouTubeIcon size={48} />}
+                          <PlatformIcon platform={latest.platform || 'youtube'} size={48} />
                         </div>
                       )}
                       <div className="ds-continue-play">
@@ -2932,8 +3029,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                     <div className="ds-continue-body">
                       <p className="ds-continue-video-title">{latest.title || latest.id}</p>
                       <p className="ds-continue-meta">
-                        {latest.platform === 'vimeo' ? <VimeoIcon size={12} /> : <YouTubeIcon size={12} />}
-                        {latest.channel || (latest.platform === 'vimeo' ? 'Vimeo' : 'YouTube')}
+                        <PlatformIcon platform={latest.platform || 'youtube'} size={12} />
+                        {latest.channel || (latest.platform ? latest.platform.charAt(0).toUpperCase() + latest.platform.slice(1) : 'YouTube')}
                         {latestWc > 0 && <span style={{ color: '#C0BAB3' }}>·</span>}
                         {latestWc > 0 && `${latestWc.toLocaleString()} words`}
                       </p>
@@ -3296,7 +3393,7 @@ const App = () => {
   const [academicInsights, setAcademicInsights]               = useState(null); // {references, claims, glossary, researchGaps}
   const [academicInsightsLoading, setAcademicInsightsLoading] = useState(false);
   const [academicInsightsFull, setAcademicInsightsFull]       = useState(false);
-  const [activeLogo, setActiveLogo]               = useState('youtube'); // 'youtube' | 'vimeo'
+  const [activeLogo, setActiveLogo]               = useState('youtube');
   const [logoFlip, setLogoFlip]                   = useState('idle');    // 'idle' | 'out' | 'in'
   const [sgQuestion, setSgQuestion]               = useState('');
   const [sgMessages, setSgMessages]               = useState([]);       // [{role, text, isError?}]
@@ -3406,7 +3503,8 @@ const App = () => {
     const id = setInterval(() => {
       setLogoFlip('out');
       const t1 = setTimeout(() => {
-        setActiveLogo(p => p === 'youtube' ? 'vimeo' : 'youtube');
+        const LOGO_CYCLE = ['youtube', 'tiktok', 'twitch', 'loom', 'vimeo', 'twitter', 'instagram'];
+        setActiveLogo(p => { const i = LOGO_CYCLE.indexOf(p); return LOGO_CYCLE[(i + 1) % LOGO_CYCLE.length]; });
         setLogoFlip('in');
         const t2 = setTimeout(() => setLogoFlip('idle'), FLIP_DURATION);
         return () => clearTimeout(t2);
@@ -3744,7 +3842,7 @@ const App = () => {
     }
 
     const platform = entry.platform || 'youtube';
-    setVideoUrl(platform === 'vimeo' ? `https://vimeo.com/${entry.id}` : `https://youtube.com/watch?v=${entry.id}`);
+    setVideoUrl(entry.url || (platform === 'vimeo' ? `https://vimeo.com/${entry.id}` : `https://youtube.com/watch?v=${entry.id}`));
     setTranscript(entry.transcript);
     setSegments(entry.segments || []);
     setTranscriptSource(entry.source || '');
@@ -3848,9 +3946,9 @@ const App = () => {
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
 
-    const apiUrl = platform === 'vimeo'
-      ? `/api/transcript?platform=vimeo&url=${encodeURIComponent(videoCanonical)}&lang=${langToUse}`
-      : `/api/transcript?videoId=${videoId}&lang=${langToUse}`;
+    const apiUrl = platform === 'youtube'
+      ? `/api/transcript?videoId=${videoId}&lang=${langToUse}`
+      : `/api/transcript?platform=${encodeURIComponent(platform)}&url=${encodeURIComponent(videoCanonical)}&lang=${langToUse}`;
     const es = new EventSource(apiUrl);
     const killTimer = setTimeout(() => {
       es.close();
@@ -3869,7 +3967,8 @@ const App = () => {
         const data = JSON.parse(e.data);
         const meta = await fetchVideoMeta(platform, videoCanonical);
         const title = meta.title || data.title || videoId;
-        const channel = meta.channel || data.channel || (platform === 'vimeo' ? 'Vimeo' : 'YouTube');
+        const platformLabel = platform.charAt(0).toUpperCase() + platform.slice(1);
+        const channel = meta.channel || data.channel || platformLabel;
         const thumb = data.thumbnail || meta.thumbnail || (platform === 'youtube' ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
 
         setTranscript(data.transcript);
@@ -4352,7 +4451,7 @@ const App = () => {
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
         {history.map((entry) => {
           const hTitle = entry.title || entry.id;
-          const hChannel = entry.channel || (entry.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
+          const hChannel = entry.channel || (entry.platform ? entry.platform.charAt(0).toUpperCase() + entry.platform.slice(1) : 'YouTube');
           const isActive = entry.id === currentVideoId;
           return (
             <button key={entry.id} onClick={() => loadFromHistory(entry)} style={{
@@ -4367,13 +4466,13 @@ const App = () => {
               <div style={{ position: 'relative', flexShrink: 0 }}>
                 {entry.thumbnail
                   ? <img src={entry.thumbnail} alt="" style={{ width: 112, height: 70, objectFit: 'cover', borderRadius: 8, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
-                  : <div style={{ width: 112, height: 70, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><YouTubeIcon /></div>
+                  : <div style={{ width: 112, height: 70, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlatformIcon platform={entry.platform || 'youtube'} /></div>
                 }
               </div>
               <div style={{ minWidth: 0, flex: 1, paddingTop: 2 }}>
                 <div style={{ fontSize: 13.5, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.4, marginBottom: 5 }}>{hTitle}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: P.muted, marginBottom: 2 }}>
-                  {entry.platform === 'vimeo' ? <VimeoIcon size={9} /> : <YouTubeIcon />}
+                  <PlatformIcon platform={entry.platform || 'youtube'} size={9} />
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hChannel}</span>
                 </div>
                 <div style={{ fontSize: 11, color: P.muted }}>{timeAgo(entry.date)}</div>
@@ -4647,8 +4746,7 @@ const App = () => {
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: isMobile ? '11px 14px' : '16px 20px', background: P.paper, borderRadius: 14, border: `1px solid ${P.border}` }}>
                     {(() => {
                       const platform = parseVideoUrl(videoUrl)?.platform;
-                      if (platform === 'youtube') return <YouTubeIcon />;
-                      if (platform === 'vimeo') return <VimeoIcon />;
+                      if (platform) return <PlatformIcon platform={platform} />;
                       // Flip-clock animation between logos
                       const flipStyle = {
                         display: 'inline-flex', flexShrink: 0,
@@ -4660,7 +4758,7 @@ const App = () => {
                       };
                       return (
                         <span style={flipStyle}>
-                          {activeLogo === 'youtube' ? <YouTubeIcon /> : <VimeoIcon />}
+                          <PlatformIcon platform={activeLogo} />
                         </span>
                       );
                     })()}
@@ -4671,7 +4769,7 @@ const App = () => {
                       onChange={e => setVideoUrl(e.target.value)}
                       onFocus={handleInputFocus}
                       onKeyDown={e => e.key === 'Enter' && !loading && getTranscript()}
-                      placeholder="Paste a YouTube or Vimeo URL…"
+                      placeholder="Paste a YouTube, TikTok, Twitch, Loom, Vimeo URL…"
                       style={{
                         flex: 1, border: 'none', background: 'transparent', outline: 'none',
                         fontSize: isMobile ? 15 : 17, color: P.ink,
@@ -4956,7 +5054,7 @@ const App = () => {
                           <img src={h.thumbnail} alt="" style={{ width: 72, height: 40, objectFit: 'cover', borderRadius: 7, border: `1px solid ${P.border}`, display: 'block' }}
                             onError={e => { e.target.style.display = 'none'; }} />
                           <div style={{ position: 'absolute', bottom: 3, right: 3, background: 'rgba(28,25,23,0.75)', color: 'white', fontSize: 9, fontWeight: 700, fontFamily: 'monospace', padding: '1px 3px', borderRadius: 3 }}>
-                            {h.platform === 'vimeo' ? 'VIM' : h.source === 'whisper' ? 'AI' : 'YT'}
+                            {h.source === 'whisper' ? 'AI' : (h.platform || 'youtube').slice(0, 3).toUpperCase()}
                           </div>
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -5043,8 +5141,61 @@ const App = () => {
                           allowFullScreen
                           title="Video player"
                         />
-                      ) : (
+                      ) : currentPlatform === 'youtube' ? (
                         <div ref={ytPlayerDivRef} style={{ width: '100%', aspectRatio: '16/9', display: 'block', ...(isMobile ? { maxHeight: 160 } : {}) }} />
+                      ) : currentPlatform === 'tiktok' ? (
+                        <iframe
+                          src={`https://www.tiktok.com/embed/v2/${currentVideoId}`}
+                          style={{ width: '100%', aspectRatio: '9/16', maxHeight: isMobile ? 320 : 480, border: 'none', display: 'block' }}
+                          allow="autoplay; encrypted-media; fullscreen"
+                          allowFullScreen
+                          title="TikTok player"
+                        />
+                      ) : currentPlatform === 'twitch' ? (
+                        <iframe
+                          src={(() => {
+                            const parent = window.location.hostname;
+                            if (currentVideoId.startsWith('v'))
+                              return `https://player.twitch.tv/?video=${currentVideoId.slice(1)}&parent=${parent}&autoplay=false`;
+                            if (currentVideoId.startsWith('c_'))
+                              return `https://clips.twitch.tv/embed?clip=${currentVideoId.slice(2)}&parent=${parent}&autoplay=false`;
+                            return `https://player.twitch.tv/?channel=${currentVideoId}&parent=${parent}&autoplay=false`;
+                          })()}
+                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block', ...(isMobile ? { maxHeight: 160 } : {}) }}
+                          allow="autoplay; fullscreen"
+                          allowFullScreen
+                          title="Twitch player"
+                        />
+                      ) : currentPlatform === 'dailymotion' ? (
+                        <iframe
+                          src={`https://www.dailymotion.com/embed/video/${currentVideoId}?autoplay=0&ui-logo=0`}
+                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block', ...(isMobile ? { maxHeight: 160 } : {}) }}
+                          allow="autoplay; fullscreen; picture-in-picture"
+                          allowFullScreen
+                          title="Dailymotion player"
+                        />
+                      ) : currentPlatform === 'loom' ? (
+                        <iframe
+                          src={`https://www.loom.com/embed/${currentVideoId}`}
+                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block', ...(isMobile ? { maxHeight: 160 } : {}) }}
+                          allow="autoplay; fullscreen; picture-in-picture"
+                          allowFullScreen
+                          title="Loom player"
+                        />
+                      ) : (
+                        // Generic platform: show thumbnail + open link
+                        <a href={currentVideoId} target="_blank" rel="noopener noreferrer" style={{ display: 'block', position: 'relative', width: '100%', aspectRatio: '16/9', background: '#000', textDecoration: 'none' }}>
+                          {currentThumbnail
+                            ? <img src={currentThumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                            : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: P.surface }}><PlatformIcon platform={currentPlatform} size={48} /></div>
+                          }
+                          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.35)' }}>
+                            <div style={{ background: 'rgba(0,0,0,0.7)', color: '#fff', fontSize: 12, fontWeight: 600, padding: '6px 14px', borderRadius: 20, display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                              Watch on {currentPlatform.charAt(0).toUpperCase() + currentPlatform.slice(1)}
+                            </div>
+                          </div>
+                        </a>
                       )}
                     </div>
                   </div>
