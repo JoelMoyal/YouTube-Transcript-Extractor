@@ -4967,25 +4967,25 @@ const App = () => {
             <div style={{ maxWidth: 820, margin: '0 auto', padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14 }}>
               {[
                 {
-                  emoji: '⚡',
+                  num: '01',
                   label: 'Instant Transcript',
-                  desc: 'Full text + timestamps from YouTube & Vimeo in seconds. Auto-translated to English when needed.',
+                  desc: 'Paste any video URL and get the full transcript with timestamps in seconds — across YouTube, TikTok, Vimeo, and 6 more platforms.',
                   accent: P.accent,
                   bg: 'rgba(45,108,223,0.06)',
                   border: 'rgba(45,108,223,0.14)',
                 },
                 {
-                  emoji: '✨',
-                  label: 'AI Insights',
-                  desc: 'Summaries, chapter breakdowns, flashcards & study guides — generated on demand.',
+                  num: '02',
+                  label: 'AI Study Tools',
+                  desc: 'Turn any video into a study guide, flashcard deck, chapter breakdown, or bullet summary — all generated on demand.',
                   accent: '#7C3AED',
                   bg: 'rgba(124,58,237,0.06)',
                   border: 'rgba(124,58,237,0.14)',
                 },
                 {
-                  emoji: '💬',
+                  num: '03',
                   label: 'Chat With Any Video',
-                  desc: 'Ask questions, pull quotes, and get precise AI answers backed by the transcript.',
+                  desc: 'Ask questions about the video and get precise answers grounded in the transcript. No hallucinations, just the source.',
                   accent: P.success,
                   bg: 'rgba(15,118,110,0.06)',
                   border: 'rgba(15,118,110,0.14)',
@@ -4995,7 +4995,7 @@ const App = () => {
                   background: card.bg, border: `1px solid ${card.border}`, borderRadius: 18,
                   padding: '26px 22px',
                 }}>
-                  <div style={{ fontSize: 30, marginBottom: 14, lineHeight: 1 }}>{card.emoji}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: card.accent, marginBottom: 14, letterSpacing: '0.06em', fontFamily: 'monospace' }}>{card.num}</div>
                   <div style={{ fontSize: 15, fontWeight: 700, color: P.ink, marginBottom: 8, letterSpacing: '-0.02em' }}>
                     {card.label}
                   </div>
