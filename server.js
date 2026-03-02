@@ -774,8 +774,9 @@ app.post('/api/ask', async (req, res) => {
   try {
     const source = platform === 'vimeo' ? 'Vimeo video' : 'YouTube video';
 
-    // Build timestamped transcript if segments are available
-    const hasTimestamps = Array.isArray(segments) && segments.length > 0;
+    // Build timestamped transcript if segments are available with real timing data
+    // (requires at least one segment with seconds > 0, otherwise all times are 0:00 which is useless)
+    const hasTimestamps = Array.isArray(segments) && segments.length > 0 && segments.some(s => s.seconds > 0);
     let transcriptContext;
     if (hasTimestamps) {
       transcriptContext = segments.map(s => {
