@@ -6190,34 +6190,52 @@ const App = () => {
                     )}
                   </div>
                 ) : (
-                  /* ── Mobile: Academic Insights card only ── */
-                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '12px 16px 20px' }}>
-                    <div style={{ marginBottom: 12 }}>
-                      <div style={{ fontSize: 15, fontWeight: 800, color: P.ink, letterSpacing: '-0.01em', marginBottom: 2 }}>Academic Insights</div>
-                      <div style={{ fontSize: 12, color: P.muted, lineHeight: 1.4 }}>References, claims & glossary from this video.</div>
+                  /* ── Mobile: rich card design ── */
+                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '10px 14px 20px' }}>
+                    <div style={{ marginBottom: 10 }}>
+                      <div style={{ fontSize: 15, fontWeight: 800, color: P.ink, letterSpacing: '-0.01em', marginBottom: 2 }}>AI Insights</div>
+                      <div style={{ fontSize: 11.5, color: P.muted, lineHeight: 1.4 }}>Generate smart study tools in seconds.</div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {[
-                        { title: 'Academic Insights', sub: 'Key claims, references & glossary', color: '#7C3AED',
+                        { title: 'Summary', sub: 'Key points & bullet overview', color: P.accent,
+                          bg: 'linear-gradient(135deg,rgba(45,108,223,0.12),rgba(45,108,223,0.06))', border: 'rgba(45,108,223,0.2)',
+                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+                          label: summary ? 'View' : summarizing ? 'Generating…' : 'Generate',
+                          onClick: summary ? () => setMobilePanel('summary') : summarize,
+                          active: !!summary, loading: summarizing, badge: summary ? 'Ready' : null },
+                        { title: 'Flashcards', sub: 'Q&A cards — flip to reveal', color: '#D97706',
+                          bg: 'linear-gradient(135deg,rgba(217,119,6,0.12),rgba(217,119,6,0.06))', border: 'rgba(217,119,6,0.2)',
+                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+                          label: flashcards.length > 0 ? 'View' : flashcardsLoading ? 'Generating…' : 'Generate',
+                          onClick: flashcards.length > 0 ? () => setMobilePanel('flashcards') : generateFlashcards,
+                          active: flashcards.length > 0, loading: flashcardsLoading, badge: flashcards.length > 0 ? `${flashcards.length} cards` : null },
+                        { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success,
+                          bg: 'linear-gradient(135deg,rgba(15,118,110,0.12),rgba(15,118,110,0.06))', border: 'rgba(15,118,110,0.2)',
+                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+                          label: (studyGuide && !studyGuide._error) ? 'View' : studyGuideLoading ? 'Generating…' : 'Generate',
+                          onClick: (studyGuide && !studyGuide._error) ? () => setMobilePanel('study-guide') : generateStudyGuide,
+                          active: !!(studyGuide && !studyGuide._error), loading: studyGuideLoading, badge: (studyGuide && !studyGuide._error) ? 'Ready' : null },
+                        { title: 'Academic', sub: 'References, claims & glossary', color: '#7C3AED',
                           bg: 'linear-gradient(135deg,rgba(124,58,237,0.12),rgba(124,58,237,0.06))', border: 'rgba(124,58,237,0.2)',
-                          icon: <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>,
+                          icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>,
                           label: (academicInsights && !academicInsights._error) ? 'View' : academicInsightsLoading ? 'Generating…' : 'Generate',
                           onClick: (academicInsights && !academicInsights._error) ? () => setMobilePanel('academic') : generateAcademicInsights,
                           active: !!(academicInsights && !academicInsights._error), loading: academicInsightsLoading, badge: (academicInsights && !academicInsights._error) ? 'Ready' : null },
                       ].map(item => (
                         <div key={item.title} onClick={item.loading ? undefined : item.onClick}
-                          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px', borderRadius: 16, cursor: item.loading ? 'default' : 'pointer', background: item.active ? item.bg : '#fff', border: `1.5px solid ${item.active ? item.border : P.border}`, boxShadow: item.active ? `0 2px 12px ${item.border}` : '0 1px 4px rgba(28,25,23,0.05)', transition: 'all 0.18s' }}>
-                          <div style={{ width: 52, height: 52, borderRadius: 14, flexShrink: 0, background: item.active ? item.bg : 'rgba(124,58,237,0.07)', border: `1.5px solid ${item.active ? item.border : 'rgba(124,58,237,0.15)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.active ? item.color : '#7C3AED' }}>
-                            {item.loading ? <SpinnerIcon size={16} /> : item.icon}
+                          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 13px', borderRadius: 14, cursor: item.loading ? 'default' : 'pointer', background: item.active ? item.bg : '#fff', border: `1.5px solid ${item.active ? item.border : P.border}`, boxShadow: item.active ? `0 2px 10px ${item.border}` : '0 1px 3px rgba(28,25,23,0.05)', transition: 'all 0.18s' }}>
+                          <div style={{ width: 42, height: 42, borderRadius: 12, flexShrink: 0, background: item.active ? item.bg : 'rgba(0,0,0,0.04)', border: `1.5px solid ${item.active ? item.border : 'transparent'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.active ? item.color : P.muted }}>
+                            {item.loading ? <SpinnerIcon size={14} /> : item.icon}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 3 }}>
-                              <span style={{ fontSize: 15, fontWeight: 700, color: item.active ? item.color : P.ink }}>{item.title}</span>
-                              {item.badge && <span style={{ fontSize: 10, fontWeight: 700, color: item.color, background: item.bg, border: `1px solid ${item.border}`, padding: '1px 7px', borderRadius: 99 }}>{item.badge}</span>}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                              <span style={{ fontSize: 13.5, fontWeight: 700, color: item.active ? item.color : P.ink }}>{item.title}</span>
+                              {item.badge && <span style={{ fontSize: 9.5, fontWeight: 700, color: item.color, background: item.bg, border: `1px solid ${item.border}`, padding: '1px 6px', borderRadius: 99 }}>{item.badge}</span>}
                             </div>
-                            <div style={{ fontSize: 12.5, color: P.muted, lineHeight: 1.4 }}>{item.sub}</div>
+                            <div style={{ fontSize: 11.5, color: P.muted, lineHeight: 1.3 }}>{item.sub}</div>
                           </div>
-                          <div style={{ flexShrink: 0, padding: '6px 14px', borderRadius: 10, fontSize: 12.5, fontWeight: 600, border: `1.5px solid ${item.active ? item.border : P.border}`, background: item.active ? item.bg : 'transparent', color: item.active ? item.color : P.muted, whiteSpace: 'nowrap' }}>
+                          <div style={{ flexShrink: 0, padding: '5px 11px', borderRadius: 8, fontSize: 11.5, fontWeight: 600, border: `1.5px solid ${item.active ? item.border : P.border}`, background: item.active ? item.bg : 'transparent', color: item.active ? item.color : P.muted, whiteSpace: 'nowrap' }}>
                             {item.label}
                           </div>
                         </div>
