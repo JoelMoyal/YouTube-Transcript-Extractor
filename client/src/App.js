@@ -4425,8 +4425,8 @@ const App = () => {
           background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(45,108,223,0.12) 0%, transparent 70%),
                       ${P.paper};
         }
-        .feature-card { transition: box-shadow 0.28s cubic-bezier(.22,.68,0,1.2), transform 0.28s cubic-bezier(.22,.68,0,1.2); cursor: default; }
-        .feature-card:hover { box-shadow: 0 20px 48px rgba(28,25,23,0.14), 0 4px 12px rgba(28,25,23,0.08); transform: translateY(-8px) scale(1.025); }
+        .feature-card { transition: box-shadow 0.26s cubic-bezier(.22,.68,0,1.2), transform 0.26s cubic-bezier(.22,.68,0,1.2); cursor: default; }
+        .feature-card:hover { box-shadow: 0 16px 40px rgba(28,25,23,0.13), 0 3px 10px rgba(28,25,23,0.07); transform: translateY(-7px) scale(1.02); }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(45,108,223,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
@@ -4887,87 +4887,62 @@ const App = () => {
             <div style={{ maxWidth: 920, margin: '0 auto', padding: '8px 24px 56px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
               {[
                 {
-                  emoji: '⚡',
-                  label: 'Instant Transcript',
-                  desc: 'Paste any YouTube or Vimeo link and get the full transcript with timestamps in seconds.',
-                  tag: 'YouTube & Vimeo',
-                  gradient: 'linear-gradient(135deg, #4F8EF7 0%, #2D6CDF 100%)',
-                  glow: 'rgba(45,108,223,0.22)',
-                  chipColor: 'rgba(255,255,255,0.22)',
-                  bullets: ['Full text + timestamps', 'Auto English translation', 'Click to jump in video'],
+                  num: '01',
+                  label: 'Transcript in Seconds',
+                  tagline: 'Paste a link. Done.',
+                  desc: 'Get the full transcript of any YouTube or Vimeo video instantly — complete with clickable timestamps and automatic English translation.',
+                  accent: P.accent,
+                  accentBg: P.accentLight,
                 },
                 {
-                  emoji: '✨',
-                  label: 'AI Insights',
-                  desc: 'Summaries, chapter breakdowns, flashcards and study guides — generated on demand.',
-                  tag: 'Powered by AI',
-                  gradient: 'linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%)',
-                  glow: 'rgba(124,58,237,0.22)',
-                  chipColor: 'rgba(255,255,255,0.22)',
-                  bullets: ['Smart summaries', 'Flashcards & study guides', 'Chapter breakdowns'],
+                  num: '02',
+                  label: 'Study Smarter',
+                  tagline: 'AI does the work.',
+                  desc: 'Turn any video into a study guide, chapter breakdown, or set of flashcards. Everything you need to actually retain what you watched.',
+                  accent: '#7C3AED',
+                  accentBg: 'rgba(124,58,237,0.07)',
                 },
                 {
-                  emoji: '💬',
-                  label: 'Chat With Video',
-                  desc: 'Ask anything about the video and get precise answers with timestamps straight to the source.',
-                  tag: 'AI Chat',
-                  gradient: 'linear-gradient(135deg, #34D399 0%, #0F766E 100%)',
-                  glow: 'rgba(15,118,110,0.22)',
-                  chipColor: 'rgba(255,255,255,0.22)',
-                  bullets: ['Ask any question', 'Timestamped answers', 'Pull exact quotes'],
+                  num: '03',
+                  label: 'Ask the Video Anything',
+                  tagline: 'Like Ctrl+F, but smarter.',
+                  desc: 'Chat directly with the transcript. Ask a question and get a precise answer with timestamp links that jump straight to the moment.',
+                  accent: P.success,
+                  accentBg: 'rgba(15,118,110,0.07)',
                 },
               ].map(card => (
                 <div key={card.label} className="feature-card" style={{
-                  background: card.gradient,
-                  borderRadius: 24,
-                  overflow: 'hidden',
+                  background: P.surface,
+                  border: `1.5px solid ${P.border}`,
+                  borderRadius: 20,
                   display: 'flex',
                   flexDirection: 'column',
-                  boxShadow: `0 8px 32px ${card.glow}, 0 2px 8px rgba(0,0,0,0.08)`,
-                  position: 'relative',
+                  boxShadow: '0 2px 8px rgba(28,25,23,0.06)',
+                  padding: '28px 26px 30px',
                 }}>
-                  {/* Subtle sheen overlay */}
-                  <div style={{
-                    position: 'absolute', inset: 0, pointerEvents: 'none',
-                    background: 'linear-gradient(160deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 60%)',
-                    borderRadius: 24,
-                  }} />
-                  <div style={{ padding: '28px 26px 30px', position: 'relative', zIndex: 1 }}>
-                    {/* Tag chip */}
+                  {/* Number + accent line */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 22 }}>
                     <div style={{
-                      display: 'inline-block', background: card.chipColor,
-                      color: '#fff', fontSize: 11, fontWeight: 600,
-                      padding: '3px 10px', borderRadius: 20, marginBottom: 20,
-                      letterSpacing: '0.03em', backdropFilter: 'blur(4px)',
+                      fontSize: 11, fontWeight: 800, color: card.accent,
+                      background: card.accentBg,
+                      padding: '3px 9px', borderRadius: 8,
+                      letterSpacing: '0.05em',
                     }}>
-                      {card.tag}
+                      {card.num}
                     </div>
-                    {/* Emoji */}
-                    <div style={{ fontSize: 38, lineHeight: 1, marginBottom: 14 }}>{card.emoji}</div>
-                    {/* Title */}
-                    <div style={{ fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 10, letterSpacing: '-0.03em' }}>
-                      {card.label}
-                    </div>
-                    {/* Description */}
-                    <div style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.82)', lineHeight: 1.65, marginBottom: 22 }}>
-                      {card.desc}
-                    </div>
-                    {/* Bullet list */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      {card.bullets.map(b => (
-                        <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                          <div style={{
-                            width: 18, height: 18, borderRadius: '50%',
-                            background: 'rgba(255,255,255,0.25)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            flexShrink: 0,
-                          }}>
-                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />
-                          </div>
-                          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>{b}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <div style={{ flex: 1, height: 1.5, background: card.accentBg, borderRadius: 2 }} />
+                  </div>
+                  {/* Tagline */}
+                  <div style={{ fontSize: 11.5, fontWeight: 700, color: card.accent, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 8 }}>
+                    {card.tagline}
+                  </div>
+                  {/* Title */}
+                  <div style={{ fontSize: 17, fontWeight: 800, color: P.ink, marginBottom: 12, letterSpacing: '-0.03em', lineHeight: 1.25 }}>
+                    {card.label}
+                  </div>
+                  {/* Description */}
+                  <div style={{ fontSize: 13.5, color: P.muted, lineHeight: 1.7 }}>
+                    {card.desc}
                   </div>
                 </div>
               ))}
@@ -6803,13 +6778,6 @@ const App = () => {
                 onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
               >Privacy Policy</a>
             </span>
-            <a href="https://github.com/joelmoyal/YouTube-Transcript-Extractor" target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
-              onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
-            >
-              <GitHubIcon /> Open source on GitHub
-            </a>
           </div>
         </div>
       </footer>}
