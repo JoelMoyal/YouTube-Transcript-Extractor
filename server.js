@@ -788,8 +788,8 @@ app.post('/api/ask', async (req, res) => {
     }
 
     const timestampInstruction = hasTimestamps
-      ? ' When relevant, cite the exact timestamp from the transcript in [M:SS] format (e.g. [1:23]) so the user can jump to that part of the video. Only cite timestamps that actually appear in the transcript.'
-      : '';
+      ? ' The transcript includes timestamps. When relevant, cite them in [M:SS] format (e.g. [1:23]) so the user can jump to that part of the video. Use only timestamps that appear in the transcript.'
+      : ' This transcript does not have timestamps. Do not reference, estimate, or guess any time positions or timestamps in your answer.';
 
     const text = await aiComplete(
       `You are a helpful assistant that answers questions about ${source} transcripts. Be concise and accurate. Only use information from the provided transcript. If the answer is not in the transcript, say so.${timestampInstruction}\n\nIMPORTANT FEATURE GUIDANCE: If the user asks about flashcards, making flashcards, or studying with flashcards — tell them to click the "Insights" tab and then click the "Flashcards" button there. If the user asks about a study guide, study notes, or a structured summary — tell them to click the "Insights" tab and then click the "Study Guide" button there.\n\nTranscript:\n${transcriptContext}\n\nQuestion: ${question}`
