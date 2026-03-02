@@ -772,7 +772,8 @@ app.post('/api/summarize', async (req, res) => {
   if (!process.env.GROQ_API_KEY && !process.env.OPENROUTER_API_KEY)
     return res.status(503).json({ error: 'AI summary is not configured (missing GROQ_API_KEY or OPENROUTER_API_KEY)' });
 
-  const source = platform === 'vimeo' ? 'Vimeo video' : 'YouTube video';
+  const platformLabels = { youtube: 'YouTube', vimeo: 'Vimeo', tiktok: 'TikTok', twitter: 'Twitter/X', instagram: 'Instagram', dailymotion: 'Dailymotion', facebook: 'Facebook', loom: 'Loom', wistia: 'Wistia' };
+  const source = `${platformLabels[platform] || 'video'} video`;
   try {
     const text = await aiComplete(
       `Summarize the following ${source} transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 15000)}`
@@ -903,7 +904,8 @@ app.post('/api/ask', async (req, res) => {
     return res.status(503).json({ error: 'AI not configured (missing GROQ_API_KEY or OPENROUTER_API_KEY)' });
 
   try {
-    const source = platform === 'vimeo' ? 'Vimeo video' : 'YouTube video';
+    const platformLabels = { youtube: 'YouTube', vimeo: 'Vimeo', tiktok: 'TikTok', twitter: 'Twitter/X', instagram: 'Instagram', dailymotion: 'Dailymotion', facebook: 'Facebook', loom: 'Loom', wistia: 'Wistia' };
+    const source = `${platformLabels[platform] || 'video'} video`;
 
     // Build timestamped transcript if segments are available with real timing data
     // (requires at least one segment with seconds > 0, otherwise all times are 0:00 which is useless)
