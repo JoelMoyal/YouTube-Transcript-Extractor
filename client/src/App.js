@@ -4882,42 +4882,75 @@ const App = () => {
             </div>{/* end hero-grad */}
 
             {/* Capability cards */}
-            <div style={{ maxWidth: 820, margin: '0 auto', padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14 }}>
+            <div style={{ maxWidth: 860, margin: '0 auto', padding: '8px 24px 48px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 18 }}>
               {[
                 {
                   emoji: '⚡',
                   label: 'Instant Transcript',
-                  desc: 'Full text + timestamps from YouTube & Vimeo in seconds. Auto-translated to English when needed.',
+                  desc: 'Paste any YouTube or Vimeo link and get the full transcript with timestamps in seconds. Auto-translated to English.',
                   accent: P.accent,
-                  bg: 'rgba(45,108,223,0.06)',
-                  border: 'rgba(45,108,223,0.14)',
+                  iconBg: 'rgba(45,108,223,0.10)',
+                  topBar: P.accent,
+                  bullets: ['YouTube & Vimeo support', 'Click timestamps to jump', 'Auto English translation'],
                 },
                 {
                   emoji: '✨',
                   label: 'AI Insights',
-                  desc: 'Summaries, chapter breakdowns, flashcards & study guides — generated on demand.',
+                  desc: 'Let AI do the heavy lifting — get summaries, chapter breakdowns, flashcards and study guides on demand.',
                   accent: '#7C3AED',
-                  bg: 'rgba(124,58,237,0.06)',
-                  border: 'rgba(124,58,237,0.14)',
+                  iconBg: 'rgba(124,58,237,0.10)',
+                  topBar: '#7C3AED',
+                  bullets: ['Smart summaries', 'Flashcards & study guides', 'Chapter breakdowns'],
                 },
                 {
                   emoji: '💬',
                   label: 'Chat With Any Video',
-                  desc: 'Ask questions, pull quotes, and get precise AI answers backed by the transcript.',
+                  desc: 'Ask anything about the video. Get precise answers with inline timestamps that take you straight to the source.',
                   accent: P.success,
-                  bg: 'rgba(15,118,110,0.06)',
-                  border: 'rgba(15,118,110,0.14)',
+                  iconBg: 'rgba(15,118,110,0.10)',
+                  topBar: P.success,
+                  bullets: ['Ask any question', 'Timestamped answers', 'Pull exact quotes'],
                 },
               ].map(card => (
                 <div key={card.label} className="feature-card" style={{
-                  background: card.bg, border: `1px solid ${card.border}`, borderRadius: 18,
-                  padding: '26px 22px',
+                  background: P.surface,
+                  border: `1px solid ${P.border}`,
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
                 }}>
-                  <div style={{ fontSize: 30, marginBottom: 14, lineHeight: 1 }}>{card.emoji}</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: P.ink, marginBottom: 8, letterSpacing: '-0.02em' }}>
-                    {card.label}
+                  {/* Colored top accent bar */}
+                  <div style={{ height: 4, background: card.topBar }} />
+                  <div style={{ padding: '24px 24px 26px' }}>
+                    {/* Icon badge */}
+                    <div style={{
+                      width: 48, height: 48, borderRadius: 14,
+                      background: card.iconBg,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 24, marginBottom: 18,
+                    }}>
+                      {card.emoji}
+                    </div>
+                    {/* Title */}
+                    <div style={{ fontSize: 15.5, fontWeight: 700, color: P.ink, marginBottom: 8, letterSpacing: '-0.02em' }}>
+                      {card.label}
+                    </div>
+                    {/* Description */}
+                    <div style={{ fontSize: 13.5, color: P.muted, lineHeight: 1.65, marginBottom: 18 }}>
+                      {card.desc}
+                    </div>
+                    {/* Bullet list */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                      {card.bullets.map(b => (
+                        <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div style={{ width: 6, height: 6, borderRadius: '50%', background: card.accent, flexShrink: 0 }} />
+                          <span style={{ fontSize: 12.5, color: P.muted, fontWeight: 500 }}>{b}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div style={{ fontSize: 13.5, color: P.muted, lineHeight: 1.65 }}>{card.desc}</div>
                 </div>
               ))}
             </div>
