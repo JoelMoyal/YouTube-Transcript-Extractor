@@ -4798,10 +4798,57 @@ const App = () => {
           background: var(--card-accent);
           opacity: 0.72;
         }
+        .feature-addon-grid {
+          margin-top: 12px;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+        .feature-addon-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          border-radius: 14px;
+          border: 1px solid var(--addon-border);
+          background: linear-gradient(152deg, rgba(255,255,255,0.95) 0%, var(--addon-bg) 100%);
+          padding: 11px 12px;
+          transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .feature-addon-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 18px rgba(28,25,23,0.11);
+        }
+        .feature-addon-icon {
+          width: 24px;
+          height: 24px;
+          flex-shrink: 0;
+          border-radius: 8px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--addon-accent);
+          background: rgba(255,255,255,0.78);
+          border: 1px solid rgba(28,25,23,0.12);
+        }
+        .feature-addon-title {
+          margin: 1px 0 2px;
+          font-size: 13px;
+          line-height: 1.2;
+          font-weight: 700;
+          letter-spacing: -0.01em;
+          color: ${P.ink};
+        }
+        .feature-addon-sub {
+          margin: 0;
+          font-size: 11.5px;
+          line-height: 1.35;
+          color: ${P.muted};
+        }
         @media (max-width: 740px) {
           .feature-card { min-height: 0; }
           .feature-card-label { font-size: 17px; }
           .feature-card:hover { transform: translateY(-2px); }
+          .feature-addon-grid { grid-template-columns: 1fr; }
         }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(45,108,223,0.06) !important; }
@@ -5469,6 +5516,74 @@ const App = () => {
                     </div>
                     <p className="feature-card-desc">{card.desc}</p>
                     <div className="feature-card-meta">{card.meta}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="feature-addon-grid">
+                {[
+                  {
+                    title: 'AI Summaries',
+                    sub: 'Bullet point summaries',
+                    accent: P.accent,
+                    bg: 'rgba(45,108,223,0.08)',
+                    border: 'rgba(45,108,223,0.2)',
+                    icon: (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    title: 'Flash Cards',
+                    sub: 'Q&A cards with flip mode',
+                    accent: P.warning,
+                    bg: 'rgba(180,83,9,0.08)',
+                    border: 'rgba(180,83,9,0.2)',
+                    icon: (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="14" height="14" rx="2"/><path d="M7 8h6"/><path d="M7 12h4"/><path d="M11 20h10a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    title: 'Study Guide',
+                    sub: 'Objectives, concepts & review',
+                    accent: P.success,
+                    bg: 'rgba(15,118,110,0.08)',
+                    border: 'rgba(15,118,110,0.2)',
+                    icon: (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    title: 'Academic',
+                    sub: 'References, claims & glossary',
+                    accent: '#7C3AED',
+                    bg: 'rgba(124,58,237,0.08)',
+                    border: 'rgba(124,58,237,0.2)',
+                    icon: (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                      </svg>
+                    ),
+                  },
+                ].map(item => (
+                  <div
+                    key={item.title}
+                    className="feature-addon-card"
+                    style={{
+                      '--addon-accent': item.accent,
+                      '--addon-bg': item.bg,
+                      '--addon-border': item.border,
+                    }}
+                  >
+                    <span className="feature-addon-icon">{item.icon}</span>
+                    <div>
+                      <p className="feature-addon-title">{item.title}</p>
+                      <p className="feature-addon-sub">{item.sub}</p>
+                    </div>
                   </div>
                 ))}
               </div>
