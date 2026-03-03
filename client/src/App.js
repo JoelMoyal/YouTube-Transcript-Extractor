@@ -4849,6 +4849,30 @@ const App = () => {
           .feature-card-label { font-size: 17px; }
           .feature-card-desc { font-size: 12.5px; }
         }
+        @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+        @keyframes shimmerSweep { 0% { background-position:110% center; } 100% { background-position:-110% center; } }
+        @keyframes bulletReveal { 0% { opacity:0.12; transform:translateX(-4px); } 18%,68% { opacity:1; transform:translateX(0); } 85%,100% { opacity:0.12; transform:translateX(0); } }
+        @keyframes cardFlip3D { 0%,33% { transform:rotateY(0deg); } 50%,83% { transform:rotateY(180deg); } 100% { transform:rotateY(360deg); } }
+        @keyframes dotBounce { 0%,60%,100% { transform:translateY(0); opacity:0.35; } 30% { transform:translateY(-3px); opacity:0.85; } }
+        .feature-mock-url-bar { display:flex; align-items:center; gap:5px; height:20px; padding:0 7px; border-radius:5px; background:rgba(255,255,255,0.88); border:1px solid rgba(29,29,31,0.11); font-size:8px; color:rgba(29,29,31,0.42); font-family:ui-monospace,monospace; letter-spacing:0.01em; overflow:hidden; }
+        .feature-mock-cursor { width:1.5px; height:9px; background:var(--card-accent); border-radius:1px; flex-shrink:0; animation:cursorBlink 0.9s step-end infinite; }
+        .feature-mock-ts-row { display:flex; align-items:center; gap:5px; }
+        .feature-mock-ts-badge { font-size:7px; font-weight:700; color:var(--card-accent); font-family:ui-monospace,monospace; opacity:0.7; flex-shrink:0; white-space:nowrap; }
+        .feature-mock-line.shimmer { background:linear-gradient(90deg, rgba(29,29,31,0.09) 0%, rgba(29,29,31,0.09) 20%, rgba(255,255,255,0.88) 50%, rgba(29,29,31,0.09) 80%, rgba(29,29,31,0.09) 100%); background-size:300% 100%; animation:shimmerSweep 2s ease-in-out infinite; }
+        .feature-mock-bullet-row { display:flex; align-items:center; gap:5px; }
+        .feature-mock-bullet-dot { width:4px; height:4px; border-radius:50%; flex-shrink:0; background:var(--card-accent); opacity:0.7; }
+        .feature-mock-bullet-row.anim-1 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; }
+        .feature-mock-bullet-row.anim-2 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:0.65s; }
+        .feature-mock-bullet-row.anim-3 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:1.3s; }
+        .feature-mock-flip-scene { perspective:500px; height:46px; margin:2px 0; }
+        .feature-mock-flip-card { width:100%; height:100%; position:relative; transform-style:preserve-3d; animation:cardFlip3D 3.8s ease-in-out infinite; }
+        .feature-mock-flip-front, .feature-mock-flip-back { position:absolute; inset:0; border-radius:8px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; align-items:center; padding:0 10px; gap:7px; }
+        .feature-mock-flip-front { background:rgba(255,255,255,0.92); border:1px solid var(--card-pill-border); }
+        .feature-mock-flip-back { background:var(--card-pill-bg); border:1px solid var(--card-pill-border); transform:rotateY(180deg); }
+        .feature-mock-flip-label { font-size:8px; font-weight:800; color:var(--card-accent); text-transform:uppercase; letter-spacing:0.05em; font-family:ui-monospace,monospace; flex-shrink:0; }
+        .feature-mock-flip-line { height:6px; flex:1; border-radius:4px; background:rgba(29,29,31,0.12); }
+        .feature-mock-typing { display:flex; align-items:center; gap:3px; padding:5px 8px; background:rgba(255,255,255,0.88); border:1px solid rgba(29,29,31,0.1); border-radius:8px; align-self:flex-start; width:fit-content; margin-top:1px; }
+        .feature-mock-typing-dot { width:4px; height:4px; border-radius:50%; background:rgba(29,29,31,0.38); animation:dotBounce 1.1s ease-in-out infinite; }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(60,140,255,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
@@ -5357,15 +5381,15 @@ const App = () => {
                     desc: 'Paste any video URL and extract a full transcript with second-level timestamps in seconds.',
                     meta: '10+ platforms · second-level timestamps',
                     tags: ['YouTube', 'TikTok', 'Vimeo', '6+ more'],
-                    accent: '#1F6BFF',
-                    gradient: 'linear-gradient(100deg, #7BD3FF 0%, #3C8CFF 55%, #1F6BFF 100%)',
-                    bg: 'rgba(123,211,255,0.17)',
-                    panel: 'rgba(123,211,255,0.16)',
-                    panelBorder: 'rgba(60,140,255,0.22)',
-                    border: 'rgba(60,140,255,0.24)',
-                    pillBg: 'rgba(123,211,255,0.23)',
-                    pillBorder: 'rgba(60,140,255,0.32)',
-                    glow: 'rgba(123,211,255,0.48)',
+                    accent: '#3B6DB3',
+                    gradient: 'linear-gradient(100deg, #A5C4EC 0%, #5A87CC 55%, #3B6DB3 100%)',
+                    bg: 'rgba(100,165,230,0.10)',
+                    panel: 'rgba(100,165,230,0.08)',
+                    panelBorder: 'rgba(59,109,179,0.17)',
+                    border: 'rgba(59,109,179,0.18)',
+                    pillBg: 'rgba(100,165,230,0.14)',
+                    pillBorder: 'rgba(59,109,179,0.24)',
+                    glow: 'rgba(100,165,230,0.28)',
                     type: 'transcript',
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -5379,15 +5403,15 @@ const App = () => {
                     desc: 'Create bullet point summaries and chapter breakdowns on demand from any transcript.',
                     meta: 'AI summaries · Bullet points · Chapters',
                     tags: ['AI Summary', 'Bullet Points', 'Chapters'],
-                    accent: '#3C8CFF',
-                    gradient: 'linear-gradient(100deg, #7BD3FF 0%, #3C8CFF 62%, #1F6BFF 100%)',
-                    bg: 'rgba(123,211,255,0.14)',
-                    panel: 'rgba(123,211,255,0.11)',
-                    panelBorder: 'rgba(60,140,255,0.21)',
-                    border: 'rgba(60,140,255,0.21)',
-                    pillBg: 'rgba(123,211,255,0.2)',
-                    pillBorder: 'rgba(60,140,255,0.28)',
-                    glow: 'rgba(123,211,255,0.42)',
+                    accent: '#4A7CC0',
+                    gradient: 'linear-gradient(100deg, #A5C4EC 0%, #5A87CC 62%, #3B6DB3 100%)',
+                    bg: 'rgba(100,165,230,0.08)',
+                    panel: 'rgba(100,165,230,0.07)',
+                    panelBorder: 'rgba(74,124,192,0.16)',
+                    border: 'rgba(74,124,192,0.17)',
+                    pillBg: 'rgba(100,165,230,0.12)',
+                    pillBorder: 'rgba(74,124,192,0.22)',
+                    glow: 'rgba(100,165,230,0.24)',
                     type: 'summaries',
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -5401,15 +5425,15 @@ const App = () => {
                     desc: 'Build Q&A flash cards with flip mode plus objectives, concepts, and review prompts.',
                     meta: 'Flash cards · Flip mode · Study guide',
                     tags: ['Flash Cards', 'Q&A Flip', 'Objectives', 'Concepts', 'Review'],
-                    accent: '#1F6BFF',
-                    gradient: 'linear-gradient(100deg, #7BD3FF 0%, #3C8CFF 52%, #1F6BFF 100%)',
-                    bg: 'rgba(60,140,255,0.14)',
-                    panel: 'rgba(60,140,255,0.11)',
-                    panelBorder: 'rgba(60,140,255,0.23)',
-                    border: 'rgba(60,140,255,0.23)',
-                    pillBg: 'rgba(123,211,255,0.19)',
-                    pillBorder: 'rgba(60,140,255,0.31)',
-                    glow: 'rgba(60,140,255,0.34)',
+                    accent: '#3B6DB3',
+                    gradient: 'linear-gradient(100deg, #A5C4EC 0%, #5A87CC 52%, #3B6DB3 100%)',
+                    bg: 'rgba(90,135,204,0.09)',
+                    panel: 'rgba(90,135,204,0.07)',
+                    panelBorder: 'rgba(59,109,179,0.18)',
+                    border: 'rgba(59,109,179,0.18)',
+                    pillBg: 'rgba(100,165,230,0.12)',
+                    pillBorder: 'rgba(59,109,179,0.22)',
+                    glow: 'rgba(90,135,204,0.22)',
                     type: 'study',
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -5423,15 +5447,15 @@ const App = () => {
                     desc: 'Ask questions with transcript-grounded answers and surface references, claims, and glossary terms.',
                     meta: 'Cited answers · References · Glossary',
                     tags: ['Chat Q&A', 'References', 'Claims', 'Glossary'],
-                    accent: '#3C8CFF',
-                    gradient: 'linear-gradient(100deg, #3C8CFF 0%, #8B8F97 100%)',
-                    bg: 'rgba(139,143,151,0.12)',
-                    panel: 'rgba(139,143,151,0.1)',
-                    panelBorder: 'rgba(139,143,151,0.25)',
-                    border: 'rgba(139,143,151,0.28)',
-                    pillBg: 'rgba(139,143,151,0.16)',
-                    pillBorder: 'rgba(139,143,151,0.28)',
-                    glow: 'rgba(139,143,151,0.34)',
+                    accent: '#4A5C8A',
+                    gradient: 'linear-gradient(100deg, #5A87CC 0%, #6B7A9E 100%)',
+                    bg: 'rgba(100,120,170,0.08)',
+                    panel: 'rgba(100,120,170,0.07)',
+                    panelBorder: 'rgba(74,92,138,0.18)',
+                    border: 'rgba(74,92,138,0.20)',
+                    pillBg: 'rgba(100,120,170,0.12)',
+                    pillBorder: 'rgba(74,92,138,0.20)',
+                    glow: 'rgba(100,120,170,0.24)',
                     type: 'evidence',
                     icon: (
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -5472,19 +5496,25 @@ const App = () => {
                             </span>
                             <span className="feature-mock-chip">Transcript</span>
                           </div>
-                          <div className="feature-mock-body">
-                            <div className="feature-mock-timeline">
-                              <span className="feature-mock-timeline-bar active" />
-                              <span className="feature-mock-timeline-bar" />
-                              <span className="feature-mock-timeline-bar" />
-                              <span className="feature-mock-timeline-bar" />
+                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 5 }}>
+                            <div className="feature-mock-url-bar">
+                              <span style={{ opacity: 0.45, fontSize: 10 }}>⌕</span>
+                              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>youtube.com/watch?v=dQw4w9</span>
+                              <span className="feature-mock-cursor" />
                             </div>
-                            <div className="feature-mock-lines">
-                              <span className="feature-mock-line active" style={{ width: '93%' }} />
-                              <span className="feature-mock-line" style={{ width: '78%' }} />
-                              <span className="feature-mock-line" style={{ width: '88%' }} />
-                              <span className="feature-mock-line" style={{ width: '71%' }} />
-                              <span className="feature-mock-line" style={{ width: '84%' }} />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                              <div className="feature-mock-ts-row">
+                                <span className="feature-mock-ts-badge">0:12</span>
+                                <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0s' }} />
+                              </div>
+                              <div className="feature-mock-ts-row">
+                                <span className="feature-mock-ts-badge">0:38</span>
+                                <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0.22s' }} />
+                              </div>
+                              <div className="feature-mock-ts-row">
+                                <span className="feature-mock-ts-badge">1:04</span>
+                                <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0.44s' }} />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -5499,22 +5529,24 @@ const App = () => {
                             </span>
                             <span className="feature-mock-chip">Summaries</span>
                           </div>
-                          <div className="feature-mock-body">
-                            <div className="feature-mock-tools-main">
-                              <span className="feature-mock-title" style={{ width: '64%' }} />
-                              <span className="feature-mock-bullet" style={{ width: '93%' }} />
-                              <span className="feature-mock-bullet" style={{ width: '82%' }} />
-                              <span className="feature-mock-bullet" style={{ width: '87%' }} />
-                              <div className="feature-mock-kpi-row">
-                                <span className="feature-mock-kpi" style={{ width: 40 }} />
-                                <span className="feature-mock-kpi" style={{ width: 50 }} />
-                                <span className="feature-mock-kpi" style={{ width: 44 }} />
-                              </div>
+                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 5 }}>
+                            <span className="feature-mock-title" style={{ width: '60%' }} />
+                            <div className="feature-mock-bullet-row anim-1">
+                              <span className="feature-mock-bullet-dot" />
+                              <span className="feature-mock-bullet" style={{ flex: 1, width: '90%' }} />
                             </div>
-                            <div className="feature-mock-tools-nav">
-                              <span className="feature-mock-tools-tab active" />
-                              <span className="feature-mock-tools-tab" />
-                              <span className="feature-mock-tools-tab" />
+                            <div className="feature-mock-bullet-row anim-2">
+                              <span className="feature-mock-bullet-dot" />
+                              <span className="feature-mock-bullet" style={{ flex: 1, width: '80%' }} />
+                            </div>
+                            <div className="feature-mock-bullet-row anim-3">
+                              <span className="feature-mock-bullet-dot" />
+                              <span className="feature-mock-bullet" style={{ flex: 1, width: '85%' }} />
+                            </div>
+                            <div className="feature-mock-kpi-row" style={{ marginTop: 2 }}>
+                              <span className="feature-mock-kpi" style={{ width: 40 }} />
+                              <span className="feature-mock-kpi" style={{ width: 50 }} />
+                              <span className="feature-mock-kpi" style={{ width: 44 }} />
                             </div>
                           </div>
                         </div>
@@ -5529,22 +5561,25 @@ const App = () => {
                             </span>
                             <span className="feature-mock-chip">Study Mode</span>
                           </div>
-                          <div className="feature-mock-body">
-                            <div className="feature-mock-tools-main">
-                              <div className="feature-mock-mini-grid">
-                                <span className="feature-mock-mini-card" />
-                                <span className="feature-mock-mini-card" />
-                                <span className="feature-mock-mini-card" />
-                                <span className="feature-mock-mini-card" />
+                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 6 }}>
+                            <div className="feature-mock-flip-scene">
+                              <div className="feature-mock-flip-card">
+                                <div className="feature-mock-flip-front">
+                                  <span className="feature-mock-flip-label">Q?</span>
+                                  <span className="feature-mock-flip-line" />
+                                  <span className="feature-mock-flip-line" style={{ maxWidth: 28 }} />
+                                </div>
+                                <div className="feature-mock-flip-back">
+                                  <span className="feature-mock-flip-label">A</span>
+                                  <span className="feature-mock-flip-line" style={{ opacity: 0.65 }} />
+                                </div>
                               </div>
-                              <span className="feature-mock-bullet" style={{ width: '88%' }} />
-                              <span className="feature-mock-bullet" style={{ width: '74%' }} />
                             </div>
-                            <div className="feature-mock-tools-nav">
-                              <span className="feature-mock-tools-tab active" />
-                              <span className="feature-mock-tools-tab" />
-                              <span className="feature-mock-tools-tab" />
-                              <span className="feature-mock-tools-tab" />
+                            <div style={{ display: 'flex', gap: 4 }}>
+                              <span className="feature-mock-tools-tab active" style={{ flex: 1, height: 10 }} />
+                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
+                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
+                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
                             </div>
                           </div>
                         </div>
@@ -5564,13 +5599,15 @@ const App = () => {
                               <span className="feature-mock-bubble question" />
                               <span className="feature-mock-bubble answer" />
                               <span className="feature-mock-bubble question" style={{ width: '55%' }} />
+                              <div className="feature-mock-typing">
+                                <span className="feature-mock-typing-dot" style={{ animationDelay: '0s' }} />
+                                <span className="feature-mock-typing-dot" style={{ animationDelay: '0.18s' }} />
+                                <span className="feature-mock-typing-dot" style={{ animationDelay: '0.36s' }} />
+                              </div>
                               <div className="feature-mock-refs">
                                 <span className="feature-mock-ref" style={{ width: 31 }} />
                                 <span className="feature-mock-ref" style={{ width: 26 }} />
                                 <span className="feature-mock-ref" style={{ width: 34 }} />
-                              </div>
-                              <div className="feature-mock-meter">
-                                <span className="feature-mock-meter-fill" />
                               </div>
                             </div>
                             <div className="feature-mock-tools-nav">
