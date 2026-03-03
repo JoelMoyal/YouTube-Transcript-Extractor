@@ -3447,12 +3447,14 @@ const App = () => {
   const [mobilePanel, setMobilePanel]         = useState('transcript'); // 'transcript'|'ai'|'insights'|'history'
   const [sidebarTab, setSidebarTab]           = useState('ai'); // 'ai'|'insights'|'summary'|'flashcards'|'study-guide'
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
+  const [hideMobileNavForFooter, setHideMobileNavForFooter] = useState(false);
   const isMobile  = windowWidth < MOBILE_BREAKPOINT;
   const isTablet  = windowWidth >= MOBILE_BREAKPOINT && windowWidth < TABLET_BREAKPOINT;
   const isDesktop = windowWidth >= TABLET_BREAKPOINT;
 
   const aiCacheRef         = useRef({});  // keyed by videoId → saved AI state
   const mobileNavRef       = useRef(null);
+  const footerRef          = useRef(null);
   const downloadMenuRef    = useRef(null);
   const qaInputRef         = useRef(null);
   const playerRef          = useRef(null);
@@ -3477,6 +3479,23 @@ const App = () => {
     window.addEventListener('resize', onResize);
     return () => { window.removeEventListener('resize', onResize); cancelAnimationFrame(raf); };
   }, []);
+
+  useEffect(() => {
+    if (!isMobile || !transcript) {
+      setHideMobileNavForFooter(false);
+      return;
+    }
+    const footerEl = footerRef.current;
+    if (!footerEl || typeof IntersectionObserver === 'undefined') {
+      setHideMobileNavForFooter(false);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      setHideMobileNavForFooter(entry.isIntersecting);
+    }, { threshold: 0.08 });
+    observer.observe(footerEl);
+    return () => observer.disconnect();
+  }, [isMobile, transcript]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -3931,6 +3950,13 @@ const App = () => {
     setShowPasswordReset(false);
     resetAll();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const startNewSearch = () => {
+    goHome();
+    setTimeout(() => {
+      urlInputRef.current?.focus();
+    }, 260);
   };
 
   const askQuestion = async (overrideQ) => {
@@ -4580,7 +4606,7 @@ const App = () => {
 
       {/* Back button pinned at bottom */}
       <div style={{ padding: '10px 12px', borderTop: `1px solid ${P.border}` }}>
-        <button onClick={resetAll} style={{
+        <button onClick={startNewSearch} style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%',
           padding: '8px', border: `1px solid ${P.accentHover}`, borderRadius: 9,
           background: `radial-gradient(ellipse at top left, rgba(255,255,255,0.22) 0%, transparent 55%), radial-gradient(ellipse at top right, rgba(255,255,255,0.22) 0%, transparent 55%), radial-gradient(ellipse at bottom left, rgba(255,255,255,0.22) 0%, transparent 55%), radial-gradient(ellipse at bottom right, rgba(255,255,255,0.22) 0%, transparent 55%), ${P.accent}`,
@@ -4594,6 +4620,10 @@ const App = () => {
       </div>
     </>
   );
+
+  const showTopNavbar = !isMobile || !transcript;
+  const topChromeOffset = showTopNavbar ? ((showBookmarkBanner && !isMobile) ? 97 : 56) : 0;
+  const mobileBottomNavHeight = isMobile && transcript && !hideMobileNavForFooter ? 60 : 0;
 
   return (
     <>
@@ -4998,7 +5028,7 @@ const App = () => {
         .no-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
 
-      {(!isMobile || !transcript) && (
+      {showTopNavbar && (
         <Navbar
           onAskAI={onNavAskAI}
           hasTranscript={!!transcript}
@@ -5157,7 +5187,7 @@ const App = () => {
         />
       )}
 
-      <div style={{ minHeight: '100vh', paddingTop: (showBookmarkBanner && !isMobile) ? 97 : 56, background: P.paper, transition: 'padding-top 0.3s ease', display: view === 'dashboard' ? 'none' : 'block' }}>
+      <div style={{ minHeight: '100vh', paddingTop: topChromeOffset, background: P.paper, transition: 'padding-top 0.3s ease', display: view === 'dashboard' ? 'none' : 'block' }}>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* LANDING VIEW */}
@@ -5873,8 +5903,8 @@ const App = () => {
             display: 'grid',
             gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 300px' : '320px 1fr 360px',
             gridTemplateRows: '1fr',
-            height: isMobile ? 'calc(100dvh - 116px)' : 'calc(100dvh - 56px)',
-            minHeight: isMobile ? 'calc(100vh - 116px)' : 'calc(100vh - 56px)',
+            height: isMobile ? `calc(100dvh - ${mobileBottomNavHeight}px)` : 'calc(100dvh - 56px)',
+            minHeight: isMobile ? `calc(100vh - ${mobileBottomNavHeight}px)` : 'calc(100vh - 56px)',
             overflow: 'hidden',
           }}>
 
@@ -7304,6 +7334,7 @@ const App = () => {
               { key: 'transcript', label: 'Transcript', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
               { key: 'ai', label: 'AI Chat', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
               { key: 'insights', label: 'Insights', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+              { key: 'new-search', label: 'New', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> },
             ];
             const hasDynamic = mobileTabs.length > 4;
             const insightPanels = new Set(['insights', 'summary', 'flashcards', 'study-guide', 'academic']);
@@ -7314,7 +7345,7 @@ const App = () => {
                 background: 'linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%)',
                 borderTop: `1.5px solid rgba(60,140,255,0.18)`,
                 boxShadow: '0 -2px 16px rgba(60,140,255,0.08)',
-                display: showFlashcardModal || studyGuideFull || academicInsightsFull ? 'none' : 'flex',
+                display: showFlashcardModal || studyGuideFull || academicInsightsFull || hideMobileNavForFooter ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: hasDynamic ? 'flex-start' : 'center',
                 overflowX: hasDynamic ? 'auto' : 'visible',
@@ -7323,9 +7354,14 @@ const App = () => {
                 gap: 2,
               }}>
                 {mobileTabs.map(tab => {
-                  const isAct = mobilePanel === tab.key || (tab.key === 'insights' && insightPanels.has(mobilePanel));
+                  const isNewSearch = tab.key === 'new-search';
+                  const isAct = !isNewSearch && (mobilePanel === tab.key || (tab.key === 'insights' && insightPanels.has(mobilePanel)));
                   return (
                     <button key={tab.key} data-nav-key={tab.key} onClick={() => {
+                      if (isNewSearch) {
+                        startNewSearch();
+                        return;
+                      }
                       setMobilePanel(tab.key);
                       if (tab.key === 'ai') setSidebarTab('ai');
                       if (tab.key === 'insights') setSidebarTab('insights');
@@ -7386,7 +7422,7 @@ const App = () => {
 
           {/* ── MOBILE SUMMARY PANEL ──────────────────────────────────────────── */}
           {isMobile && mobilePanel === 'summary' && (
-            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
@@ -7419,7 +7455,7 @@ const App = () => {
 
           {/* ── MOBILE FLASHCARDS PANEL ───────────────────────────────────────── */}
           {isMobile && mobilePanel === 'flashcards' && (
-            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
@@ -7500,7 +7536,7 @@ const App = () => {
 
           {/* ── MOBILE ACADEMIC INSIGHTS PANEL ───────────────────────────────── */}
           {isMobile && mobilePanel === 'academic' && (
-            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
@@ -7582,7 +7618,7 @@ const App = () => {
 
           {/* ── MOBILE STUDY GUIDE PANEL ──────────────────────────────────────── */}
           {isMobile && mobilePanel === 'study-guide' && (
-            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
@@ -7667,9 +7703,11 @@ const App = () => {
       </div>
 
       {/* Footer */}
-      <footer style={{
+      <footer ref={footerRef} style={{
         background: P.surface, borderTop: `1px solid ${P.border}`,
-        padding: '40px 24px 32px',
+        padding: isMobile
+          ? `34px 20px ${mobileBottomNavHeight > 0 ? mobileBottomNavHeight + 30 : 28}px`
+          : '40px 24px 32px',
         marginTop: 24,
       }}>
         <div style={{ maxWidth: 820, margin: '0 auto' }}>
