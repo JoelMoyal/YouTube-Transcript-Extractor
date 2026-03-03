@@ -6913,7 +6913,7 @@ const App = () => {
                 <div style={{ fontSize: 11, fontWeight: 700, color: P.ink, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 12 }}>Connect</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
                   {[
-                    { label: 'GitHub', href: 'https://github.com/joelmoyal/YouTube-Transcript-Extractor' },
+                    { label: 'GitHub', href: 'https://github.com/JoelMoyal' },
                     { label: 'joelmoyal.com', href: 'https://joelmoyal.com' },
                     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/joel-moyal-0a3109110/' },
                   ].map(l => (
