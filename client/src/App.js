@@ -1172,7 +1172,6 @@ const PasswordResetModal = ({ onClose }) => {
 const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLoadTranscript, lang }) => {
   const [tab, setTab] = React.useState('overview');
   // ON ICE: const [prefLangSaved, setPrefLangSaved] = React.useState(false);
-  const [copyLinkDone, setCopyLinkDone] = React.useState(false);
   const [copyRefDone, setCopyRefDone] = React.useState(false);
   const [showAllHistory, setShowAllHistory] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 900);
@@ -1280,17 +1279,51 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   const mostUsedDay = mostUsedDayIdx >= 0 ? `${dayNames[mostUsedDayIdx]} (${maxCount})` : '—';
   const avgPerDay = history.length > 0 ? (history.length / 7).toFixed(1) : '0.0';
 
-  const copyShareLink = () => {
-    navigator.clipboard.writeText(window.location.origin).then(() => {
-      setCopyLinkDone(true);
-      setTimeout(() => setCopyLinkDone(false), 2000);
-    });
+  const CONTINUE_ACTIONS = [
+    { label: 'Summarize', target: 'summary' },
+    { label: 'Flashcards', target: 'flashcards' },
+    { label: 'Study guide', target: 'study-guide' },
+  ];
+  const DS = {
+    color: {
+      surface: '#FFFFFF',
+      border: '#E6E0D6',
+      text: '#1D1D1F',
+      muted: '#6F7480',
+      accent: '#3C8CFF',
+      accentHover: '#1F6BFF',
+      accentSoft: 'rgba(60,140,255,0.1)',
+    },
+    radius: {
+      card: 14,
+      button: 8,
+    },
   };
 
-  const openTranscript = (entry) => {
+  const openTranscript = (entry, target = 'transcript') => {
     if (!entry) return;
-    onLoadTranscript(entry);
+    onLoadTranscript(entry, target);
     onBack();
+  };
+
+  const onShareReferralWhatsApp = () => {
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`,
+      '_blank'
+    );
+  };
+  const onShareReferralX = () => {
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent('I use ScribeSnap to get YouTube transcripts instantly 🎬 Try it free — use my invite link and we both get +3 bonus credits 👉')}&url=${encodeURIComponent(refLink)}`,
+      '_blank'
+    );
+  };
+  const onShareReferralInstagram = () => {
+    navigator.clipboard.writeText(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`);
+    window.open('https://www.instagram.com/', '_blank');
+  };
+  const onShareReferralEmail = () => {
+    window.location.href = `mailto:?subject=${encodeURIComponent('Try ScribeSnap — free YouTube transcript tool')}&body=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`;
   };
 
   // Save display name via Supabase
@@ -1382,6 +1415,184 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   const weekSegments = Array.from({ length: 7 }, (_, i) => i);
   const activeDay = Math.min(6, Math.round((pct / 100) * 6));
 
+  const renderContinueCard = ({ mobile = false }) => {
+    if (mobile) {
+      if (!latest) return null;
+      return (
+        <div style={{ background: DS.color.surface, border: `1px solid ${DS.color.border}`, borderRadius: DS.radius.card, overflow: 'hidden' }}>
+          <div style={{ padding: '9px 12px 8px', borderBottom: `1px solid ${DS.color.border}` }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: DS.color.text }}>Continue where you left off</span>
+          </div>
+          <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 60, height: 34, borderRadius: 7, overflow: 'hidden', flexShrink: 0, background: 'rgba(60,140,255,0.06)', border: '1px solid rgba(60,140,255,0.1)' }}>
+              {latest.thumbnail && <img src={latest.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: DS.color.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{latest.title || latest.id}</div>
+              <div style={{ fontSize: 12, color: DS.color.muted }}>{latestWc > 0 ? `${latestWc.toLocaleString()} words · ` : ''}{timeAgo(latest.date)}</div>
+            </div>
+            <button onClick={() => openTranscript(latest)} style={{ flexShrink: 0, border: 'none', borderRadius: 7, background: DS.color.accent, color: 'white', fontSize: 12, fontWeight: 700, padding: '5px 11px', cursor: 'pointer' }}>Open</button>
+          </div>
+          <div style={{ padding: '0 12px 9px', display: 'flex', gap: 5 }}>
+            {CONTINUE_ACTIONS.map(({ label, target }) => (
+              <button
+                key={target}
+                onClick={() => openTranscript(latest, target)}
+                style={{ flex: 1, border: `1px solid ${DS.color.border}`, background: '#F6F2EA', color: DS.color.muted, fontSize: 12, fontWeight: 600, padding: '5px 2px', borderRadius: 7, cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <section className="ds-card ds-continue">
+        <div className="ds-continue-header">
+          <h2 className="ds-side-title">Continue where you left off</h2>
+        </div>
+        {latest ? (
+          <>
+            <div className="ds-continue-thumb" onClick={() => openTranscript(latest)}>
+              {latest.thumbnail ? (
+                <img src={latest.thumbnail} alt={latest.title || 'Video'} loading="lazy" />
+              ) : (
+                <div style={{ color: 'rgba(60,140,255,0.3)' }}>
+                  <PlatformIcon platform={latest.platform || 'youtube'} size={48} />
+                </div>
+              )}
+              <div className="ds-continue-play">
+                <div className="ds-continue-play-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#1D1D1F" style={{ marginLeft: 2 }}>
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div className="ds-continue-body">
+              <p className="ds-continue-video-title">{latest.title || latest.id}</p>
+              <p className="ds-continue-meta">
+                <PlatformIcon platform={latest.platform || 'youtube'} size={12} />
+                {latest.channel || (latest.platform ? latest.platform.charAt(0).toUpperCase() + latest.platform.slice(1) : 'YouTube')}
+                {latestWc > 0 && <span style={{ color: '#C0BAB3' }}>·</span>}
+                {latestWc > 0 && `${latestWc.toLocaleString()} words`}
+              </p>
+              <button className="ds-continue-open-btn" onClick={() => openTranscript(latest)}>Open</button>
+              <div className="ds-continue-quick">
+                {CONTINUE_ACTIONS.map(({ label, target }) => (
+                  <button key={target} className="ds-continue-quick-btn" onClick={() => openTranscript(latest, target)}>{label}</button>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="ds-continue-empty">
+            <p style={{ margin: 0 }}>Extract a transcript to see it here.</p>
+            <button
+              style={{ marginTop: 12, border: 'none', borderRadius: 10, background: '#3C8CFF', color: 'white', fontSize: 13, fontWeight: 600, padding: '8px 16px', cursor: 'pointer' }}
+              onClick={onBack}
+            >Extract transcript</button>
+          </div>
+        )}
+      </section>
+    );
+  };
+
+  const renderReferralCard = ({ mobile = false }) => {
+    if (mobile) {
+      return (
+        <div style={{ background: DS.color.surface, border: `1px solid ${DS.color.border}`, borderRadius: DS.radius.card, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 30, height: 30, borderRadius: DS.radius.button, background: DS.color.accentSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3C8CFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: DS.color.text }}>Invite friends, earn credits</div>
+              <div style={{ fontSize: 12, color: DS.color.muted }}>+3 free credits per friend who signs up</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <div style={{ flex: 1, minWidth: 0, background: '#F6F2EA', border: `1px solid ${DS.color.border}`, borderRadius: DS.radius.button, padding: '7px 10px', fontSize: 12, color: DS.color.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{refLink}</div>
+            <button onClick={copyRefLink} style={{ flexShrink: 0, border: 'none', borderRadius: DS.radius.button, background: copyRefDone ? '#0F766E' : DS.color.accent, color: 'white', fontSize: 12, fontWeight: 700, padding: '7px 12px', cursor: 'pointer', transition: 'background 0.2s' }}>{copyRefDone ? '✓ Copied' : 'Copy'}</button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <section className="ds-card ds-referral">
+        <div className="ds-referral-banner">
+          <div className="ds-referral-head">
+            <div className="ds-referral-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <div>
+              <h2 className="ds-referral-title">Invite friends, earn credits</h2>
+              <p className="ds-referral-subtitle">Share your link · both get rewarded</p>
+            </div>
+          </div>
+          <div className="ds-referral-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            +3 free credits per friend who signs up
+          </div>
+        </div>
+        <div className="ds-referral-body">
+          <p className="ds-referral-desc">
+            Share your personal link. Every friend who signs up gets a bonus — and so do you.
+          </p>
+          <div className="ds-referral-link-row">
+            <div className="ds-referral-link-box">{refLink}</div>
+            <button className={`ds-referral-copy-btn${copyRefDone ? ' done' : ''}`} onClick={copyRefLink}>
+              {copyRefDone ? '✓ Copied!' : 'Copy link'}
+            </button>
+          </div>
+          <div className="ds-referral-share-row">
+            <button className="ds-referral-share-btn ds-referral-share-wa" onClick={onShareReferralWhatsApp}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+              WhatsApp
+            </button>
+            <button className="ds-referral-share-btn ds-referral-share-x" onClick={onShareReferralX}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              Share on X
+            </button>
+            <button className="ds-referral-share-btn ds-referral-share-ig" onClick={onShareReferralInstagram}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" stroke="white">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+              Instagram
+            </button>
+            <button className="ds-referral-share-btn ds-referral-share-email" onClick={onShareReferralEmail}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+              Email
+            </button>
+          </div>
+          {((user?.user_metadata?.referral_count || 0) > 0 || (user?.user_metadata?.referral_bonus || 0) > 0) && (
+            <div className="ds-referral-stats">
+              <div className="ds-referral-stat">
+                <span className="ds-referral-stat-value">{user?.user_metadata?.referral_count || 0}</span>
+                <span className="ds-referral-stat-label">friends joined</span>
+              </div>
+              <div className="ds-referral-stat">
+                <span className="ds-referral-stat-value">+{user?.user_metadata?.referral_bonus || 0}</span>
+                <span className="ds-referral-stat-label">credits earned</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  };
+
   return (
     <div className="ds-shell">
       <style>{`
@@ -1423,7 +1634,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-topnav {
           display: flex;
           align-items: center;
-          gap: 2px;
+          gap: 10px;
           margin-bottom: 22px;
         }
         .ds-topnav-back {
@@ -1432,28 +1643,19 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           justify-content: center;
           border: none;
           background: none;
-          color: #8B8F97;
+          color: ${DS.color.muted};
           cursor: pointer;
           padding: 6px 8px 6px 2px;
           transition: color 0.15s;
           flex-shrink: 0;
         }
         .ds-topnav-back:hover { color: #1D1D1F; }
-        .ds-topnav-tab {
-          border: none;
-          background: none;
-          color: #8B8F97;
-          font-size: 15px;
-          font-weight: 500;
-          cursor: pointer;
-          padding: 6px 14px;
-          border-radius: 8px;
-          transition: all 0.15s;
-        }
-        .ds-topnav-tab:hover { color: #1D1D1F; background: rgba(29,29,31,0.05); }
-        .ds-topnav-tab.is-active {
-          color: #1D1D1F;
+        .ds-topnav-title {
+          margin: 0;
+          font-size: 16px;
           font-weight: 700;
+          color: ${DS.color.text};
+          letter-spacing: -0.01em;
         }
         .ds-grid {
           display: grid;
@@ -1462,8 +1664,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           align-items: start;
         }
         .ds-card {
-          background: #FDFAF5;
-          border: 1px solid #E6E0D6;
+          background: ${DS.color.surface};
+          border: 1px solid ${DS.color.border};
           border-radius: 18px;
           box-shadow: 0 2px 12px rgba(29,29,31,0.06);
         }
@@ -1497,7 +1699,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         }
         .ds-profile-email {
           font-size: 14px;
-          color: #8B8F97;
+          color: #6F7480;
           margin: 0;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -1513,7 +1715,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           font-size: 11px;
           letter-spacing: 0.05em;
           text-transform: uppercase;
-          color: #8B8F97;
+          color: #6F7480;
           font-weight: 600;
         }
         .ds-profile-meta-value {
@@ -1540,7 +1742,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           border-radius: 11px;
           padding: 8px;
           background: transparent;
-          color: #8B8F97;
+          color: #6F7480;
           font-size: 14px;
           font-weight: 500;
           cursor: pointer;
@@ -1623,7 +1825,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           z-index: 1;
           margin: 0;
           font-size: 13px;
-          color: #8B8F97;
+          color: #6F7480;
         }
         .ds-usage {
           padding: 16px 18px 14px;
@@ -1772,7 +1974,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-row-meta {
           margin: 0;
           font-size: 12px;
-          color: #8B8F97;
+          color: #6F7480;
           display: flex;
           align-items: center;
           gap: 5px;
@@ -1885,7 +2087,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-continue-meta {
           margin: 0 0 9px;
           font-size: 12px;
-          color: #8B8F97;
+          color: #6F7480;
           display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
         }
         .ds-continue-open-btn {
@@ -1999,7 +2201,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           margin: 0 0 1px; font-size: 14.5px; font-weight: 700; color: white; letter-spacing: -0.01em;
         }
         .ds-referral-subtitle {
-          margin: 0; font-size: 11.5px; color: rgba(255,255,255,0.7);
+          margin: 0; font-size: 12px; color: rgba(255,255,255,0.74);
         }
         .ds-referral-badge {
           display: inline-flex; align-items: center; gap: 5px; position: relative; z-index: 1;
@@ -2012,7 +2214,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           padding: 14px 18px 18px; background: white;
         }
         .ds-referral-desc {
-          margin: 0 0 12px; font-size: 12.5px; color: #8B8F97; line-height: 1.5;
+          margin: 0 0 12px; font-size: 13px; color: #6F7480; line-height: 1.5;
         }
         .ds-referral-link-row {
           display: flex; gap: 7px; align-items: stretch; margin-bottom: 10px;
@@ -2059,7 +2261,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           display: block; font-size: 19px; font-weight: 800; color: #3C8CFF; line-height: 1;
         }
         .ds-referral-stat-label {
-          display: block; font-size: 10.5px; color: #8B8F97; margin-top: 3px;
+          display: block; font-size: 12px; color: #6F7480; margin-top: 3px;
         }
         .ds-empty {
           text-align: center;
@@ -2113,7 +2315,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           border-bottom: none;
           padding-bottom: 0;
         }
-        .ds-setting-label { color: #8B8F97; font-size: 13px; }
+        .ds-setting-label { color: #6F7480; font-size: 13px; }
         .ds-setting-value {
           color: #1D1D1F;
           font-size: 13px;
@@ -2152,7 +2354,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           margin: -2px 0 4px;
           font-size: 12px;
           line-height: 1.45;
-          color: #8B8F97;
+          color: #6F7480;
         }
         .ds-security-feedback {
           margin-top: 2px;
@@ -2281,8 +2483,6 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           .ds-profile-name { font-size: 15px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 1px; }
           .ds-profile-email { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
           .ds-avatar { width: 38px; height: 38px; font-size: 15px; flex-shrink: 0; }
-          /* Hide topnav tabs — section-tabs handle navigation */
-          .ds-topnav-tab { display: none; }
           .ds-section-tab { font-size: 13px; padding: 7px 10px; }
           /* Hide weekly usage card — credits pill covers the same info */
           .ds-usage { display: none; }
@@ -2333,37 +2533,15 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                 <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, padding: '9px 12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#1D1D1F' }}>{used} / {tierMax} credits used</span>
-                    <span style={{ fontSize: 11, color: '#8B8F97' }}>resets in {daysLeft}d</span>
+                    <span style={{ fontSize: 12, color: '#6F7480' }}>resets in {daysLeft}d</span>
                   </div>
                   <div style={{ height: 5, borderRadius: 999, background: '#E6E0D6', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#3C8CFF', transition: 'width 0.4s ease' }} />
                   </div>
-                  <div style={{ marginTop: 4, fontSize: 11, color: '#8B8F97' }}>{remaining} credits remaining</div>
+                  <div style={{ marginTop: 4, fontSize: 12, color: '#6F7480' }}>{remaining} credits remaining</div>
                 </div>
 
-                {/* Continue where you left off */}
-                {latest && (
-                  <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, overflow: 'hidden' }}>
-                    <div style={{ padding: '9px 12px 8px', borderBottom: '1px solid #E6E0D6' }}>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: '#1D1D1F' }}>Continue where you left off</span>
-                    </div>
-                    <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 60, height: 34, borderRadius: 7, overflow: 'hidden', flexShrink: 0, background: 'rgba(60,140,255,0.06)', border: '1px solid rgba(60,140,255,0.1)' }}>
-                        {latest.thumbnail && <img src={latest.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{latest.title || latest.id}</div>
-                        <div style={{ fontSize: 11, color: '#8B8F97' }}>{latestWc > 0 ? `${latestWc.toLocaleString()} words · ` : ''}{timeAgo(latest.date)}</div>
-                      </div>
-                      <button onClick={() => openTranscript(latest)} style={{ flexShrink: 0, border: 'none', borderRadius: 7, background: '#3C8CFF', color: 'white', fontSize: 12, fontWeight: 700, padding: '5px 11px', cursor: 'pointer' }}>Open</button>
-                    </div>
-                    <div style={{ padding: '0 12px 9px', display: 'flex', gap: 5 }}>
-                      {['Summarize', 'Flashcards', 'Study guide'].map(action => (
-                        <button key={action} onClick={() => openTranscript(latest)} style={{ flex: 1, border: '1px solid #E6E0D6', background: '#F6F2EA', color: '#8B8F97', fontSize: 11, fontWeight: 600, padding: '5px 2px', borderRadius: 7, cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{action}</button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {renderContinueCard({ mobile: true })}
 
                 {/* Recent transcripts */}
                 <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, overflow: 'hidden' }}>
@@ -2387,7 +2565,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                             </div>
                             <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
                               <div style={{ fontSize: 12, fontWeight: 600, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
-                              <div style={{ fontSize: 10, color: '#8B8F97' }}>{wc > 0 ? `${wc.toLocaleString()} words · ` : ''}{timeAgo(h.date)}</div>
+                              <div style={{ fontSize: 12, color: '#6F7480' }}>{wc > 0 ? `${wc.toLocaleString()} words · ` : ''}{timeAgo(h.date)}</div>
                             </div>
                             <button onClick={() => openTranscript(h)} style={{ flexShrink: 0, border: 'none', borderRadius: 7, background: '#3C8CFF', color: 'white', fontSize: 11, fontWeight: 700, padding: '5px 10px', cursor: 'pointer' }}>Open</button>
                           </div>
@@ -2404,22 +2582,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                   )}
                 </div>
 
-                {/* Invite friends */}
-                <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(60,140,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3C8CFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: '#1D1D1F' }}>Invite friends, earn credits</div>
-                      <div style={{ fontSize: 11, color: '#8B8F97' }}>+3 free credits per friend who signs up</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <div style={{ flex: 1, minWidth: 0, background: '#F6F2EA', border: '1px solid #E6E0D6', borderRadius: 8, padding: '7px 10px', fontSize: 11, color: '#8B8F97', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{refLink}</div>
-                    <button onClick={copyRefLink} style={{ flexShrink: 0, border: 'none', borderRadius: 8, background: copyRefDone ? '#0F766E' : '#3C8CFF', color: 'white', fontSize: 12, fontWeight: 700, padding: '7px 12px', cursor: 'pointer', transition: 'background 0.2s' }}>{copyRefDone ? '✓ Copied' : 'Copy'}</button>
-                  </div>
-                </div>
+                {renderReferralCard({ mobile: true })}
               </>
             )}
 
@@ -2602,11 +2765,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           <button className="ds-topnav-back" onClick={onBack} title="Back to extractor">
             <ChevronIcon size={16} dir="left" />
           </button>
-          {[['overview', 'Overview'], ['settings', 'Settings']].map(([key, label]) => (
-            <button key={key} className={`ds-topnav-tab ${tab === key ? 'is-active' : ''}`} onClick={() => setTab(key)}>
-              {label}
-            </button>
-          ))}
+          <h2 className="ds-topnav-title">Dashboard</h2>
         </nav>
 
         <div className="ds-grid">
@@ -2994,129 +3153,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
           {tab === 'overview' && (
             <aside className="ds-side">
-              {/* ── Continue where you left off ── */}
-              <section className="ds-card ds-continue">
-                <div className="ds-continue-header">
-                  <h2 className="ds-side-title">Continue where you left off</h2>
-                </div>
-                {latest ? (
-                  <>
-                    <div className="ds-continue-thumb" onClick={() => openTranscript(latest)}>
-                      {latest.thumbnail ? (
-                        <img src={latest.thumbnail} alt={latest.title || 'Video'} loading="lazy" />
-                      ) : (
-                        <div style={{ color: 'rgba(60,140,255,0.3)' }}>
-                          <PlatformIcon platform={latest.platform || 'youtube'} size={48} />
-                        </div>
-                      )}
-                      <div className="ds-continue-play">
-                        <div className="ds-continue-play-icon">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1D1D1F" style={{ marginLeft: 2 }}>
-                            <polygon points="5 3 19 12 5 21 5 3"/>
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="ds-continue-body">
-                      <p className="ds-continue-video-title">{latest.title || latest.id}</p>
-                      <p className="ds-continue-meta">
-                        <PlatformIcon platform={latest.platform || 'youtube'} size={12} />
-                        {latest.channel || (latest.platform ? latest.platform.charAt(0).toUpperCase() + latest.platform.slice(1) : 'YouTube')}
-                        {latestWc > 0 && <span style={{ color: '#C0BAB3' }}>·</span>}
-                        {latestWc > 0 && `${latestWc.toLocaleString()} words`}
-                      </p>
-                      <button className="ds-continue-open-btn" onClick={() => openTranscript(latest)}>Open</button>
-                      <div className="ds-continue-quick">
-                        <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Summarize</button>
-                        <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Flashcards</button>
-                        <button className="ds-continue-quick-btn" onClick={() => openTranscript(latest)}>Study guide</button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="ds-continue-empty">
-                    <p style={{ margin: 0 }}>Extract a transcript to see it here.</p>
-                    <button
-                      style={{ marginTop: 12, border: 'none', borderRadius: 10, background: '#3C8CFF', color: 'white', fontSize: 13, fontWeight: 600, padding: '8px 16px', cursor: 'pointer' }}
-                      onClick={onBack}
-                    >Extract transcript</button>
-                  </div>
-                )}
-              </section>
-
-              {/* ── Invite friends (sidebar referral card) ── */}
-              <section className="ds-card ds-referral">
-                <div className="ds-referral-banner">
-                  <div className="ds-referral-head">
-                    <div className="ds-referral-icon">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h2 className="ds-referral-title">Invite friends, earn credits</h2>
-                      <p className="ds-referral-subtitle">Share your link · both get rewarded</p>
-                    </div>
-                  </div>
-                  <div className="ds-referral-badge">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                    +3 free credits per friend who signs up
-                  </div>
-                </div>
-                <div className="ds-referral-body">
-                  <p className="ds-referral-desc">
-                    Share your personal link. Every friend who signs up gets a bonus — and so do you.
-                  </p>
-                  <div className="ds-referral-link-row">
-                    <div className="ds-referral-link-box">{refLink}</div>
-                    <button
-                      className={`ds-referral-copy-btn${copyRefDone ? ' done' : ''}`}
-                      onClick={copyRefLink}
-                    >
-                      {copyRefDone ? '✓ Copied!' : 'Copy link'}
-                    </button>
-                  </div>
-                  <div className="ds-referral-share-row">
-                    <button className="ds-referral-share-btn ds-referral-share-wa"
-                      onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank')}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                      WhatsApp
-                    </button>
-                    <button className="ds-referral-share-btn ds-referral-share-x"
-                      onClick={() => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent('I use ScribeSnap to get YouTube transcripts instantly 🎬 Try it free — use my invite link and we both get +3 bonus credits 👉')}&url=${encodeURIComponent(refLink)}`, '_blank')}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                      Share on X
-                    </button>
-                    <button className="ds-referral-share-btn ds-referral-share-ig"
-                      onClick={() => { navigator.clipboard.writeText(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`); window.open('https://www.instagram.com/', '_blank'); }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" stroke="white">
-                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-                      </svg>
-                      Instagram
-                    </button>
-                    <button className="ds-referral-share-btn ds-referral-share-email"
-                      onClick={() => { window.location.href = `mailto:?subject=${encodeURIComponent('Try ScribeSnap — free YouTube transcript tool')}&body=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`; }}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-                      Email
-                    </button>
-                  </div>
-                  {((user?.user_metadata?.referral_count || 0) > 0 || (user?.user_metadata?.referral_bonus || 0) > 0) && (
-                    <div className="ds-referral-stats">
-                      <div className="ds-referral-stat">
-                        <span className="ds-referral-stat-value">{user?.user_metadata?.referral_count || 0}</span>
-                        <span className="ds-referral-stat-label">friends joined</span>
-                      </div>
-                      <div className="ds-referral-stat">
-                        <span className="ds-referral-stat-value">+{user?.user_metadata?.referral_bonus || 0}</span>
-                        <span className="ds-referral-stat-label">credits earned</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </section>
+              {renderContinueCard({ mobile: false })}
+              {renderReferralCard({ mobile: false })}
             </aside>
           )}
         </div>
@@ -3390,6 +3428,7 @@ const App = () => {
   const [sgMessages, setSgMessages]               = useState([]);       // [{role, text, isError?}]
   const [sgLoading, setSgLoading]                 = useState(false);
   const [activeTab, setActiveTab]         = useState('transcript'); // 'transcript' | 'timeline' | 'editor' | 'summary' | 'study-guide'
+  const [pendingHistoryAction, setPendingHistoryAction] = useState(null); // 'transcript' | 'summary' | 'flashcards' | 'study-guide'
   const [currentTitle, setCurrentTitle]   = useState('');
   const [currentChannel, setCurrentChannel] = useState('');
   const [selectedSegment, setSelectedSegment] = useState(null);
@@ -3822,7 +3861,7 @@ const App = () => {
     });
   };
 
-  const loadFromHistory = (entry) => {
+  const loadFromHistory = (entry, target = 'transcript') => {
     // Save current video's AI state before switching
     if (currentVideoId) {
       aiCacheRef.current[currentVideoId] = {
@@ -3858,9 +3897,10 @@ const App = () => {
     setSgMessages(cached?.sgMessages ?? []);
     setStudyGuideFull(false);
     setShowFlashcardModal(false);
-    setActiveTab(cached?.activeTab ?? 'transcript');
+    setActiveTab(target === 'transcript' ? (cached?.activeTab ?? 'transcript') : 'transcript');
     setSidebarTab('ai');
     setMobilePanel('transcript'); setHistoryDrawerOpen(false);
+    setPendingHistoryAction(target);
   };
 
   const resetAll = () => {
@@ -3872,6 +3912,7 @@ const App = () => {
     setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setShowFlashcardModal(false);
     setAcademicInsights(null); setAcademicInsightsLoading(false); setAcademicInsightsFull(false);
     setActiveTab('transcript');
+    setPendingHistoryAction(null);
     setCurrentTitle(''); setCurrentChannel('');
     setSelectedSegment(null); setExportToggle(false);
     setMobilePanel('transcript'); setHistoryDrawerOpen(false);
@@ -3934,6 +3975,7 @@ const App = () => {
     setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
     setAcademicInsights(null); setAcademicInsightsLoading(false); setAcademicInsightsFull(false);
     setMobilePanel('transcript'); setHistoryDrawerOpen(false);
+    setPendingHistoryAction(null);
     setLoading(true); setLoadingMsg('Looking for subtitles…');
     setLoadingPercent(5); setLoadingStage('subtitles');
 
@@ -4296,6 +4338,62 @@ const App = () => {
     } catch (err) { setAcademicInsights({ _error: err.message }); }
     finally { setAcademicInsightsLoading(false); }
   };
+
+  useEffect(() => {
+    if (!pendingHistoryAction || !currentVideoId || !transcript) return;
+
+    if (pendingHistoryAction === 'summary') {
+      if (summary) {
+        setActiveTab('summary');
+        setSidebarTab('summary');
+        setMobilePanel('summary');
+      } else if (!summarizing) {
+        summarize();
+      }
+      setPendingHistoryAction(null);
+      return;
+    }
+
+    if (pendingHistoryAction === 'flashcards') {
+      if (flashcards.length > 0 || flashcardsExhausted) {
+        setActiveTab('flashcards');
+        setSidebarTab('flashcards');
+        setMobilePanel('flashcards');
+      } else if (!flashcardsLoading) {
+        generateFlashcards();
+      }
+      setPendingHistoryAction(null);
+      return;
+    }
+
+    if (pendingHistoryAction === 'study-guide') {
+      if (studyGuide && !studyGuide._error) {
+        setActiveTab('study-guide');
+        setSidebarTab('study-guide');
+        setMobilePanel('study-guide');
+      } else if (!studyGuideLoading) {
+        generateStudyGuide();
+      }
+      setPendingHistoryAction(null);
+      return;
+    }
+
+    setActiveTab('transcript');
+    setSidebarTab('ai');
+    setMobilePanel('transcript');
+    setPendingHistoryAction(null);
+  }, [
+    pendingHistoryAction,
+    currentVideoId,
+    transcript,
+    summary,
+    summarizing,
+    flashcards.length,
+    flashcardsExhausted,
+    flashcardsLoading,
+    studyGuide,
+    studyGuideLoading,
+  ]);
 
   const pauseVideo = () => {
     if (currentPlatform === 'vimeo') {
