@@ -7500,7 +7500,7 @@ const App = () => {
       </div>
 
       {/* Footer */}
-      {view !== 'dashboard' && <footer style={{
+      <footer style={{
         background: P.surface, borderTop: `1px solid ${P.border}`,
         padding: '40px 24px 32px',
         marginTop: 24,
@@ -7577,7 +7577,7 @@ const App = () => {
             </span>
           </div>
         </div>
-      </footer>}
+      </footer>
 
       {/* ── Study Guide Fullscreen Overlay ──────────────────────────────── */}
       {studyGuideFull && studyGuide && !studyGuide._error && (
