@@ -5113,18 +5113,18 @@ const App = () => {
                 <div style={{ flexShrink: 0, borderRadius: 16, overflow: 'hidden', border: `1px solid ${P.border}`, background: P.paper }}>
                   {/* Centered 16:9 player — max 391×220, no black bars, paper sides */}
                   <div style={{ display: 'flex', justifyContent: 'center', background: P.paper }}>
-                    <div style={{ width: 'min(100%, 411px)', flexShrink: 0, borderRadius: 0, overflow: 'hidden', ...(isMobile ? { maxHeight: 160 } : {}) }}>
+                    <div style={{ width: 'min(100%, 411px)', flexShrink: 0, borderRadius: 0, overflow: 'hidden', ...(isMobile ? { maxHeight: 200 } : {}) }}>
                       {currentPlatform === 'vimeo' ? (
                         <iframe
                           ref={playerRef}
                           src={`https://player.vimeo.com/video/${currentVideoId}?api=1`}
-                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block', ...(isMobile ? { maxHeight: 160 } : {}) }}
+                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block', ...(isMobile ? { maxHeight: 200 } : {}) }}
                           allow="autoplay; fullscreen; picture-in-picture"
                           allowFullScreen
                           title="Video player"
                         />
                       ) : currentPlatform === 'youtube' ? (
-                        <div ref={ytPlayerDivRef} style={{ width: '100%', aspectRatio: '16/9', display: 'block', ...(isMobile ? { maxHeight: 160 } : {}) }} />
+                        <div ref={ytPlayerDivRef} style={{ width: '100%', aspectRatio: '16/9', display: 'block', ...(isMobile ? { maxHeight: 200 } : {}) }} />
                       ) : currentPlatform === 'tiktok' ? (
                         <iframe
                           src={`https://www.tiktok.com/embed/v2/${currentVideoId}`}
@@ -5136,7 +5136,7 @@ const App = () => {
                       ) : currentPlatform === 'dailymotion' ? (
                         <iframe
                           src={`https://www.dailymotion.com/embed/video/${currentVideoId}?autoplay=0&ui-logo=0`}
-                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block', ...(isMobile ? { maxHeight: 160 } : {}) }}
+                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block', ...(isMobile ? { maxHeight: 200 } : {}) }}
                           allow="autoplay; fullscreen; picture-in-picture"
                           allowFullScreen
                           title="Dailymotion player"
@@ -5144,7 +5144,7 @@ const App = () => {
                       ) : currentPlatform === 'loom' ? (
                         <iframe
                           src={`https://www.loom.com/embed/${currentVideoId}`}
-                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block', ...(isMobile ? { maxHeight: 160 } : {}) }}
+                          style={{ width: '100%', aspectRatio: '16/9', border: 'none', display: 'block', ...(isMobile ? { maxHeight: 200 } : {}) }}
                           allow="autoplay; fullscreen; picture-in-picture"
                           allowFullScreen
                           title="Loom player"
@@ -6547,7 +6547,7 @@ const App = () => {
                     }}>
                       {isAct && <div style={{ position: 'absolute', top: -1, left: '50%', transform: 'translateX(-50%)', width: 28, height: 2.5, borderRadius: '0 0 3px 3px', background: P.accent }} />}
                       <div style={{ color: isAct ? P.accent : P.muted, transition: 'color 0.18s' }}>{tab.icon}</div>
-                      <span style={{ fontSize: 9.5, fontWeight: isAct ? 700 : 500, whiteSpace: 'nowrap', color: isAct ? P.accent : P.muted }}>{tab.label}</span>
+                      <span style={{ fontSize: 11, fontWeight: isAct ? 700 : 500, whiteSpace: 'nowrap', color: isAct ? P.accent : P.muted }}>{tab.label}</span>
                     </button>
                   );
                 })}
@@ -6584,21 +6584,26 @@ const App = () => {
 
           {/* ── MOBILE SUMMARY PANEL ──────────────────────────────────────────── */}
           {isMobile && mobilePanel === 'summary' && (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+              {/* Sticky back header */}
+              <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                  Back
+                </button>
+                <div style={{ flex: 1, fontSize: 15, fontWeight: 700, color: P.ink }}>Summary</div>
+                {summary && (
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', borderRadius: 6, padding: '5px 10px', fontSize: 12, fontWeight: 600, color: summaryCopied ? P.success : P.muted }}>
+                      {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
+                    </button>
+                    <button onClick={() => { setSummary(''); setMobilePanel('transcript'); }}
+                      style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, fontWeight: 600, padding: '5px 12px', borderRadius: 6 }}>Clear</button>
+                  </div>
+                )}
+              </div>
               <div style={{ padding: '16px 18px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Summary</div>
-                  {summary && (
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 4, border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', borderRadius: 6, padding: '5px 10px', fontSize: 12, fontWeight: 600, color: summaryCopied ? P.success : P.muted }}>
-                        {summaryCopied ? <CheckIcon /> : <CopyIcon />} {summaryCopied ? 'Copied!' : 'Copy'}
-                      </button>
-                      <button onClick={() => { setSummary(''); setMobilePanel('transcript'); }}
-                        style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, fontWeight: 600, padding: '5px 12px', borderRadius: 6 }}>Clear</button>
-                    </div>
-                  )}
-                </div>
                 {summarizing ? (
                   <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
                     <SpinnerIcon size={14} /> Summarizing…
@@ -6612,7 +6617,22 @@ const App = () => {
 
           {/* ── MOBILE FLASHCARDS PANEL ───────────────────────────────────────── */}
           {isMobile && mobilePanel === 'flashcards' && (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+              {/* Sticky back header */}
+              <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                  Back
+                </button>
+                <div style={{ flex: 1, fontSize: 15, fontWeight: 700, color: P.ink }}>Flashcards · {flashcards.length} cards</div>
+                {flashcards.length > 0 && (
+                  <button onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, border: 'none', background: P.accent, color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Study
+                  </button>
+                )}
+              </div>
               <div style={{ padding: '16px 18px 24px' }}>
                 {flashcardsLoading ? (
                   <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
@@ -6620,16 +6640,6 @@ const App = () => {
                   </div>
                 ) : (
                   <>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                      <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Flashcards · {flashcards.length} cards</div>
-                      {flashcards.length > 0 && (
-                        <button onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
-                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, border: 'none', background: P.accent, color: 'white', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                          Study
-                        </button>
-                      )}
-                    </div>
                     {flashcards.length > 0 && (
                       <div style={{ height: 5, borderRadius: 3, background: P.border, marginBottom: 14, overflow: 'hidden' }}>
                         <div style={{ height: '100%', borderRadius: 3, background: P.success, width: `${(flashcardKnown.size / flashcards.length) * 100}%`, transition: 'width 0.4s' }} />
@@ -6688,15 +6698,20 @@ const App = () => {
 
           {/* ── MOBILE ACADEMIC INSIGHTS PANEL ───────────────────────────────── */}
           {isMobile && mobilePanel === 'academic' && (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+              {/* Sticky back header */}
+              <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                  Back
+                </button>
+                <div style={{ flex: 1, fontSize: 15, fontWeight: 700, color: P.ink }}>Academic Insights</div>
+                {academicInsights && !academicInsights._error && (
+                  <button onClick={() => { setAcademicInsights(null); setMobilePanel('transcript'); }}
+                    style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, fontWeight: 600, padding: '5px 12px', borderRadius: 6 }}>Clear</button>
+                )}
+              </div>
               <div style={{ padding: '16px 18px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Academic Insights</div>
-                  {academicInsights && !academicInsights._error && (
-                    <button onClick={() => { setAcademicInsights(null); setMobilePanel('transcript'); }}
-                      style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 12, fontWeight: 600, padding: '5px 12px', borderRadius: 6 }}>Clear</button>
-                  )}
-                </div>
                 {academicInsightsLoading ? (
                   <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#7C3AED', fontSize: 13 }}>
                     <SpinnerIcon size={14} /> Generating academic insights…
@@ -6765,9 +6780,16 @@ const App = () => {
 
           {/* ── MOBILE STUDY GUIDE PANEL ──────────────────────────────────────── */}
           {isMobile && mobilePanel === 'study-guide' && (
-            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 60, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+              {/* Sticky back header */}
+              <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                  Back
+                </button>
+                <div style={{ flex: 1, fontSize: 15, fontWeight: 700, color: P.ink }}>Study Guide</div>
+              </div>
               <div style={{ padding: '16px 18px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Study Guide</div>
                 {studyGuideLoading ? (
                   <div style={{ padding: '60px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, color: P.muted, fontSize: 13 }}>
                     <SpinnerIcon size={14} /> Generating study guide…
