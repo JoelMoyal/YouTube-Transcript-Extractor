@@ -5598,7 +5598,7 @@ const App = () => {
             <div style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px 48px' }}>
               <div style={{ textAlign: 'center', marginBottom: 28 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>What people say</div>
-                <h2 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em', margin: 0 }}>Loved by researchers &amp; builders</h2>
+                <h2 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em', margin: 0 }}>Loved by Researchers &amp; Builders</h2>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
                 {/* Founder */}
