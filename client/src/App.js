@@ -6915,6 +6915,7 @@ const App = () => {
                   {[
                     { label: 'GitHub', href: 'https://github.com/joelmoyal/YouTube-Transcript-Extractor' },
                     { label: 'joelmoyal.com', href: 'https://joelmoyal.com' },
+                    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/joel-moyal-0a3109110/' },
                   ].map(l => (
                     <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
                       style={{ fontSize: 13, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
@@ -6944,13 +6945,6 @@ const App = () => {
                 onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
               >Privacy Policy</a>
             </span>
-            <a href="https://www.linkedin.com/in/joel-moyal-0a3109110/" target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
-              onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
-            >
-              <LinkedInIcon /> LinkedIn
-            </a>
           </div>
         </div>
       </footer>}
