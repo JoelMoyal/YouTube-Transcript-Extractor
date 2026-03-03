@@ -4504,9 +4504,11 @@ const App = () => {
         .marquee-track:hover { animation-play-state: paused; }
         * { box-sizing: border-box; }
         body { margin: 0; background: ${P.paper}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: ${P.paper}; }
-        ::-webkit-scrollbar-thumb { background: ${P.border}; border-radius: 3px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #EEEBE4; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #C4BBAD; border-radius: 4px; transition: background 0.2s; }
+        ::-webkit-scrollbar-thumb:hover { background: #A89C8E; }
+        * { scrollbar-width: thin; scrollbar-color: #C4BBAD #EEEBE4; }
         input, select, textarea { font-family: inherit; }
         .hero-grad {
           background: radial-gradient(ellipse 86% 54% at 50% -12%, rgba(123,211,255,0.3) 0%, rgba(60,140,255,0.13) 38%, transparent 72%),
