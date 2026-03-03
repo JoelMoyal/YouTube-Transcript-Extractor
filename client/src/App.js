@@ -3416,8 +3416,6 @@ const App = () => {
   const urlInputRef     = useRef(null);
   const qaRef           = useRef(null);
   const chatMessagesRef = useRef(null);
-  const addonScrollRef  = useRef(null);
-  const addonLastInteractRef = useRef(0);
   const recoveryIntentRef = useRef(false);
 
   useEffect(() => {
@@ -3429,93 +3427,6 @@ const App = () => {
     window.addEventListener('resize', onResize);
     return () => { window.removeEventListener('resize', onResize); cancelAnimationFrame(raf); };
   }, []);
-
-  // Landing: while this feature rail is on screen, vertical wheel scroll reveals hidden cards horizontally.
-  useEffect(() => {
-    if (isMobile) return;
-    const onWheel = (e) => {
-      const rail = addonScrollRef.current;
-      if (!rail) return;
-      const max = rail.scrollWidth - rail.clientWidth;
-      if (max <= 0) return;
-
-      const rect = rail.getBoundingClientRect();
-      const inView = rect.top < window.innerHeight * 0.82 && rect.bottom > window.innerHeight * 0.18;
-      if (!inView) return;
-
-      const atStart = rail.scrollLeft <= 1;
-      const atEnd = rail.scrollLeft >= max - 1;
-      const down = e.deltaY > 0;
-      if ((down && atEnd) || (!down && atStart)) return;
-
-      e.preventDefault();
-      addonLastInteractRef.current = Date.now();
-      rail.scrollLeft = Math.max(0, Math.min(max, rail.scrollLeft + e.deltaY));
-    };
-
-    window.addEventListener('wheel', onWheel, { passive: false });
-    return () => window.removeEventListener('wheel', onWheel);
-  }, [isMobile]);
-
-  // Landing: subtle auto-pan to reveal hidden cards when the rail is in view.
-  useEffect(() => {
-    if (isMobile) return;
-    let raf = 0;
-    let dir = 1;
-
-    const markInteraction = () => { addonLastInteractRef.current = Date.now(); };
-    const rail = addonScrollRef.current;
-    if (rail) {
-      rail.addEventListener('mousedown', markInteraction);
-      rail.addEventListener('touchstart', markInteraction, { passive: true });
-      rail.addEventListener('pointerdown', markInteraction);
-      rail.addEventListener('mouseenter', markInteraction);
-    }
-
-    const tick = () => {
-      const node = addonScrollRef.current;
-      if (!node) {
-        raf = requestAnimationFrame(tick);
-        return;
-      }
-
-      const max = node.scrollWidth - node.clientWidth;
-      if (max <= 0) {
-        raf = requestAnimationFrame(tick);
-        return;
-      }
-
-      const rect = node.getBoundingClientRect();
-      const inView = rect.top < window.innerHeight * 0.88 && rect.bottom > window.innerHeight * 0.12;
-      const recentlyInteracted = Date.now() - addonLastInteractRef.current < 2300;
-      const isHovering = node.matches(':hover');
-
-      if (inView && !recentlyInteracted && !isHovering) {
-        node.scrollLeft += dir * 0.45;
-        if (node.scrollLeft >= max - 0.6) {
-          node.scrollLeft = max;
-          dir = -1;
-        } else if (node.scrollLeft <= 0.6) {
-          node.scrollLeft = 0;
-          dir = 1;
-        }
-      }
-
-      raf = requestAnimationFrame(tick);
-    };
-
-    raf = requestAnimationFrame(tick);
-    return () => {
-      cancelAnimationFrame(raf);
-      const n = addonScrollRef.current;
-      if (n) {
-        n.removeEventListener('mousedown', markInteraction);
-        n.removeEventListener('touchstart', markInteraction);
-        n.removeEventListener('pointerdown', markInteraction);
-        n.removeEventListener('mouseenter', markInteraction);
-      }
-    };
-  }, [isMobile]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -4885,116 +4796,6 @@ const App = () => {
           background: var(--card-accent);
           opacity: 0.72;
         }
-        .feature-addon-wrap { margin-top: 14px; position: relative; }
-        .feature-addon-scroll {
-          display: flex;
-          gap: 12px;
-          overflow-x: auto;
-          overflow-y: hidden;
-          scroll-snap-type: x mandatory;
-          scroll-behavior: smooth;
-          padding: 2px 2px 10px;
-          -webkit-overflow-scrolling: touch;
-        }
-        .feature-addon-wrap::before,
-        .feature-addon-wrap::after {
-          content: '';
-          position: absolute;
-          top: 24px;
-          bottom: 10px;
-          width: 18px;
-          pointer-events: none;
-          z-index: 2;
-        }
-        .feature-addon-wrap::before {
-          left: 0;
-          background: linear-gradient(90deg, ${P.paper} 0%, rgba(246,243,238,0) 100%);
-        }
-        .feature-addon-wrap::after {
-          right: 0;
-          background: linear-gradient(270deg, ${P.paper} 0%, rgba(246,243,238,0) 100%);
-        }
-        .feature-addon-scroll::-webkit-scrollbar { height: 7px; }
-        .feature-addon-scroll::-webkit-scrollbar-track {
-          background: rgba(28,25,23,0.08);
-          border-radius: 999px;
-        }
-        .feature-addon-scroll::-webkit-scrollbar-thumb {
-          background: rgba(28,25,23,0.22);
-          border-radius: 999px;
-        }
-        .feature-addon-card {
-          flex: 0 0 calc((100% - 24px) / 3);
-          min-width: 238px;
-          scroll-snap-align: start;
-          position: relative;
-          overflow: hidden;
-          border-radius: 16px;
-          border: 1px solid var(--addon-border);
-          background: linear-gradient(152deg, rgba(255,255,255,0.95) 0%, var(--addon-bg) 100%);
-          padding: 13px 12px 12px;
-          display: flex;
-          flex-direction: column;
-          min-height: 184px;
-        }
-        .feature-addon-card::before {
-          content: '';
-          position: absolute;
-          left: 0;
-          right: 0;
-          top: 0;
-          height: 3px;
-          background: linear-gradient(90deg, var(--addon-accent), rgba(255,255,255,0.74));
-          opacity: 0.92;
-        }
-        .feature-addon-head {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 10px;
-        }
-        .feature-addon-num {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          min-width: 38px;
-          height: 24px;
-          padding: 0 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(28,25,23,0.14);
-          background: rgba(255,255,255,0.82);
-          color: var(--addon-accent);
-          font-size: 10.5px;
-          font-weight: 800;
-          letter-spacing: 0.07em;
-          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        }
-        .feature-addon-icon {
-          width: 24px;
-          height: 24px;
-          flex-shrink: 0;
-          border-radius: 8px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--addon-accent);
-          background: rgba(255,255,255,0.82);
-          border: 1px solid rgba(28,25,23,0.12);
-        }
-        .feature-addon-title {
-          margin: 1px 0 4px;
-          font-size: 13.5px;
-          line-height: 1.2;
-          font-weight: 700;
-          letter-spacing: -0.01em;
-          color: ${P.ink};
-        }
-        .feature-addon-sub {
-          margin: 0;
-          font-size: 11.5px;
-          line-height: 1.38;
-          color: ${P.muted};
-        }
         .feature-addon-visual {
           margin: 0 0 10px;
           padding: 8px;
@@ -5011,7 +4812,7 @@ const App = () => {
           background: rgba(28,25,23,0.11);
         }
         .feature-addon-line.active {
-          background: var(--addon-accent);
+          background: var(--card-accent);
           opacity: 0.3;
         }
         .feature-addon-pill-row {
@@ -5025,39 +4826,9 @@ const App = () => {
           border: 1px solid rgba(28,25,23,0.14);
           background: rgba(255,255,255,0.84);
         }
-        .feature-addon-card-meta {
-          margin-top: auto;
-          padding-top: 10px;
-          display: inline-flex;
-          align-items: center;
-          gap: 7px;
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          color: var(--addon-accent);
-        }
-        .feature-addon-card-meta::before {
-          content: '';
-          width: 14px;
-          height: 2px;
-          border-radius: 999px;
-          background: var(--addon-accent);
-          opacity: 0.6;
-        }
-        @media (max-width: 980px) {
-          .feature-addon-card {
-            flex-basis: calc((100% - 12px) / 2);
-            min-width: 220px;
-          }
-        }
         @media (max-width: 740px) {
           .feature-card { min-height: 0; }
           .feature-card-label { font-size: 17px; }
-          .feature-addon-wrap::before,
-          .feature-addon-wrap::after { display: none; }
-          .feature-addon-scroll { gap: 10px; padding-bottom: 6px; }
-          .feature-addon-card { flex-basis: 100%; min-width: 0; }
         }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(45,108,223,0.06) !important; }
@@ -5556,21 +5327,16 @@ const App = () => {
                   How It Works
                 </div>
                 <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 28, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
-                  Three visual steps from link to insight
+                  Four visual cards from link to insight
                 </h2>
               </div>
-              {!isMobile && (
-                <div style={{ textAlign: 'right', fontSize: 11, color: P.muted, marginBottom: 8 }}>
-                  Scroll down to reveal all cards
-                </div>
-              )}
-              <div ref={addonScrollRef} className="feature-addon-scroll">
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 14 }}>
                 {[
                   {
                     num: '01',
                     label: 'Instant Transcript',
-                    desc: 'Paste any video URL and get the full transcript with timestamps in seconds — across YouTube, TikTok, Vimeo, and 6 more platforms.',
-                    meta: '10+ platforms supported',
+                    desc: 'Paste any video URL and get the full transcript with timestamps in seconds.',
+                    meta: 'YouTube, TikTok, Vimeo + more',
                     accent: P.accent,
                     bg: 'rgba(45,108,223,0.08)',
                     border: 'rgba(45,108,223,0.17)',
@@ -5586,16 +5352,16 @@ const App = () => {
                   },
                   {
                     num: '02',
-                    label: 'AI Study Tools',
-                    desc: 'Turn any video into a study guide, flashcard deck, chapter breakdown, or bullet summary — all generated on demand.',
-                    meta: 'Guide, cards, chapters, summary',
+                    label: 'AI Learning Pack',
+                    desc: 'AI Summaries, Flash Cards with flip mode, and a full Study Guide.',
+                    meta: 'Bullet points · Q&A cards · Objectives',
                     accent: '#C2410C',
                     bg: 'rgba(194,65,12,0.08)',
                     border: 'rgba(194,65,12,0.17)',
                     pillBg: 'rgba(194,65,12,0.11)',
                     pillBorder: 'rgba(194,65,12,0.25)',
                     glow: 'rgba(194,65,12,0.22)',
-                    type: 'tools',
+                    type: 'learning',
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3z"/>
@@ -5606,8 +5372,8 @@ const App = () => {
                   {
                     num: '03',
                     label: 'Chat With Any Video',
-                    desc: 'Ask questions about the video and get precise answers grounded in the transcript. No hallucinations, just the source.',
-                    meta: 'Answers cite transcript evidence',
+                    desc: 'Ask questions and get precise answers grounded directly in the transcript.',
+                    meta: 'No hallucinations, source-first answers',
                     accent: P.success,
                     bg: 'rgba(15,118,110,0.08)',
                     border: 'rgba(15,118,110,0.17)',
@@ -5624,63 +5390,9 @@ const App = () => {
                   },
                   {
                     num: '04',
-                    label: 'AI Summaries',
-                    desc: 'Bullet point summaries',
-                    meta: 'Fast overview',
-                    accent: P.accent,
-                    bg: 'rgba(45,108,223,0.08)',
-                    border: 'rgba(45,108,223,0.2)',
-                    pillBg: 'rgba(45,108,223,0.11)',
-                    pillBorder: 'rgba(45,108,223,0.25)',
-                    glow: 'rgba(45,108,223,0.23)',
-                    type: 'summary',
-                    icon: (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-                      </svg>
-                    ),
-                  },
-                  {
-                    num: '05',
-                    label: 'Flash Cards',
-                    desc: 'Q&A cards with flip mode',
-                    meta: 'Flip and review',
-                    accent: P.warning,
-                    bg: 'rgba(180,83,9,0.08)',
-                    border: 'rgba(180,83,9,0.2)',
-                    pillBg: 'rgba(180,83,9,0.11)',
-                    pillBorder: 'rgba(180,83,9,0.25)',
-                    glow: 'rgba(180,83,9,0.2)',
-                    type: 'flash',
-                    icon: (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="4" width="14" height="14" rx="2"/><path d="M7 8h6"/><path d="M7 12h4"/><path d="M11 20h10a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/>
-                      </svg>
-                    ),
-                  },
-                  {
-                    num: '06',
-                    label: 'Study Guide',
-                    desc: 'Objectives, concepts & review',
-                    meta: 'Structured learning',
-                    accent: P.success,
-                    bg: 'rgba(15,118,110,0.08)',
-                    border: 'rgba(15,118,110,0.2)',
-                    pillBg: 'rgba(15,118,110,0.11)',
-                    pillBorder: 'rgba(15,118,110,0.25)',
-                    glow: 'rgba(15,118,110,0.2)',
-                    type: 'guide',
-                    icon: (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                      </svg>
-                    ),
-                  },
-                  {
-                    num: '07',
-                    label: 'Academic',
-                    desc: 'References, claims & glossary',
-                    meta: 'Evidence oriented',
+                    label: 'Academic Lens',
+                    desc: 'References, claims, and glossary terms for deeper analysis.',
+                    meta: 'References · Claims · Glossary',
                     accent: '#7C3AED',
                     bg: 'rgba(124,58,237,0.08)',
                     border: 'rgba(124,58,237,0.2)',
@@ -5706,9 +5418,6 @@ const App = () => {
                       background: `linear-gradient(155deg, rgba(255,255,255,0.98) 0%, ${card.bg} 100%)`,
                       border: `1px solid ${card.border}`,
                       padding: '20px 18px 18px',
-                      flex: isMobile ? '0 0 100%' : isTablet ? '0 0 calc((100% - 12px) / 2)' : '0 0 calc((100% - 24px) / 3)',
-                      minWidth: isMobile ? 0 : 238,
-                      scrollSnapAlign: 'start',
                     }}
                   >
                     <div className="feature-card-top">
@@ -5744,7 +5453,7 @@ const App = () => {
                           </div>
                         </div>
                       )}
-                      {card.type === 'tools' && (
+                      {card.type === 'learning' && (
                         <div className="feature-mock-shell">
                           <div className="feature-mock-topbar">
                             <span className="feature-mock-dots">
@@ -5752,7 +5461,7 @@ const App = () => {
                               <span className="feature-mock-dot" />
                               <span className="feature-mock-dot" />
                             </span>
-                            <span className="feature-mock-chip">AI Tools</span>
+                            <span className="feature-mock-chip">Learning Pack</span>
                           </div>
                           <div className="feature-mock-body">
                             <div className="feature-mock-tools-nav">
@@ -5762,14 +5471,14 @@ const App = () => {
                               <span className="feature-mock-tools-tab" />
                             </div>
                             <div className="feature-mock-tools-main">
-                              <span className="feature-mock-title" />
+                              <div className="feature-addon-pill-row">
+                                <span className="feature-addon-pill" style={{ width: 56 }} />
+                                <span className="feature-addon-pill" style={{ width: 44 }} />
+                                <span className="feature-addon-pill" style={{ width: 54 }} />
+                              </div>
                               <span className="feature-mock-bullet" style={{ width: '94%' }} />
                               <span className="feature-mock-bullet" style={{ width: '82%' }} />
                               <span className="feature-mock-bullet" style={{ width: '89%' }} />
-                              <div className="feature-mock-mini-grid">
-                                <span className="feature-mock-mini-card" />
-                                <span className="feature-mock-mini-card" />
-                              </div>
                             </div>
                           </div>
                         </div>
@@ -5799,33 +5508,6 @@ const App = () => {
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                      {card.type === 'summary' && (
-                        <div className="feature-addon-visual">
-                          <span className="feature-addon-line active" style={{ width: '82%' }} />
-                          <span className="feature-addon-line" style={{ width: '96%' }} />
-                          <span className="feature-addon-line" style={{ width: '74%' }} />
-                          <span className="feature-addon-line" style={{ width: '89%' }} />
-                        </div>
-                      )}
-                      {card.type === 'flash' && (
-                        <div className="feature-addon-visual">
-                          <div className="feature-addon-pill-row">
-                            <span className="feature-addon-pill" style={{ width: 56 }} />
-                            <span className="feature-addon-pill" style={{ width: 44 }} />
-                          </div>
-                          <span className="feature-addon-line active" style={{ width: '92%' }} />
-                          <span className="feature-addon-line" style={{ width: '68%' }} />
-                          <span className="feature-addon-line" style={{ width: '84%' }} />
-                        </div>
-                      )}
-                      {card.type === 'guide' && (
-                        <div className="feature-addon-visual">
-                          <span className="feature-addon-line active" style={{ width: '58%' }} />
-                          <span className="feature-addon-line" style={{ width: '95%' }} />
-                          <span className="feature-addon-line" style={{ width: '86%' }} />
-                          <span className="feature-addon-line" style={{ width: '78%' }} />
                         </div>
                       )}
                       {card.type === 'academic' && (
