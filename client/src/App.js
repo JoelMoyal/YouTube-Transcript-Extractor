@@ -21,6 +21,9 @@ const P = {
   error:       '#B42318',
 };
 
+const MOBILE_BREAKPOINT = 640;
+const TABLET_BREAKPOINT = 1024;
+
 const LANGUAGES = [
   { code: 'en',      label: 'English' },
   { code: 'es',      label: 'Spanish' },
@@ -745,7 +748,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
   }, [onClose]);
 
   const inputStyle = {
-    width: '100%', padding: '10px 13px', borderRadius: 10,
+    width: '100%', padding: '11px 13px', borderRadius: 10,
     border: `1px solid ${P.border}`, background: P.paper,
     fontSize: 14, color: P.ink, outline: 'none', transition: 'border-color 0.15s',
     fontFamily: 'inherit',
@@ -824,8 +827,8 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
 
   const CloseBtn = () => (
     <button onClick={onClose} style={{
-      position: 'absolute', top: 16, right: 16, width: 28, height: 28,
-      borderRadius: 7, background: 'none', border: 'none', cursor: 'pointer',
+      position: 'absolute', top: 12, right: 12, width: 40, height: 40,
+      borderRadius: 10, background: 'none', border: 'none', cursor: 'pointer',
       color: P.muted, fontSize: 20, lineHeight: 1,
       display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s',
     }}
@@ -836,7 +839,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
 
   const SubmitBtn = ({ label }) => (
     <button type="submit" disabled={loading} style={{
-      marginTop: 4, padding: '11px 0', borderRadius: 10, border: 'none',
+      marginTop: 4, padding: '11px 0', minHeight: 44, borderRadius: 10, border: 'none',
       background: loading ? 'rgba(60,140,255,0.55)' : P.accent,
       color: 'white', fontSize: 14, fontWeight: 600,
       cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.15s',
@@ -933,7 +936,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
         <div style={{ display: 'flex', marginBottom: 24, background: P.paper, borderRadius: 10, padding: 3, border: `1px solid ${P.border}` }}>
           {[['signin', 'Sign in'], ['signup', 'Create account']].map(([key, label]) => (
             <button key={key} onClick={() => switchScreen(key)} style={{
-              flex: 1, padding: '7px 0', borderRadius: 8, border: 'none',
+              flex: 1, padding: '10px 0', minHeight: 40, borderRadius: 8, border: 'none',
               background: screen === key ? P.surface : 'transparent',
               color: screen === key ? P.ink : P.muted,
               fontSize: 13, fontWeight: screen === key ? 600 : 400,
@@ -980,7 +983,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
               <label style={{ fontSize: 12, fontWeight: 600, color: P.ink }}>Password</label>
               {!isSignUp && (
                 <button type="button" onClick={() => switchScreen('forgot')}
-                  style={{ background: 'none', border: 'none', fontSize: 12, color: P.muted, cursor: 'pointer', padding: 0, transition: 'color 0.15s' }}
+                  style={{ background: 'none', border: 'none', fontSize: 12, color: P.muted, cursor: 'pointer', padding: '6px 2px', minHeight: 32, display: 'inline-flex', alignItems: 'center', transition: 'color 0.15s' }}
                   onMouseEnter={e => { e.currentTarget.style.color = P.accent; }}
                   onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
                 >Forgot password?</button>
@@ -1059,7 +1062,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
             if (err) setError(friendlyError(err.message));
           }}
           style={{
-            width: '100%', padding: '10px 0', borderRadius: 10,
+            width: '100%', padding: '10px 0', minHeight: 44, borderRadius: 10,
             border: `1px solid ${P.border}`, background: P.paper,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
             fontSize: 14, fontWeight: 600, color: P.ink, cursor: 'pointer',
@@ -1082,7 +1085,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
         <p style={{ textAlign: 'center', fontSize: 12, color: P.muted, marginTop: 16, marginBottom: 0 }}>
           {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
           <button onClick={() => switchScreen(isSignUp ? 'signin' : 'signup')}
-            style={{ background: 'none', border: 'none', color: P.accent, fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0 }}
+            style={{ background: 'none', border: 'none', color: P.accent, fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: '6px 2px', minHeight: 32, display: 'inline-flex', alignItems: 'center' }}
           >{isSignUp ? 'Sign in' : 'Create one'}</button>
         </p>
       </div>
@@ -1151,7 +1154,7 @@ const PasswordResetModal = ({ onClose }) => {
               </div>
               {error && <div style={{ padding: '9px 12px', borderRadius: 8, background: 'rgba(180,35,24,0.07)', border: `1px solid rgba(180,35,24,0.18)`, fontSize: 13, color: P.error }}>{error}</div>}
               <button type="submit" disabled={loading} style={{
-                marginTop: 4, padding: '11px 0', borderRadius: 10, border: 'none',
+                marginTop: 4, padding: '11px 0', minHeight: 44, borderRadius: 10, border: 'none',
                 background: loading ? 'rgba(60,140,255,0.55)' : P.accent,
                 color: 'white', fontSize: 14, fontWeight: 600,
                 cursor: loading ? 'not-allowed' : 'pointer',
@@ -1174,9 +1177,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   // ON ICE: const [prefLangSaved, setPrefLangSaved] = React.useState(false);
   const [copyRefDone, setCopyRefDone] = React.useState(false);
   const [showAllHistory, setShowAllHistory] = React.useState(false);
-  const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < 900);
+  const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < MOBILE_BREAKPOINT);
   React.useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 900);
+    const onResize = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
@@ -3328,7 +3331,7 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, on
       href="/"
       onClick={(e) => { e.preventDefault(); onHome?.(); }}
       aria-label={`Go to ${BRAND_NAME} home`}
-      style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none' }}
+      style={{ display: 'flex', alignItems: 'center', gap: 9, textDecoration: 'none', minHeight: 44 }}
     >
       <img
         src={FOOTER_LOGO_SRC}
@@ -3348,7 +3351,11 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, on
         <button
           onClick={onSignIn}
           style={{
-            marginLeft: 2, padding: '7px 16px', borderRadius: 8, border: 'none',
+            marginLeft: 2,
+            padding: isMobile ? '0 16px' : '7px 16px',
+            minHeight: isMobile ? 44 : undefined,
+            lineHeight: 1,
+            borderRadius: 8, border: 'none',
             background: P.accent, color: 'white',
             fontSize: 13, fontWeight: 600, cursor: 'pointer',
             transition: 'background 0.15s',
@@ -3440,9 +3447,9 @@ const App = () => {
   const [mobilePanel, setMobilePanel]         = useState('transcript'); // 'transcript'|'ai'|'insights'|'history'
   const [sidebarTab, setSidebarTab]           = useState('ai'); // 'ai'|'insights'|'summary'|'flashcards'|'study-guide'
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
-  const isMobile  = windowWidth < 640;
-  const isTablet  = windowWidth >= 640 && windowWidth < 1024;
-  const isDesktop = windowWidth >= 1024;
+  const isMobile  = windowWidth < MOBILE_BREAKPOINT;
+  const isTablet  = windowWidth >= MOBILE_BREAKPOINT && windowWidth < TABLET_BREAKPOINT;
+  const isDesktop = windowWidth >= TABLET_BREAKPOINT;
 
   const aiCacheRef         = useRef({});  // keyed by videoId → saved AI state
   const mobileNavRef       = useRef(null);
@@ -5200,7 +5207,7 @@ const App = () => {
                 padding: isMobile ? '7px 7px 7px 7px' : 10,
               }}>
                 <div style={{ display: 'flex', gap: isMobile ? 6 : 8, flexDirection: isMobile ? 'column' : 'row' }}>
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: isMobile ? '10px 12px' : '16px 20px', background: P.paper, borderRadius: isMobile ? 11 : 14, border: `1px solid ${P.border}` }}>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: isMobile ? '11px 12px' : '16px 20px', minHeight: isMobile ? 44 : undefined, background: P.paper, borderRadius: isMobile ? 11 : 14, border: `1px solid ${P.border}` }}>
                     {(() => {
                       const platform = parseVideoUrl(videoUrl)?.platform;
                       if (platform) return <PlatformIcon platform={platform} />;
@@ -5229,7 +5236,7 @@ const App = () => {
                       placeholder="Paste a YouTube, TikTok, Loom, Vimeo, Dailymotion URL…"
                       style={{
                         flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                        fontSize: isMobile ? 15 : 17, color: P.ink,
+                        minHeight: isMobile ? 44 : undefined, fontSize: isMobile ? 16 : 17, color: P.ink,
                       }}
                     />
                   </div>
@@ -5247,6 +5254,7 @@ const App = () => {
                         disabled={btnDisabled}
                         style={{
                           flexShrink: 0, padding: isMobile ? '9px 18px' : '0 28px', borderRadius: isMobile ? 11 : 14, border: 'none',
+                          minHeight: isMobile ? 44 : undefined,
                           background: btnBg,
                           color: outOfCredits ? P.error : 'white',
                           fontSize: isMobile ? 14 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
@@ -5865,7 +5873,8 @@ const App = () => {
             display: 'grid',
             gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 300px' : '320px 1fr 360px',
             gridTemplateRows: '1fr',
-            height: isMobile ? 'calc(100vh - 116px)' : 'calc(100vh - 56px)',
+            height: isMobile ? 'calc(100dvh - 116px)' : 'calc(100dvh - 56px)',
+            minHeight: isMobile ? 'calc(100vh - 116px)' : 'calc(100vh - 56px)',
             overflow: 'hidden',
           }}>
 
@@ -5966,7 +5975,7 @@ const App = () => {
                     </div>
                     <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                       <button onClick={copyToClipboard} style={{
-                        display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 20,
+                        display: 'flex', alignItems: 'center', gap: 5, padding: isMobile ? '8px 12px' : '5px 11px', minHeight: isMobile ? 44 : undefined, borderRadius: 20,
                         border: `1px solid ${P.border}`, background: 'transparent', cursor: 'pointer',
                         fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
                       }}
@@ -5975,7 +5984,7 @@ const App = () => {
                         {copied ? <CheckIcon /> : <CopyIcon />} {copied ? 'Copied' : 'Copy'}
                       </button>
                       <button onClick={downloadTxt} style={{
-                        display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 20,
+                        display: 'flex', alignItems: 'center', gap: 5, padding: isMobile ? '8px 12px' : '5px 11px', minHeight: isMobile ? 44 : undefined, borderRadius: 20,
                         border: `1px solid ${P.border}`, background: 'transparent', cursor: 'pointer',
                         fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
                       }}
@@ -6011,7 +6020,7 @@ const App = () => {
                   const isActive = activeTab === tab.key;
                   return (
                     <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
-                      display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 12,
+                      display: 'flex', alignItems: 'center', gap: 5, padding: isMobile ? '8px 12px' : '5px 12px', minHeight: isMobile ? 44 : undefined, fontSize: 12,
                       fontWeight: isActive ? 600 : 500,
                       border: isActive ? `1px solid ${P.border}` : '1px solid transparent',
                       borderBottom: isActive ? '1px solid #FFFFFF' : '1px solid transparent',
@@ -6038,10 +6047,10 @@ const App = () => {
                 {activeTab === 'transcript' && (
                   <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {/* Search bar */}
-                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', borderBottom: `1px solid ${P.border}`, background: '#FFFFFF' }}>
+                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, padding: isMobile ? '10px 12px' : '8px 16px', borderBottom: `1px solid ${P.border}`, background: '#FFFFFF' }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                       <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search transcript…"
-                        style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13, color: P.ink }} />
+                        style={{ flex: 1, minHeight: isMobile ? 44 : 28, border: 'none', background: 'transparent', outline: 'none', fontSize: isMobile ? 14 : 13, color: P.ink }} />
                       {search && matchCount > 0 && <span style={{ fontSize: 11, color: P.muted }}>{matchCount} match{matchCount !== 1 ? 'es' : ''}</span>}
                       {search && <button onClick={() => setSearch('')} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
                       {segments.length > 0 && (
@@ -6049,20 +6058,34 @@ const App = () => {
                           {/* Timestamps toggle */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                             <span style={{ fontSize: 11, color: P.muted, whiteSpace: 'nowrap' }}>Timestamps</span>
-                            <div onClick={() => setShowTimestamps(v => !v)} style={{ width: 28, height: 16, borderRadius: 8, background: showTimestamps ? P.accent : P.border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
-                              <div style={{ position: 'absolute', top: 2, left: showTimestamps ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
-                            </div>
+                            <button
+                              type="button"
+                              aria-label={showTimestamps ? 'Hide timestamps' : 'Show timestamps'}
+                              onClick={() => setShowTimestamps(v => !v)}
+                              style={{ width: 44, height: 44, border: 'none', background: 'transparent', cursor: 'pointer', position: 'relative', flexShrink: 0, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                              <div style={{ width: 40, height: 24, borderRadius: 999, background: showTimestamps ? P.accent : P.border, position: 'relative', transition: 'background 0.2s' }}>
+                                <div style={{ position: 'absolute', top: 3, left: showTimestamps ? 19 : 3, width: 18, height: 18, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                              </div>
+                            </button>
                           </div>
                           {/* Topics toggle — desktop/tablet only */}
                           {!isMobile && <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                             <span style={{ fontSize: 11, color: P.muted, whiteSpace: 'nowrap' }}>Topics</span>
-                            <div onClick={() => {
+                            <button
+                              type="button"
+                              aria-label={showTopics ? 'Hide topics' : 'Show topics'}
+                              onClick={() => {
                               const next = !showTopics;
                               setShowTopics(next);
                               if (next && !timeline && !timelineLoading) generateTimeline();
-                            }} style={{ width: 28, height: 16, borderRadius: 8, background: showTopics ? '#7C3AED' : P.border, cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
-                              <div style={{ position: 'absolute', top: 2, left: showTopics ? 14 : 2, width: 12, height: 12, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
-                            </div>
+                            }}
+                              style={{ width: 44, height: 44, border: 'none', background: 'transparent', cursor: 'pointer', position: 'relative', flexShrink: 0, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                            >
+                              <div style={{ width: 40, height: 24, borderRadius: 999, background: showTopics ? '#7C3AED' : P.border, position: 'relative', transition: 'background 0.2s' }}>
+                                <div style={{ position: 'absolute', top: 3, left: showTopics ? 19 : 3, width: 18, height: 18, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                              </div>
+                            </button>
                           </div>}
                           {/* Language pill — ON ICE, desktop/tablet only */}
                           {!isMobile && <div title="Language translation coming soon" style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px 3px 7px', borderRadius: 20, border: `1px solid ${P.border}`, background: P.paper, cursor: 'not-allowed', position: 'relative', opacity: 0.45 }}>
@@ -6123,7 +6146,7 @@ const App = () => {
                                 >
                                   <button
                                     onClick={e => { e.stopPropagation(); seekToTime(seg.seconds); setSelectedSegment(i); }}
-                                    style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '10px 6px 10px 0', background: 'none', border: 'none', cursor: 'pointer', color: selectedSegment === i ? P.accent : playingSegment === i ? '#5B9BD5' : '#999', fontWeight: playingSegment === i ? 700 : 600, fontSize: 10.5, fontFamily: 'monospace', flexShrink: 0 }}>
+                                    style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', minHeight: 44, padding: '10px 6px 10px 0', background: 'none', border: 'none', cursor: 'pointer', color: selectedSegment === i ? P.accent : playingSegment === i ? '#5B9BD5' : '#999', fontWeight: playingSegment === i ? 700 : 600, fontSize: 10.5, fontFamily: 'monospace', flexShrink: 0 }}>
                                     {formatTime(seg.seconds)}
                                   </button>
                                   <div style={{ padding: '10px 14px 10px 8px', fontSize: 13.5, lineHeight: 1.7, color: P.ink, fontWeight: playingSegment === i ? 600 : selectedSegment === i ? 500 : 400 }}>
@@ -6141,7 +6164,7 @@ const App = () => {
                       )}
                     </div>
                     {/* Bottom info bar */}
-                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', background: P.paper, borderTop: `1px solid ${P.border}` }}>
+                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', flexWrap: isMobile ? 'wrap' : 'nowrap', gap: 12, rowGap: isMobile ? 6 : undefined, padding: '8px 16px', background: P.paper, borderTop: `1px solid ${P.border}` }}>
                       <span style={{ fontSize: 11, color: P.muted }}>Word Count: <strong style={{ color: P.ink }}>{wordCount.toLocaleString()}</strong></span>
                       <span style={{ color: P.border }}>·</span>
                       <span style={{ fontSize: 11, color: P.muted }}>Character Count: <strong style={{ color: P.ink }}>{charCount.toLocaleString()}</strong></span>
@@ -6890,7 +6913,7 @@ const App = () => {
                       onClick={e => { e.stopPropagation(); askQuestion(); }}
                       disabled={!qaQuestion.trim() || qaLoading}
                       style={{
-                        flexShrink: 0, width: 38, height: 38,
+                        flexShrink: 0, width: 42, height: 42,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         borderRadius: 10, border: 'none',
                         background: qaQuestion.trim() && !qaLoading
@@ -7281,12 +7304,9 @@ const App = () => {
               { key: 'transcript', label: 'Transcript', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
               { key: 'ai', label: 'AI Chat', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
               { key: 'insights', label: 'Insights', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
-              ...(summary || summarizing ? [{ key: 'summary', label: 'Summary', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
-              ...(flashcards.length > 0 || flashcardsExhausted || flashcardsLoading ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
-              ...(studyGuide || studyGuideLoading ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
-              ...(academicInsights || academicInsightsLoading ? [{ key: 'academic', label: 'Academic', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }] : []),
             ];
             const hasDynamic = mobileTabs.length > 4;
+            const insightPanels = new Set(['insights', 'summary', 'flashcards', 'study-guide', 'academic']);
             return (
               <div ref={mobileNavRef} className="no-scrollbar" style={{
                 position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
@@ -7303,7 +7323,7 @@ const App = () => {
                 gap: 2,
               }}>
                 {mobileTabs.map(tab => {
-                  const isAct = mobilePanel === tab.key;
+                  const isAct = mobilePanel === tab.key || (tab.key === 'insights' && insightPanels.has(mobilePanel));
                   return (
                     <button key={tab.key} data-nav-key={tab.key} onClick={() => {
                       setMobilePanel(tab.key);
