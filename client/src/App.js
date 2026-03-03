@@ -8,14 +8,14 @@ ReactGA.send({ hitType: 'pageview', page: window.location.pathname });
 
 // ── Palette ────────────────────────────────────────────────────────────────────
 const P = {
-  paper:       '#F6F3EE',
-  surface:     '#FFFEFC',
-  border:      '#E7E1D8',
-  ink:         '#1C1917',
-  muted:       '#6B645C',
-  accent:      '#2D6CDF',
-  accentHover: '#2459B8',
-  accentLight: 'rgba(45,108,223,0.08)',
+  paper:       '#F6F2EA',
+  surface:     '#FFFFFF',
+  border:      '#E6E0D6',
+  ink:         '#1D1D1F',
+  muted:       '#8B8F97',
+  accent:      '#3C8CFF',
+  accentHover: '#1F6BFF',
+  accentLight: 'rgba(123,211,255,0.18)',
   success:     '#0F766E',
   warning:     '#B45309',
   error:       '#B42318',
@@ -404,15 +404,15 @@ const ReferralPromoModal = ({ user, onClose }) => {
   );
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(28,25,23,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(29,29,31,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={{ width: '100%', maxWidth: 420, background: P.surface, borderRadius: 20, border: `1px solid ${P.border}`, boxShadow: '0 24px 80px rgba(28,25,23,0.2)', overflow: 'hidden', animation: 'fadeUp 0.3s ease' }}>
-        <div style={{ height: 4, background: 'linear-gradient(90deg, #2D6CDF, #5B9FFF)' }} />
+      <div style={{ width: '100%', maxWidth: 420, background: P.surface, borderRadius: 20, border: `1px solid ${P.border}`, boxShadow: '0 24px 80px rgba(29,29,31,0.2)', overflow: 'hidden', animation: 'fadeUp 0.3s ease' }}>
+        <div style={{ height: 4, background: 'linear-gradient(90deg, #3C8CFF, #5B9FFF)' }} />
         <div style={{ padding: '22px 22px 26px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 }}>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(45,108,223,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D6CDF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(60,140,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3C8CFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/>
                   <line x1="12" y1="22" x2="12" y2="7"/>
                   <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
@@ -548,7 +548,7 @@ const CreditsWidget = ({ credits, onUpgrade, user, onShowReferralPromo }) => {
         <div className="fade-up" style={{
           position: 'absolute', right: 0, top: 'calc(100% + 8px)',
           width: 290, background: P.surface, border: `1px solid ${P.border}`,
-          borderRadius: 14, boxShadow: '0 8px 32px rgba(28,25,23,0.12)',
+          borderRadius: 14, boxShadow: '0 8px 32px rgba(29,29,31,0.12)',
           padding: '14px 16px', zIndex: 200,
         }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: P.ink, marginBottom: 6 }}>
@@ -599,8 +599,8 @@ const CreditsWidget = ({ credits, onUpgrade, user, onShowReferralPromo }) => {
             <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${P.border}` }}>
               {/* Header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
-                <div style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(45,108,223,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2D6CDF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div style={{ width: 26, height: 26, borderRadius: 7, background: 'rgba(60,140,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3C8CFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                     <circle cx="9" cy="7" r="4"/>
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -610,9 +610,9 @@ const CreditsWidget = ({ credits, onUpgrade, user, onShowReferralPromo }) => {
                 <div style={{ fontSize: 12, fontWeight: 700, color: P.ink }}>Invite friends, earn credits</div>
               </div>
               {/* Badge */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: 'rgba(45,108,223,0.09)', marginBottom: 7 }}>
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="#2D6CDF"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#2D6CDF' }}>+3 free credits per friend who signs up</span>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: 'rgba(60,140,255,0.09)', marginBottom: 7 }}>
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="#3C8CFF"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#3C8CFF' }}>+3 free credits per friend who signs up</span>
               </div>
               {/* Description */}
               <p style={{ margin: '0 0 9px', fontSize: 11, color: P.muted, lineHeight: 1.5 }}>
@@ -625,8 +625,8 @@ const CreditsWidget = ({ credits, onUpgrade, user, onShowReferralPromo }) => {
               {/* Copy button */}
               <button onClick={copyRefLink} style={{
                 width: '100%', padding: '7px 0', borderRadius: 8, marginBottom: 7,
-                border: `1px solid ${refCopied ? 'rgba(15,118,110,0.3)' : 'rgba(45,108,223,0.3)'}`,
-                background: refCopied ? 'rgba(15,118,110,0.08)' : 'rgba(45,108,223,0.07)',
+                border: `1px solid ${refCopied ? 'rgba(15,118,110,0.3)' : 'rgba(60,140,255,0.3)'}`,
+                background: refCopied ? 'rgba(15,118,110,0.08)' : 'rgba(60,140,255,0.07)',
                 color: refCopied ? '#0F766E' : P.accent,
                 fontSize: 12, fontWeight: 600, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
@@ -675,14 +675,14 @@ const AuthLogo = () => (
 
 const modalOverlay = {
   position: 'fixed', inset: 0, zIndex: 1000,
-  background: 'rgba(28,25,23,0.5)',
+  background: 'rgba(29,29,31,0.5)',
   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
 };
 const modalCard = {
   width: '100%', maxWidth: 420,
   background: P.surface, borderRadius: 20,
   border: `1px solid ${P.border}`,
-  boxShadow: '0 24px 80px rgba(28,25,23,0.2)',
+  boxShadow: '0 24px 80px rgba(29,29,31,0.2)',
   padding: '32px 32px 28px',
   position: 'relative',
 };
@@ -837,7 +837,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
   const SubmitBtn = ({ label }) => (
     <button type="submit" disabled={loading} style={{
       marginTop: 4, padding: '11px 0', borderRadius: 10, border: 'none',
-      background: loading ? 'rgba(45,108,223,0.55)' : P.accent,
+      background: loading ? 'rgba(60,140,255,0.55)' : P.accent,
       color: 'white', fontSize: 14, fontWeight: 600,
       cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.15s',
       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%',
@@ -938,7 +938,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
               color: screen === key ? P.ink : P.muted,
               fontSize: 13, fontWeight: screen === key ? 600 : 400,
               cursor: 'pointer', transition: 'all 0.15s',
-              boxShadow: screen === key ? '0 1px 4px rgba(28,25,23,0.08)' : 'none',
+              boxShadow: screen === key ? '0 1px 4px rgba(29,29,31,0.08)' : 'none',
             }}>{label}</button>
           ))}
         </div>
@@ -1152,7 +1152,7 @@ const PasswordResetModal = ({ onClose }) => {
               {error && <div style={{ padding: '9px 12px', borderRadius: 8, background: 'rgba(180,35,24,0.07)', border: `1px solid rgba(180,35,24,0.18)`, fontSize: 13, color: P.error }}>{error}</div>}
               <button type="submit" disabled={loading} style={{
                 marginTop: 4, padding: '11px 0', borderRadius: 10, border: 'none',
-                background: loading ? 'rgba(45,108,223,0.55)' : P.accent,
+                background: loading ? 'rgba(60,140,255,0.55)' : P.accent,
                 color: 'white', fontSize: 14, fontWeight: 600,
                 cursor: loading ? 'not-allowed' : 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -1388,7 +1388,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-shell {
           min-height: 100vh;
           padding-top: 56px;
-          background: radial-gradient(ellipse 90% 55% at 50% -15%, rgba(45,108,223,0.1) 0%, transparent 65%), #F6F3EE;
+          background: radial-gradient(ellipse 90% 55% at 50% -15%, rgba(60,140,255,0.1) 0%, transparent 65%), #F6F2EA;
           position: relative;
           overflow-x: hidden;
         }
@@ -1398,7 +1398,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           inset: 36px auto auto -220px;
           width: 760px;
           height: 760px;
-          background: radial-gradient(circle at center, rgba(45,108,223,0.06) 0%, transparent 68%);
+          background: radial-gradient(circle at center, rgba(60,140,255,0.06) 0%, transparent 68%);
           border-radius: 50%;
           pointer-events: none;
         }
@@ -1409,7 +1409,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           width: 620px;
           height: 620px;
           border-radius: 50%;
-          background: radial-gradient(circle at center, rgba(45,108,223,0.05) 0%, transparent 72%);
+          background: radial-gradient(circle at center, rgba(60,140,255,0.05) 0%, transparent 72%);
           pointer-events: none;
         }
         .ds-wrap {
@@ -1432,17 +1432,17 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           justify-content: center;
           border: none;
           background: none;
-          color: #6B645C;
+          color: #8B8F97;
           cursor: pointer;
           padding: 6px 8px 6px 2px;
           transition: color 0.15s;
           flex-shrink: 0;
         }
-        .ds-topnav-back:hover { color: #1C1917; }
+        .ds-topnav-back:hover { color: #1D1D1F; }
         .ds-topnav-tab {
           border: none;
           background: none;
-          color: #6B645C;
+          color: #8B8F97;
           font-size: 15px;
           font-weight: 500;
           cursor: pointer;
@@ -1450,9 +1450,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           border-radius: 8px;
           transition: all 0.15s;
         }
-        .ds-topnav-tab:hover { color: #1C1917; background: rgba(28,25,23,0.05); }
+        .ds-topnav-tab:hover { color: #1D1D1F; background: rgba(29,29,31,0.05); }
         .ds-topnav-tab.is-active {
-          color: #1C1917;
+          color: #1D1D1F;
           font-weight: 700;
         }
         .ds-grid {
@@ -1462,10 +1462,10 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           align-items: start;
         }
         .ds-card {
-          background: #FFFEFC;
-          border: 1px solid #E7E1D8;
+          background: #FFFFFF;
+          border: 1px solid #E6E0D6;
           border-radius: 18px;
-          box-shadow: 0 2px 12px rgba(28,25,23,0.06);
+          box-shadow: 0 2px 12px rgba(29,29,31,0.06);
         }
         .ds-profile {
           display: flex;
@@ -1485,19 +1485,19 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           font-size: 26px;
           font-weight: 700;
           color: white;
-          background: #2D6CDF;
-          box-shadow: 0 6px 16px rgba(45,108,223,0.25);
+          background: #3C8CFF;
+          box-shadow: 0 6px 16px rgba(60,140,255,0.25);
         }
         .ds-profile-name {
           font-size: clamp(20px, 2.4vw, 30px);
           font-weight: 700;
           letter-spacing: -0.02em;
-          color: #1C1917;
+          color: #1D1D1F;
           margin: 0 0 2px;
         }
         .ds-profile-email {
           font-size: 14px;
-          color: #6B645C;
+          color: #8B8F97;
           margin: 0;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -1513,13 +1513,13 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           font-size: 11px;
           letter-spacing: 0.05em;
           text-transform: uppercase;
-          color: #6B645C;
+          color: #8B8F97;
           font-weight: 600;
         }
         .ds-profile-meta-value {
           margin: 0;
           font-size: 15px;
-          color: #1C1917;
+          color: #1D1D1F;
           font-weight: 700;
         }
         /* ── Section tabs (white card, blue active) ── */
@@ -1529,10 +1529,10 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           gap: 4px;
           padding: 5px;
           margin-bottom: 14px;
-          background: #FFFEFC;
-          border: 1px solid #E7E1D8;
+          background: #FFFFFF;
+          border: 1px solid #E6E0D6;
           border-radius: 18px;
-          box-shadow: 0 2px 12px rgba(28,25,23,0.06);
+          box-shadow: 0 2px 12px rgba(29,29,31,0.06);
         }
         .ds-section-tab {
           flex: 1;
@@ -1540,18 +1540,18 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           border-radius: 11px;
           padding: 8px;
           background: transparent;
-          color: #6B645C;
+          color: #8B8F97;
           font-size: 14px;
           font-weight: 500;
           cursor: pointer;
           transition: all 0.15s;
           text-align: center;
         }
-        .ds-section-tab:hover { color: #1C1917; }
+        .ds-section-tab:hover { color: #1D1D1F; }
         .ds-section-tab.is-active {
-          color: #2D6CDF;
+          color: #3C8CFF;
           font-weight: 700;
-          background: rgba(45,108,223,0.07);
+          background: rgba(60,140,255,0.07);
         }
         .ds-overview-col {
           display: flex;
@@ -1568,9 +1568,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           overflow: hidden;
           padding: 16px 16px 14px;
           border-radius: 16px;
-          border: 1px solid #E7E1D8;
-          background: #FFFEFC;
-          box-shadow: 0 2px 10px rgba(28,25,23,0.05);
+          border: 1px solid #E6E0D6;
+          background: #FFFFFF;
+          box-shadow: 0 2px 10px rgba(29,29,31,0.05);
         }
         .ds-stat::before {
           content: '';
@@ -1580,16 +1580,16 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           pointer-events: none;
         }
         .ds-stat.ds-stat-primary::before {
-          background: linear-gradient(130deg, rgba(45,108,223,0.1) 0%, rgba(45,108,223,0.06) 100%);
+          background: linear-gradient(130deg, rgba(60,140,255,0.1) 0%, rgba(60,140,255,0.06) 100%);
         }
         .ds-stat.ds-stat-neutral::before {
-          background: linear-gradient(140deg, rgba(45,108,223,0.05) 0%, rgba(45,108,223,0.02) 100%);
+          background: linear-gradient(140deg, rgba(60,140,255,0.05) 0%, rgba(60,140,255,0.02) 100%);
         }
         .ds-stat.ds-stat-youtube::before {
-          background: linear-gradient(145deg, rgba(255,0,0,0.05) 0%, rgba(45,108,223,0.06) 100%);
+          background: linear-gradient(145deg, rgba(255,0,0,0.05) 0%, rgba(60,140,255,0.06) 100%);
         }
         .ds-stat.ds-stat-vimeo::before {
-          background: linear-gradient(140deg, rgba(26,183,234,0.07) 0%, rgba(45,108,223,0.05) 100%);
+          background: linear-gradient(140deg, rgba(26,183,234,0.07) 0%, rgba(60,140,255,0.05) 100%);
         }
         .ds-stat-head {
           position: relative;
@@ -1597,7 +1597,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           display: flex;
           align-items: center;
           gap: 6px;
-          color: #2D6CDF;
+          color: #3C8CFF;
           margin-bottom: 8px;
         }
         .ds-stat-value {
@@ -1607,7 +1607,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           font-size: 28px;
           line-height: 1.05;
           letter-spacing: -0.02em;
-          color: #1C1917;
+          color: #1D1D1F;
           font-weight: 700;
         }
         .ds-stat-label {
@@ -1615,7 +1615,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           z-index: 1;
           margin: 0 0 7px;
           font-size: 13px;
-          color: #1C1917;
+          color: #1D1D1F;
           font-weight: 600;
         }
         .ds-stat-sub {
@@ -1623,7 +1623,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           z-index: 1;
           margin: 0;
           font-size: 13px;
-          color: #6B645C;
+          color: #8B8F97;
         }
         .ds-usage {
           padding: 16px 18px 14px;
@@ -1638,7 +1638,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-usage-title {
           margin: 0;
           font-size: 16px;
-          color: #1C1917;
+          color: #1D1D1F;
           font-weight: 700;
           letter-spacing: -0.01em;
         }
@@ -1646,8 +1646,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           display: inline-flex;
           border-radius: 10px;
           padding: 3px;
-          background: rgba(45,108,223,0.07);
-          border: 1px solid rgba(45,108,223,0.18);
+          background: rgba(60,140,255,0.07);
+          border: 1px solid rgba(60,140,255,0.18);
           gap: 3px;
         }
         .ds-usage-switch button {
@@ -1655,7 +1655,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           border-radius: 8px;
           padding: 5px 10px;
           background: transparent;
-          color: #6B645C;
+          color: #8B8F97;
           font-size: 12px;
           font-weight: 700;
           cursor: pointer;
@@ -1663,18 +1663,18 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         }
         .ds-usage-switch button.is-active {
           background: white;
-          color: #1C1917;
+          color: #1D1D1F;
         }
         .ds-usage-track {
           height: 9px;
           border-radius: 999px;
-          background: #E7E1D8;
+          background: #E6E0D6;
           overflow: hidden;
         }
         .ds-usage-bar {
           height: 100%;
           border-radius: 999px;
-          background: linear-gradient(90deg, #5B9BD5 0%, #2D6CDF 60%, #2459B8 100%);
+          background: linear-gradient(90deg, #5B9BD5 0%, #3C8CFF 60%, #1F6BFF 100%);
           transition: width 0.45s ease;
         }
         .ds-usage-meta {
@@ -1686,7 +1686,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           margin-top: 12px;
         }
         .ds-usage-meta strong {
-          color: #1C1917;
+          color: #1D1D1F;
           font-size: 22px;
         }
         .ds-usage-days {
@@ -1697,11 +1697,11 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-usage-day {
           width: 13px;
           border-radius: 4px 4px 3px 3px;
-          background: rgba(45,108,223,0.14);
+          background: rgba(60,140,255,0.14);
           transition: all 0.2s ease;
         }
         .ds-usage-day.is-active {
-          background: #2D6CDF;
+          background: #3C8CFF;
         }
         .ds-usage-daystats {
           display: flex;
@@ -1709,9 +1709,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           align-items: center;
           margin-top: 8px;
           padding-top: 8px;
-          border-top: 1px solid #E7E1D8;
+          border-top: 1px solid #E6E0D6;
           font-size: 12px;
-          color: #6B645C;
+          color: #8B8F97;
         }
         .ds-list-card { padding: 12px 0 4px; overflow: hidden; }
         .ds-list-head {
@@ -1724,7 +1724,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-list-title {
           margin: 0;
           font-size: 15px;
-          color: #1C1917;
+          color: #1D1D1F;
           font-weight: 700;
           letter-spacing: -0.01em;
         }
@@ -1733,22 +1733,22 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           align-items: center;
           gap: 10px;
           padding: 10px 16px;
-          border-top: 1px solid #E7E1D8;
+          border-top: 1px solid #E6E0D6;
           transition: background 0.15s ease;
         }
         .ds-row:first-of-type {
-          border-top: 1px solid rgba(45,108,223,0.2);
-          box-shadow: inset 2px 0 0 rgba(45,108,223,0.3);
+          border-top: 1px solid rgba(60,140,255,0.2);
+          box-shadow: inset 2px 0 0 rgba(60,140,255,0.3);
         }
-        .ds-row:hover { background: rgba(45,108,223,0.03); }
+        .ds-row:hover { background: rgba(60,140,255,0.03); }
         .ds-thumb {
           width: 96px;
           height: 54px;
           border-radius: 9px;
           overflow: hidden;
           flex-shrink: 0;
-          background: rgba(45,108,223,0.06);
-          border: 1px solid rgba(45,108,223,0.1);
+          background: rgba(60,140,255,0.06);
+          border: 1px solid rgba(60,140,255,0.1);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1762,7 +1762,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-row-title {
           margin: 0 0 3px;
           font-size: 14px;
-          color: #1C1917;
+          color: #1D1D1F;
           font-weight: 700;
           letter-spacing: -0.01em;
           overflow: hidden;
@@ -1772,7 +1772,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-row-meta {
           margin: 0;
           font-size: 12px;
-          color: #6B645C;
+          color: #8B8F97;
           display: flex;
           align-items: center;
           gap: 5px;
@@ -1785,7 +1785,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           flex-shrink: 0;
         }
         .ds-row-btn {
-          border: 1px solid #E7E1D8;
+          border: 1px solid #E6E0D6;
           border-radius: 8px;
           padding: 6px 13px;
           min-width: 60px;
@@ -1795,28 +1795,28 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           transition: all 0.15s ease;
         }
         .ds-row-btn.primary {
-          background: #2D6CDF;
+          background: #3C8CFF;
           color: white;
-          border-color: rgba(45,108,223,0.4);
+          border-color: rgba(60,140,255,0.4);
         }
-        .ds-row-btn.primary:hover { background: #2459B8; }
+        .ds-row-btn.primary:hover { background: #1F6BFF; }
         .ds-row-btn.ghost {
           background: white;
-          color: #1C1917;
-          border-color: #E7E1D8;
+          color: #1D1D1F;
+          border-color: #E6E0D6;
         }
         .ds-row-btn.ghost:hover {
-          border-color: rgba(45,108,223,0.3);
-          color: #2D6CDF;
+          border-color: rgba(60,140,255,0.3);
+          color: #3C8CFF;
         }
         .ds-list-footer {
-          border-top: 1px solid #E7E1D8;
+          border-top: 1px solid #E6E0D6;
           padding: 10px 16px 8px;
         }
         .ds-link-btn {
           border: none;
           background: none;
-          color: #2D6CDF;
+          color: #3C8CFF;
           font-size: 13px;
           font-weight: 600;
           cursor: pointer;
@@ -1825,7 +1825,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           gap: 5px;
           padding: 0;
         }
-        .ds-link-btn:hover { color: #2459B8; }
+        .ds-link-btn:hover { color: #1F6BFF; }
         .ds-side {
           display: flex;
           flex-direction: column;
@@ -1839,7 +1839,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           margin: 0;
           font-size: 14px;
           line-height: 1.2;
-          color: #1C1917;
+          color: #1D1D1F;
           font-weight: 700;
           letter-spacing: -0.01em;
         }
@@ -1848,7 +1848,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           width: 100%;
           aspect-ratio: 16/9;
           overflow: hidden;
-          background: rgba(45,108,223,0.08);
+          background: rgba(60,140,255,0.08);
           margin: 10px 0 0;
           cursor: pointer;
           display: flex;
@@ -1876,7 +1876,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           margin: 0 0 2px;
           font-size: 14px;
           font-weight: 700;
-          color: #1C1917;
+          color: #1D1D1F;
           letter-spacing: -0.01em;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -1885,15 +1885,15 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-continue-meta {
           margin: 0 0 9px;
           font-size: 12px;
-          color: #6B645C;
+          color: #8B8F97;
           display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
         }
         .ds-continue-open-btn {
           width: 100%;
           border: none;
           border-radius: 9px;
-          background: rgba(45,108,223,0.13);
-          color: #2D6CDF;
+          background: rgba(60,140,255,0.13);
+          color: #3C8CFF;
           font-size: 14px;
           font-weight: 700;
           padding: 9px 12px;
@@ -1901,18 +1901,18 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           transition: background 0.15s, transform 0.15s;
           margin-bottom: 7px;
         }
-        .ds-continue-open-btn:hover { background: rgba(45,108,223,0.22); transform: translateY(-1px); }
+        .ds-continue-open-btn:hover { background: rgba(60,140,255,0.22); transform: translateY(-1px); }
         .ds-continue-quick {
           display: flex;
           gap: 5px;
         }
         .ds-continue-quick-btn {
           flex: 1;
-          border: 1px solid #E7E1D8;
+          border: 1px solid #E6E0D6;
           border-radius: 7px;
           padding: 5px 2px;
           background: white;
-          color: #6B645C;
+          color: #8B8F97;
           font-size: 11px;
           font-weight: 600;
           cursor: pointer;
@@ -1922,11 +1922,11 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        .ds-continue-quick-btn:hover { border-color: rgba(45,108,223,0.3); color: #2D6CDF; background: rgba(45,108,223,0.04); }
+        .ds-continue-quick-btn:hover { border-color: rgba(60,140,255,0.3); color: #3C8CFF; background: rgba(60,140,255,0.04); }
         .ds-continue-empty {
           padding: 20px 14px 14px;
           text-align: center;
-          color: #6B645C;
+          color: #8B8F97;
           font-size: 13px;
         }
         /* ── Share card ── */
@@ -1936,40 +1936,40 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         }
         .ds-share-icon {
           width: 26px; height: 26px; border-radius: 8px;
-          background: rgba(45,108,223,0.08); color: #2D6CDF;
+          background: rgba(60,140,255,0.08); color: #3C8CFF;
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
         }
         .ds-share-title {
-          margin: 0; font-size: 14px; font-weight: 700; color: #1C1917;
+          margin: 0; font-size: 14px; font-weight: 700; color: #1D1D1F;
         }
         .ds-share-desc {
-          margin: 0 0 8px; font-size: 12px; color: #6B645C; line-height: 1.4;
+          margin: 0 0 8px; font-size: 12px; color: #8B8F97; line-height: 1.4;
         }
         .ds-share-item {
           display: flex; align-items: center; gap: 9px;
-          padding: 7px 0; border: none; border-bottom: 1px solid #E7E1D8;
+          padding: 7px 0; border: none; border-bottom: 1px solid #E6E0D6;
           background: none; width: 100%; text-align: left; cursor: pointer;
-          font-size: 13px; color: #1C1917; font-weight: 500;
+          font-size: 13px; color: #1D1D1F; font-weight: 500;
           transition: color 0.15s;
         }
         .ds-share-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .ds-share-item:hover { color: #2D6CDF; }
+        .ds-share-item:hover { color: #3C8CFF; }
         .ds-share-item-icon {
           width: 26px; height: 26px; border-radius: 7px;
-          background: rgba(28,25,23,0.04);
+          background: rgba(29,29,31,0.04);
           display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0; color: #6B645C;
+          flex-shrink: 0; color: #8B8F97;
         }
-        .ds-share-item:hover .ds-share-item-icon { color: #2D6CDF; background: rgba(45,108,223,0.08); }
+        .ds-share-item:hover .ds-share-item-icon { color: #3C8CFF; background: rgba(60,140,255,0.08); }
         /* ── Referral card ── */
         .ds-referral {
           padding: 0; overflow: hidden;
-          border: 1.5px solid rgba(45,108,223,0.2) !important;
-          box-shadow: 0 4px 20px rgba(45,108,223,0.1), 0 1px 4px rgba(0,0,0,0.05);
+          border: 1.5px solid rgba(60,140,255,0.2) !important;
+          box-shadow: 0 4px 20px rgba(60,140,255,0.1), 0 1px 4px rgba(0,0,0,0.05);
         }
         .ds-referral-banner {
-          background: linear-gradient(135deg, #2D6CDF 0%, #6C47D9 100%);
+          background: linear-gradient(135deg, #3C8CFF 0%, #6C47D9 100%);
           padding: 16px 18px 14px;
           position: relative; overflow: hidden;
         }
@@ -2012,27 +2012,27 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           padding: 14px 18px 18px; background: white;
         }
         .ds-referral-desc {
-          margin: 0 0 12px; font-size: 12.5px; color: #6B645C; line-height: 1.5;
+          margin: 0 0 12px; font-size: 12.5px; color: #8B8F97; line-height: 1.5;
         }
         .ds-referral-link-row {
           display: flex; gap: 7px; align-items: stretch; margin-bottom: 10px;
         }
         .ds-referral-link-box {
           flex: 1; min-width: 0;
-          background: #F8F6F2; border: 1.5px solid #E7E1D8; border-radius: 9px;
-          padding: 8px 11px; font-size: 11.5px; color: #6B645C;
+          background: #F8F6F2; border: 1.5px solid #E6E0D6; border-radius: 9px;
+          padding: 8px 11px; font-size: 11.5px; color: #8B8F97;
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
           font-family: monospace; letter-spacing: -0.01em;
         }
         .ds-referral-copy-btn {
           border: none; border-radius: 9px;
-          background: #2D6CDF; color: white;
+          background: #3C8CFF; color: white;
           font-size: 12px; font-weight: 700;
           padding: 8px 14px; cursor: pointer; flex-shrink: 0;
           transition: all 0.15s; white-space: nowrap;
-          box-shadow: 0 2px 8px rgba(45,108,223,0.35);
+          box-shadow: 0 2px 8px rgba(60,140,255,0.35);
         }
-        .ds-referral-copy-btn:hover { background: #2459B8; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(45,108,223,0.45); }
+        .ds-referral-copy-btn:hover { background: #1F6BFF; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(60,140,255,0.45); }
         .ds-referral-copy-btn.done { background: #0F766E; box-shadow: 0 2px 8px rgba(15,118,110,0.3); }
         .ds-referral-share-row {
           display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
@@ -2051,24 +2051,24 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           display: flex; gap: 8px; margin-top: 12px;
         }
         .ds-referral-stat {
-          flex: 1; background: linear-gradient(135deg, rgba(45,108,223,0.05), rgba(108,71,217,0.05));
-          border: 1.5px solid rgba(45,108,223,0.15);
+          flex: 1; background: linear-gradient(135deg, rgba(60,140,255,0.05), rgba(108,71,217,0.05));
+          border: 1.5px solid rgba(60,140,255,0.15);
           border-radius: 10px; padding: 9px 10px; text-align: center;
         }
         .ds-referral-stat-value {
-          display: block; font-size: 19px; font-weight: 800; color: #2D6CDF; line-height: 1;
+          display: block; font-size: 19px; font-weight: 800; color: #3C8CFF; line-height: 1;
         }
         .ds-referral-stat-label {
-          display: block; font-size: 10.5px; color: #6B645C; margin-top: 3px;
+          display: block; font-size: 10.5px; color: #8B8F97; margin-top: 3px;
         }
         .ds-empty {
           text-align: center;
           padding: 42px 18px;
-          color: #6B645C;
+          color: #8B8F97;
         }
         .ds-empty h3 {
           margin: 0 0 8px;
-          color: #1C1917;
+          color: #1D1D1F;
           font-size: 20px;
         }
         .ds-empty p {
@@ -2080,7 +2080,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           margin-top: 14px;
           border: none;
           border-radius: 10px;
-          background: #2D6CDF;
+          background: #3C8CFF;
           color: white;
           font-size: 14px;
           font-weight: 600;
@@ -2098,7 +2098,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-settings-title {
           margin: 0 0 13px;
           font-size: 17px;
-          color: #1C1917;
+          color: #1D1D1F;
           font-weight: 700;
         }
         .ds-setting-row {
@@ -2107,15 +2107,15 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           align-items: center;
           gap: 10px;
           padding: 8px 0;
-          border-bottom: 1px solid #E7E1D8;
+          border-bottom: 1px solid #E6E0D6;
         }
         .ds-setting-row:last-child {
           border-bottom: none;
           padding-bottom: 0;
         }
-        .ds-setting-label { color: #6B645C; font-size: 13px; }
+        .ds-setting-label { color: #8B8F97; font-size: 13px; }
         .ds-setting-value {
-          color: #1C1917;
+          color: #1D1D1F;
           font-size: 13px;
           font-weight: 600;
           text-align: right;
@@ -2128,17 +2128,17 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           width: 100%;
           border-radius: 10px;
           padding: 9px 11px;
-          border: 1px solid #E7E1D8;
+          border: 1px solid #E6E0D6;
           background: white;
-          color: #1C1917;
+          color: #1D1D1F;
           font-size: 13px;
           font-weight: 600;
           cursor: pointer;
           transition: all 0.15s ease;
         }
         .ds-settings-btn:hover {
-          border-color: rgba(45,108,223,0.3);
-          background: rgba(45,108,223,0.06);
+          border-color: rgba(60,140,255,0.3);
+          background: rgba(60,140,255,0.06);
         }
         .ds-settings-btn.danger {
           border-color: rgba(180,35,24,0.26);
@@ -2152,7 +2152,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           margin: -2px 0 4px;
           font-size: 12px;
           line-height: 1.45;
-          color: #6B645C;
+          color: #8B8F97;
         }
         .ds-security-feedback {
           margin-top: 2px;
@@ -2163,9 +2163,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           border: 1px solid transparent;
         }
         .ds-security-feedback.loading {
-          color: #2D6CDF;
-          background: rgba(45,108,223,0.08);
-          border-color: rgba(45,108,223,0.22);
+          color: #3C8CFF;
+          background: rgba(60,140,255,0.08);
+          border-color: rgba(60,140,255,0.22);
         }
         .ds-security-feedback.success {
           color: #0F766E;
@@ -2180,40 +2180,40 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         /* ── Settings extras ── */
         .ds-settings-input {
           width: 100%; padding: 7px 10px; border-radius: 8px;
-          border: 1px solid #E7E1D8; background: #F6F3EE;
-          font-size: 13px; color: #1C1917; outline: none;
+          border: 1px solid #E6E0D6; background: #F6F2EA;
+          font-size: 13px; color: #1D1D1F; outline: none;
           transition: border-color 0.15s; font-family: inherit; box-sizing: border-box;
         }
-        .ds-settings-input:focus { border-color: rgba(45,108,223,0.5); }
+        .ds-settings-input:focus { border-color: rgba(60,140,255,0.5); }
         .ds-settings-form { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .ds-settings-form-label { font-size: 11px; font-weight: 600; color: #6B645C; margin-bottom: 3px; display: block; }
+        .ds-settings-form-label { font-size: 11px; font-weight: 600; color: #8B8F97; margin-bottom: 3px; display: block; }
         .ds-settings-row-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
         .ds-settings-edit-btn {
-          padding: 4px 10px; border-radius: 6px; border: 1px solid #E7E1D8;
-          background: white; font-size: 12px; font-weight: 600; color: #6B645C;
+          padding: 4px 10px; border-radius: 6px; border: 1px solid #E6E0D6;
+          background: white; font-size: 12px; font-weight: 600; color: #8B8F97;
           cursor: pointer; transition: all 0.15s; white-space: nowrap;
         }
-        .ds-settings-edit-btn:hover { border-color: rgba(45,108,223,0.3); color: #2D6CDF; }
+        .ds-settings-edit-btn:hover { border-color: rgba(60,140,255,0.3); color: #3C8CFF; }
         .ds-settings-save-btn {
           padding: 4px 10px; border-radius: 6px; border: none;
-          background: #2D6CDF; font-size: 12px; font-weight: 600;
+          background: #3C8CFF; font-size: 12px; font-weight: 600;
           color: white; cursor: pointer; transition: background 0.15s; white-space: nowrap;
         }
-        .ds-settings-save-btn:hover { background: #2459B8; }
+        .ds-settings-save-btn:hover { background: #1F6BFF; }
         .ds-settings-save-btn:disabled { opacity: 0.55; cursor: not-allowed; }
         .ds-settings-cancel-btn {
-          padding: 4px 10px; border-radius: 6px; border: 1px solid #E7E1D8;
+          padding: 4px 10px; border-radius: 6px; border: 1px solid #E6E0D6;
           background: white; font-size: 12px; font-weight: 600;
-          color: #6B645C; cursor: pointer; white-space: nowrap;
+          color: #8B8F97; cursor: pointer; white-space: nowrap;
         }
         .ds-settings-confirm-box {
           margin-top: 8px; padding: 12px 14px; border-radius: 10px;
           background: rgba(180,35,24,0.05); border: 1px solid rgba(180,35,24,0.18);
         }
         .ds-settings-confirm-box.neutral {
-          background: rgba(45,108,223,0.05); border-color: rgba(45,108,223,0.18);
+          background: rgba(60,140,255,0.05); border-color: rgba(60,140,255,0.18);
         }
-        .ds-settings-confirm-text { font-size: 13px; color: #1C1917; margin: 0 0 10px; line-height: 1.4; }
+        .ds-settings-confirm-text { font-size: 13px; color: #1D1D1F; margin: 0 0 10px; line-height: 1.4; }
         .ds-settings-confirm-row { display: flex; gap: 8px; }
         /* Toggle switch */
         .ds-toggle-wrap { display: flex; align-items: center; gap: 8px; }
@@ -2226,7 +2226,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           position: absolute; inset: 0; border-radius: 20px;
           background: #D5CFC7; transition: background 0.2s; cursor: pointer;
         }
-        .ds-toggle input:checked ~ .ds-toggle-track { background: #2D6CDF; }
+        .ds-toggle input:checked ~ .ds-toggle-track { background: #3C8CFF; }
         .ds-toggle-track::after {
           content: ''; position: absolute; width: 14px; height: 14px;
           border-radius: 50%; background: white; top: 3px; left: 3px;
@@ -2239,7 +2239,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         }
         .ds-settings-feedback.success { color: #0F766E; background: rgba(15,118,110,0.09); border-color: rgba(15,118,110,0.24); }
         .ds-settings-feedback.error { color: #B42318; background: rgba(180,35,24,0.07); border-color: rgba(180,35,24,0.22); }
-        .ds-settings-feedback.loading { color: #2D6CDF; background: rgba(45,108,223,0.07); border-color: rgba(45,108,223,0.2); }
+        .ds-settings-feedback.loading { color: #3C8CFF; background: rgba(60,140,255,0.07); border-color: rgba(60,140,255,0.2); }
         @media (max-width: 1130px) {
           .ds-grid { grid-template-columns: 1fr; }
           .ds-side { order: 2; }
@@ -2300,24 +2300,24 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
       {/* ═══ MOBILE LAYOUT (pure inline styles, no CSS class overflow) ═══ */}
       {isMobile && (
-        <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', background: '#F6F3EE', overflowX: 'hidden', overflowY: 'hidden' }}>
+        <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', background: '#F6F2EA', overflowX: 'hidden', overflowY: 'hidden' }}>
           {/* Fixed header: flex-shrink:0 means it NEVER scrolls — no sticky/overflow issues */}
-          <div style={{ background: '#FFFEFC', borderBottom: '1px solid #E7E1D8', flexShrink: 0 }}>
+          <div style={{ background: '#FFFFFF', borderBottom: '1px solid #E6E0D6', flexShrink: 0 }}>
             {/* Row 1: back button + avatar + name/email */}
             <div style={{ padding: '10px 14px 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <button onClick={onBack} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#6B645C', padding: '4px 4px 4px 0', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+              <button onClick={onBack} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#8B8F97', padding: '4px 4px 4px 0', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                 <ChevronIcon size={16} dir="left" />
               </button>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#2D6CDF', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, flexShrink: 0 }}>{initial}</div>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#3C8CFF', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, flexShrink: 0 }}>{initial}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
-                <div style={{ fontSize: 12, color: '#6B645C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
+                <div style={{ fontSize: 12, color: '#8B8F97', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
               </div>
             </div>
             {/* Row 2: full-width tab pills */}
             <div style={{ padding: '0 14px 10px', display: 'flex', gap: 6 }}>
               {[['overview', 'Overview'], ['settings', 'Settings']].map(([key, label]) => (
-                <button key={key} onClick={() => setTab(key)} style={{ flex: 1, border: 'none', background: tab === key ? '#2D6CDF' : 'rgba(28,25,23,0.06)', color: tab === key ? 'white' : '#6B645C', fontWeight: tab === key ? 700 : 500, fontSize: 13, padding: '7px 0', borderRadius: 9, cursor: 'pointer', transition: 'all 0.15s' }}>
+                <button key={key} onClick={() => setTab(key)} style={{ flex: 1, border: 'none', background: tab === key ? '#3C8CFF' : 'rgba(29,29,31,0.06)', color: tab === key ? 'white' : '#8B8F97', fontWeight: tab === key ? 700 : 500, fontSize: 13, padding: '7px 0', borderRadius: 9, cursor: 'pointer', transition: 'all 0.15s' }}>
                   {label}
                 </button>
               ))}
@@ -2330,50 +2330,50 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
             {tab === 'overview' && (
               <>
                 {/* Credits bar */}
-                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '9px 12px' }}>
+                <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, padding: '9px 12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#1C1917' }}>{used} / {tierMax} credits used</span>
-                    <span style={{ fontSize: 11, color: '#6B645C' }}>resets in {daysLeft}d</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#1D1D1F' }}>{used} / {tierMax} credits used</span>
+                    <span style={{ fontSize: 11, color: '#8B8F97' }}>resets in {daysLeft}d</span>
                   </div>
-                  <div style={{ height: 5, borderRadius: 999, background: '#E7E1D8', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#2D6CDF', transition: 'width 0.4s ease' }} />
+                  <div style={{ height: 5, borderRadius: 999, background: '#E6E0D6', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#3C8CFF', transition: 'width 0.4s ease' }} />
                   </div>
-                  <div style={{ marginTop: 4, fontSize: 11, color: '#6B645C' }}>{remaining} credits remaining</div>
+                  <div style={{ marginTop: 4, fontSize: 11, color: '#8B8F97' }}>{remaining} credits remaining</div>
                 </div>
 
                 {/* Continue where you left off */}
                 {latest && (
-                  <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, overflow: 'hidden' }}>
-                    <div style={{ padding: '9px 12px 8px', borderBottom: '1px solid #E7E1D8' }}>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: '#1C1917' }}>Continue where you left off</span>
+                  <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, overflow: 'hidden' }}>
+                    <div style={{ padding: '9px 12px 8px', borderBottom: '1px solid #E6E0D6' }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#1D1D1F' }}>Continue where you left off</span>
                     </div>
                     <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 60, height: 34, borderRadius: 7, overflow: 'hidden', flexShrink: 0, background: 'rgba(45,108,223,0.06)', border: '1px solid rgba(45,108,223,0.1)' }}>
+                      <div style={{ width: 60, height: 34, borderRadius: 7, overflow: 'hidden', flexShrink: 0, background: 'rgba(60,140,255,0.06)', border: '1px solid rgba(60,140,255,0.1)' }}>
                         {latest.thumbnail && <img src={latest.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{latest.title || latest.id}</div>
-                        <div style={{ fontSize: 11, color: '#6B645C' }}>{latestWc > 0 ? `${latestWc.toLocaleString()} words · ` : ''}{timeAgo(latest.date)}</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{latest.title || latest.id}</div>
+                        <div style={{ fontSize: 11, color: '#8B8F97' }}>{latestWc > 0 ? `${latestWc.toLocaleString()} words · ` : ''}{timeAgo(latest.date)}</div>
                       </div>
-                      <button onClick={() => openTranscript(latest)} style={{ flexShrink: 0, border: 'none', borderRadius: 7, background: '#2D6CDF', color: 'white', fontSize: 12, fontWeight: 700, padding: '5px 11px', cursor: 'pointer' }}>Open</button>
+                      <button onClick={() => openTranscript(latest)} style={{ flexShrink: 0, border: 'none', borderRadius: 7, background: '#3C8CFF', color: 'white', fontSize: 12, fontWeight: 700, padding: '5px 11px', cursor: 'pointer' }}>Open</button>
                     </div>
                     <div style={{ padding: '0 12px 9px', display: 'flex', gap: 5 }}>
                       {['Summarize', 'Flashcards', 'Study guide'].map(action => (
-                        <button key={action} onClick={() => openTranscript(latest)} style={{ flex: 1, border: '1px solid #E7E1D8', background: '#F6F3EE', color: '#6B645C', fontSize: 11, fontWeight: 600, padding: '5px 2px', borderRadius: 7, cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{action}</button>
+                        <button key={action} onClick={() => openTranscript(latest)} style={{ flex: 1, border: '1px solid #E6E0D6', background: '#F6F2EA', color: '#8B8F97', fontSize: 11, fontWeight: 600, padding: '5px 2px', borderRadius: 7, cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{action}</button>
                       ))}
                     </div>
                   </div>
                 )}
 
                 {/* Recent transcripts */}
-                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, overflow: 'hidden' }}>
-                  <div style={{ padding: '9px 12px 8px', borderBottom: '1px solid #E7E1D8' }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1C1917' }}>Recent Transcripts</span>
+                <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, overflow: 'hidden' }}>
+                  <div style={{ padding: '9px 12px 8px', borderBottom: '1px solid #E6E0D6' }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1D1D1F' }}>Recent Transcripts</span>
                   </div>
                   {history.length === 0 ? (
                     <div style={{ padding: '16px 12px', textAlign: 'center' }}>
-                      <p style={{ margin: '0 0 10px', fontSize: 13, color: '#6B645C' }}>No transcripts yet.</p>
-                      <button onClick={onBack} style={{ border: 'none', borderRadius: 9, background: '#2D6CDF', color: 'white', fontSize: 13, fontWeight: 600, padding: '7px 16px', cursor: 'pointer' }}>Extract one</button>
+                      <p style={{ margin: '0 0 10px', fontSize: 13, color: '#8B8F97' }}>No transcripts yet.</p>
+                      <button onClick={onBack} style={{ border: 'none', borderRadius: 9, background: '#3C8CFF', color: 'white', fontSize: 13, fontWeight: 600, padding: '7px 16px', cursor: 'pointer' }}>Extract one</button>
                     </div>
                   ) : (
                     <>
@@ -2381,21 +2381,21 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                         const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
                         const title = h.title || h.id;
                         return (
-                          <div key={`m-${h.id}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderTop: '1px solid #E7E1D8' }}>
-                            <div style={{ width: 54, height: 30, borderRadius: 6, overflow: 'hidden', flexShrink: 0, background: 'rgba(45,108,223,0.06)', border: '1px solid rgba(45,108,223,0.1)' }}>
+                          <div key={`m-${h.id}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderTop: '1px solid #E6E0D6' }}>
+                            <div style={{ width: 54, height: 30, borderRadius: 6, overflow: 'hidden', flexShrink: 0, background: 'rgba(60,140,255,0.06)', border: '1px solid rgba(60,140,255,0.1)' }}>
                               {h.thumbnail && <img src={h.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />}
                             </div>
                             <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                              <div style={{ fontSize: 12, fontWeight: 600, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
-                              <div style={{ fontSize: 10, color: '#6B645C' }}>{wc > 0 ? `${wc.toLocaleString()} words · ` : ''}{timeAgo(h.date)}</div>
+                              <div style={{ fontSize: 12, fontWeight: 600, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
+                              <div style={{ fontSize: 10, color: '#8B8F97' }}>{wc > 0 ? `${wc.toLocaleString()} words · ` : ''}{timeAgo(h.date)}</div>
                             </div>
-                            <button onClick={() => openTranscript(h)} style={{ flexShrink: 0, border: 'none', borderRadius: 7, background: '#2D6CDF', color: 'white', fontSize: 11, fontWeight: 700, padding: '5px 10px', cursor: 'pointer' }}>Open</button>
+                            <button onClick={() => openTranscript(h)} style={{ flexShrink: 0, border: 'none', borderRadius: 7, background: '#3C8CFF', color: 'white', fontSize: 11, fontWeight: 700, padding: '5px 10px', cursor: 'pointer' }}>Open</button>
                           </div>
                         );
                       })}
                       {history.length > 3 && (
-                        <div style={{ padding: '8px 12px 10px', borderTop: '1px solid #E7E1D8' }}>
-                          <button onClick={() => setShowAllHistory(v => !v)} style={{ border: 'none', background: 'none', color: '#2D6CDF', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0 }}>
+                        <div style={{ padding: '8px 12px 10px', borderTop: '1px solid #E6E0D6' }}>
+                          <button onClick={() => setShowAllHistory(v => !v)} style={{ border: 'none', background: 'none', color: '#3C8CFF', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0 }}>
                             {showAllHistory ? 'Show less' : `+ View all ${history.length} transcripts`}
                           </button>
                         </div>
@@ -2405,19 +2405,19 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                 </div>
 
                 {/* Invite friends */}
-                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(45,108,223,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2D6CDF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(60,140,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3C8CFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </div>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: '#1C1917' }}>Invite friends, earn credits</div>
-                      <div style={{ fontSize: 11, color: '#6B645C' }}>+3 free credits per friend who signs up</div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#1D1D1F' }}>Invite friends, earn credits</div>
+                      <div style={{ fontSize: 11, color: '#8B8F97' }}>+3 free credits per friend who signs up</div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 6 }}>
-                    <div style={{ flex: 1, minWidth: 0, background: '#F6F3EE', border: '1px solid #E7E1D8', borderRadius: 8, padding: '7px 10px', fontSize: 11, color: '#6B645C', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{refLink}</div>
-                    <button onClick={copyRefLink} style={{ flexShrink: 0, border: 'none', borderRadius: 8, background: copyRefDone ? '#0F766E' : '#2D6CDF', color: 'white', fontSize: 12, fontWeight: 700, padding: '7px 12px', cursor: 'pointer', transition: 'background 0.2s' }}>{copyRefDone ? '✓ Copied' : 'Copy'}</button>
+                    <div style={{ flex: 1, minWidth: 0, background: '#F6F2EA', border: '1px solid #E6E0D6', borderRadius: 8, padding: '7px 10px', fontSize: 11, color: '#8B8F97', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{refLink}</div>
+                    <button onClick={copyRefLink} style={{ flexShrink: 0, border: 'none', borderRadius: 8, background: copyRefDone ? '#0F766E' : '#3C8CFF', color: 'white', fontSize: 12, fontWeight: 700, padding: '7px 12px', cursor: 'pointer', transition: 'background 0.2s' }}>{copyRefDone ? '✓ Copied' : 'Copy'}</button>
                   </div>
                 </div>
               </>
@@ -2427,17 +2427,17 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
             {tab === 'settings' && (
               <>
                 {/* Profile */}
-                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 0 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10 }}>Profile</span>
+                <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#8B8F97', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10 }}>Profile</span>
                   {/* Display name */}
-                  <div style={{ paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid #E7E1D8' }}>
-                    <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 4 }}>Display name</div>
+                  <div style={{ paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid #E6E0D6' }}>
+                    <div style={{ fontSize: 11, color: '#8B8F97', marginBottom: 4 }}>Display name</div>
                     {!editingName ? (
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{displayName}</span>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{displayName}</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                           {nameSaved && <span style={{ fontSize: 12, color: P.success, fontWeight: 600 }}>Saved ✓</span>}
-                          <button onClick={() => setEditingName(true)} style={{ border: '1px solid #E7E1D8', background: 'white', color: '#6B645C', fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, cursor: 'pointer' }}>Edit</button>
+                          <button onClick={() => setEditingName(true)} style={{ border: '1px solid #E6E0D6', background: 'white', color: '#8B8F97', fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, cursor: 'pointer' }}>Edit</button>
                         </div>
                       </div>
                     ) : (
@@ -2452,32 +2452,32 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                     )}
                   </div>
                   {/* Email */}
-                  <div style={{ paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid #E7E1D8' }}>
-                    <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 3 }}>Email</div>
-                    <div style={{ fontSize: 14, color: '#1C1917', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+                  <div style={{ paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid #E6E0D6' }}>
+                    <div style={{ fontSize: 11, color: '#8B8F97', marginBottom: 3 }}>Email</div>
+                    <div style={{ fontSize: 14, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
                   </div>
                   {/* Member since */}
-                  <div style={{ paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid #E7E1D8' }}>
-                    <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 3 }}>Member since</div>
-                    <div style={{ fontSize: 14, color: '#1C1917' }}>{memberSince}</div>
+                  <div style={{ paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid #E6E0D6' }}>
+                    <div style={{ fontSize: 11, color: '#8B8F97', marginBottom: 3 }}>Member since</div>
+                    <div style={{ fontSize: 14, color: '#1D1D1F' }}>{memberSince}</div>
                   </div>
                   {/* Plan */}
                   <div>
-                    <div style={{ fontSize: 11, color: '#6B645C', marginBottom: 3 }}>Plan</div>
+                    <div style={{ fontSize: 11, color: '#8B8F97', marginBottom: 3 }}>Plan</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(45,108,223,0.1)', color: '#2D6CDF' }}>Free</span>
-                      <span style={{ fontSize: 14, color: '#1C1917' }}>{tierMax} credits / 7 days</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(60,140,255,0.1)', color: '#3C8CFF' }}>Free</span>
+                      <span style={{ fontSize: 14, color: '#1D1D1F' }}>{tierMax} credits / 7 days</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Preferences */}
-                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 0 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10 }}>Preferences</span>
+                <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#8B8F97', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 10 }}>Preferences</span>
                   {/* Export format */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingBottom: 12, marginBottom: 12, borderBottom: '1px solid #E7E1D8' }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#1C1917' }}>Export format</div>
-                    <select value={prefFormat} onChange={e => { setPrefFormat(e.target.value); try { localStorage.setItem(prefKey('format'), e.target.value); } catch {} savePrefsToCloud({ format: e.target.value }); }} style={{ fontSize: 13, padding: '5px 8px', borderRadius: 8, border: '1px solid #E7E1D8', background: '#F6F3EE', color: '#1C1917', cursor: 'pointer', outline: 'none' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingBottom: 12, marginBottom: 12, borderBottom: '1px solid #E6E0D6' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#1D1D1F' }}>Export format</div>
+                    <select value={prefFormat} onChange={e => { setPrefFormat(e.target.value); try { localStorage.setItem(prefKey('format'), e.target.value); } catch {} savePrefsToCloud({ format: e.target.value }); }} style={{ fontSize: 13, padding: '5px 8px', borderRadius: 8, border: '1px solid #E6E0D6', background: '#F6F2EA', color: '#1D1D1F', cursor: 'pointer', outline: 'none' }}>
                       <option value="plain">Plain text</option>
                       <option value="srt">Subtitles (.srt)</option>
                       <option value="pdf">Document (.pdf)</option>
@@ -2487,9 +2487,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                     { label: 'Show timestamps', sub: 'Time markers in transcript', checked: prefTimestamps, onChange: e => { setPrefTimestamps(e.target.checked); try { localStorage.setItem(prefKey('timestamps'), String(e.target.checked)); } catch {} savePrefsToCloud({ timestamps: e.target.checked }); } },
                     { label: 'Auto-copy transcript', sub: 'Copy to clipboard after extraction', checked: prefAutoCopy, onChange: e => { setPrefAutoCopy(e.target.checked); try { localStorage.setItem(prefKey('autocopy'), String(e.target.checked)); } catch {} savePrefsToCloud({ autocopy: e.target.checked }); } },
                   ].map((pref, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingTop: i > 0 ? 12 : 0, marginTop: i > 0 ? 12 : 0, borderTop: i > 0 ? '1px solid #E7E1D8' : 'none' }}>
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, paddingTop: i > 0 ? 12 : 0, marginTop: i > 0 ? 12 : 0, borderTop: i > 0 ? '1px solid #E6E0D6' : 'none' }}>
                       <div>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: '#1C1917' }}>{pref.label}</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: '#1D1D1F' }}>{pref.label}</div>
                         <div style={{ fontSize: 11, color: '#9B9490' }}>{pref.sub}</div>
                       </div>
                       <label className="ds-toggle">
@@ -2501,8 +2501,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                 </div>
 
                 {/* Security */}
-                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Security</span>
+                <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#8B8F97', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Security</span>
                   {pwStep === 'idle' && (
                     <button className="ds-settings-btn" onClick={() => { setPwStep('form'); setPwError(''); }}>Change password</button>
                   )}
@@ -2543,11 +2543,11 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                 </div>
 
                 {/* Data & Storage */}
-                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Data & Storage</span>
+                <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#8B8F97', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Data & Storage</span>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                    <span style={{ color: '#6B645C' }}>Saved transcripts</span>
-                    <span style={{ fontWeight: 600, color: '#1C1917' }}>{history.length} / 10</span>
+                    <span style={{ color: '#8B8F97' }}>Saved transcripts</span>
+                    <span style={{ fontWeight: 600, color: '#1D1D1F' }}>{history.length} / 10</span>
                   </div>
                   <button className="ds-settings-btn" onClick={exportHistory} disabled={history.length === 0} style={{ opacity: history.length === 0 ? 0.45 : 1 }}>Export history as JSON</button>
                   {!clearConfirm ? (
@@ -2570,12 +2570,12 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                 </div>
 
                 {/* Sign out */}
-                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px' }}>
+                <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, padding: '12px 14px' }}>
                   {!signOutConfirm ? (
                     <button onClick={() => setSignOutConfirm(true)} style={{ width: '100%', border: '1px solid rgba(180,35,24,0.26)', background: 'rgba(180,35,24,0.06)', color: '#B42318', fontSize: 13, fontWeight: 600, padding: '10px', borderRadius: 10, cursor: 'pointer' }}>Sign out</button>
                   ) : (
                     <div>
-                      <p style={{ margin: '0 0 10px', fontSize: 13, color: '#1C1917' }}>Are you sure you want to sign out?</p>
+                      <p style={{ margin: '0 0 10px', fontSize: 13, color: '#1D1D1F' }}>Are you sure you want to sign out?</p>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button className="ds-settings-save-btn" style={{ flex: 1, background: P.error }} onClick={onSignOut}>Yes, sign out</button>
                         <button className="ds-settings-cancel-btn" onClick={() => setSignOutConfirm(false)}>Cancel</button>
@@ -2584,8 +2584,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                   )}
                 </div>
                 {/* Danger zone */}
-                <div style={{ background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, padding: '12px 14px' }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6B645C', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Danger zone</span>
+                <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, padding: '12px 14px' }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#8B8F97', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>Danger zone</span>
                   <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} style={{ width: '100%', border: '1px solid rgba(180,35,24,0.3)', background: 'rgba(180,35,24,0.05)', color: '#B42318', fontSize: 13, fontWeight: 600, padding: '10px', borderRadius: 10, cursor: 'pointer', textAlign: 'left' }}>Delete account</button>
                 </div>
               </>
@@ -2625,13 +2625,13 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
             {/* Credits pill — mobile only, overview tab only */}
             {tab === 'overview' && (
-              <div className="ds-credits-mobile" style={{ display: 'none', margin: '8px 0', padding: '10px 14px', background: '#FFFEFC', border: '1px solid #E7E1D8', borderRadius: 14, boxShadow: '0 2px 8px rgba(28,25,23,0.06)' }}>
+              <div className="ds-credits-mobile" style={{ display: 'none', margin: '8px 0', padding: '10px 14px', background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 14, boxShadow: '0 2px 8px rgba(29,29,31,0.06)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#1C1917' }}>Free Credits</span>
-                  <span style={{ fontSize: 12, color: '#6B645C' }}>{used} / {tierMax} used · resets in {daysLeft}d</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#1D1D1F' }}>Free Credits</span>
+                  <span style={{ fontSize: 12, color: '#8B8F97' }}>{used} / {tierMax} used · resets in {daysLeft}d</span>
                 </div>
-                <div style={{ height: 5, borderRadius: 999, background: '#E7E1D8', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#2D6CDF', transition: 'width 0.4s ease' }} />
+                <div style={{ height: 5, borderRadius: 999, background: '#E6E0D6', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#3C8CFF', transition: 'width 0.4s ease' }} />
                 </div>
               </div>
             )}
@@ -2650,8 +2650,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                 <section className="ds-card ds-usage">
                   <div className="ds-usage-head">
                     <h2 className="ds-usage-title">Weekly usage</h2>
-                    <span style={{ fontSize: 13, color: '#6B645C', fontWeight: 500 }}>
-                      Resets in <strong style={{ color: '#1C1917' }}>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong>
+                    <span style={{ fontSize: 13, color: '#8B8F97', fontWeight: 500 }}>
+                      Resets in <strong style={{ color: '#1D1D1F' }}>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong>
                     </span>
                   </div>
                   <div className="ds-usage-track">
@@ -2660,7 +2660,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                   <div className="ds-usage-meta">
                     <div>
                       <strong>{used} / {tierMax}</strong>{' '}
-                      <span style={{ color: '#6B645C', fontSize: 14 }}>used</span>
+                      <span style={{ color: '#8B8F97', fontSize: 14 }}>used</span>
                     </div>
                     <div className="ds-usage-days">
                       {weekSegments.map(i => (
@@ -2670,12 +2670,12 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                           style={{ height: `${8 + (i === activeDay ? 18 : i <= activeDay ? 12 : 6)}px` }}
                         />
                       ))}
-                      <span style={{ marginLeft: 6, fontSize: 13, color: '#6B645C' }}>{remaining} remaining</span>
+                      <span style={{ marginLeft: 6, fontSize: 13, color: '#8B8F97' }}>{remaining} remaining</span>
                     </div>
                   </div>
                   <div className="ds-usage-daystats">
-                    <span>Most used day: <strong style={{ color: '#1C1917' }}>{mostUsedDay}</strong></span>
-                    <span>Avg per day: <strong style={{ color: '#1C1917' }}>{avgPerDay}</strong></span>
+                    <span>Most used day: <strong style={{ color: '#1D1D1F' }}>{mostUsedDay}</strong></span>
+                    <span>Avg per day: <strong style={{ color: '#1D1D1F' }}>{avgPerDay}</strong></span>
                   </div>
                 </section>
 
@@ -2790,7 +2790,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                   <div className="ds-setting-row">
                     <span className="ds-setting-label">Current plan</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(45,108,223,0.1)', color: '#2D6CDF' }}>Free</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(60,140,255,0.1)', color: '#3C8CFF' }}>Free</span>
                       <span className="ds-setting-value" style={{ maxWidth: 'none' }}>{tierMax} credits / 7 days</span>
                     </div>
                   </div>
@@ -3001,13 +3001,13 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                       {latest.thumbnail ? (
                         <img src={latest.thumbnail} alt={latest.title || 'Video'} loading="lazy" />
                       ) : (
-                        <div style={{ color: 'rgba(45,108,223,0.3)' }}>
+                        <div style={{ color: 'rgba(60,140,255,0.3)' }}>
                           <PlatformIcon platform={latest.platform || 'youtube'} size={48} />
                         </div>
                       )}
                       <div className="ds-continue-play">
                         <div className="ds-continue-play-icon">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1C1917" style={{ marginLeft: 2 }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1D1D1F" style={{ marginLeft: 2 }}>
                             <polygon points="5 3 19 12 5 21 5 3"/>
                           </svg>
                         </div>
@@ -3033,7 +3033,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                   <div className="ds-continue-empty">
                     <p style={{ margin: 0 }}>Extract a transcript to see it here.</p>
                     <button
-                      style={{ marginTop: 12, border: 'none', borderRadius: 10, background: '#2D6CDF', color: 'white', fontSize: 13, fontWeight: 600, padding: '8px 16px', cursor: 'pointer' }}
+                      style={{ marginTop: 12, border: 'none', borderRadius: 10, background: '#3C8CFF', color: 'white', fontSize: 13, fontWeight: 600, padding: '8px 16px', cursor: 'pointer' }}
                       onClick={onBack}
                     >Extract transcript</button>
                   </div>
@@ -3244,7 +3244,7 @@ const UserMenu = ({ user, onSignOut, onDashboard }) => {
         <div className="fade-up" style={{
           position: 'absolute', right: 0, top: 'calc(100% + 8px)',
           width: 220, background: P.surface, border: `1px solid ${P.border}`,
-          borderRadius: 14, boxShadow: '0 8px 32px rgba(28,25,23,0.12)',
+          borderRadius: 14, boxShadow: '0 8px 32px rgba(29,29,31,0.12)',
           padding: '8px 0', zIndex: 200, overflow: 'hidden',
         }}>
           {/* User info */}
@@ -4410,7 +4410,7 @@ const App = () => {
             background: item.selected ? P.accentLight : 'transparent', transition: 'background 0.12s',
             opacity: item.disabled ? 0.4 : 1,
           }}
-            onMouseEnter={e => { if (!item.disabled && !item.selected) e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; }}
+            onMouseEnter={e => { if (!item.disabled && !item.selected) e.currentTarget.style.background = 'rgba(29,29,31,0.05)'; }}
             onMouseLeave={e => { if (!item.selected) e.currentTarget.style.background = 'transparent'; }}
           >
             <span style={{ color: item.selected ? P.accent : P.muted, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{item.icon}</span>
@@ -4443,11 +4443,11 @@ const App = () => {
           return (
             <button key={entry.id} onClick={() => loadFromHistory(entry)} style={{
               display: 'flex', alignItems: 'flex-start', gap: 11, padding: '10px 12px',
-              borderRadius: 12, border: `1px solid ${isActive ? 'rgba(45,108,223,0.2)' : 'transparent'}`,
+              borderRadius: 12, border: `1px solid ${isActive ? 'rgba(60,140,255,0.2)' : 'transparent'}`,
               background: isActive ? P.accentLight : 'transparent',
               cursor: 'pointer', transition: 'background 0.1s', textAlign: 'left', width: '100%',
             }}
-              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; e.currentTarget.style.borderColor = P.border; } }}
+              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(29,29,31,0.05)'; e.currentTarget.style.borderColor = P.border; } }}
               onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; } }}
             >
               <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -4498,7 +4498,7 @@ const App = () => {
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         @keyframes logoFlipOut { 0% { transform: perspective(300px) rotateX(0deg); opacity:1; } 100% { transform: perspective(300px) rotateX(-80deg); opacity:0; } }
         @keyframes logoFlipIn  { 0% { transform: perspective(300px) rotateX(80deg);  opacity:0; } 100% { transform: perspective(300px) rotateX(0deg);   opacity:1; } }
-        @keyframes tabHighlight { 0% { box-shadow: 0 0 0 0 rgba(45,108,223,0); } 30% { box-shadow: 0 0 0 3px rgba(45,108,223,0.4), 0 0 10px rgba(45,108,223,0.18); } 100% { box-shadow: 0 0 0 0 rgba(45,108,223,0); } }
+        @keyframes tabHighlight { 0% { box-shadow: 0 0 0 0 rgba(60,140,255,0); } 30% { box-shadow: 0 0 0 3px rgba(60,140,255,0.34), 0 0 12px rgba(60,140,255,0.22); } 100% { box-shadow: 0 0 0 0 rgba(60,140,255,0); } }
         .fade-up { animation: fadeUp 0.3s ease forwards; }
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
@@ -4509,7 +4509,7 @@ const App = () => {
         ::-webkit-scrollbar-thumb { background: ${P.border}; border-radius: 3px; }
         input, select, textarea { font-family: inherit; }
         .hero-grad {
-          background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(45,108,223,0.12) 0%, transparent 70%),
+          background: radial-gradient(ellipse 86% 54% at 50% -12%, rgba(123,211,255,0.3) 0%, rgba(60,140,255,0.13) 38%, transparent 72%),
                       ${P.paper};
         }
         .feature-card {
@@ -4517,9 +4517,11 @@ const App = () => {
           overflow: hidden;
           display: flex;
           flex-direction: column;
-          min-height: 218px;
-          border-radius: 20px;
+          min-height: 246px;
+          border-radius: 22px;
           isolation: isolate;
+          box-shadow: 0 12px 30px rgba(29,29,31,0.07), inset 0 1px 0 rgba(255,255,255,0.72);
+          cursor: default;
         }
         .feature-card::before {
           content: '';
@@ -4527,19 +4529,19 @@ const App = () => {
           left: 0;
           right: 0;
           top: 0;
-          height: 4px;
-          background: linear-gradient(90deg, var(--card-accent), rgba(255,255,255,0.78));
+          height: 3px;
+          background: var(--card-gradient);
           opacity: 0.95;
         }
         .feature-card::after {
           content: '';
           position: absolute;
-          width: 170px;
-          height: 170px;
-          right: -56px;
-          top: -58px;
+          width: 196px;
+          height: 196px;
+          right: -62px;
+          top: -64px;
           border-radius: 999px;
-          background: radial-gradient(circle at center, var(--card-glow) 0%, rgba(255,255,255,0) 70%);
+          background: radial-gradient(circle at center, var(--card-glow) 0%, rgba(255,255,255,0) 74%);
           pointer-events: none;
           z-index: 0;
         }
@@ -4549,7 +4551,7 @@ const App = () => {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 15px;
+          margin-bottom: 14px;
         }
         .feature-card-num {
           display: inline-flex;
@@ -4560,7 +4562,7 @@ const App = () => {
           padding: 0 12px;
           border-radius: 999px;
           border: 1px solid var(--card-pill-border);
-          background: var(--card-pill-bg);
+          background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, var(--card-pill-bg) 100%);
           color: var(--card-accent);
           font-size: 12px;
           font-weight: 800;
@@ -4568,21 +4570,21 @@ const App = () => {
           font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
         .feature-card-icon {
-          width: 36px;
-          height: 36px;
+          width: 38px;
+          height: 38px;
           border-radius: 11px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           color: var(--card-accent);
-          background: var(--card-pill-bg);
+          background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, var(--card-pill-bg) 100%);
           border: 1px solid var(--card-pill-border);
         }
         .feature-card-label {
           position: relative;
           z-index: 1;
-          margin: 0 0 8px;
-          font-size: 18px;
+          margin: 0 0 7px;
+          font-size: 19px;
           line-height: 1.2;
           font-weight: 800;
           letter-spacing: -0.02em;
@@ -4592,34 +4594,34 @@ const App = () => {
           position: relative;
           z-index: 1;
           margin: 0;
-          font-size: 13.5px;
-          line-height: 1.64;
+          font-size: 13px;
+          line-height: 1.62;
           color: ${P.muted};
         }
         .feature-card-visual {
           position: relative;
           z-index: 1;
-          margin: 0 0 12px;
-          padding: 0;
-          border-radius: 12px;
-          background: transparent;
-          border: none;
+          margin: 0 0 13px;
+          padding: 8px;
+          border-radius: 14px;
+          background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, var(--card-panel-bg) 100%);
+          border: 1px solid var(--card-panel-border);
           display: flex;
           flex-direction: column;
-          gap: 7px;
+          gap: 8px;
         }
         .feature-mock-shell {
-          border-radius: 11px;
-          border: 1px solid rgba(28,25,23,0.12);
-          background: rgba(255,255,255,0.95);
+          border-radius: 10px;
+          border: 1px solid rgba(29,29,31,0.12);
+          background: rgba(255,255,255,0.96);
           overflow: hidden;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+          box-shadow: 0 2px 6px rgba(29,29,31,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
         }
         .feature-mock-topbar {
           height: 22px;
           padding: 0 7px;
-          border-bottom: 1px solid rgba(28,25,23,0.1);
-          background: linear-gradient(180deg, rgba(28,25,23,0.05) 0%, rgba(28,25,23,0.02) 100%);
+          border-bottom: 1px solid rgba(29,29,31,0.09);
+          background: linear-gradient(180deg, rgba(29,29,31,0.045) 0%, rgba(29,29,31,0.02) 100%);
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -4633,11 +4635,11 @@ const App = () => {
           width: 5px;
           height: 5px;
           border-radius: 999px;
-          background: rgba(28,25,23,0.32);
+          background: rgba(29,29,31,0.3);
         }
         .feature-mock-chip {
           border: 1px solid var(--card-pill-border);
-          background: var(--card-pill-bg);
+          background: rgba(255,255,255,0.88);
           color: var(--card-accent);
           border-radius: 999px;
           font-size: 9px;
@@ -4648,7 +4650,7 @@ const App = () => {
           line-height: 1;
         }
         .feature-mock-body {
-          min-height: 82px;
+          min-height: 88px;
           padding: 8px;
           display: flex;
           gap: 8px;
@@ -4663,7 +4665,7 @@ const App = () => {
         .feature-mock-timeline-bar {
           height: 7px;
           border-radius: 999px;
-          background: rgba(28,25,23,0.13);
+          background: rgba(29,29,31,0.13);
         }
         .feature-mock-timeline-bar.active {
           background: var(--card-accent);
@@ -4678,10 +4680,10 @@ const App = () => {
         .feature-mock-line {
           height: 7px;
           border-radius: 4px;
-          background: rgba(28,25,23,0.11);
+          background: rgba(29,29,31,0.11);
         }
         .feature-mock-line.active {
-          background: linear-gradient(90deg, var(--card-pill-bg) 0%, rgba(255,255,255,0.7) 100%);
+          background: linear-gradient(90deg, rgba(123,211,255,0.28) 0%, rgba(255,255,255,0.88) 100%);
           border: 1px solid var(--card-pill-border);
           height: 8px;
         }
@@ -4694,7 +4696,7 @@ const App = () => {
         .feature-mock-tools-tab {
           height: 11px;
           border-radius: 4px;
-          background: rgba(28,25,23,0.12);
+          background: rgba(29,29,31,0.12);
         }
         .feature-mock-tools-tab.active {
           background: var(--card-accent);
@@ -4710,12 +4712,12 @@ const App = () => {
           height: 8px;
           width: 66%;
           border-radius: 4px;
-          background: rgba(28,25,23,0.2);
+          background: rgba(29,29,31,0.2);
         }
         .feature-mock-bullet {
           height: 6px;
           border-radius: 4px;
-          background: rgba(28,25,23,0.11);
+          background: rgba(29,29,31,0.11);
         }
         .feature-mock-mini-grid {
           display: grid;
@@ -4741,7 +4743,7 @@ const App = () => {
         }
         .feature-mock-bubble.question {
           width: 63%;
-          background: rgba(28,25,23,0.11);
+          background: rgba(29,29,31,0.11);
         }
         .feature-mock-bubble.answer {
           width: 78%;
@@ -4765,14 +4767,60 @@ const App = () => {
           margin-top: 2px;
           height: 5px;
           border-radius: 999px;
-          background: rgba(28,25,23,0.1);
+          background: rgba(29,29,31,0.1);
           overflow: hidden;
         }
         .feature-mock-meter-fill {
           width: 76%;
           height: 100%;
           border-radius: 999px;
-          background: linear-gradient(90deg, var(--card-accent) 0%, rgba(255,255,255,0.85) 100%);
+          background: linear-gradient(90deg, #7BD3FF 0%, var(--card-accent) 58%, #1F6BFF 100%);
+        }
+        .feature-mock-kpi-row {
+          display: flex;
+          gap: 4px;
+          margin-top: auto;
+        }
+        .feature-mock-kpi {
+          height: 13px;
+          border-radius: 5px;
+          border: 1px solid var(--card-pill-border);
+          background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, var(--card-pill-bg) 100%);
+        }
+        .feature-mock-refs {
+          display: flex;
+          gap: 4px;
+          margin-top: auto;
+          flex-wrap: wrap;
+        }
+        .feature-mock-ref {
+          height: 11px;
+          border-radius: 999px;
+          border: 1px solid var(--card-pill-border);
+          background: rgba(255,255,255,0.92);
+        }
+        .feature-card-tags {
+          position: relative;
+          z-index: 1;
+          margin-top: 10px;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+        .feature-card-tag {
+          display: inline-flex;
+          align-items: center;
+          height: 21px;
+          padding: 0 9px;
+          border-radius: 999px;
+          border: 1px solid var(--card-pill-border);
+          background: rgba(255,255,255,0.74);
+          color: var(--card-accent);
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.025em;
+          line-height: 1;
+          white-space: nowrap;
         }
         .feature-card-meta {
           position: relative;
@@ -4796,42 +4844,13 @@ const App = () => {
           background: var(--card-accent);
           opacity: 0.72;
         }
-        .feature-addon-visual {
-          margin: 0 0 10px;
-          padding: 8px;
-          border-radius: 10px;
-          border: 1px solid rgba(28,25,23,0.12);
-          background: rgba(255,255,255,0.8);
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
-        .feature-addon-line {
-          height: 6px;
-          border-radius: 4px;
-          background: rgba(28,25,23,0.11);
-        }
-        .feature-addon-line.active {
-          background: var(--card-accent);
-          opacity: 0.3;
-        }
-        .feature-addon-pill-row {
-          display: flex;
-          gap: 5px;
-          flex-wrap: wrap;
-        }
-        .feature-addon-pill {
-          height: 14px;
-          border-radius: 999px;
-          border: 1px solid rgba(28,25,23,0.14);
-          background: rgba(255,255,255,0.84);
-        }
         @media (max-width: 740px) {
           .feature-card { min-height: 0; }
           .feature-card-label { font-size: 17px; }
+          .feature-card-desc { font-size: 12.5px; }
         }
         .chip-btn { transition: all 0.15s; }
-        .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(45,108,223,0.06) !important; }
+        .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(60,140,255,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
         .bookmark-banner { animation: slideDown 0.3s ease forwards; }
         @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
@@ -4871,16 +4890,16 @@ const App = () => {
           zIndex: 200, width: 'calc(100% - 32px)', maxWidth: 420,
           background: '#fff', borderRadius: 16,
           boxShadow: '0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08)',
-          border: '1px solid rgba(45,108,223,0.15)',
+          border: '1px solid rgba(60,140,255,0.15)',
           overflow: 'hidden', animation: 'fadeUp 0.35s ease',
         }}>
-          <div style={{ height: 4, background: 'linear-gradient(90deg, #2D6CDF, #5B9FFF)' }} />
+          <div style={{ height: 4, background: 'linear-gradient(90deg, #3C8CFF, #5B9FFF)' }} />
           <div style={{ padding: '16px 18px 18px', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
             <div style={{
               flexShrink: 0, width: 40, height: 40, borderRadius: 12,
-              background: 'rgba(45,108,223,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(60,140,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2D6CDF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3C8CFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 12 20 22 4 22 4 12"/>
                 <rect x="2" y="7" width="20" height="5"/>
                 <line x1="12" y1="22" x2="12" y2="7"/>
@@ -4893,18 +4912,18 @@ const App = () => {
                 You've been invited!
               </p>
               <p style={{ margin: '0 0 14px', fontSize: 13, color: '#6b7280', lineHeight: 1.45 }}>
-                Sign up now and <strong style={{ color: '#2D6CDF' }}>both you and your friend get +3 free credits</strong> automatically.
+                Sign up now and <strong style={{ color: '#3C8CFF' }}>both you and your friend get +3 free credits</strong> automatically.
               </p>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button
                   onClick={() => { setShowReferralBanner(false); setAuthInitialTab('signup'); setShowAuthModal(true); }}
                   style={{
                     flex: 1, padding: '9px 0', borderRadius: 10, border: 'none',
-                    background: '#2D6CDF', color: '#fff', fontWeight: 600, fontSize: 13,
+                    background: '#3C8CFF', color: '#fff', fontWeight: 600, fontSize: 13,
                     cursor: 'pointer', transition: 'background 0.15s',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = '#2459B8'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = '#2D6CDF'; }}
+                  onMouseEnter={e => { e.currentTarget.style.background = '#1F6BFF'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#3C8CFF'; }}
                 >
                   Sign up free →
                 </button>
@@ -4912,11 +4931,11 @@ const App = () => {
                   onClick={() => { setShowReferralBanner(false); setAuthInitialTab('signin'); setShowAuthModal(true); }}
                   style={{
                     padding: '9px 14px', borderRadius: 10,
-                    border: '1px solid rgba(45,108,223,0.25)', background: 'none',
-                    color: '#2D6CDF', fontWeight: 600, fontSize: 13,
+                    border: '1px solid rgba(60,140,255,0.25)', background: 'none',
+                    color: '#3C8CFF', fontWeight: 600, fontSize: 13,
                     cursor: 'pointer', transition: 'all 0.15s',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(45,108,223,0.07)'; }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(60,140,255,0.07)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
                 >
                   Sign in
@@ -5016,7 +5035,7 @@ const App = () => {
               <div style={{
                 display: isMobile ? 'none' : 'inline-flex', alignItems: 'center', gap: 6,
                 padding: '5px 14px', borderRadius: 999, marginBottom: 28,
-                background: 'rgba(45,108,223,0.08)', border: `1px solid rgba(45,108,223,0.18)`,
+                background: 'rgba(60,140,255,0.08)', border: `1px solid rgba(60,140,255,0.18)`,
                 fontSize: 12, fontWeight: 600, color: P.accent,
               }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
@@ -5043,7 +5062,7 @@ const App = () => {
               {/* Input card */}
               <div style={{
                 background: P.surface, border: `1px solid ${P.border}`,
-                borderRadius: isMobile ? 16 : 20, boxShadow: '0 12px 56px rgba(28,25,23,0.13)',
+                borderRadius: isMobile ? 16 : 20, boxShadow: '0 12px 56px rgba(29,29,31,0.13)',
                 padding: isMobile ? '7px 7px 7px 7px' : 10,
               }}>
                 <div style={{ display: 'flex', gap: isMobile ? 6 : 8, flexDirection: isMobile ? 'column' : 'row' }}>
@@ -5086,7 +5105,7 @@ const App = () => {
                     const outOfCredits = _used >= _max;
                     const btnDisabled = loading || outOfCredits;
                     const btnBg = btnDisabled
-                      ? (outOfCredits ? 'rgba(220,38,38,0.1)' : 'rgba(45,108,223,0.5)')
+                      ? (outOfCredits ? 'rgba(220,38,38,0.1)' : 'rgba(60,140,255,0.5)')
                       : P.accent;
                     return (
                       <button
@@ -5172,8 +5191,8 @@ const App = () => {
                 <div className="fade-up" style={{
                   marginTop: 18,
                   padding: '16px 18px',
-                  background: 'rgba(45,108,223,0.04)',
-                  border: `1px solid rgba(45,108,223,0.14)`,
+                  background: 'rgba(60,140,255,0.04)',
+                  border: `1px solid rgba(60,140,255,0.14)`,
                   borderRadius: 14,
                 }}>
                   {/* Step indicators */}
@@ -5230,10 +5249,10 @@ const App = () => {
                         height: '100%', width: `${loadingPercent}%`,
                         background: `linear-gradient(90deg, ${P.accent}, #5B9BD5)`,
                         borderRadius: 999, transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
-                        boxShadow: '0 0 8px rgba(45,108,223,0.45)',
+                        boxShadow: '0 0 8px rgba(60,140,255,0.45)',
                       }} />
                     ) : (
-                      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, transparent, rgba(45,108,223,0.45), transparent)`, animation: 'shimmer 1.4s infinite' }} />
+                      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, transparent, rgba(60,140,255,0.45), transparent)`, animation: 'shimmer 1.4s infinite' }} />
                     )}
                   </div>
 
@@ -5327,7 +5346,7 @@ const App = () => {
                   How It Works
                 </div>
                 <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 28, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
-                  Four visual cards from link to insight
+                  Four visual cards, one complete workflow
                 </h2>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 14 }}>
@@ -5335,14 +5354,18 @@ const App = () => {
                   {
                     num: '01',
                     label: 'Instant Transcript',
-                    desc: 'Paste any video URL and get the full transcript with timestamps in seconds.',
-                    meta: 'YouTube, TikTok, Vimeo + more',
-                    accent: P.accent,
-                    bg: 'rgba(45,108,223,0.08)',
-                    border: 'rgba(45,108,223,0.17)',
-                    pillBg: 'rgba(45,108,223,0.11)',
-                    pillBorder: 'rgba(45,108,223,0.25)',
-                    glow: 'rgba(45,108,223,0.23)',
+                    desc: 'Paste any video URL and extract a full transcript with second-level timestamps in seconds.',
+                    meta: '10+ platforms · second-level timestamps',
+                    tags: ['YouTube', 'TikTok', 'Vimeo', '6+ more'],
+                    accent: '#1F6BFF',
+                    gradient: 'linear-gradient(100deg, #7BD3FF 0%, #3C8CFF 55%, #1F6BFF 100%)',
+                    bg: 'rgba(123,211,255,0.17)',
+                    panel: 'rgba(123,211,255,0.16)',
+                    panelBorder: 'rgba(60,140,255,0.22)',
+                    border: 'rgba(60,140,255,0.24)',
+                    pillBg: 'rgba(123,211,255,0.23)',
+                    pillBorder: 'rgba(60,140,255,0.32)',
+                    glow: 'rgba(123,211,255,0.48)',
                     type: 'transcript',
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -5352,57 +5375,67 @@ const App = () => {
                   },
                   {
                     num: '02',
-                    label: 'AI Learning Pack',
-                    desc: 'AI Summaries, Flash Cards with flip mode, and a full Study Guide.',
-                    meta: 'Bullet points · Q&A cards · Objectives',
-                    accent: '#C2410C',
-                    bg: 'rgba(194,65,12,0.08)',
-                    border: 'rgba(194,65,12,0.17)',
-                    pillBg: 'rgba(194,65,12,0.11)',
-                    pillBorder: 'rgba(194,65,12,0.25)',
-                    glow: 'rgba(194,65,12,0.22)',
-                    type: 'learning',
+                    label: 'AI Summaries',
+                    desc: 'Create bullet point summaries and chapter breakdowns on demand from any transcript.',
+                    meta: 'AI summaries · Bullet points · Chapters',
+                    tags: ['AI Summary', 'Bullet Points', 'Chapters'],
+                    accent: '#3C8CFF',
+                    gradient: 'linear-gradient(100deg, #7BD3FF 0%, #3C8CFF 62%, #1F6BFF 100%)',
+                    bg: 'rgba(123,211,255,0.14)',
+                    panel: 'rgba(123,211,255,0.11)',
+                    panelBorder: 'rgba(60,140,255,0.21)',
+                    border: 'rgba(60,140,255,0.21)',
+                    pillBg: 'rgba(123,211,255,0.2)',
+                    pillBorder: 'rgba(60,140,255,0.28)',
+                    glow: 'rgba(123,211,255,0.42)',
+                    type: 'summaries',
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3z"/>
-                        <path d="M19 4v4"/><path d="M17 6h4"/>
+                        <line x1="7" y1="7" x2="17" y2="7"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="17" x2="13" y2="17"/><circle cx="18" cy="17" r="2"/>
                       </svg>
                     ),
                   },
                   {
                     num: '03',
-                    label: 'Chat With Any Video',
-                    desc: 'Ask questions and get precise answers grounded directly in the transcript.',
-                    meta: 'No hallucinations, source-first answers',
-                    accent: P.success,
-                    bg: 'rgba(15,118,110,0.08)',
-                    border: 'rgba(15,118,110,0.17)',
-                    pillBg: 'rgba(15,118,110,0.11)',
-                    pillBorder: 'rgba(15,118,110,0.25)',
-                    glow: 'rgba(15,118,110,0.22)',
-                    type: 'chat',
+                    label: 'Flash Cards + Study Guide',
+                    desc: 'Build Q&A flash cards with flip mode plus objectives, concepts, and review prompts.',
+                    meta: 'Flash cards · Flip mode · Study guide',
+                    tags: ['Flash Cards', 'Q&A Flip', 'Objectives', 'Concepts', 'Review'],
+                    accent: '#1F6BFF',
+                    gradient: 'linear-gradient(100deg, #7BD3FF 0%, #3C8CFF 52%, #1F6BFF 100%)',
+                    bg: 'rgba(60,140,255,0.14)',
+                    panel: 'rgba(60,140,255,0.11)',
+                    panelBorder: 'rgba(60,140,255,0.23)',
+                    border: 'rgba(60,140,255,0.23)',
+                    pillBg: 'rgba(123,211,255,0.19)',
+                    pillBorder: 'rgba(60,140,255,0.31)',
+                    glow: 'rgba(60,140,255,0.34)',
+                    type: 'study',
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
-                        <path d="M8 10h8"/><path d="M8 14h5"/>
+                        <rect x="4" y="6" width="16" height="12" rx="2"/><path d="M9 10h6"/><path d="M8 14h8"/>
                       </svg>
                     ),
                   },
                   {
                     num: '04',
-                    label: 'Academic Lens',
-                    desc: 'References, claims, and glossary terms for deeper analysis.',
-                    meta: 'References · Claims · Glossary',
-                    accent: '#7C3AED',
-                    bg: 'rgba(124,58,237,0.08)',
-                    border: 'rgba(124,58,237,0.2)',
-                    pillBg: 'rgba(124,58,237,0.11)',
-                    pillBorder: 'rgba(124,58,237,0.25)',
-                    glow: 'rgba(124,58,237,0.2)',
-                    type: 'academic',
+                    label: 'Chat + Academic',
+                    desc: 'Ask questions with transcript-grounded answers and surface references, claims, and glossary terms.',
+                    meta: 'Cited answers · References · Glossary',
+                    tags: ['Chat Q&A', 'References', 'Claims', 'Glossary'],
+                    accent: '#3C8CFF',
+                    gradient: 'linear-gradient(100deg, #3C8CFF 0%, #8B8F97 100%)',
+                    bg: 'rgba(139,143,151,0.12)',
+                    panel: 'rgba(139,143,151,0.1)',
+                    panelBorder: 'rgba(139,143,151,0.25)',
+                    border: 'rgba(139,143,151,0.28)',
+                    pillBg: 'rgba(139,143,151,0.16)',
+                    pillBorder: 'rgba(139,143,151,0.28)',
+                    glow: 'rgba(139,143,151,0.34)',
+                    type: 'evidence',
                     icon: (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M8 7h12"/><path d="M8 12h12"/><path d="M8 17h8"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/>
                       </svg>
                     ),
                   },
@@ -5415,6 +5448,9 @@ const App = () => {
                       '--card-glow': card.glow,
                       '--card-pill-bg': card.pillBg,
                       '--card-pill-border': card.pillBorder,
+                      '--card-gradient': card.gradient,
+                      '--card-panel-bg': card.panel,
+                      '--card-panel-border': card.panelBorder,
                       background: `linear-gradient(155deg, rgba(255,255,255,0.98) 0%, ${card.bg} 100%)`,
                       border: `1px solid ${card.border}`,
                       padding: '20px 18px 18px',
@@ -5453,7 +5489,7 @@ const App = () => {
                           </div>
                         </div>
                       )}
-                      {card.type === 'learning' && (
+                      {card.type === 'summaries' && (
                         <div className="feature-mock-shell">
                           <div className="feature-mock-topbar">
                             <span className="feature-mock-dots">
@@ -5461,29 +5497,59 @@ const App = () => {
                               <span className="feature-mock-dot" />
                               <span className="feature-mock-dot" />
                             </span>
-                            <span className="feature-mock-chip">Learning Pack</span>
+                            <span className="feature-mock-chip">Summaries</span>
                           </div>
                           <div className="feature-mock-body">
+                            <div className="feature-mock-tools-main">
+                              <span className="feature-mock-title" style={{ width: '64%' }} />
+                              <span className="feature-mock-bullet" style={{ width: '93%' }} />
+                              <span className="feature-mock-bullet" style={{ width: '82%' }} />
+                              <span className="feature-mock-bullet" style={{ width: '87%' }} />
+                              <div className="feature-mock-kpi-row">
+                                <span className="feature-mock-kpi" style={{ width: 40 }} />
+                                <span className="feature-mock-kpi" style={{ width: 50 }} />
+                                <span className="feature-mock-kpi" style={{ width: 44 }} />
+                              </div>
+                            </div>
+                            <div className="feature-mock-tools-nav">
+                              <span className="feature-mock-tools-tab active" />
+                              <span className="feature-mock-tools-tab" />
+                              <span className="feature-mock-tools-tab" />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {card.type === 'study' && (
+                        <div className="feature-mock-shell">
+                          <div className="feature-mock-topbar">
+                            <span className="feature-mock-dots">
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                            </span>
+                            <span className="feature-mock-chip">Study Mode</span>
+                          </div>
+                          <div className="feature-mock-body">
+                            <div className="feature-mock-tools-main">
+                              <div className="feature-mock-mini-grid">
+                                <span className="feature-mock-mini-card" />
+                                <span className="feature-mock-mini-card" />
+                                <span className="feature-mock-mini-card" />
+                                <span className="feature-mock-mini-card" />
+                              </div>
+                              <span className="feature-mock-bullet" style={{ width: '88%' }} />
+                              <span className="feature-mock-bullet" style={{ width: '74%' }} />
+                            </div>
                             <div className="feature-mock-tools-nav">
                               <span className="feature-mock-tools-tab active" />
                               <span className="feature-mock-tools-tab" />
                               <span className="feature-mock-tools-tab" />
                               <span className="feature-mock-tools-tab" />
                             </div>
-                            <div className="feature-mock-tools-main">
-                              <div className="feature-addon-pill-row">
-                                <span className="feature-addon-pill" style={{ width: 56 }} />
-                                <span className="feature-addon-pill" style={{ width: 44 }} />
-                                <span className="feature-addon-pill" style={{ width: 54 }} />
-                              </div>
-                              <span className="feature-mock-bullet" style={{ width: '94%' }} />
-                              <span className="feature-mock-bullet" style={{ width: '82%' }} />
-                              <span className="feature-mock-bullet" style={{ width: '89%' }} />
-                            </div>
                           </div>
                         </div>
                       )}
-                      {card.type === 'chat' && (
+                      {card.type === 'evidence' && (
                         <div className="feature-mock-shell">
                           <div className="feature-mock-topbar">
                             <span className="feature-mock-dots">
@@ -5491,39 +5557,37 @@ const App = () => {
                               <span className="feature-mock-dot" />
                               <span className="feature-mock-dot" />
                             </span>
-                            <span className="feature-mock-chip">Q&A</span>
+                            <span className="feature-mock-chip">Q&A + Evidence</span>
                           </div>
                           <div className="feature-mock-body">
                             <div className="feature-mock-chat">
                               <span className="feature-mock-bubble question" />
                               <span className="feature-mock-bubble answer" />
-                              <span className="feature-mock-bubble question" style={{ width: '53%' }} />
-                              <div className="feature-mock-source-row">
-                                <span className="feature-mock-source" />
-                                <span className="feature-mock-source" />
-                                <span className="feature-mock-source" />
+                              <span className="feature-mock-bubble question" style={{ width: '55%' }} />
+                              <div className="feature-mock-refs">
+                                <span className="feature-mock-ref" style={{ width: 31 }} />
+                                <span className="feature-mock-ref" style={{ width: 26 }} />
+                                <span className="feature-mock-ref" style={{ width: 34 }} />
                               </div>
                               <div className="feature-mock-meter">
                                 <span className="feature-mock-meter-fill" />
                               </div>
                             </div>
+                            <div className="feature-mock-tools-nav">
+                              <span className="feature-mock-tools-tab active" />
+                              <span className="feature-mock-tools-tab" />
+                              <span className="feature-mock-tools-tab" />
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      {card.type === 'academic' && (
-                        <div className="feature-addon-visual">
-                          <div className="feature-addon-pill-row">
-                            <span className="feature-addon-pill" style={{ width: 48 }} />
-                            <span className="feature-addon-pill" style={{ width: 42 }} />
-                            <span className="feature-addon-pill" style={{ width: 54 }} />
-                          </div>
-                          <span className="feature-addon-line active" style={{ width: '88%' }} />
-                          <span className="feature-addon-line" style={{ width: '75%' }} />
-                          <span className="feature-addon-line" style={{ width: '92%' }} />
                         </div>
                       )}
                     </div>
                     <p className="feature-card-desc">{card.desc}</p>
+                    <div className="feature-card-tags">
+                      {card.tags.map(tag => (
+                        <span key={`${card.label}-${tag}`} className="feature-card-tag">{tag}</span>
+                      ))}
+                    </div>
                     <div className="feature-card-meta">{card.meta}</div>
                   </div>
                 ))}
@@ -5606,7 +5670,7 @@ const App = () => {
                         <div style={{ position: 'relative', flexShrink: 0 }}>
                           <img src={h.thumbnail} alt="" style={{ width: 72, height: 40, objectFit: 'cover', borderRadius: 7, border: `1px solid ${P.border}`, display: 'block' }}
                             onError={e => { e.target.style.display = 'none'; }} />
-                          <div style={{ position: 'absolute', bottom: 3, right: 3, background: 'rgba(28,25,23,0.75)', color: 'white', fontSize: 9, fontWeight: 700, fontFamily: 'monospace', padding: '1px 3px', borderRadius: 3 }}>
+                          <div style={{ position: 'absolute', bottom: 3, right: 3, background: 'rgba(29,29,31,0.75)', color: 'white', fontSize: 9, fontWeight: 700, fontFamily: 'monospace', padding: '1px 3px', borderRadius: 3 }}>
                             {h.source === 'whisper' ? 'AI' : (h.platform || 'youtube').slice(0, 3).toUpperCase()}
                           </div>
                         </div>
@@ -5759,7 +5823,7 @@ const App = () => {
                         border: `1px solid ${P.border}`, background: 'transparent', cursor: 'pointer',
                         fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
                       }}
-                        onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.3)'; }}
+                        onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(60,140,255,0.3)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}>
                         {copied ? <CheckIcon /> : <CopyIcon />} {copied ? 'Copied' : 'Copy'}
                       </button>
@@ -5768,7 +5832,7 @@ const App = () => {
                         border: `1px solid ${P.border}`, background: 'transparent', cursor: 'pointer',
                         fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
                       }}
-                        onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(45,108,223,0.3)'; }}
+                        onMouseEnter={e => { e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.borderColor = 'rgba(60,140,255,0.3)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}>
                         <DownloadIcon size={12} /> Download
                       </button>
@@ -5810,7 +5874,7 @@ const App = () => {
                       whiteSpace: 'nowrap',
                       animation: tab.key === 'flashcards' && flashcardsTabPulse ? 'tabHighlight 1.2s ease-out forwards' : undefined,
                     }}
-                      onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; e.currentTarget.style.color = P.ink; }}}
+                      onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(29,29,31,0.05)'; e.currentTarget.style.color = P.ink; }}}
                       onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; }}}
                     >
                       {tab.icon}
@@ -5821,7 +5885,7 @@ const App = () => {
               </div>
 
               {/* Transcript card */}
-              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRadius: '0 0 16px 16px', boxShadow: '0 2px 12px rgba(28,25,23,0.07)', border: `1px solid ${P.border}`, borderTop: 'none', overflow: 'hidden' }}>
+              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', borderRadius: '0 0 16px 16px', boxShadow: '0 2px 12px rgba(29,29,31,0.07)', border: `1px solid ${P.border}`, borderTop: 'none', overflow: 'hidden' }}>
 
                 {/* Transcript tab content */}
                 {activeTab === 'transcript' && (
@@ -5902,13 +5966,13 @@ const App = () => {
                                   style={{
                                     display: 'grid', gridTemplateColumns: '54px 1fr',
                                     gap: 0, padding: '0',
-                                    background: selectedSegment === i ? 'rgba(45,108,223,0.08)' : playingSegment === i ? 'rgba(91,155,213,0.13)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'),
+                                    background: selectedSegment === i ? 'rgba(60,140,255,0.08)' : playingSegment === i ? 'rgba(91,155,213,0.13)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'),
                                     cursor: 'pointer', transition: 'background 0.15s',
                                     borderLeft: playingSegment === i ? `3px solid ${P.accent}` : '3px solid transparent',
-                                    borderBottom: `1px solid ${selectedSegment === i ? 'rgba(45,108,223,0.15)' : P.border}`,
+                                    borderBottom: `1px solid ${selectedSegment === i ? 'rgba(60,140,255,0.15)' : P.border}`,
                                   }}
-                                  onMouseEnter={e => { if (selectedSegment !== i && playingSegment !== i) e.currentTarget.style.background = 'rgba(45,108,223,0.03)'; }}
-                                  onMouseLeave={e => { if (selectedSegment !== i) e.currentTarget.style.background = playingSegment === i ? 'rgba(45,108,223,0.05)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'); }}
+                                  onMouseEnter={e => { if (selectedSegment !== i && playingSegment !== i) e.currentTarget.style.background = 'rgba(60,140,255,0.03)'; }}
+                                  onMouseLeave={e => { if (selectedSegment !== i) e.currentTarget.style.background = playingSegment === i ? 'rgba(60,140,255,0.05)' : (i % 2 === 0 ? '#FFFFFF' : 'rgba(246,243,238,0.5)'); }}
                                 >
                                   <button
                                     onClick={e => { e.stopPropagation(); seekToTime(seg.seconds); setSelectedSegment(i); }}
@@ -6097,7 +6161,7 @@ const App = () => {
                             >Clear</button>
                           </div>
                         </div>
-                        <div style={{ padding: '18px 20px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', fontSize: 14, lineHeight: 1.8, color: P.ink, whiteSpace: 'pre-wrap' }}>{summary}</div>
+                        <div style={{ padding: '18px 20px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)', fontSize: 14, lineHeight: 1.8, color: P.ink, whiteSpace: 'pre-wrap' }}>{summary}</div>
                       </div>
                     ) : null}
                   </div>
@@ -6143,14 +6207,14 @@ const App = () => {
                           </div>
 
                           {/* Overview */}
-                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
                             <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 8 }}>Overview</div>
                             <div style={{ fontSize: 14, lineHeight: 1.7, color: P.ink }}>{studyGuide.overview}</div>
                           </div>
 
                           {/* Learning Objectives */}
                           {studyGuide.objectives?.length > 0 && (
-                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
                               <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Learning Objectives</div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {studyGuide.objectives.map((obj, i) => (
@@ -6167,7 +6231,7 @@ const App = () => {
 
                           {/* Key Concepts */}
                           {studyGuide.keyConcepts?.length > 0 && (
-                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
                               <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Key Concepts</div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {studyGuide.keyConcepts.map((kc, i) => (
@@ -6183,7 +6247,7 @@ const App = () => {
 
                           {/* Sections */}
                           {studyGuide.sections?.length > 0 && (
-                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
                               <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Sections</div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                 {studyGuide.sections.map((sec, i) => (
@@ -6208,7 +6272,7 @@ const App = () => {
 
                           {/* Review Questions */}
                           {studyGuide.reviewQuestions?.length > 0 && (
-                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)' }}>
+                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
                               <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Review Questions</div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {studyGuide.reviewQuestions.map((q, i) => (
@@ -6222,9 +6286,9 @@ const App = () => {
                           )}
 
                           {/* Ask ScribeSnap AI */}
-                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1.5px solid rgba(45,108,223,0.18)`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', marginBottom: 8 }}>
+                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1.5px solid rgba(60,140,255,0.18)`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)', marginBottom: 8 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                              <div style={{ width: 26, height: 26, borderRadius: 7, background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)', border: '1.5px solid rgba(45,108,223,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <div style={{ width: 26, height: 26, borderRadius: 7, background: 'linear-gradient(135deg, rgba(60,140,255,0.13) 0%, rgba(60,140,255,0.05) 100%)', border: '1.5px solid rgba(60,140,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                 <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 14, height: 14 }} />
                               </div>
                               <span style={{ fontSize: 12.5, fontWeight: 700, color: P.accent }}>Ask ScribeSnap AI</span>
@@ -6267,13 +6331,13 @@ const App = () => {
                                 placeholder="Ask a question about this video…"
                                 disabled={sgLoading}
                                 style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13, color: P.ink, padding: '3px 0' }}
-                                onFocus={e => { e.currentTarget.parentElement.style.borderColor = P.accent; e.currentTarget.parentElement.style.boxShadow = '0 0 0 3px rgba(45,108,223,0.1)'; }}
+                                onFocus={e => { e.currentTarget.parentElement.style.borderColor = P.accent; e.currentTarget.parentElement.style.boxShadow = '0 0 0 3px rgba(60,140,255,0.1)'; }}
                                 onBlur={e => { e.currentTarget.parentElement.style.borderColor = P.border; e.currentTarget.parentElement.style.boxShadow = 'none'; }}
                               />
                               <button
                                 onClick={() => askSgQuestion()}
                                 disabled={!sgQuestion.trim() || sgLoading}
-                                style={{ flexShrink: 0, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: 'none', background: sgQuestion.trim() && !sgLoading ? 'linear-gradient(135deg, #5ba4f5 0%, #2D6CDF 100%)' : 'rgba(28,25,23,0.05)', color: sgQuestion.trim() && !sgLoading ? 'white' : P.muted, cursor: sgQuestion.trim() && !sgLoading ? 'pointer' : 'default', transition: 'all 0.2s' }}
+                                style={{ flexShrink: 0, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, border: 'none', background: sgQuestion.trim() && !sgLoading ? 'linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%)' : 'rgba(29,29,31,0.05)', color: sgQuestion.trim() && !sgLoading ? 'white' : P.muted, cursor: sgQuestion.trim() && !sgLoading ? 'pointer' : 'default', transition: 'all 0.2s' }}
                               >
                                 {sgLoading ? <SpinnerIcon size={12} /> : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>}
                               </button>
@@ -6337,7 +6401,7 @@ const App = () => {
                               </div>
                             )}
                             {ai.claims?.length > 0 && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', background: 'rgba(28,25,23,0.04)', borderRadius: 99, border: `1px solid ${P.border}` }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', background: 'rgba(29,29,31,0.04)', borderRadius: 99, border: `1px solid ${P.border}` }}>
                                 <span style={{ fontSize: 11.5, fontWeight: 600, color: P.success }}>{supportedCount} supported</span>
                                 <span style={{ width: 1, height: 10, background: P.border }} />
                                 <span style={{ fontSize: 11.5, fontWeight: 600, color: unsupportedCount > 0 ? P.error : P.muted }}>{unsupportedCount} unsupported</span>
@@ -6357,7 +6421,7 @@ const App = () => {
 
                           {/* References */}
                           {ai.references?.length > 0 && (
-                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', overflow: 'hidden' }}>
+                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)', overflow: 'hidden' }}>
                               <div style={{ padding: '14px 18px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                                 <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>References Mentioned</span>
@@ -6393,7 +6457,7 @@ const App = () => {
 
                           {/* Key Claims */}
                           {ai.claims?.length > 0 && (
-                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', overflow: 'hidden' }}>
+                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)', overflow: 'hidden' }}>
                               <div style={{ padding: '14px 18px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                                 <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Key Claims</span>
@@ -6425,7 +6489,7 @@ const App = () => {
 
                           {/* Glossary */}
                           {ai.glossary?.length > 0 && (
-                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', overflow: 'hidden' }}>
+                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)', overflow: 'hidden' }}>
                               <div style={{ padding: '14px 18px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                                 <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Glossary</span>
@@ -6446,7 +6510,7 @@ const App = () => {
 
                           {/* Research Gaps */}
                           {ai.researchGaps?.length > 0 && (
-                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', overflow: 'hidden' }}>
+                            <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)', overflow: 'hidden' }}>
                               <div style={{ padding: '14px 18px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                                 <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Open Questions & Research Gaps</span>
@@ -6506,7 +6570,7 @@ const App = () => {
                       color: isAct ? P.ink : P.muted, cursor: 'pointer', transition: 'all 0.15s',
                       whiteSpace: 'nowrap',
                     }}
-                      onMouseEnter={e => { if (!isAct) { e.currentTarget.style.background = 'rgba(28,25,23,0.05)'; e.currentTarget.style.color = P.ink; }}}
+                      onMouseEnter={e => { if (!isAct) { e.currentTarget.style.background = 'rgba(29,29,31,0.05)'; e.currentTarget.style.color = P.ink; }}}
                       onMouseLeave={e => { if (!isAct) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; }}}
                     >
                       {tab.icon}{tab.label}
@@ -6522,8 +6586,8 @@ const App = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '13px 18px 11px', borderBottom: `1px solid ${P.border}` }}>
                   <div style={{
                     width: 32, height: 32, borderRadius: 9, flexShrink: 0,
-                    background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)',
-                    border: `1.5px solid rgba(45,108,223,0.2)`,
+                    background: 'linear-gradient(135deg, rgba(60,140,255,0.13) 0%, rgba(60,140,255,0.05) 100%)',
+                    border: `1.5px solid rgba(60,140,255,0.2)`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     <img src="/scribesnap_icon_wave.svg" alt="ScribeSnap AI" style={{ width: 19, height: 19 }} />
@@ -6548,7 +6612,7 @@ const App = () => {
                 <div style={{
                   padding: '12px 16px 11px',
                   borderBottom: `1px solid ${P.border}`,
-                  background: 'linear-gradient(180deg, rgba(45,108,223,0.04) 0%, transparent 100%)',
+                  background: 'linear-gradient(180deg, rgba(60,140,255,0.04) 0%, transparent 100%)',
                 }}>
                   <div
                     data-composer="true"
@@ -6559,7 +6623,7 @@ const App = () => {
                       borderRadius: 14,
                       padding: '6px 6px 6px 16px',
                       transition: 'border-color 0.2s, box-shadow 0.2s',
-                      boxShadow: '0 1px 4px rgba(28,25,23,0.06)',
+                      boxShadow: '0 1px 4px rgba(29,29,31,0.06)',
                     }}
                     onClick={() => qaInputRef.current?.focus()}
                   >
@@ -6573,11 +6637,11 @@ const App = () => {
                       style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, color: P.ink, padding: '4px 0' }}
                       onFocus={e => {
                         const w = e.currentTarget.closest('[data-composer]');
-                        if (w) { w.style.borderColor = P.accent; w.style.boxShadow = '0 0 0 3px rgba(45,108,223,0.12)'; }
+                        if (w) { w.style.borderColor = P.accent; w.style.boxShadow = '0 0 0 3px rgba(60,140,255,0.12)'; }
                       }}
                       onBlur={e => {
                         const w = e.currentTarget.closest('[data-composer]');
-                        if (w) { w.style.borderColor = P.border; w.style.boxShadow = '0 1px 4px rgba(28,25,23,0.06)'; }
+                        if (w) { w.style.borderColor = P.border; w.style.boxShadow = '0 1px 4px rgba(29,29,31,0.06)'; }
                       }}
                     />
                     <button
@@ -6588,23 +6652,23 @@ const App = () => {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         borderRadius: 10, border: 'none',
                         background: qaQuestion.trim() && !qaLoading
-                          ? 'linear-gradient(135deg, #5ba4f5 0%, #2D6CDF 100%)'
-                          : 'rgba(28,25,23,0.05)',
+                          ? 'linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%)'
+                          : 'rgba(29,29,31,0.05)',
                         color: qaQuestion.trim() && !qaLoading ? 'white' : P.muted,
                         cursor: qaQuestion.trim() && !qaLoading ? 'pointer' : 'default',
                         transition: 'all 0.2s',
-                        boxShadow: qaQuestion.trim() && !qaLoading ? '0 2px 8px rgba(45,108,223,0.3)' : 'none',
+                        boxShadow: qaQuestion.trim() && !qaLoading ? '0 2px 8px rgba(60,140,255,0.3)' : 'none',
                       }}
                       onMouseEnter={e => {
                         if (qaQuestion.trim() && !qaLoading) {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #6bbcff 0%, #2459B8 100%)';
-                          e.currentTarget.style.boxShadow = '0 3px 12px rgba(45,108,223,0.4)';
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #6bbcff 0%, #1F6BFF 100%)';
+                          e.currentTarget.style.boxShadow = '0 3px 12px rgba(60,140,255,0.4)';
                         }
                       }}
                       onMouseLeave={e => {
                         if (qaQuestion.trim() && !qaLoading) {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #5ba4f5 0%, #2D6CDF 100%)';
-                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(45,108,223,0.3)';
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%)';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(60,140,255,0.3)';
                         }
                       }}
                     >
@@ -6621,15 +6685,15 @@ const App = () => {
 
                 {/* Empty state — intentional, not a bug */}
                 {qaMessages.length === 0 && (
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px 18px 16px', background: 'linear-gradient(180deg, rgba(45,108,223,0.025) 0%, transparent 50%)' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px 18px 16px', background: 'linear-gradient(180deg, rgba(60,140,255,0.025) 0%, transparent 50%)' }}>
                     {/* Hero */}
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginBottom: 20, paddingTop: 4 }}>
                       <div style={{
                         width: 54, height: 54, borderRadius: 17,
-                        background: 'linear-gradient(135deg, rgba(45,108,223,0.14) 0%, rgba(45,108,223,0.05) 100%)',
-                        border: '1.5px solid rgba(45,108,223,0.2)',
+                        background: 'linear-gradient(135deg, rgba(60,140,255,0.14) 0%, rgba(60,140,255,0.05) 100%)',
+                        border: '1.5px solid rgba(60,140,255,0.2)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 4px 16px rgba(45,108,223,0.1)',
+                        boxShadow: '0 4px 16px rgba(60,140,255,0.1)',
                       }}>
                         <img src="/scribesnap_icon_wave.svg" alt="" style={{ width: 32, height: 32 }} />
                       </div>
@@ -6646,10 +6710,10 @@ const App = () => {
                           padding: '10px 14px', borderRadius: 10, border: `1px solid ${P.border}`,
                           background: '#fff', fontSize: 12.5, color: P.ink,
                           cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left', width: '100%',
-                          boxShadow: '0 1px 3px rgba(28,25,23,0.04)',
+                          boxShadow: '0 1px 3px rgba(29,29,31,0.04)',
                         }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.boxShadow = '0 2px 8px rgba(45,108,223,0.1)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = P.ink; e.currentTarget.style.boxShadow = '0 1px 3px rgba(28,25,23,0.04)'; }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.boxShadow = '0 2px 8px rgba(60,140,255,0.1)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = P.ink; e.currentTarget.style.boxShadow = '0 1px 3px rgba(29,29,31,0.04)'; }}
                         >
                           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.35 }}><polyline points="9 18 15 12 9 6"/></svg>
                           {chip}
@@ -6668,8 +6732,8 @@ const App = () => {
                           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, maxWidth: '93%' }}>
                             <div style={{
                               width: 26, height: 26, borderRadius: 7, flexShrink: 0, marginTop: 1,
-                              background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)',
-                              border: `1.5px solid rgba(45,108,223,0.2)`,
+                              background: 'linear-gradient(135deg, rgba(60,140,255,0.13) 0%, rgba(60,140,255,0.05) 100%)',
+                              border: `1.5px solid rgba(60,140,255,0.2)`,
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
                             }}>
                               <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 15, height: 15 }} />
@@ -6700,8 +6764,8 @@ const App = () => {
                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                         <div style={{
                           width: 26, height: 26, borderRadius: 7, flexShrink: 0,
-                          background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)',
-                          border: `1.5px solid rgba(45,108,223,0.2)`,
+                          background: 'linear-gradient(135deg, rgba(60,140,255,0.13) 0%, rgba(60,140,255,0.05) 100%)',
+                          border: `1.5px solid rgba(60,140,255,0.2)`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
                           <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 15, height: 15 }} />
@@ -6723,7 +6787,7 @@ const App = () => {
                   /* ── Desktop: original compact row list ── */
                   <div style={{ padding: '14px 18px 16px' }}>
                     {[
-                      { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(45,108,223,0.1)',
+                      { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(60,140,255,0.1)',
                         icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
                         onClick: summary ? () => setActiveTab('summary') : summarize, active: !!summary, loading: summarizing },
                       { title: 'Flash Cards', sub: 'Q&A cards with flip mode', color: P.warning, bg: 'rgba(180,83,9,0.1)',
@@ -6770,7 +6834,7 @@ const App = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {[
                         { title: 'Summary', sub: 'Key points & bullet overview', color: P.accent,
-                          bg: 'linear-gradient(135deg,rgba(45,108,223,0.12),rgba(45,108,223,0.06))', border: 'rgba(45,108,223,0.2)',
+                          bg: 'linear-gradient(135deg,rgba(60,140,255,0.12),rgba(60,140,255,0.06))', border: 'rgba(60,140,255,0.2)',
                           icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
                           label: summary ? 'View' : summarizing ? 'Generating…' : 'Generate',
                           onClick: summary ? () => setMobilePanel('summary') : summarize,
@@ -6795,7 +6859,7 @@ const App = () => {
                           active: !!(academicInsights && !academicInsights._error), loading: academicInsightsLoading, badge: (academicInsights && !academicInsights._error) ? 'Ready' : null },
                       ].map(item => (
                         <div key={item.title} onClick={item.loading ? undefined : item.onClick}
-                          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 13px', borderRadius: 14, cursor: item.loading ? 'default' : 'pointer', background: item.active ? item.bg : '#fff', border: `1.5px solid ${item.active ? item.border : P.border}`, boxShadow: item.active ? `0 2px 10px ${item.border}` : '0 1px 3px rgba(28,25,23,0.05)', transition: 'all 0.18s' }}>
+                          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 13px', borderRadius: 14, cursor: item.loading ? 'default' : 'pointer', background: item.active ? item.bg : '#fff', border: `1.5px solid ${item.active ? item.border : P.border}`, boxShadow: item.active ? `0 2px 10px ${item.border}` : '0 1px 3px rgba(29,29,31,0.05)', transition: 'all 0.18s' }}>
                           <div style={{ width: 42, height: 42, borderRadius: 12, flexShrink: 0, background: item.active ? item.bg : 'rgba(0,0,0,0.04)', border: `1.5px solid ${item.active ? item.border : 'transparent'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.active ? item.color : P.muted }}>
                             {item.loading ? <SpinnerIcon size={14} /> : item.icon}
                           </div>
@@ -6841,7 +6905,7 @@ const App = () => {
                             style={{ border: `1px solid ${P.border}`, background: 'none', cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6 }}>Clear</button>
                         </div>
                       </div>
-                      <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(28,25,23,0.04)', fontSize: 13.5, lineHeight: 1.75, color: P.ink, whiteSpace: 'pre-wrap' }}>{summary}</div>
+                      <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)', fontSize: 13.5, lineHeight: 1.75, color: P.ink, whiteSpace: 'pre-wrap' }}>{summary}</div>
                     </div>
                   ) : null}
                 </div>
@@ -7000,7 +7064,7 @@ const App = () => {
                     return (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         {sg.overview && (
-                          <div style={{ padding: '14px 16px', background: P.accentLight, borderRadius: 12, border: `1px solid rgba(45,108,223,0.15)` }}>
+                          <div style={{ padding: '14px 16px', background: P.accentLight, borderRadius: 12, border: `1px solid rgba(60,140,255,0.15)` }}>
                             <div style={{ fontSize: 11, fontWeight: 700, color: P.accent, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Overview</div>
                             <div style={{ fontSize: 13, lineHeight: 1.65, color: P.ink }}>{sg.overview}</div>
                           </div>
@@ -7081,8 +7145,8 @@ const App = () => {
                 position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
                 height: 60,
                 background: 'linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%)',
-                borderTop: `1.5px solid rgba(45,108,223,0.18)`,
-                boxShadow: '0 -2px 16px rgba(45,108,223,0.08)',
+                borderTop: `1.5px solid rgba(60,140,255,0.18)`,
+                boxShadow: '0 -2px 16px rgba(60,140,255,0.08)',
                 display: showFlashcardModal || studyGuideFull || academicInsightsFull ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: hasDynamic ? 'flex-start' : 'center',
@@ -7112,7 +7176,7 @@ const App = () => {
                       border: 'none', cursor: 'pointer',
                       padding: '5px 6px',
                       borderRadius: 12,
-                      background: isAct ? 'rgba(45,108,223,0.1)' : 'transparent',
+                      background: isAct ? 'rgba(60,140,255,0.1)' : 'transparent',
                       color: isAct ? P.accent : P.muted,
                       transition: 'background 0.18s, color 0.18s',
                     }}>
@@ -7131,14 +7195,14 @@ const App = () => {
             <>
               <div onClick={() => setHistoryDrawerOpen(false)} style={{
                 position: 'fixed', inset: 0, zIndex: 200,
-                background: 'rgba(28,25,23,0.4)',
+                background: 'rgba(29,29,31,0.4)',
                 backdropFilter: 'blur(2px)', WebkitBackdropFilter: 'blur(2px)',
               }} />
               <div style={{
                 position: 'fixed', top: 56, left: 0, bottom: 0,
                 width: 300, zIndex: 201,
                 background: P.paper, borderRight: `1px solid ${P.border}`,
-                boxShadow: '4px 0 24px rgba(28,25,23,0.12)',
+                boxShadow: '4px 0 24px rgba(29,29,31,0.12)',
                 animation: 'slideInLeft 0.22s ease',
                 display: 'flex', flexDirection: 'column', overflowY: 'auto',
               }}>
@@ -7370,7 +7434,7 @@ const App = () => {
                   return (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                       {sg.overview && (
-                        <div style={{ padding: '14px 16px', background: P.accentLight, borderRadius: 12, border: `1px solid rgba(45,108,223,0.15)` }}>
+                        <div style={{ padding: '14px 16px', background: P.accentLight, borderRadius: 12, border: `1px solid rgba(60,140,255,0.15)` }}>
                           <div style={{ fontSize: 11, fontWeight: 700, color: P.accent, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Overview</div>
                           <div style={{ fontSize: 13.5, lineHeight: 1.7, color: P.ink }}>{sg.overview}</div>
                         </div>
@@ -7551,13 +7615,13 @@ const App = () => {
           <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '16px 16px' : '28px 40px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 22, maxWidth: 800, margin: '0 auto' }}>
               {studyGuide.overview && (
-                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
+                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(29,29,31,0.05)' }}>
                   <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 10 }}>Overview</div>
                   <div style={{ fontSize: 15, lineHeight: 1.75, color: P.ink }}>{studyGuide.overview}</div>
                 </div>
               )}
               {studyGuide.objectives?.length > 0 && (
-                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
+                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(29,29,31,0.05)' }}>
                   <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 14 }}>Learning Objectives</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {studyGuide.objectives.map((obj, i) => (
@@ -7572,7 +7636,7 @@ const App = () => {
                 </div>
               )}
               {studyGuide.keyConcepts?.length > 0 && (
-                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
+                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(29,29,31,0.05)' }}>
                   <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 14 }}>Key Concepts</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {studyGuide.keyConcepts.map((kc, i) => (
@@ -7586,7 +7650,7 @@ const App = () => {
                 </div>
               )}
               {studyGuide.sections?.length > 0 && (
-                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
+                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(29,29,31,0.05)' }}>
                   <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 14 }}>Sections</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                     {studyGuide.sections.map((sec, i) => (
@@ -7609,7 +7673,7 @@ const App = () => {
                 </div>
               )}
               {studyGuide.reviewQuestions?.length > 0 && (
-                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)' }}>
+                <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(29,29,31,0.05)' }}>
                   <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 14 }}>Review Questions</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     {studyGuide.reviewQuestions.map((q, i) => (
@@ -7622,9 +7686,9 @@ const App = () => {
                 </div>
               )}
               {/* Ask ScribeSnap AI — fullscreen version */}
-              <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1.5px solid rgba(45,108,223,0.18)`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)', marginBottom: 24 }}>
+              <div style={{ padding: '18px 22px', background: '#fff', borderRadius: 14, border: `1.5px solid rgba(60,140,255,0.18)`, boxShadow: '0 1px 6px rgba(29,29,31,0.05)', marginBottom: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, rgba(45,108,223,0.13) 0%, rgba(45,108,223,0.05) 100%)', border: '1.5px solid rgba(45,108,223,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, rgba(60,140,255,0.13) 0%, rgba(60,140,255,0.05) 100%)', border: '1.5px solid rgba(60,140,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 16, height: 16 }} />
                   </div>
                   <span style={{ fontSize: 14, fontWeight: 700, color: P.accent }}>Ask ScribeSnap AI</span>
@@ -7647,11 +7711,11 @@ const App = () => {
                 <div style={{ display: 'flex', alignItems: 'center', background: P.paper, border: `1.5px solid ${P.border}`, borderRadius: 14, padding: '8px 8px 8px 18px' }}>
                   <input value={sgQuestion} onChange={e => setSgQuestion(e.target.value)} onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askSgQuestion()} placeholder="Ask a question about this video…" disabled={sgLoading}
                     style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 14, color: P.ink, padding: '4px 0' }}
-                    onFocus={e => { e.currentTarget.parentElement.style.borderColor = P.accent; e.currentTarget.parentElement.style.boxShadow = '0 0 0 3px rgba(45,108,223,0.1)'; }}
+                    onFocus={e => { e.currentTarget.parentElement.style.borderColor = P.accent; e.currentTarget.parentElement.style.boxShadow = '0 0 0 3px rgba(60,140,255,0.1)'; }}
                     onBlur={e => { e.currentTarget.parentElement.style.borderColor = P.border; e.currentTarget.parentElement.style.boxShadow = 'none'; }}
                   />
                   <button onClick={() => askSgQuestion()} disabled={!sgQuestion.trim() || sgLoading}
-                    style={{ flexShrink: 0, width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, border: 'none', background: sgQuestion.trim() && !sgLoading ? 'linear-gradient(135deg, #5ba4f5 0%, #2D6CDF 100%)' : 'rgba(28,25,23,0.05)', color: sgQuestion.trim() && !sgLoading ? 'white' : P.muted, cursor: sgQuestion.trim() && !sgLoading ? 'pointer' : 'default', transition: 'all 0.2s' }}>
+                    style={{ flexShrink: 0, width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 10, border: 'none', background: sgQuestion.trim() && !sgLoading ? 'linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%)' : 'rgba(29,29,31,0.05)', color: sgQuestion.trim() && !sgLoading ? 'white' : P.muted, cursor: sgQuestion.trim() && !sgLoading ? 'pointer' : 'default', transition: 'all 0.2s' }}>
                     {sgLoading ? <SpinnerIcon size={13} /> : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>}
                   </button>
                 </div>
@@ -7698,7 +7762,7 @@ const App = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 22, maxWidth: 800, margin: '0 auto' }}>
                 {/* References */}
                 {ai.references?.length > 0 && (
-                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)', overflow: 'hidden' }}>
+                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(29,29,31,0.05)', overflow: 'hidden' }}>
                     <div style={{ padding: '14px 22px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>References Mentioned</span>
@@ -7730,7 +7794,7 @@ const App = () => {
                 )}
                 {/* Key Claims */}
                 {ai.claims?.length > 0 && (
-                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)', overflow: 'hidden' }}>
+                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(29,29,31,0.05)', overflow: 'hidden' }}>
                     <div style={{ padding: '14px 22px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Key Claims</span>
@@ -7757,7 +7821,7 @@ const App = () => {
                 )}
                 {/* Glossary */}
                 {ai.glossary?.length > 0 && (
-                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)', overflow: 'hidden' }}>
+                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(29,29,31,0.05)', overflow: 'hidden' }}>
                     <div style={{ padding: '14px 22px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Glossary</span>
@@ -7775,7 +7839,7 @@ const App = () => {
                 )}
                 {/* Research Gaps */}
                 {ai.researchGaps?.length > 0 && (
-                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(28,25,23,0.05)', overflow: 'hidden', marginBottom: 24 }}>
+                  <div style={{ background: '#fff', borderRadius: 14, border: `1px solid ${P.border}`, boxShadow: '0 1px 6px rgba(29,29,31,0.05)', overflow: 'hidden', marginBottom: 24 }}>
                     <div style={{ padding: '14px 22px 12px', borderBottom: `1px solid ${P.border}`, display: 'flex', alignItems: 'center', gap: 8 }}>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Open Questions & Research Gaps</span>
@@ -7804,7 +7868,7 @@ const App = () => {
         return (
           <div
             onClick={(e) => { if (e.target === e.currentTarget) closeFlashcardModal(); }}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(28,25,23,0.72)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: isMobile ? 12 : 24 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(29,29,31,0.72)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: isMobile ? 12 : 24 }}
           >
             {/* Header */}
             <div style={{ width: '100%', maxWidth: 560, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
