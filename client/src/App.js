@@ -4512,8 +4512,297 @@ const App = () => {
           background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(45,108,223,0.12) 0%, transparent 70%),
                       ${P.paper};
         }
-        .feature-card { transition: box-shadow 0.2s, transform 0.2s; }
-        .feature-card:hover { box-shadow: 0 8px 32px rgba(28,25,23,0.1); transform: translateY(-2px); }
+        .feature-card {
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          min-height: 218px;
+          border-radius: 20px;
+          isolation: isolate;
+          transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+        .feature-card::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          height: 4px;
+          background: linear-gradient(90deg, var(--card-accent), rgba(255,255,255,0.78));
+          opacity: 0.95;
+        }
+        .feature-card::after {
+          content: '';
+          position: absolute;
+          width: 170px;
+          height: 170px;
+          right: -56px;
+          top: -58px;
+          border-radius: 999px;
+          background: radial-gradient(circle at center, var(--card-glow) 0%, rgba(255,255,255,0) 70%);
+          pointer-events: none;
+          z-index: 0;
+        }
+        .feature-card:hover { box-shadow: 0 14px 34px rgba(28,25,23,0.14); transform: translateY(-4px); }
+        .feature-card-top {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 15px;
+        }
+        .feature-card-num {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 30px;
+          min-width: 42px;
+          padding: 0 12px;
+          border-radius: 999px;
+          border: 1px solid var(--card-pill-border);
+          background: var(--card-pill-bg);
+          color: var(--card-accent);
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        .feature-card-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 11px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--card-accent);
+          background: var(--card-pill-bg);
+          border: 1px solid var(--card-pill-border);
+        }
+        .feature-card-label {
+          position: relative;
+          z-index: 1;
+          margin: 0 0 8px;
+          font-size: 18px;
+          line-height: 1.2;
+          font-weight: 800;
+          letter-spacing: -0.02em;
+          color: ${P.ink};
+        }
+        .feature-card-desc {
+          position: relative;
+          z-index: 1;
+          margin: 0;
+          font-size: 13.5px;
+          line-height: 1.64;
+          color: ${P.muted};
+        }
+        .feature-card-visual {
+          position: relative;
+          z-index: 1;
+          margin: 0 0 12px;
+          padding: 0;
+          border-radius: 12px;
+          background: transparent;
+          border: none;
+          display: flex;
+          flex-direction: column;
+          gap: 7px;
+        }
+        .feature-mock-shell {
+          border-radius: 11px;
+          border: 1px solid rgba(28,25,23,0.12);
+          background: rgba(255,255,255,0.95);
+          overflow: hidden;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        .feature-mock-topbar {
+          height: 22px;
+          padding: 0 7px;
+          border-bottom: 1px solid rgba(28,25,23,0.1);
+          background: linear-gradient(180deg, rgba(28,25,23,0.05) 0%, rgba(28,25,23,0.02) 100%);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .feature-mock-dots {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .feature-mock-dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 999px;
+          background: rgba(28,25,23,0.32);
+        }
+        .feature-mock-chip {
+          border: 1px solid var(--card-pill-border);
+          background: var(--card-pill-bg);
+          color: var(--card-accent);
+          border-radius: 999px;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.03em;
+          text-transform: uppercase;
+          padding: 2px 7px;
+          line-height: 1;
+        }
+        .feature-mock-body {
+          min-height: 82px;
+          padding: 8px;
+          display: flex;
+          gap: 8px;
+        }
+        .feature-mock-timeline {
+          width: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+          padding-top: 3px;
+        }
+        .feature-mock-timeline-bar {
+          height: 7px;
+          border-radius: 999px;
+          background: rgba(28,25,23,0.13);
+        }
+        .feature-mock-timeline-bar.active {
+          background: var(--card-accent);
+          opacity: 0.85;
+        }
+        .feature-mock-lines {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+        .feature-mock-line {
+          height: 7px;
+          border-radius: 4px;
+          background: rgba(28,25,23,0.11);
+        }
+        .feature-mock-line.active {
+          background: linear-gradient(90deg, var(--card-pill-bg) 0%, rgba(255,255,255,0.7) 100%);
+          border: 1px solid var(--card-pill-border);
+          height: 8px;
+        }
+        .feature-mock-tools-nav {
+          width: 56px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .feature-mock-tools-tab {
+          height: 11px;
+          border-radius: 4px;
+          background: rgba(28,25,23,0.12);
+        }
+        .feature-mock-tools-tab.active {
+          background: var(--card-accent);
+          opacity: 0.8;
+        }
+        .feature-mock-tools-main {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+        .feature-mock-title {
+          height: 8px;
+          width: 66%;
+          border-radius: 4px;
+          background: rgba(28,25,23,0.2);
+        }
+        .feature-mock-bullet {
+          height: 6px;
+          border-radius: 4px;
+          background: rgba(28,25,23,0.11);
+        }
+        .feature-mock-mini-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 4px;
+          margin-top: auto;
+        }
+        .feature-mock-mini-card {
+          height: 17px;
+          border-radius: 5px;
+          background: var(--card-pill-bg);
+          border: 1px solid var(--card-pill-border);
+        }
+        .feature-mock-chat {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+        .feature-mock-bubble {
+          height: 15px;
+          border-radius: 8px;
+        }
+        .feature-mock-bubble.question {
+          width: 63%;
+          background: rgba(28,25,23,0.11);
+        }
+        .feature-mock-bubble.answer {
+          width: 78%;
+          align-self: flex-end;
+          background: var(--card-pill-bg);
+          border: 1px solid var(--card-pill-border);
+        }
+        .feature-mock-source-row {
+          display: flex;
+          gap: 4px;
+          margin-top: 1px;
+        }
+        .feature-mock-source {
+          width: 22px;
+          height: 8px;
+          border-radius: 4px;
+          border: 1px solid var(--card-pill-border);
+          background: rgba(255,255,255,0.9);
+        }
+        .feature-mock-meter {
+          margin-top: 2px;
+          height: 5px;
+          border-radius: 999px;
+          background: rgba(28,25,23,0.1);
+          overflow: hidden;
+        }
+        .feature-mock-meter-fill {
+          width: 76%;
+          height: 100%;
+          border-radius: 999px;
+          background: linear-gradient(90deg, var(--card-accent) 0%, rgba(255,255,255,0.85) 100%);
+        }
+        .feature-card-meta {
+          position: relative;
+          z-index: 1;
+          margin-top: auto;
+          padding-top: 14px;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.03em;
+          text-transform: uppercase;
+          color: var(--card-accent);
+        }
+        .feature-card-meta::before {
+          content: '';
+          width: 16px;
+          height: 2px;
+          border-radius: 999px;
+          background: var(--card-accent);
+          opacity: 0.72;
+        }
+        @media (max-width: 740px) {
+          .feature-card { min-height: 0; }
+          .feature-card-label { font-size: 17px; }
+          .feature-card:hover { transform: translateY(-2px); }
+        }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(45,108,223,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
@@ -5009,44 +5298,184 @@ const App = () => {
             </div>{/* end hero-grad */}
 
             {/* Capability cards */}
-            <div style={{ maxWidth: 820, margin: '0 auto', padding: '8px 24px 40px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14 }}>
-              {[
-                {
-                  num: '01',
-                  label: 'Instant Transcript',
-                  desc: 'Paste any video URL and get the full transcript with timestamps in seconds — across YouTube, TikTok, Vimeo, and 6 more platforms.',
-                  accent: P.accent,
-                  bg: 'rgba(45,108,223,0.06)',
-                  border: 'rgba(45,108,223,0.14)',
-                },
-                {
-                  num: '02',
-                  label: 'AI Study Tools',
-                  desc: 'Turn any video into a study guide, flashcard deck, chapter breakdown, or bullet summary — all generated on demand.',
-                  accent: '#7C3AED',
-                  bg: 'rgba(124,58,237,0.06)',
-                  border: 'rgba(124,58,237,0.14)',
-                },
-                {
-                  num: '03',
-                  label: 'Chat With Any Video',
-                  desc: 'Ask questions about the video and get precise answers grounded in the transcript. No hallucinations, just the source.',
-                  accent: P.success,
-                  bg: 'rgba(15,118,110,0.06)',
-                  border: 'rgba(15,118,110,0.14)',
-                },
-              ].map(card => (
-                <div key={card.label} className="feature-card" style={{
-                  background: card.bg, border: `1px solid ${card.border}`, borderRadius: 18,
-                  padding: '26px 22px',
-                }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: card.accent, marginBottom: 14, letterSpacing: '0.06em', fontFamily: 'monospace' }}>{card.num}</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: P.ink, marginBottom: 8, letterSpacing: '-0.02em' }}>
-                    {card.label}
-                  </div>
-                  <div style={{ fontSize: 13.5, color: P.muted, lineHeight: 1.65 }}>{card.desc}</div>
+            <div style={{ maxWidth: 920, margin: '0 auto', padding: '10px 24px 44px' }}>
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>
+                  How It Works
                 </div>
-              ))}
+                <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 28, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
+                  Three visual steps from link to insight
+                </h2>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 1fr))', gap: 14 }}>
+                {[
+                  {
+                    num: '01',
+                    label: 'Instant Transcript',
+                    desc: 'Paste any video URL and get the full transcript with timestamps in seconds — across YouTube, TikTok, Vimeo, and 6 more platforms.',
+                    meta: '10+ platforms supported',
+                    accent: P.accent,
+                    bg: 'rgba(45,108,223,0.08)',
+                    border: 'rgba(45,108,223,0.17)',
+                    pillBg: 'rgba(45,108,223,0.11)',
+                    pillBorder: 'rgba(45,108,223,0.25)',
+                    glow: 'rgba(45,108,223,0.23)',
+                    type: 'transcript',
+                    icon: (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    num: '02',
+                    label: 'AI Study Tools',
+                    desc: 'Turn any video into a study guide, flashcard deck, chapter breakdown, or bullet summary — all generated on demand.',
+                    meta: 'Guide, cards, chapters, summary',
+                    accent: '#C2410C',
+                    bg: 'rgba(194,65,12,0.08)',
+                    border: 'rgba(194,65,12,0.17)',
+                    pillBg: 'rgba(194,65,12,0.11)',
+                    pillBorder: 'rgba(194,65,12,0.25)',
+                    glow: 'rgba(194,65,12,0.22)',
+                    type: 'tools',
+                    icon: (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3z"/>
+                        <path d="M19 4v4"/><path d="M17 6h4"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    num: '03',
+                    label: 'Chat With Any Video',
+                    desc: 'Ask questions about the video and get precise answers grounded in the transcript. No hallucinations, just the source.',
+                    meta: 'Answers cite transcript evidence',
+                    accent: P.success,
+                    bg: 'rgba(15,118,110,0.08)',
+                    border: 'rgba(15,118,110,0.17)',
+                    pillBg: 'rgba(15,118,110,0.11)',
+                    pillBorder: 'rgba(15,118,110,0.25)',
+                    glow: 'rgba(15,118,110,0.22)',
+                    type: 'chat',
+                    icon: (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>
+                        <path d="M8 10h8"/><path d="M8 14h5"/>
+                      </svg>
+                    ),
+                  },
+                ].map((card, idx) => (
+                  <div
+                    key={card.label}
+                    className="feature-card"
+                    style={{
+                      '--card-accent': card.accent,
+                      '--card-glow': card.glow,
+                      '--card-pill-bg': card.pillBg,
+                      '--card-pill-border': card.pillBorder,
+                      background: `linear-gradient(155deg, rgba(255,255,255,0.98) 0%, ${card.bg} 100%)`,
+                      border: `1px solid ${card.border}`,
+                      padding: '20px 18px 18px',
+                      marginTop: !isMobile && idx === 1 ? -8 : 0,
+                    }}
+                  >
+                    <div className="feature-card-top">
+                      <span className="feature-card-num">{card.num}</span>
+                      <span className="feature-card-icon">{card.icon}</span>
+                    </div>
+                    <h3 className="feature-card-label">{card.label}</h3>
+                    <div className="feature-card-visual">
+                      {card.type === 'transcript' && (
+                        <div className="feature-mock-shell">
+                          <div className="feature-mock-topbar">
+                            <span className="feature-mock-dots">
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                            </span>
+                            <span className="feature-mock-chip">Transcript</span>
+                          </div>
+                          <div className="feature-mock-body">
+                            <div className="feature-mock-timeline">
+                              <span className="feature-mock-timeline-bar active" />
+                              <span className="feature-mock-timeline-bar" />
+                              <span className="feature-mock-timeline-bar" />
+                              <span className="feature-mock-timeline-bar" />
+                            </div>
+                            <div className="feature-mock-lines">
+                              <span className="feature-mock-line active" style={{ width: '93%' }} />
+                              <span className="feature-mock-line" style={{ width: '78%' }} />
+                              <span className="feature-mock-line" style={{ width: '88%' }} />
+                              <span className="feature-mock-line" style={{ width: '71%' }} />
+                              <span className="feature-mock-line" style={{ width: '84%' }} />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {card.type === 'tools' && (
+                        <div className="feature-mock-shell">
+                          <div className="feature-mock-topbar">
+                            <span className="feature-mock-dots">
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                            </span>
+                            <span className="feature-mock-chip">AI Tools</span>
+                          </div>
+                          <div className="feature-mock-body">
+                            <div className="feature-mock-tools-nav">
+                              <span className="feature-mock-tools-tab active" />
+                              <span className="feature-mock-tools-tab" />
+                              <span className="feature-mock-tools-tab" />
+                              <span className="feature-mock-tools-tab" />
+                            </div>
+                            <div className="feature-mock-tools-main">
+                              <span className="feature-mock-title" />
+                              <span className="feature-mock-bullet" style={{ width: '94%' }} />
+                              <span className="feature-mock-bullet" style={{ width: '82%' }} />
+                              <span className="feature-mock-bullet" style={{ width: '89%' }} />
+                              <div className="feature-mock-mini-grid">
+                                <span className="feature-mock-mini-card" />
+                                <span className="feature-mock-mini-card" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {card.type === 'chat' && (
+                        <div className="feature-mock-shell">
+                          <div className="feature-mock-topbar">
+                            <span className="feature-mock-dots">
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                            </span>
+                            <span className="feature-mock-chip">Q&A</span>
+                          </div>
+                          <div className="feature-mock-body">
+                            <div className="feature-mock-chat">
+                              <span className="feature-mock-bubble question" />
+                              <span className="feature-mock-bubble answer" />
+                              <span className="feature-mock-bubble question" style={{ width: '53%' }} />
+                              <div className="feature-mock-source-row">
+                                <span className="feature-mock-source" />
+                                <span className="feature-mock-source" />
+                                <span className="feature-mock-source" />
+                              </div>
+                              <div className="feature-mock-meter">
+                                <span className="feature-mock-meter-fill" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <p className="feature-card-desc">{card.desc}</p>
+                    <div className="feature-card-meta">{card.meta}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Testimonials */}
