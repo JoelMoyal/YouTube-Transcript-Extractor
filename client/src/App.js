@@ -4473,11 +4473,12 @@ const App = () => {
       <div style={{ padding: '10px 12px', borderTop: `1px solid ${P.border}` }}>
         <button onClick={resetAll} style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%',
-          padding: '8px', border: `1px solid ${P.border}`, borderRadius: 9, background: 'transparent',
-          cursor: 'pointer', fontSize: 12, fontWeight: 600, color: P.muted, transition: 'all 0.15s',
+          padding: '8px', border: `1px solid ${P.accentHover}`, borderRadius: 9,
+          background: `radial-gradient(ellipse at top left, rgba(255,255,255,0.22) 0%, transparent 55%), radial-gradient(ellipse at top right, rgba(255,255,255,0.22) 0%, transparent 55%), radial-gradient(ellipse at bottom left, rgba(255,255,255,0.22) 0%, transparent 55%), radial-gradient(ellipse at bottom right, rgba(255,255,255,0.22) 0%, transparent 55%), ${P.accent}`,
+          cursor: 'pointer', fontSize: 12, fontWeight: 600, color: '#fff', transition: 'all 0.15s',
         }}
-          onMouseEnter={e => { e.currentTarget.style.color = P.ink; e.currentTarget.style.background = P.surface; }}
-          onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.background = 'transparent'; }}
+          onMouseEnter={e => { e.currentTarget.style.background = `radial-gradient(ellipse at top left, rgba(255,255,255,0.3) 0%, transparent 55%), radial-gradient(ellipse at top right, rgba(255,255,255,0.3) 0%, transparent 55%), radial-gradient(ellipse at bottom left, rgba(255,255,255,0.3) 0%, transparent 55%), radial-gradient(ellipse at bottom right, rgba(255,255,255,0.3) 0%, transparent 55%), ${P.accentHover}`; }}
+          onMouseLeave={e => { e.currentTarget.style.background = `radial-gradient(ellipse at top left, rgba(255,255,255,0.22) 0%, transparent 55%), radial-gradient(ellipse at top right, rgba(255,255,255,0.22) 0%, transparent 55%), radial-gradient(ellipse at bottom left, rgba(255,255,255,0.22) 0%, transparent 55%), radial-gradient(ellipse at bottom right, rgba(255,255,255,0.22) 0%, transparent 55%), ${P.accent}`; }}
         >
           <ChevronIcon dir="left" size={11} /> New search
         </button>
