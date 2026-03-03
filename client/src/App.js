@@ -1462,7 +1462,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           align-items: start;
         }
         .ds-card {
-          background: #FFFFFF;
+          background: #FDFAF5;
           border: 1px solid #E6E0D6;
           border-radius: 18px;
           box-shadow: 0 2px 12px rgba(29,29,31,0.06);
@@ -1737,18 +1737,18 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           transition: background 0.15s ease;
         }
         .ds-row:first-of-type {
-          border-top: 1px solid rgba(60,140,255,0.2);
-          box-shadow: inset 2px 0 0 rgba(60,140,255,0.3);
+          border-top: 1px solid rgba(138,102,64,0.15);
+          box-shadow: inset 2px 0 0 rgba(138,102,64,0.22);
         }
-        .ds-row:hover { background: rgba(60,140,255,0.03); }
+        .ds-row:hover { background: rgba(200,190,170,0.09); }
         .ds-thumb {
           width: 96px;
           height: 54px;
           border-radius: 9px;
           overflow: hidden;
           flex-shrink: 0;
-          background: rgba(60,140,255,0.06);
-          border: 1px solid rgba(60,140,255,0.1);
+          background: rgba(200,190,170,0.18);
+          border: 1px solid rgba(180,170,150,0.25);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1795,19 +1795,19 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           transition: all 0.15s ease;
         }
         .ds-row-btn.primary {
-          background: #3C8CFF;
+          background: #2A2A2A;
           color: white;
-          border-color: rgba(60,140,255,0.4);
+          border-color: rgba(29,29,31,0.18);
         }
-        .ds-row-btn.primary:hover { background: #1F6BFF; }
+        .ds-row-btn.primary:hover { background: #1D1D1F; }
         .ds-row-btn.ghost {
-          background: white;
+          background: rgba(255,255,255,0.7);
           color: #1D1D1F;
           border-color: #E6E0D6;
         }
         .ds-row-btn.ghost:hover {
-          border-color: rgba(60,140,255,0.3);
-          color: #3C8CFF;
+          border-color: rgba(29,29,31,0.28);
+          background: rgba(255,255,255,0.95);
         }
         .ds-list-footer {
           border-top: 1px solid #E6E0D6;
@@ -1816,7 +1816,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-link-btn {
           border: none;
           background: none;
-          color: #3C8CFF;
+          color: #8B8F97;
           font-size: 13px;
           font-weight: 600;
           cursor: pointer;
@@ -1825,7 +1825,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           gap: 5px;
           padding: 0;
         }
-        .ds-link-btn:hover { color: #1F6BFF; }
+        .ds-link-btn:hover { color: #1D1D1F; }
         .ds-side {
           display: flex;
           flex-direction: column;
@@ -2080,7 +2080,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           margin-top: 14px;
           border: none;
           border-radius: 10px;
-          background: #3C8CFF;
+          background: #1D1D1F;
           color: white;
           font-size: 14px;
           font-weight: 600;
@@ -2682,7 +2682,11 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                 <section className="ds-card ds-list-card">
                   <div className="ds-list-head">
                     <h2 className="ds-list-title">Recent Transcripts</h2>
-                    <span style={{ color: '#C6BCC9', letterSpacing: 2, fontWeight: 700 }}>•••</span>
+                    {history.length > 0 && (
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#8B8F97', letterSpacing: '0.04em', background: 'rgba(29,29,31,0.05)', padding: '3px 9px', borderRadius: 999, border: '1px solid rgba(29,29,31,0.08)' }}>
+                        {history.length}
+                      </span>
+                    )}
                   </div>
 
                   {history.length === 0 ? (
@@ -6653,81 +6657,6 @@ const App = () => {
                   )}
                 </div>
 
-                {/* Composer — at the TOP, below header */}
-                <div style={{
-                  padding: '12px 16px 11px',
-                  borderBottom: `1px solid ${P.border}`,
-                  background: 'linear-gradient(180deg, rgba(60,140,255,0.04) 0%, transparent 100%)',
-                }}>
-                  <div
-                    data-composer="true"
-                    style={{
-                      display: 'flex', alignItems: 'center',
-                      background: '#fff',
-                      border: `1.5px solid ${P.border}`,
-                      borderRadius: 14,
-                      padding: '6px 6px 6px 16px',
-                      transition: 'border-color 0.2s, box-shadow 0.2s',
-                      boxShadow: '0 1px 4px rgba(29,29,31,0.06)',
-                    }}
-                    onClick={() => qaInputRef.current?.focus()}
-                  >
-                    <input
-                      ref={qaInputRef}
-                      value={qaQuestion}
-                      onChange={e => setQaQuestion(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
-                      placeholder={qaMessages.length === 0 ? 'Ask anything about this video…' : 'Ask a follow-up…'}
-                      disabled={qaLoading}
-                      style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, color: P.ink, padding: '4px 0' }}
-                      onFocus={e => {
-                        const w = e.currentTarget.closest('[data-composer]');
-                        if (w) { w.style.borderColor = P.accent; w.style.boxShadow = '0 0 0 3px rgba(60,140,255,0.12)'; }
-                      }}
-                      onBlur={e => {
-                        const w = e.currentTarget.closest('[data-composer]');
-                        if (w) { w.style.borderColor = P.border; w.style.boxShadow = '0 1px 4px rgba(29,29,31,0.06)'; }
-                      }}
-                    />
-                    <button
-                      onClick={e => { e.stopPropagation(); askQuestion(); }}
-                      disabled={!qaQuestion.trim() || qaLoading}
-                      style={{
-                        flexShrink: 0, width: 38, height: 38,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        borderRadius: 10, border: 'none',
-                        background: qaQuestion.trim() && !qaLoading
-                          ? 'linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%)'
-                          : 'rgba(29,29,31,0.05)',
-                        color: qaQuestion.trim() && !qaLoading ? 'white' : P.muted,
-                        cursor: qaQuestion.trim() && !qaLoading ? 'pointer' : 'default',
-                        transition: 'all 0.2s',
-                        boxShadow: qaQuestion.trim() && !qaLoading ? '0 2px 8px rgba(60,140,255,0.3)' : 'none',
-                      }}
-                      onMouseEnter={e => {
-                        if (qaQuestion.trim() && !qaLoading) {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #6bbcff 0%, #1F6BFF 100%)';
-                          e.currentTarget.style.boxShadow = '0 3px 12px rgba(60,140,255,0.4)';
-                        }
-                      }}
-                      onMouseLeave={e => {
-                        if (qaQuestion.trim() && !qaLoading) {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%)';
-                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(60,140,255,0.3)';
-                        }
-                      }}
-                    >
-                      {qaLoading
-                        ? <SpinnerIcon size={13} />
-                        : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                      }
-                    </button>
-                  </div>
-                  {qaQuestion.trim() && (
-                    <div style={{ fontSize: 10.5, color: P.muted, marginTop: 5, textAlign: 'right', paddingRight: 2 }}>↵ to send</div>
-                  )}
-                </div>
-
                 {/* Empty state — intentional, not a bug */}
                 {qaMessages.length === 0 && (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '20px 18px 16px', background: 'linear-gradient(180deg, rgba(60,140,255,0.025) 0%, transparent 50%)' }}>
@@ -6822,6 +6751,81 @@ const App = () => {
                     )}
                   </div>
                 )}
+
+                {/* Composer — at the BOTTOM, above footer */}
+                <div style={{
+                  padding: '11px 16px 12px',
+                  borderTop: `1px solid ${P.border}`,
+                  background: 'linear-gradient(0deg, rgba(60,140,255,0.04) 0%, transparent 100%)',
+                }}>
+                  <div
+                    data-composer="true"
+                    style={{
+                      display: 'flex', alignItems: 'center',
+                      background: '#fff',
+                      border: `1.5px solid ${P.border}`,
+                      borderRadius: 14,
+                      padding: '6px 6px 6px 16px',
+                      transition: 'border-color 0.2s, box-shadow 0.2s',
+                      boxShadow: '0 1px 4px rgba(29,29,31,0.06)',
+                    }}
+                    onClick={() => qaInputRef.current?.focus()}
+                  >
+                    <input
+                      ref={qaInputRef}
+                      value={qaQuestion}
+                      onChange={e => setQaQuestion(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
+                      placeholder={qaMessages.length === 0 ? 'Ask anything about this video…' : 'Ask a follow-up…'}
+                      disabled={qaLoading}
+                      style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, color: P.ink, padding: '4px 0' }}
+                      onFocus={e => {
+                        const w = e.currentTarget.closest('[data-composer]');
+                        if (w) { w.style.borderColor = P.accent; w.style.boxShadow = '0 0 0 3px rgba(60,140,255,0.12)'; }
+                      }}
+                      onBlur={e => {
+                        const w = e.currentTarget.closest('[data-composer]');
+                        if (w) { w.style.borderColor = P.border; w.style.boxShadow = '0 1px 4px rgba(29,29,31,0.06)'; }
+                      }}
+                    />
+                    <button
+                      onClick={e => { e.stopPropagation(); askQuestion(); }}
+                      disabled={!qaQuestion.trim() || qaLoading}
+                      style={{
+                        flexShrink: 0, width: 38, height: 38,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        borderRadius: 10, border: 'none',
+                        background: qaQuestion.trim() && !qaLoading
+                          ? 'linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%)'
+                          : 'rgba(29,29,31,0.05)',
+                        color: qaQuestion.trim() && !qaLoading ? 'white' : P.muted,
+                        cursor: qaQuestion.trim() && !qaLoading ? 'pointer' : 'default',
+                        transition: 'all 0.2s',
+                        boxShadow: qaQuestion.trim() && !qaLoading ? '0 2px 8px rgba(60,140,255,0.3)' : 'none',
+                      }}
+                      onMouseEnter={e => {
+                        if (qaQuestion.trim() && !qaLoading) {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #6bbcff 0%, #1F6BFF 100%)';
+                          e.currentTarget.style.boxShadow = '0 3px 12px rgba(60,140,255,0.4)';
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        if (qaQuestion.trim() && !qaLoading) {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%)';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(60,140,255,0.3)';
+                        }
+                      }}
+                    >
+                      {qaLoading
+                        ? <SpinnerIcon size={13} />
+                        : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      }
+                    </button>
+                  </div>
+                  {qaQuestion.trim() && (
+                    <div style={{ fontSize: 10.5, color: P.muted, marginTop: 5, textAlign: 'right', paddingRight: 2 }}>↵ to send</div>
+                  )}
+                </div>
 
               </div>}
 
