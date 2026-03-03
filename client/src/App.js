@@ -5009,6 +5009,51 @@ const App = () => {
               ))}
             </div>
 
+            {/* Testimonials */}
+            <div style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px 48px' }}>
+              <div style={{ textAlign: 'center', marginBottom: 28 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>What people say</div>
+                <h2 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em', margin: 0 }}>Loved by researchers &amp; builders</h2>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+                {/* Founder */}
+                <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 18, padding: '26px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div style={{ display: 'flex', gap: 3 }}>
+                    {[0,1,2,3,4].map(i => (
+                      <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={P.accent} stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: 14.5, color: P.ink, lineHeight: 1.75, margin: 0, fontStyle: 'italic' }}>
+                    "This is the tool I didn't know I needed. We use it every week to pull takeaways from founder interviews and VC talks — it cut our research time in half."
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 'auto' }}>
+                    <img src="/review-founder.jpg" alt="" style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${P.border}`, flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: P.ink }}>Startup Founder</div>
+                      <div style={{ fontSize: 11.5, color: P.muted, marginTop: 2 }}>Series A · San Francisco</div>
+                    </div>
+                  </div>
+                </div>
+                {/* PhD Student */}
+                <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 18, padding: '26px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div style={{ display: 'flex', gap: 3 }}>
+                    {[0,1,2,3,4].map(i => (
+                      <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={P.accent} stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    ))}
+                  </div>
+                  <p style={{ fontSize: 14.5, color: P.ink, lineHeight: 1.75, margin: 0, fontStyle: 'italic' }}>
+                    "I spend hours watching academic lectures and conference talks. ScribeSnap gives me the full transcript plus a study guide in seconds. The flashcard feature alone is worth it."
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 'auto' }}>
+                    <img src="/review-phd.jpg" alt="" style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${P.border}`, flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: P.ink }}>PhD Student</div>
+                      <div style={{ fontSize: 11.5, color: P.muted, marginTop: 2 }}>Neuroscience · Stanford</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Recent transcripts */}
             {history.length > 0 && (
