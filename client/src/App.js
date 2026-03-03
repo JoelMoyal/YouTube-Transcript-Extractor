@@ -5245,19 +5245,15 @@ const App = () => {
                 </div>
               )}
 
-              {/* Social proof pills */}
-              <div style={{ marginTop: 22, display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', alignItems: 'center' }}>
+              {/* Feature highlights */}
+              <div style={{ marginTop: 18, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
                 {[
                   { icon: '⚡', text: 'Instant extraction' },
                   { icon: '🤖', text: 'AI-powered insights' },
                   { icon: '🔒', text: 'No account needed' },
-                ].map(p => (
-                  <span key={p.text} style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    padding: '5px 12px', borderRadius: 999,
-                    background: P.surface, border: `1px solid ${P.border}`,
-                    fontSize: 12, fontWeight: 500, color: P.muted,
-                  }}>
+                ].map((p, i) => (
+                  <span key={p.text} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: P.muted }}>
+                    {i > 0 && <span style={{ marginRight: 6, opacity: 0.4 }}>·</span>}
                     <span>{p.icon}</span>{p.text}
                   </span>
                 ))}
