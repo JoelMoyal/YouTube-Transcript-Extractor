@@ -5559,7 +5559,12 @@ const App = () => {
                   Three visual steps from link to insight
                 </h2>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 1fr))', gap: 14 }}>
+              {!isMobile && (
+                <div style={{ textAlign: 'right', fontSize: 11, color: P.muted, marginBottom: 8 }}>
+                  Scroll down to reveal all cards
+                </div>
+              )}
+              <div ref={addonScrollRef} className="feature-addon-scroll">
                 {[
                   {
                     num: '01',
@@ -5617,7 +5622,79 @@ const App = () => {
                       </svg>
                     ),
                   },
-                ].map((card, idx) => (
+                  {
+                    num: '04',
+                    label: 'AI Summaries',
+                    desc: 'Bullet point summaries',
+                    meta: 'Fast overview',
+                    accent: P.accent,
+                    bg: 'rgba(45,108,223,0.08)',
+                    border: 'rgba(45,108,223,0.2)',
+                    pillBg: 'rgba(45,108,223,0.11)',
+                    pillBorder: 'rgba(45,108,223,0.25)',
+                    glow: 'rgba(45,108,223,0.23)',
+                    type: 'summary',
+                    icon: (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    num: '05',
+                    label: 'Flash Cards',
+                    desc: 'Q&A cards with flip mode',
+                    meta: 'Flip and review',
+                    accent: P.warning,
+                    bg: 'rgba(180,83,9,0.08)',
+                    border: 'rgba(180,83,9,0.2)',
+                    pillBg: 'rgba(180,83,9,0.11)',
+                    pillBorder: 'rgba(180,83,9,0.25)',
+                    glow: 'rgba(180,83,9,0.2)',
+                    type: 'flash',
+                    icon: (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="14" height="14" rx="2"/><path d="M7 8h6"/><path d="M7 12h4"/><path d="M11 20h10a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    num: '06',
+                    label: 'Study Guide',
+                    desc: 'Objectives, concepts & review',
+                    meta: 'Structured learning',
+                    accent: P.success,
+                    bg: 'rgba(15,118,110,0.08)',
+                    border: 'rgba(15,118,110,0.2)',
+                    pillBg: 'rgba(15,118,110,0.11)',
+                    pillBorder: 'rgba(15,118,110,0.25)',
+                    glow: 'rgba(15,118,110,0.2)',
+                    type: 'guide',
+                    icon: (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    num: '07',
+                    label: 'Academic',
+                    desc: 'References, claims & glossary',
+                    meta: 'Evidence oriented',
+                    accent: '#7C3AED',
+                    bg: 'rgba(124,58,237,0.08)',
+                    border: 'rgba(124,58,237,0.2)',
+                    pillBg: 'rgba(124,58,237,0.11)',
+                    pillBorder: 'rgba(124,58,237,0.25)',
+                    glow: 'rgba(124,58,237,0.2)',
+                    type: 'academic',
+                    icon: (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                      </svg>
+                    ),
+                  },
+                ].map(card => (
                   <div
                     key={card.label}
                     className="feature-card"
@@ -5629,7 +5706,9 @@ const App = () => {
                       background: `linear-gradient(155deg, rgba(255,255,255,0.98) 0%, ${card.bg} 100%)`,
                       border: `1px solid ${card.border}`,
                       padding: '20px 18px 18px',
-                      marginTop: !isMobile && idx === 1 ? -8 : 0,
+                      flex: isMobile ? '0 0 100%' : isTablet ? '0 0 calc((100% - 12px) / 2)' : '0 0 calc((100% - 24px) / 3)',
+                      minWidth: isMobile ? 0 : 238,
+                      scrollSnapAlign: 'start',
                     }}
                   >
                     <div className="feature-card-top">
@@ -5722,146 +5801,50 @@ const App = () => {
                           </div>
                         </div>
                       )}
+                      {card.type === 'summary' && (
+                        <div className="feature-addon-visual">
+                          <span className="feature-addon-line active" style={{ width: '82%' }} />
+                          <span className="feature-addon-line" style={{ width: '96%' }} />
+                          <span className="feature-addon-line" style={{ width: '74%' }} />
+                          <span className="feature-addon-line" style={{ width: '89%' }} />
+                        </div>
+                      )}
+                      {card.type === 'flash' && (
+                        <div className="feature-addon-visual">
+                          <div className="feature-addon-pill-row">
+                            <span className="feature-addon-pill" style={{ width: 56 }} />
+                            <span className="feature-addon-pill" style={{ width: 44 }} />
+                          </div>
+                          <span className="feature-addon-line active" style={{ width: '92%' }} />
+                          <span className="feature-addon-line" style={{ width: '68%' }} />
+                          <span className="feature-addon-line" style={{ width: '84%' }} />
+                        </div>
+                      )}
+                      {card.type === 'guide' && (
+                        <div className="feature-addon-visual">
+                          <span className="feature-addon-line active" style={{ width: '58%' }} />
+                          <span className="feature-addon-line" style={{ width: '95%' }} />
+                          <span className="feature-addon-line" style={{ width: '86%' }} />
+                          <span className="feature-addon-line" style={{ width: '78%' }} />
+                        </div>
+                      )}
+                      {card.type === 'academic' && (
+                        <div className="feature-addon-visual">
+                          <div className="feature-addon-pill-row">
+                            <span className="feature-addon-pill" style={{ width: 48 }} />
+                            <span className="feature-addon-pill" style={{ width: 42 }} />
+                            <span className="feature-addon-pill" style={{ width: 54 }} />
+                          </div>
+                          <span className="feature-addon-line active" style={{ width: '88%' }} />
+                          <span className="feature-addon-line" style={{ width: '75%' }} />
+                          <span className="feature-addon-line" style={{ width: '92%' }} />
+                        </div>
+                      )}
                     </div>
                     <p className="feature-card-desc">{card.desc}</p>
                     <div className="feature-card-meta">{card.meta}</div>
                   </div>
                 ))}
-              </div>
-              <div className="feature-addon-wrap">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: P.muted }}>
-                    More AI Tools
-                  </div>
-                  {!isMobile && (
-                    <div style={{ fontSize: 11, color: P.muted }}>
-                      Scroll down to reveal all cards
-                    </div>
-                  )}
-                </div>
-                <div ref={addonScrollRef} className="feature-addon-scroll">
-                  {[
-                    {
-                      num: '04',
-                      title: 'AI Summaries',
-                      sub: 'Bullet point summaries',
-                      meta: 'Fast overview',
-                      type: 'summary',
-                      accent: P.accent,
-                      bg: 'rgba(45,108,223,0.08)',
-                      border: 'rgba(45,108,223,0.2)',
-                      icon: (
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-                        </svg>
-                      ),
-                    },
-                    {
-                      num: '05',
-                      title: 'Flash Cards',
-                      sub: 'Q&A cards with flip mode',
-                      meta: 'Flip and review',
-                      type: 'flash',
-                      accent: P.warning,
-                      bg: 'rgba(180,83,9,0.08)',
-                      border: 'rgba(180,83,9,0.2)',
-                      icon: (
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="4" width="14" height="14" rx="2"/><path d="M7 8h6"/><path d="M7 12h4"/><path d="M11 20h10a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/>
-                        </svg>
-                      ),
-                    },
-                    {
-                      num: '06',
-                      title: 'Study Guide',
-                      sub: 'Objectives, concepts & review',
-                      meta: 'Structured learning',
-                      type: 'guide',
-                      accent: P.success,
-                      bg: 'rgba(15,118,110,0.08)',
-                      border: 'rgba(15,118,110,0.2)',
-                      icon: (
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                        </svg>
-                      ),
-                    },
-                    {
-                      num: '07',
-                      title: 'Academic',
-                      sub: 'References, claims & glossary',
-                      meta: 'Evidence oriented',
-                      type: 'academic',
-                      accent: '#7C3AED',
-                      bg: 'rgba(124,58,237,0.08)',
-                      border: 'rgba(124,58,237,0.2)',
-                      icon: (
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                        </svg>
-                      ),
-                    },
-                  ].map(item => (
-                    <div
-                      key={item.title}
-                      className="feature-addon-card"
-                      style={{
-                        '--addon-accent': item.accent,
-                        '--addon-bg': item.bg,
-                        '--addon-border': item.border,
-                      }}
-                    >
-                      <div className="feature-addon-head">
-                        <span className="feature-addon-num">{item.num}</span>
-                        <span className="feature-addon-icon">{item.icon}</span>
-                      </div>
-                      <div className="feature-addon-visual">
-                        {item.type === 'summary' && (
-                          <>
-                            <span className="feature-addon-line active" style={{ width: '82%' }} />
-                            <span className="feature-addon-line" style={{ width: '96%' }} />
-                            <span className="feature-addon-line" style={{ width: '74%' }} />
-                            <span className="feature-addon-line" style={{ width: '89%' }} />
-                          </>
-                        )}
-                        {item.type === 'flash' && (
-                          <>
-                            <div className="feature-addon-pill-row">
-                              <span className="feature-addon-pill" style={{ width: 56 }} />
-                              <span className="feature-addon-pill" style={{ width: 44 }} />
-                            </div>
-                            <span className="feature-addon-line active" style={{ width: '92%' }} />
-                            <span className="feature-addon-line" style={{ width: '68%' }} />
-                            <span className="feature-addon-line" style={{ width: '84%' }} />
-                          </>
-                        )}
-                        {item.type === 'guide' && (
-                          <>
-                            <span className="feature-addon-line active" style={{ width: '58%' }} />
-                            <span className="feature-addon-line" style={{ width: '95%' }} />
-                            <span className="feature-addon-line" style={{ width: '86%' }} />
-                            <span className="feature-addon-line" style={{ width: '78%' }} />
-                          </>
-                        )}
-                        {item.type === 'academic' && (
-                          <>
-                            <div className="feature-addon-pill-row">
-                              <span className="feature-addon-pill" style={{ width: 48 }} />
-                              <span className="feature-addon-pill" style={{ width: 42 }} />
-                              <span className="feature-addon-pill" style={{ width: 54 }} />
-                            </div>
-                            <span className="feature-addon-line active" style={{ width: '88%' }} />
-                            <span className="feature-addon-line" style={{ width: '75%' }} />
-                            <span className="feature-addon-line" style={{ width: '92%' }} />
-                          </>
-                        )}
-                      </div>
-                      <p className="feature-addon-title">{item.title}</p>
-                      <p className="feature-addon-sub">{item.sub}</p>
-                      <div className="feature-addon-card-meta">{item.meta}</div>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
 
