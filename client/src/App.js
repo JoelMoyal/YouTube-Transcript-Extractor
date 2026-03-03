@@ -4512,7 +4512,7 @@ const App = () => {
         * { scrollbar-width: thin; scrollbar-color: #C4BBAD #EEEBE4; }
         input, select, textarea { font-family: inherit; }
         .hero-grad {
-          background: radial-gradient(ellipse 86% 54% at 50% -12%, rgba(123,211,255,0.3) 0%, rgba(60,140,255,0.13) 38%, transparent 72%),
+          background: radial-gradient(ellipse 86% 54% at 50% -12%, rgba(200,190,175,0.16) 0%, transparent 65%),
                       ${P.paper};
         }
         .feature-card {
@@ -4525,6 +4525,11 @@ const App = () => {
           isolation: isolate;
           box-shadow: 0 12px 30px rgba(29,29,31,0.07), inset 0 1px 0 rgba(255,255,255,0.72);
           cursor: default;
+          transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .feature-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 20px 44px rgba(29,29,31,0.11), inset 0 1px 0 rgba(255,255,255,0.72);
         }
         .feature-card::before {
           content: '';
@@ -5384,15 +5389,15 @@ const App = () => {
                     desc: 'Paste any video URL and extract a full transcript with second-level timestamps in seconds.',
                     meta: '10+ platforms · second-level timestamps',
                     tags: ['YouTube', 'TikTok', 'Vimeo', '6+ more'],
-                    accent: '#3B6DB3',
-                    gradient: 'linear-gradient(100deg, #A5C4EC 0%, #5A87CC 55%, #3B6DB3 100%)',
-                    bg: 'rgba(100,165,230,0.10)',
-                    panel: 'rgba(100,165,230,0.08)',
-                    panelBorder: 'rgba(59,109,179,0.17)',
-                    border: 'rgba(59,109,179,0.18)',
-                    pillBg: 'rgba(100,165,230,0.14)',
-                    pillBorder: 'rgba(59,109,179,0.24)',
-                    glow: 'rgba(100,165,230,0.28)',
+                    accent: '#5468A8',
+                    gradient: 'linear-gradient(100deg, #B0BDDC 0%, #7484B8 55%, #5468A8 100%)',
+                    bg: 'rgba(84,104,168,0.08)',
+                    panel: 'rgba(84,104,168,0.06)',
+                    panelBorder: 'rgba(84,104,168,0.15)',
+                    border: 'rgba(84,104,168,0.16)',
+                    pillBg: 'rgba(84,104,168,0.10)',
+                    pillBorder: 'rgba(84,104,168,0.19)',
+                    glow: 'rgba(84,104,168,0.22)',
                     type: 'transcript',
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -5406,15 +5411,15 @@ const App = () => {
                     desc: 'Create bullet point summaries and chapter breakdowns on demand from any transcript.',
                     meta: 'AI summaries · Bullet points · Chapters',
                     tags: ['AI Summary', 'Bullet Points', 'Chapters'],
-                    accent: '#4A7CC0',
-                    gradient: 'linear-gradient(100deg, #A5C4EC 0%, #5A87CC 62%, #3B6DB3 100%)',
-                    bg: 'rgba(100,165,230,0.08)',
-                    panel: 'rgba(100,165,230,0.07)',
-                    panelBorder: 'rgba(74,124,192,0.16)',
-                    border: 'rgba(74,124,192,0.17)',
-                    pillBg: 'rgba(100,165,230,0.12)',
-                    pillBorder: 'rgba(74,124,192,0.22)',
-                    glow: 'rgba(100,165,230,0.24)',
+                    accent: '#8A6640',
+                    gradient: 'linear-gradient(100deg, #D4BC98 0%, #B09070 55%, #8A6640 100%)',
+                    bg: 'rgba(138,102,64,0.08)',
+                    panel: 'rgba(138,102,64,0.06)',
+                    panelBorder: 'rgba(138,102,64,0.15)',
+                    border: 'rgba(138,102,64,0.16)',
+                    pillBg: 'rgba(138,102,64,0.10)',
+                    pillBorder: 'rgba(138,102,64,0.18)',
+                    glow: 'rgba(180,140,90,0.22)',
                     type: 'summaries',
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -5428,15 +5433,15 @@ const App = () => {
                     desc: 'Build Q&A flash cards with flip mode plus objectives, concepts, and review prompts.',
                     meta: 'Flash cards · Flip mode · Study guide',
                     tags: ['Flash Cards', 'Q&A Flip', 'Objectives', 'Concepts', 'Review'],
-                    accent: '#3B6DB3',
-                    gradient: 'linear-gradient(100deg, #A5C4EC 0%, #5A87CC 52%, #3B6DB3 100%)',
-                    bg: 'rgba(90,135,204,0.09)',
-                    panel: 'rgba(90,135,204,0.07)',
-                    panelBorder: 'rgba(59,109,179,0.18)',
-                    border: 'rgba(59,109,179,0.18)',
-                    pillBg: 'rgba(100,165,230,0.12)',
-                    pillBorder: 'rgba(59,109,179,0.22)',
-                    glow: 'rgba(90,135,204,0.22)',
+                    accent: '#3A7A6A',
+                    gradient: 'linear-gradient(100deg, #8EC8BC 0%, #5AA090 55%, #3A7A6A 100%)',
+                    bg: 'rgba(58,122,106,0.08)',
+                    panel: 'rgba(58,122,106,0.06)',
+                    panelBorder: 'rgba(58,122,106,0.15)',
+                    border: 'rgba(58,122,106,0.16)',
+                    pillBg: 'rgba(58,122,106,0.10)',
+                    pillBorder: 'rgba(58,122,106,0.18)',
+                    glow: 'rgba(58,122,106,0.22)',
                     type: 'study',
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -5450,15 +5455,15 @@ const App = () => {
                     desc: 'Ask questions with transcript-grounded answers and surface references, claims, and glossary terms.',
                     meta: 'Cited answers · References · Glossary',
                     tags: ['Chat Q&A', 'References', 'Claims', 'Glossary'],
-                    accent: '#4A5C8A',
-                    gradient: 'linear-gradient(100deg, #5A87CC 0%, #6B7A9E 100%)',
-                    bg: 'rgba(100,120,170,0.08)',
-                    panel: 'rgba(100,120,170,0.07)',
-                    panelBorder: 'rgba(74,92,138,0.18)',
-                    border: 'rgba(74,92,138,0.20)',
-                    pillBg: 'rgba(100,120,170,0.12)',
-                    pillBorder: 'rgba(74,92,138,0.20)',
-                    glow: 'rgba(100,120,170,0.24)',
+                    accent: '#6B4E90',
+                    gradient: 'linear-gradient(100deg, #C0A8DC 0%, #9070BC 55%, #6B4E90 100%)',
+                    bg: 'rgba(107,78,144,0.08)',
+                    panel: 'rgba(107,78,144,0.06)',
+                    panelBorder: 'rgba(107,78,144,0.15)',
+                    border: 'rgba(107,78,144,0.16)',
+                    pillBg: 'rgba(107,78,144,0.10)',
+                    pillBorder: 'rgba(107,78,144,0.18)',
+                    glow: 'rgba(107,78,144,0.22)',
                     type: 'evidence',
                     icon: (
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
