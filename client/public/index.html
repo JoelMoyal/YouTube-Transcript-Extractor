@@ -10,8 +10,31 @@
     <meta name="description" content="ScribeSnap extracts YouTube and Vimeo transcripts with AI summaries and Q&A." />
     <title>ScribeSnap.ai | Transcript + AI Summary + Q&amp;A</title>
     <style>
+      html { scroll-behavior: smooth; }
       body { margin: 0; background: #F6F3EE; }
       #root { min-height: 100vh; background: #F6F3EE; }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #EEEBE4;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #C4BBAD;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #A89C8E;
+      }
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: #C4BBAD #EEEBE4;
+      }
     </style>
   </head>
   <body>
