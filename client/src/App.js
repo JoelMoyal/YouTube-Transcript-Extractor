@@ -3417,6 +3417,7 @@ const App = () => {
   const qaRef           = useRef(null);
   const chatMessagesRef = useRef(null);
   const addonScrollRef  = useRef(null);
+  const addonLastInteractRef = useRef(0);
   const recoveryIntentRef = useRef(false);
 
   useEffect(() => {
@@ -3448,11 +3449,72 @@ const App = () => {
       if ((down && atEnd) || (!down && atStart)) return;
 
       e.preventDefault();
+      addonLastInteractRef.current = Date.now();
       rail.scrollLeft = Math.max(0, Math.min(max, rail.scrollLeft + e.deltaY));
     };
 
     window.addEventListener('wheel', onWheel, { passive: false });
     return () => window.removeEventListener('wheel', onWheel);
+  }, [isMobile]);
+
+  // Landing: subtle auto-pan to reveal hidden cards when the rail is in view.
+  useEffect(() => {
+    if (isMobile) return;
+    let raf = 0;
+    let dir = 1;
+
+    const markInteraction = () => { addonLastInteractRef.current = Date.now(); };
+    const rail = addonScrollRef.current;
+    if (rail) {
+      rail.addEventListener('mousedown', markInteraction);
+      rail.addEventListener('touchstart', markInteraction, { passive: true });
+      rail.addEventListener('pointerdown', markInteraction);
+      rail.addEventListener('mouseenter', markInteraction);
+    }
+
+    const tick = () => {
+      const node = addonScrollRef.current;
+      if (!node) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+
+      const max = node.scrollWidth - node.clientWidth;
+      if (max <= 0) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+
+      const rect = node.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight * 0.88 && rect.bottom > window.innerHeight * 0.12;
+      const recentlyInteracted = Date.now() - addonLastInteractRef.current < 2300;
+      const isHovering = node.matches(':hover');
+
+      if (inView && !recentlyInteracted && !isHovering) {
+        node.scrollLeft += dir * 0.45;
+        if (node.scrollLeft >= max - 0.6) {
+          node.scrollLeft = max;
+          dir = -1;
+        } else if (node.scrollLeft <= 0.6) {
+          node.scrollLeft = 0;
+          dir = 1;
+        }
+      }
+
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      const n = addonScrollRef.current;
+      if (n) {
+        n.removeEventListener('mousedown', markInteraction);
+        n.removeEventListener('touchstart', markInteraction);
+        n.removeEventListener('pointerdown', markInteraction);
+        n.removeEventListener('mouseenter', markInteraction);
+      }
+    };
   }, [isMobile]);
 
   useEffect(() => {
@@ -4823,7 +4885,7 @@ const App = () => {
           background: var(--card-accent);
           opacity: 0.72;
         }
-        .feature-addon-wrap { margin-top: 14px; }
+        .feature-addon-wrap { margin-top: 14px; position: relative; }
         .feature-addon-scroll {
           display: flex;
           gap: 12px;
@@ -4833,6 +4895,24 @@ const App = () => {
           scroll-behavior: smooth;
           padding: 2px 2px 10px;
           -webkit-overflow-scrolling: touch;
+        }
+        .feature-addon-wrap::before,
+        .feature-addon-wrap::after {
+          content: '';
+          position: absolute;
+          top: 24px;
+          bottom: 10px;
+          width: 18px;
+          pointer-events: none;
+          z-index: 2;
+        }
+        .feature-addon-wrap::before {
+          left: 0;
+          background: linear-gradient(90deg, ${P.paper} 0%, rgba(246,243,238,0) 100%);
+        }
+        .feature-addon-wrap::after {
+          right: 0;
+          background: linear-gradient(270deg, ${P.paper} 0%, rgba(246,243,238,0) 100%);
         }
         .feature-addon-scroll::-webkit-scrollbar { height: 7px; }
         .feature-addon-scroll::-webkit-scrollbar-track {
@@ -4853,6 +4933,9 @@ const App = () => {
           border: 1px solid var(--addon-border);
           background: linear-gradient(152deg, rgba(255,255,255,0.95) 0%, var(--addon-bg) 100%);
           padding: 13px 12px 12px;
+          display: flex;
+          flex-direction: column;
+          min-height: 184px;
         }
         .feature-addon-card::before {
           content: '';
@@ -4912,6 +4995,56 @@ const App = () => {
           line-height: 1.38;
           color: ${P.muted};
         }
+        .feature-addon-visual {
+          margin: 0 0 10px;
+          padding: 8px;
+          border-radius: 10px;
+          border: 1px solid rgba(28,25,23,0.12);
+          background: rgba(255,255,255,0.8);
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+        .feature-addon-line {
+          height: 6px;
+          border-radius: 4px;
+          background: rgba(28,25,23,0.11);
+        }
+        .feature-addon-line.active {
+          background: var(--addon-accent);
+          opacity: 0.3;
+        }
+        .feature-addon-pill-row {
+          display: flex;
+          gap: 5px;
+          flex-wrap: wrap;
+        }
+        .feature-addon-pill {
+          height: 14px;
+          border-radius: 999px;
+          border: 1px solid rgba(28,25,23,0.14);
+          background: rgba(255,255,255,0.84);
+        }
+        .feature-addon-card-meta {
+          margin-top: auto;
+          padding-top: 10px;
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: var(--addon-accent);
+        }
+        .feature-addon-card-meta::before {
+          content: '';
+          width: 14px;
+          height: 2px;
+          border-radius: 999px;
+          background: var(--addon-accent);
+          opacity: 0.6;
+        }
         @media (max-width: 980px) {
           .feature-addon-card {
             flex-basis: calc((100% - 12px) / 2);
@@ -4921,6 +5054,8 @@ const App = () => {
         @media (max-width: 740px) {
           .feature-card { min-height: 0; }
           .feature-card-label { font-size: 17px; }
+          .feature-addon-wrap::before,
+          .feature-addon-wrap::after { display: none; }
           .feature-addon-scroll { gap: 10px; padding-bottom: 6px; }
           .feature-addon-card { flex-basis: 100%; min-width: 0; }
         }
@@ -5610,6 +5745,8 @@ const App = () => {
                       num: '04',
                       title: 'AI Summaries',
                       sub: 'Bullet point summaries',
+                      meta: 'Fast overview',
+                      type: 'summary',
                       accent: P.accent,
                       bg: 'rgba(45,108,223,0.08)',
                       border: 'rgba(45,108,223,0.2)',
@@ -5623,6 +5760,8 @@ const App = () => {
                       num: '05',
                       title: 'Flash Cards',
                       sub: 'Q&A cards with flip mode',
+                      meta: 'Flip and review',
+                      type: 'flash',
                       accent: P.warning,
                       bg: 'rgba(180,83,9,0.08)',
                       border: 'rgba(180,83,9,0.2)',
@@ -5636,6 +5775,8 @@ const App = () => {
                       num: '06',
                       title: 'Study Guide',
                       sub: 'Objectives, concepts & review',
+                      meta: 'Structured learning',
+                      type: 'guide',
                       accent: P.success,
                       bg: 'rgba(15,118,110,0.08)',
                       border: 'rgba(15,118,110,0.2)',
@@ -5649,6 +5790,8 @@ const App = () => {
                       num: '07',
                       title: 'Academic',
                       sub: 'References, claims & glossary',
+                      meta: 'Evidence oriented',
+                      type: 'academic',
                       accent: '#7C3AED',
                       bg: 'rgba(124,58,237,0.08)',
                       border: 'rgba(124,58,237,0.2)',
@@ -5672,8 +5815,50 @@ const App = () => {
                         <span className="feature-addon-num">{item.num}</span>
                         <span className="feature-addon-icon">{item.icon}</span>
                       </div>
+                      <div className="feature-addon-visual">
+                        {item.type === 'summary' && (
+                          <>
+                            <span className="feature-addon-line active" style={{ width: '82%' }} />
+                            <span className="feature-addon-line" style={{ width: '96%' }} />
+                            <span className="feature-addon-line" style={{ width: '74%' }} />
+                            <span className="feature-addon-line" style={{ width: '89%' }} />
+                          </>
+                        )}
+                        {item.type === 'flash' && (
+                          <>
+                            <div className="feature-addon-pill-row">
+                              <span className="feature-addon-pill" style={{ width: 56 }} />
+                              <span className="feature-addon-pill" style={{ width: 44 }} />
+                            </div>
+                            <span className="feature-addon-line active" style={{ width: '92%' }} />
+                            <span className="feature-addon-line" style={{ width: '68%' }} />
+                            <span className="feature-addon-line" style={{ width: '84%' }} />
+                          </>
+                        )}
+                        {item.type === 'guide' && (
+                          <>
+                            <span className="feature-addon-line active" style={{ width: '58%' }} />
+                            <span className="feature-addon-line" style={{ width: '95%' }} />
+                            <span className="feature-addon-line" style={{ width: '86%' }} />
+                            <span className="feature-addon-line" style={{ width: '78%' }} />
+                          </>
+                        )}
+                        {item.type === 'academic' && (
+                          <>
+                            <div className="feature-addon-pill-row">
+                              <span className="feature-addon-pill" style={{ width: 48 }} />
+                              <span className="feature-addon-pill" style={{ width: 42 }} />
+                              <span className="feature-addon-pill" style={{ width: 54 }} />
+                            </div>
+                            <span className="feature-addon-line active" style={{ width: '88%' }} />
+                            <span className="feature-addon-line" style={{ width: '75%' }} />
+                            <span className="feature-addon-line" style={{ width: '92%' }} />
+                          </>
+                        )}
+                      </div>
                       <p className="feature-addon-title">{item.title}</p>
                       <p className="feature-addon-sub">{item.sub}</p>
+                      <div className="feature-addon-card-meta">{item.meta}</div>
                     </div>
                   ))}
                 </div>
