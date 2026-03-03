@@ -6905,7 +6905,11 @@ const App = () => {
 
                 {/* Composer — at the BOTTOM, above footer */}
                 <div style={{
-                  padding: '11px 16px 12px',
+                  paddingTop: 11,
+                  paddingLeft: isMobile ? 14 : 16,
+                  paddingRight: isMobile ? 14 : 16,
+                  paddingBottom: isMobile ? 'calc(18px + env(safe-area-inset-bottom))' : 12,
+                  marginBottom: isMobile ? 6 : 0,
                   borderTop: `1px solid ${P.border}`,
                   background: 'linear-gradient(0deg, rgba(60,140,255,0.04) 0%, transparent 100%)',
                 }}>
