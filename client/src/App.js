@@ -4520,7 +4520,6 @@ const App = () => {
           min-height: 218px;
           border-radius: 20px;
           isolation: isolate;
-          transition: transform 0.22s ease, box-shadow 0.22s ease;
         }
         .feature-card::before {
           content: '';
@@ -4544,7 +4543,6 @@ const App = () => {
           pointer-events: none;
           z-index: 0;
         }
-        .feature-card:hover { box-shadow: 0 14px 34px rgba(28,25,23,0.14); transform: translateY(-4px); }
         .feature-card-top {
           position: relative;
           z-index: 1;
@@ -4810,13 +4808,8 @@ const App = () => {
           gap: 10px;
           border-radius: 14px;
           border: 1px solid var(--addon-border);
-          background: linear-gradient(152deg, rgba(255,255,255,0.95) 0%, var(--addon-bg) 100%);
+          background: var(--addon-bg);
           padding: 11px 12px;
-          transition: transform 0.18s ease, box-shadow 0.18s ease;
-        }
-        .feature-addon-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 18px rgba(28,25,23,0.11);
         }
         .feature-addon-icon {
           width: 24px;
@@ -4847,7 +4840,6 @@ const App = () => {
         @media (max-width: 740px) {
           .feature-card { min-height: 0; }
           .feature-card-label { font-size: 17px; }
-          .feature-card:hover { transform: translateY(-2px); }
           .feature-addon-grid { grid-template-columns: 1fr; }
         }
         .chip-btn { transition: all 0.15s; }
@@ -5297,7 +5289,7 @@ const App = () => {
                 {[
                   { icon: '⚡', text: 'Instant extraction' },
                   { icon: '🤖', text: 'AI-powered insights' },
-                  { icon: '🔒', text: 'No account needed' },
+                  { icon: '📥', text: 'Export & download' },
                 ].map((p, i) => (
                   <span key={p.text} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: P.muted }}>
                     {i > 0 && <span style={{ marginRight: 6, opacity: 0.4 }}>·</span>}
