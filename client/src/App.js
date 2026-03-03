@@ -3416,6 +3416,7 @@ const App = () => {
   const urlInputRef     = useRef(null);
   const qaRef           = useRef(null);
   const chatMessagesRef = useRef(null);
+  const addonScrollRef  = useRef(null);
   const recoveryIntentRef = useRef(false);
 
   useEffect(() => {
@@ -3427,6 +3428,32 @@ const App = () => {
     window.addEventListener('resize', onResize);
     return () => { window.removeEventListener('resize', onResize); cancelAnimationFrame(raf); };
   }, []);
+
+  // Landing: while this feature rail is on screen, vertical wheel scroll reveals hidden cards horizontally.
+  useEffect(() => {
+    if (isMobile) return;
+    const onWheel = (e) => {
+      const rail = addonScrollRef.current;
+      if (!rail) return;
+      const max = rail.scrollWidth - rail.clientWidth;
+      if (max <= 0) return;
+
+      const rect = rail.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight * 0.82 && rect.bottom > window.innerHeight * 0.18;
+      if (!inView) return;
+
+      const atStart = rail.scrollLeft <= 1;
+      const atEnd = rail.scrollLeft >= max - 1;
+      const down = e.deltaY > 0;
+      if ((down && atEnd) || (!down && atStart)) return;
+
+      e.preventDefault();
+      rail.scrollLeft = Math.max(0, Math.min(max, rail.scrollLeft + e.deltaY));
+    };
+
+    window.addEventListener('wheel', onWheel, { passive: false });
+    return () => window.removeEventListener('wheel', onWheel);
+  }, [isMobile]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -4796,20 +4823,68 @@ const App = () => {
           background: var(--card-accent);
           opacity: 0.72;
         }
-        .feature-addon-grid {
-          margin-top: 12px;
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
+        .feature-addon-wrap { margin-top: 14px; }
+        .feature-addon-scroll {
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scroll-snap-type: x mandatory;
+          scroll-behavior: smooth;
+          padding: 2px 2px 10px;
+          -webkit-overflow-scrolling: touch;
+        }
+        .feature-addon-scroll::-webkit-scrollbar { height: 7px; }
+        .feature-addon-scroll::-webkit-scrollbar-track {
+          background: rgba(28,25,23,0.08);
+          border-radius: 999px;
+        }
+        .feature-addon-scroll::-webkit-scrollbar-thumb {
+          background: rgba(28,25,23,0.22);
+          border-radius: 999px;
         }
         .feature-addon-card {
-          display: flex;
-          align-items: flex-start;
-          gap: 10px;
-          border-radius: 14px;
+          flex: 0 0 calc((100% - 24px) / 3);
+          min-width: 238px;
+          scroll-snap-align: start;
+          position: relative;
+          overflow: hidden;
+          border-radius: 16px;
           border: 1px solid var(--addon-border);
-          background: var(--addon-bg);
-          padding: 11px 12px;
+          background: linear-gradient(152deg, rgba(255,255,255,0.95) 0%, var(--addon-bg) 100%);
+          padding: 13px 12px 12px;
+        }
+        .feature-addon-card::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          height: 3px;
+          background: linear-gradient(90deg, var(--addon-accent), rgba(255,255,255,0.74));
+          opacity: 0.92;
+        }
+        .feature-addon-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 10px;
+        }
+        .feature-addon-num {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 38px;
+          height: 24px;
+          padding: 0 10px;
+          border-radius: 999px;
+          border: 1px solid rgba(28,25,23,0.14);
+          background: rgba(255,255,255,0.82);
+          color: var(--addon-accent);
+          font-size: 10.5px;
+          font-weight: 800;
+          letter-spacing: 0.07em;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
         .feature-addon-icon {
           width: 24px;
@@ -4820,12 +4895,12 @@ const App = () => {
           align-items: center;
           justify-content: center;
           color: var(--addon-accent);
-          background: rgba(255,255,255,0.78);
+          background: rgba(255,255,255,0.82);
           border: 1px solid rgba(28,25,23,0.12);
         }
         .feature-addon-title {
-          margin: 1px 0 2px;
-          font-size: 13px;
+          margin: 1px 0 4px;
+          font-size: 13.5px;
           line-height: 1.2;
           font-weight: 700;
           letter-spacing: -0.01em;
@@ -4834,13 +4909,20 @@ const App = () => {
         .feature-addon-sub {
           margin: 0;
           font-size: 11.5px;
-          line-height: 1.35;
+          line-height: 1.38;
           color: ${P.muted};
+        }
+        @media (max-width: 980px) {
+          .feature-addon-card {
+            flex-basis: calc((100% - 12px) / 2);
+            min-width: 220px;
+          }
         }
         @media (max-width: 740px) {
           .feature-card { min-height: 0; }
           .feature-card-label { font-size: 17px; }
-          .feature-addon-grid { grid-template-columns: 1fr; }
+          .feature-addon-scroll { gap: 10px; padding-bottom: 6px; }
+          .feature-addon-card { flex-basis: 100%; min-width: 0; }
         }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(45,108,223,0.06) !important; }
@@ -5511,73 +5593,90 @@ const App = () => {
                   </div>
                 ))}
               </div>
-              <div className="feature-addon-grid">
-                {[
-                  {
-                    title: 'AI Summaries',
-                    sub: 'Bullet point summaries',
-                    accent: P.accent,
-                    bg: 'rgba(45,108,223,0.08)',
-                    border: 'rgba(45,108,223,0.2)',
-                    icon: (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-                      </svg>
-                    ),
-                  },
-                  {
-                    title: 'Flash Cards',
-                    sub: 'Q&A cards with flip mode',
-                    accent: P.warning,
-                    bg: 'rgba(180,83,9,0.08)',
-                    border: 'rgba(180,83,9,0.2)',
-                    icon: (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="4" width="14" height="14" rx="2"/><path d="M7 8h6"/><path d="M7 12h4"/><path d="M11 20h10a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/>
-                      </svg>
-                    ),
-                  },
-                  {
-                    title: 'Study Guide',
-                    sub: 'Objectives, concepts & review',
-                    accent: P.success,
-                    bg: 'rgba(15,118,110,0.08)',
-                    border: 'rgba(15,118,110,0.2)',
-                    icon: (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                      </svg>
-                    ),
-                  },
-                  {
-                    title: 'Academic',
-                    sub: 'References, claims & glossary',
-                    accent: '#7C3AED',
-                    bg: 'rgba(124,58,237,0.08)',
-                    border: 'rgba(124,58,237,0.2)',
-                    icon: (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
-                      </svg>
-                    ),
-                  },
-                ].map(item => (
-                  <div
-                    key={item.title}
-                    className="feature-addon-card"
-                    style={{
-                      '--addon-accent': item.accent,
-                      '--addon-bg': item.bg,
-                      '--addon-border': item.border,
-                    }}
-                  >
-                    <span className="feature-addon-icon">{item.icon}</span>
-                    <div>
+              <div className="feature-addon-wrap">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: P.muted }}>
+                    More AI Tools
+                  </div>
+                  {!isMobile && (
+                    <div style={{ fontSize: 11, color: P.muted }}>
+                      Scroll down to reveal all cards
+                    </div>
+                  )}
+                </div>
+                <div ref={addonScrollRef} className="feature-addon-scroll">
+                  {[
+                    {
+                      num: '04',
+                      title: 'AI Summaries',
+                      sub: 'Bullet point summaries',
+                      accent: P.accent,
+                      bg: 'rgba(45,108,223,0.08)',
+                      border: 'rgba(45,108,223,0.2)',
+                      icon: (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      num: '05',
+                      title: 'Flash Cards',
+                      sub: 'Q&A cards with flip mode',
+                      accent: P.warning,
+                      bg: 'rgba(180,83,9,0.08)',
+                      border: 'rgba(180,83,9,0.2)',
+                      icon: (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="4" width="14" height="14" rx="2"/><path d="M7 8h6"/><path d="M7 12h4"/><path d="M11 20h10a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      num: '06',
+                      title: 'Study Guide',
+                      sub: 'Objectives, concepts & review',
+                      accent: P.success,
+                      bg: 'rgba(15,118,110,0.08)',
+                      border: 'rgba(15,118,110,0.2)',
+                      icon: (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      num: '07',
+                      title: 'Academic',
+                      sub: 'References, claims & glossary',
+                      accent: '#7C3AED',
+                      bg: 'rgba(124,58,237,0.08)',
+                      border: 'rgba(124,58,237,0.2)',
+                      icon: (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                        </svg>
+                      ),
+                    },
+                  ].map(item => (
+                    <div
+                      key={item.title}
+                      className="feature-addon-card"
+                      style={{
+                        '--addon-accent': item.accent,
+                        '--addon-bg': item.bg,
+                        '--addon-border': item.border,
+                      }}
+                    >
+                      <div className="feature-addon-head">
+                        <span className="feature-addon-num">{item.num}</span>
+                        <span className="feature-addon-icon">{item.icon}</span>
+                      </div>
                       <p className="feature-addon-title">{item.title}</p>
                       <p className="feature-addon-sub">{item.sub}</p>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
 
