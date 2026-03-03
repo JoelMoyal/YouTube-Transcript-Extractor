@@ -4850,52 +4850,91 @@ const App = () => {
                 );
               })()}
 
-              {/* Progress bar */}
+              {/* Loading card */}
               {loading && (
-                <div className="fade-up" style={{ marginTop: 18 }}>
-                  {/* Stage pills */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <div style={{ display: 'flex', gap: 5 }}>
-                      {['subtitles', 'audio', 'whisper'].map((s) => {
-                        const labels = { subtitles: 'Captions', audio: 'Audio', whisper: 'AI' };
-                        const order = ['subtitles', 'audio', 'whisper'];
-                        const isDone = loadingStage && order.indexOf(s) < order.indexOf(loadingStage);
-                        const isActive = s === loadingStage;
-                        return (
-                          <span key={s} style={{
-                            fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 999,
-                            background: isDone ? 'rgba(15,118,110,0.1)' : isActive ? P.accentLight : 'transparent',
-                            color: isDone ? P.success : isActive ? P.accent : P.muted,
-                            border: `1px solid ${isDone ? 'rgba(15,118,110,0.25)' : isActive ? 'rgba(45,108,223,0.25)' : P.border}`,
-                            transition: 'all 0.3s',
-                          }}>{isDone ? '✓ ' : isActive ? '· ' : ''}{labels[s]}</span>
-                        );
-                      })}
+                <div className="fade-up" style={{
+                  marginTop: 18,
+                  padding: '16px 18px',
+                  background: 'rgba(45,108,223,0.04)',
+                  border: `1px solid rgba(45,108,223,0.14)`,
+                  borderRadius: 14,
+                }}>
+                  {/* Step indicators */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 14 }}>
+                    {['subtitles', 'audio', 'whisper'].map((s, idx) => {
+                      const labels = { subtitles: 'Captions', audio: 'Audio', whisper: 'AI Transcribe' };
+                      const order = ['subtitles', 'audio', 'whisper'];
+                      const isDone = loadingStage && order.indexOf(s) < order.indexOf(loadingStage);
+                      const isActive = s === loadingStage;
+                      return (
+                        <React.Fragment key={s}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                            <div style={{
+                              width: 28, height: 28, borderRadius: '50%',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              background: isDone ? 'rgba(15,118,110,0.11)' : isActive ? P.accentLight : P.surface,
+                              border: `1.5px solid ${isDone ? P.success : isActive ? P.accent : P.border}`,
+                              transition: 'all 0.35s',
+                              animation: isActive ? 'pulse 1.8s ease-in-out infinite' : 'none',
+                              flexShrink: 0,
+                            }}>
+                              {isDone ? (
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                              ) : isActive ? (
+                                <span style={{ width: 8, height: 8, borderRadius: '50%', background: P.accent, display: 'block' }} />
+                              ) : (
+                                <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.border, display: 'block' }} />
+                              )}
+                            </div>
+                            <span style={{
+                              fontSize: 10, fontWeight: isActive ? 700 : 500,
+                              color: isDone ? P.success : isActive ? P.accent : P.muted,
+                              transition: 'all 0.3s', whiteSpace: 'nowrap',
+                            }}>{labels[s]}</span>
+                          </div>
+                          {idx < 2 && (
+                            <div style={{
+                              flex: 1, height: 1.5, marginTop: 13, marginBottom: 0,
+                              background: isDone ? 'rgba(15,118,110,0.35)' : P.border,
+                              transition: 'background 0.5s',
+                            }} />
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+
+                  {/* Progress bar — shimmer when 0%, glowing fill when > 0% */}
+                  <div style={{ height: 6, borderRadius: 999, background: P.border, overflow: 'hidden', position: 'relative', marginBottom: 10 }}>
+                    {loadingPercent > 0 ? (
+                      <div style={{
+                        height: '100%', width: `${loadingPercent}%`,
+                        background: `linear-gradient(90deg, ${P.accent}, #5B9BD5)`,
+                        borderRadius: 999, transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
+                        boxShadow: '0 0 8px rgba(45,108,223,0.45)',
+                      }} />
+                    ) : (
+                      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, transparent, rgba(45,108,223,0.45), transparent)`, animation: 'shimmer 1.4s infinite' }} />
+                    )}
+                  </div>
+
+                  {/* Status message + percent */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <span style={{ fontSize: 12.5, color: P.muted, fontWeight: 500 }}>
+                        {loadingMsg || 'Fetching transcript'}
+                      </span>
+                      <span style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+                        {[0, 1, 2].map(i => (
+                          <span key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: `dot-flicker 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+                        ))}
+                      </span>
                     </div>
                     {loadingPercent > 0 && (
                       <span style={{ fontSize: 11, color: P.accent, fontWeight: 700 }}>{loadingPercent}%</span>
                     )}
-                  </div>
-
-                  {/* Progress bar — shimmer when 0%, real fill when > 0% */}
-                  <div style={{ height: 4, borderRadius: 999, background: P.border, overflow: 'hidden', position: 'relative' }}>
-                    {loadingPercent > 0 ? (
-                      <div style={{ height: '100%', width: `${loadingPercent}%`, background: `linear-gradient(90deg, ${P.accent}, #5B9BD5)`, borderRadius: 999, transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)' }} />
-                    ) : (
-                      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, transparent, rgba(45,108,223,0.35), transparent)`, animation: 'shimmer 1.4s infinite' }} />
-                    )}
-                  </div>
-
-                  {/* Status message with animated dots */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 10 }}>
-                    <span style={{ fontSize: 12, color: P.muted }}>
-                      {loadingMsg || 'Fetching transcript'}
-                    </span>
-                    <span style={{ display: 'flex', gap: 3 }}>
-                      {[0, 1, 2].map(i => (
-                        <span key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: `dot-flicker 1.2s ease-in-out ${i * 0.2}s infinite` }} />
-                      ))}
-                    </span>
                   </div>
                 </div>
               )}
