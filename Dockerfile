@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Install yt-dlp dependencies and the binary itself
 RUN apk add --no-cache python3 ffmpeg curl && \
@@ -8,14 +8,17 @@ RUN apk add --no-cache python3 ffmpeg curl && \
 
 WORKDIR /app
 
-# Install Node dependencies
+# Install server + client dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+COPY client/package*.json ./client/
+RUN npm install && npm --prefix client install
 
-# Copy server and pre-built React app
+# Copy app source
 COPY server.js ./
-COPY client/public ./client/public
-COPY client/build ./client/build
+COPY client ./client
+
+# Build frontend so deploys always include latest UI source changes
+RUN npm --prefix client run build && npm prune --omit=dev && rm -rf client/node_modules
 
 EXPOSE 3000
 
