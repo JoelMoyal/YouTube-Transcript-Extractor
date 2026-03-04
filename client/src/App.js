@@ -330,7 +330,7 @@ const InstagramIcon = ({ size = 18 }) => (
 );
 const DailymotionIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.dailymotion.icon}>
-    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.5 16.5a4.5 4.5 0 0 1-4.5-4.5V6h2v3.17A4.49 4.49 0 0 1 16.5 8v2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 2.5-2.5H21a4.5 4.5 0 0 1-4.5 4z"/>
+    <path d="M21.823 7.327a11.928 11.928 0 0 0-2.606-3.814 12.126 12.126 0 0 0-3.866-2.57A12.246 12.246 0 0 0 10.617 0H1.831a.602.602 0 0 0-.609.603v3.764c0 .162.064.312.179.426l4.164 4.123a.612.612 0 0 0 .439.177h4.56c.806 0 1.56.313 2.125.88.557.559.856 1.296.843 2.075-.029 1.571-1.343 2.849-2.931 2.849h-6.74a.613.613 0 0 0-.432.176.619.619 0 0 0-.178.427v3.764c0 .162.063.312.178.427l4.139 4.099a.647.647 0 0 0 .476.21h2.572a12.276 12.276 0 0 0 4.733-.945 12.145 12.145 0 0 0 3.866-2.571 11.959 11.959 0 0 0 2.607-3.813c.633-1.479.956-3.051.956-4.67 0-1.619-.321-3.19-.956-4.669l.001-.005ZM2.441 4.118V1.982l2.945 2.755.001 2.297-2.946-2.916Zm4.975 17.813-2.945-2.917v-2.137l2.945 2.755v2.299Zm-2.004-5.832h5.19c2.248 0 4.107-1.807 4.147-4.03a4.027 4.027 0 0 0-1.192-2.937 4.203 4.203 0 0 0-2.996-1.239H6.606V5.216h3.996c1.831 0 3.553.706 4.849 1.986a6.724 6.724 0 0 1-.152 9.736 6.875 6.875 0 0 1-4.697 1.84H8.275L5.412 16.1v-.001Zm15.289.1a10.753 10.753 0 0 1-2.345 3.431 10.91 10.91 0 0 1-3.48 2.314 11.018 11.018 0 0 1-4.26.847H8.633v-2.814h1.916c2.145 0 4.161-.802 5.675-2.254a7.88 7.88 0 0 0 2.451-5.728c0-2.177-.87-4.21-2.451-5.728-1.514-1.454-3.528-2.254-5.675-2.254h-4.16L3.383 1.202h7.234c1.479 0 2.911.285 4.259.847a10.957 10.957 0 0 1 3.48 2.313 10.769 10.769 0 0 1 2.345 3.432c.571 1.33.86 2.743.86 4.202 0 1.46-.289 2.873-.86 4.203Z"/>
   </svg>
 );
 const FacebookIcon = ({ size = 18 }) => (
@@ -4654,83 +4654,86 @@ const App = () => {
           background: radial-gradient(ellipse 86% 54% at 50% -12%, rgba(200,190,175,0.16) 0%, transparent 65%),
                       ${P.paper};
         }
-        .feature-card {
+        .feature-workflow {
           position: relative;
-          overflow: hidden;
           display: flex;
           flex-direction: column;
-          min-height: 246px;
-          border-radius: 22px;
+          gap: 6px;
+        }
+        .feature-card {
+          --step-col: 48px;
+          position: relative;
+          display: grid;
+          grid-template-columns: var(--step-col) minmax(0, 1fr);
+          column-gap: 14px;
+          row-gap: 0;
+          padding: 10px 0 22px;
           isolation: isolate;
-          box-shadow: 0 12px 30px rgba(29,29,31,0.07), inset 0 1px 0 rgba(255,255,255,0.72);
-          cursor: default;
-          transition: transform 0.18s ease, box-shadow 0.18s ease;
+          transition: transform 0.18s ease;
         }
         .feature-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 20px 44px rgba(29,29,31,0.11), inset 0 1px 0 rgba(255,255,255,0.72);
-        }
-        .feature-card::before {
-          content: '';
-          position: absolute;
-          left: 0;
-          right: 0;
-          top: 0;
-          height: 3px;
-          background: var(--card-gradient);
-          opacity: 0.95;
+          transform: translateX(2px);
         }
         .feature-card::after {
           content: '';
           position: absolute;
-          width: 196px;
-          height: 196px;
-          right: -62px;
-          top: -64px;
+          left: calc((var(--step-col) / 2) - 1px);
+          top: 42px;
+          bottom: -2px;
+          width: 2px;
           border-radius: 999px;
-          background: radial-gradient(circle at center, var(--card-glow) 0%, rgba(255,255,255,0) 74%);
-          pointer-events: none;
+          background: linear-gradient(180deg, var(--card-rail) 0%, rgba(29,29,31,0.08) 100%);
+          opacity: 0.8;
           z-index: 0;
+        }
+        .feature-card:last-child::after {
+          display: none;
         }
         .feature-card-top {
           position: relative;
           z-index: 1;
           display: flex;
+          flex-direction: column;
           align-items: center;
-          justify-content: space-between;
-          margin-bottom: 14px;
+          gap: 10px;
+          grid-column: 1;
+          grid-row: 1 / span 6;
+          padding-top: 2px;
         }
         .feature-card-num {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          height: 30px;
-          min-width: 42px;
-          padding: 0 12px;
+          width: 36px;
+          height: 36px;
           border-radius: 999px;
-          border: 1px solid var(--card-pill-border);
-          background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, var(--card-pill-bg) 100%);
-          color: var(--card-accent);
-          font-size: 12px;
+          background: var(--card-gradient);
+          color: #fff;
+          font-size: 11px;
           font-weight: 800;
           letter-spacing: 0.08em;
           font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          box-shadow: 0 6px 16px rgba(29,29,31,0.16);
         }
         .feature-card-icon {
-          width: 38px;
-          height: 38px;
-          border-radius: 11px;
+          width: 34px;
+          height: 34px;
+          border-radius: 10px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           color: var(--card-accent);
-          background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, var(--card-pill-bg) 100%);
+          background: rgba(255,255,255,0.9);
           border: 1px solid var(--card-pill-border);
+          box-shadow: 0 3px 10px rgba(29,29,31,0.08);
+          animation: iconPulse 3.6s ease-in-out infinite;
+          animation-delay: calc(var(--card-index) * 0.24s);
         }
         .feature-card-label {
           position: relative;
           z-index: 1;
-          margin: 0 0 7px;
+          grid-column: 2;
+          margin: 2px 0 6px;
           font-size: 19px;
           line-height: 1.2;
           font-weight: 800;
@@ -4740,6 +4743,7 @@ const App = () => {
         .feature-card-desc {
           position: relative;
           z-index: 1;
+          grid-column: 2;
           margin: 0;
           font-size: 13px;
           line-height: 1.62;
@@ -4748,7 +4752,8 @@ const App = () => {
         .feature-card-visual {
           position: relative;
           z-index: 1;
-          margin: 0 0 13px;
+          grid-column: 2;
+          margin: 0 0 11px;
           padding: 8px;
           border-radius: 14px;
           background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, var(--card-panel-bg) 100%);
@@ -4756,6 +4761,7 @@ const App = () => {
           display: flex;
           flex-direction: column;
           gap: 8px;
+          box-shadow: 0 8px 22px rgba(29,29,31,0.06);
         }
         .feature-mock-shell {
           border-radius: 10px;
@@ -4949,6 +4955,7 @@ const App = () => {
         .feature-card-tags {
           position: relative;
           z-index: 1;
+          grid-column: 2;
           margin-top: 10px;
           display: flex;
           flex-wrap: wrap;
@@ -4972,8 +4979,8 @@ const App = () => {
         .feature-card-meta {
           position: relative;
           z-index: 1;
-          margin-top: auto;
-          padding-top: 14px;
+          grid-column: 2;
+          margin-top: 9px;
           display: inline-flex;
           align-items: center;
           gap: 8px;
@@ -4992,15 +4999,35 @@ const App = () => {
           opacity: 0.72;
         }
         @media (max-width: 740px) {
-          .feature-card { min-height: 0; }
+          .feature-card {
+            --step-col: 42px;
+            column-gap: 11px;
+            padding: 8px 0 18px;
+          }
+          .feature-card::after {
+            top: 38px;
+          }
+          .feature-card-num {
+            width: 32px;
+            height: 32px;
+            font-size: 10.5px;
+          }
+          .feature-card-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+          }
           .feature-card-label { font-size: 17px; }
           .feature-card-desc { font-size: 12.5px; }
+          .feature-card-tag { font-size: 9.5px; height: 20px; }
+          .feature-card-meta { font-size: 10px; }
         }
         @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } }
         @keyframes shimmerSweep { 0% { background-position:110% center; } 100% { background-position:-110% center; } }
         @keyframes bulletReveal { 0% { opacity:0.12; transform:translateX(-4px); } 18%,68% { opacity:1; transform:translateX(0); } 85%,100% { opacity:0.12; transform:translateX(0); } }
         @keyframes cardFlip3D { 0%,33% { transform:rotateY(0deg); } 50%,83% { transform:rotateY(180deg); } 100% { transform:rotateY(360deg); } }
         @keyframes dotBounce { 0%,60%,100% { transform:translateY(0); opacity:0.35; } 30% { transform:translateY(-3px); opacity:0.85; } }
+        @keyframes iconPulse { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-2px); } }
         .feature-mock-url-bar { display:flex; align-items:center; gap:5px; height:20px; padding:0 7px; border-radius:5px; background:rgba(255,255,255,0.88); border:1px solid rgba(29,29,31,0.11); font-size:8px; color:rgba(29,29,31,0.42); font-family:ui-monospace,monospace; letter-spacing:0.01em; overflow:hidden; }
         .feature-mock-cursor { width:1.5px; height:9px; background:var(--card-accent); border-radius:1px; flex-shrink:0; animation:cursorBlink 0.9s step-end infinite; }
         .feature-mock-ts-row { display:flex; align-items:center; gap:5px; }
@@ -5512,16 +5539,16 @@ const App = () => {
             </div>{/* end hero-grad */}
 
             {/* Capability cards */}
-            <div style={{ maxWidth: 920, margin: '0 auto', padding: '10px 24px 44px' }}>
+            <div style={{ maxWidth: 860, margin: '0 auto', padding: '10px 24px 44px' }}>
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>
                   How It Works
                 </div>
                 <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 28, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
-                  Four visual cards, one complete workflow
+                  Four visual steps, one complete workflow
                 </h2>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 14 }}>
+              <div className="feature-workflow">
                 {[
                   {
                     num: '01',
@@ -5611,21 +5638,20 @@ const App = () => {
                       </svg>
                     ),
                   },
-                ].map(card => (
+                ].map((card, cardIndex) => (
                   <div
                     key={card.label}
                     className="feature-card"
                     style={{
+                      '--card-index': cardIndex,
                       '--card-accent': card.accent,
+                      '--card-rail': card.border,
                       '--card-glow': card.glow,
                       '--card-pill-bg': card.pillBg,
                       '--card-pill-border': card.pillBorder,
                       '--card-gradient': card.gradient,
                       '--card-panel-bg': card.panel,
                       '--card-panel-border': card.panelBorder,
-                      background: `linear-gradient(155deg, rgba(255,255,255,0.98) 0%, ${card.bg} 100%)`,
-                      border: `1px solid ${card.border}`,
-                      padding: '20px 18px 18px',
                     }}
                   >
                     <div className="feature-card-top">
