@@ -4229,6 +4229,17 @@ const App = () => {
     });
   };
 
+  const AiBubbleAvatar = ({ size = 26, iconSize = 15, radius = 7 }) => (
+    <div style={{
+      width: size, height: size, borderRadius: radius, flexShrink: 0, marginTop: 1,
+      background: 'linear-gradient(135deg, rgba(60,140,255,0.13) 0%, rgba(60,140,255,0.05) 100%)',
+      border: '1.5px solid rgba(60,140,255,0.2)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: iconSize, height: iconSize }} />
+    </div>
+  );
+
   const summarize = async () => {
     setSummarizing(true); setSummary('');
     try {
@@ -6881,14 +6892,7 @@ const App = () => {
                       <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                         {msg.role === 'ai' ? (
                           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, maxWidth: '93%' }}>
-                            <div style={{
-                              width: 26, height: 26, borderRadius: 7, flexShrink: 0, marginTop: 1,
-                              background: 'linear-gradient(135deg, rgba(60,140,255,0.13) 0%, rgba(60,140,255,0.05) 100%)',
-                              border: `1.5px solid rgba(60,140,255,0.2)`,
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}>
-                              <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 15, height: 15 }} />
-                            </div>
+                            <AiBubbleAvatar />
                             <div style={{
                               padding: '9px 13px',
                               borderRadius: '3px 12px 12px 12px',
@@ -6913,14 +6917,7 @@ const App = () => {
                     ))}
                     {qaLoading && (
                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                        <div style={{
-                          width: 26, height: 26, borderRadius: 7, flexShrink: 0,
-                          background: 'linear-gradient(135deg, rgba(60,140,255,0.13) 0%, rgba(60,140,255,0.05) 100%)',
-                          border: `1.5px solid rgba(60,140,255,0.2)`,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          <img src="/scribesnap_icon_wave.svg" alt="AI" style={{ width: 15, height: 15 }} />
-                        </div>
+                        <AiBubbleAvatar />
                         <div style={{ padding: '11px 15px', borderRadius: '3px 12px 12px 12px', background: P.paper, border: `1px solid ${P.border}`, display: 'flex', gap: 4, alignItems: 'center' }}>
                           {[0, 1, 2].map(d => <div key={d} style={{ width: 5, height: 5, borderRadius: '50%', background: P.accent, opacity: 0.6, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}
                         </div>
@@ -7935,12 +7932,20 @@ const App = () => {
                     {sgMessages.map((msg, i) => (
                       <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                         {msg.role === 'ai'
-                          ? <div style={{ maxWidth: '85%', padding: '10px 16px', borderRadius: '3px 14px 14px 14px', background: P.paper, border: `1px solid ${P.border}`, fontSize: 14, lineHeight: 1.7, color: msg.isError ? P.error : P.ink }}>{msg.text.split('\n').map((l, li, a) => <React.Fragment key={li}>{renderChatLine(l)}{li < a.length - 1 && <br />}</React.Fragment>)}</div>
+                          ? <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, maxWidth: '90%' }}>
+                              <AiBubbleAvatar size={28} iconSize={16} radius={8} />
+                              <div style={{ padding: '10px 16px', borderRadius: '3px 14px 14px 14px', background: P.paper, border: `1px solid ${P.border}`, fontSize: 14, lineHeight: 1.7, color: msg.isError ? P.error : P.ink }}>{msg.text.split('\n').map((l, li, a) => <React.Fragment key={li}>{renderChatLine(l)}{li < a.length - 1 && <br />}</React.Fragment>)}</div>
+                            </div>
                           : <div style={{ maxWidth: '80%', padding: '10px 16px', borderRadius: '14px 14px 3px 14px', background: P.accent, fontSize: 14, lineHeight: 1.65, color: 'white' }}>{msg.text}</div>
                         }
                       </div>
                     ))}
-                    {sgLoading && <div style={{ display: 'flex', gap: 5, padding: '10px 14px', background: P.paper, border: `1px solid ${P.border}`, borderRadius: '3px 14px 14px 14px', width: 'fit-content' }}>{[0,1,2].map(d => <div key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, opacity: 0.6, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}</div>}
+                    {sgLoading && (
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                        <AiBubbleAvatar size={28} iconSize={16} radius={8} />
+                        <div style={{ display: 'flex', gap: 5, padding: '10px 14px', background: P.paper, border: `1px solid ${P.border}`, borderRadius: '3px 14px 14px 14px', width: 'fit-content' }}>{[0,1,2].map(d => <div key={d} style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, opacity: 0.6, animation: `bounce 1.2s ease-in-out ${d * 0.2}s infinite` }} />)}</div>
+                      </div>
+                    )}
                   </div>
                 )}
                 <div style={{ display: 'flex', alignItems: 'center', background: P.paper, border: `1.5px solid ${P.border}`, borderRadius: 14, padding: '8px 8px 8px 18px' }}>
