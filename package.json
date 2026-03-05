@@ -1,7 +1,7 @@
 {
   "name": "youtube-transcript-extractor",
   "version": "1.0.0",
-  "description": "ScribeSnap extracts YouTube and Vimeo transcripts with AI tools",
+  "description": "ScribeSnap extracts transcripts from YouTube, Vimeo, TikTok, and more with AI tools",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
