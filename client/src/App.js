@@ -5886,7 +5886,7 @@ const App = () => {
 
               {/* Trusted by Silicon Valley — styled social proof */}
               <div style={{
-                marginTop: isMobile ? 56 : 128,
+                marginTop: isMobile ? 44 : 108,
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
                 alignItems: 'center',
