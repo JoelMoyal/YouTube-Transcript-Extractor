@@ -4852,19 +4852,19 @@ const App = () => {
           position: relative;
           display: flex;
           flex-direction: column;
-          gap: 22px;
+          gap: 28px;
         }
         .feature-flow-head {
           position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 4px;
+          gap: 6px;
           padding-bottom: 2px;
         }
         .feature-flow-node {
-          min-width: 180px;
-          min-height: 30px;
+          min-width: 206px;
+          min-height: 36px;
           padding: 0 6px;
           border: none;
           background: transparent;
@@ -4872,7 +4872,7 @@ const App = () => {
           align-items: center;
           justify-content: center;
           color: ${P.ink};
-          font-size: 15px;
+          font-size: 16px;
           font-weight: 800;
           letter-spacing: -0.01em;
           box-shadow: none;
@@ -4884,30 +4884,30 @@ const App = () => {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 20px;
-          height: 16px;
+          width: 22px;
+          height: 18px;
           color: rgba(29,29,31,0.44);
-          font-size: 12px;
+          font-size: 13px;
           line-height: 1;
         }
         .feature-flow-node.transcript {
-          min-width: 304px;
-          min-height: 60px;
+          min-width: 350px;
+          min-height: 72px;
           height: auto;
           padding: 0;
         }
         .feature-flow-transcript-preview {
           width: 100%;
-          border-radius: 8px;
+          border-radius: 10px;
           border: 1px solid rgba(84,104,168,0.12);
           background: rgba(255,255,255,0.62);
-          padding: 5px 5px 4px;
+          padding: 7px 7px 6px;
           display: flex;
           flex-direction: column;
-          gap: 3px;
+          gap: 4px;
         }
         .feature-flow-transcript-title {
-          font-size: 6.5px;
+          font-size: 7.2px;
           line-height: 1;
           font-weight: 800;
           letter-spacing: 0.05em;
@@ -4920,19 +4920,19 @@ const App = () => {
           gap: 4px;
         }
         .feature-flow-transcript-preview .feature-mock-ts-badge {
-          font-size: 6.1px;
+          font-size: 6.8px;
           opacity: 0.78;
         }
         .feature-flow-transcript-preview .feature-mock-line {
-          height: 6px;
+          height: 7px;
           border-radius: 4px;
         }
         .feature-flow-branches {
           position: relative;
           display: grid;
           grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: 24px;
-          padding-top: 8px;
+          gap: 30px;
+          padding-top: 12px;
         }
         .feature-flow-branches::before {
           content: none;
@@ -4941,8 +4941,8 @@ const App = () => {
           position: relative;
           display: flex;
           flex-direction: column;
-          gap: 10px;
-          padding: 4px 0;
+          gap: 12px;
+          padding: 6px 0;
           border: none;
           background: transparent;
           box-shadow: none;
@@ -4979,9 +4979,9 @@ const App = () => {
           box-shadow: 0 4px 10px rgba(29,29,31,0.14);
         }
         .feature-card-icon {
-          width: 30px;
-          height: 30px;
-          border-radius: 9px;
+          width: 34px;
+          height: 34px;
+          border-radius: 10px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -4996,7 +4996,7 @@ const App = () => {
           position: relative;
           z-index: 1;
           margin: 0;
-          font-size: 18px;
+          font-size: 20px;
           line-height: 1.25;
           font-weight: 800;
           letter-spacing: -0.02em;
@@ -5006,32 +5006,32 @@ const App = () => {
           position: relative;
           z-index: 1;
           margin: 0;
-          font-size: 13.1px;
+          font-size: 14px;
           line-height: 1.55;
           color: ${P.muted};
         }
         .feature-card-visual {
           position: relative;
           z-index: 1;
-          margin: 0 0 4px;
-          padding: 9px;
-          border-radius: 12px;
+          margin: 0 0 6px;
+          padding: 11px;
+          border-radius: 14px;
           background: rgba(255,255,255,0.52);
           border: 1px solid rgba(29,29,31,0.08);
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 9px;
         }
         .feature-mock-shell {
-          border-radius: 10px;
+          border-radius: 12px;
           border: 1px solid rgba(29,29,31,0.12);
           background: rgba(255,255,255,0.96);
           overflow: hidden;
           box-shadow: 0 2px 6px rgba(29,29,31,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
         }
         .feature-mock-topbar {
-          height: 22px;
-          padding: 0 7px;
+          height: 24px;
+          padding: 0 8px;
           border-bottom: 1px solid rgba(29,29,31,0.09);
           background: linear-gradient(180deg, rgba(29,29,31,0.045) 0%, rgba(29,29,31,0.02) 100%);
           display: flex;
@@ -5054,7 +5054,7 @@ const App = () => {
           background: rgba(255,255,255,0.88);
           color: var(--card-accent);
           border-radius: 999px;
-          font-size: 9px;
+          font-size: 9.5px;
           font-weight: 700;
           letter-spacing: 0.03em;
           text-transform: uppercase;
@@ -5062,10 +5062,10 @@ const App = () => {
           line-height: 1;
         }
         .feature-mock-body {
-          min-height: 88px;
-          padding: 8px;
+          min-height: 100px;
+          padding: 9px;
           display: flex;
-          gap: 8px;
+          gap: 9px;
         }
         .feature-mock-timeline {
           width: 16px;
@@ -5253,18 +5253,18 @@ const App = () => {
           margin-top: 1px;
           display: flex;
           flex-wrap: wrap;
-          gap: 5px;
+          gap: 6px;
         }
         .feature-card-tag {
           display: inline-flex;
           align-items: center;
-          height: 19px;
-          padding: 0 8px;
+          height: 21px;
+          padding: 0 9px;
           border-radius: 999px;
           border: 1px solid var(--card-pill-border);
           background: rgba(255,255,255,0.74);
           color: var(--card-accent);
-          font-size: 9.5px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.025em;
           line-height: 1;
@@ -5277,7 +5277,7 @@ const App = () => {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          font-size: 10px;
+          font-size: 10.5px;
           font-weight: 700;
           letter-spacing: 0.03em;
           text-transform: uppercase;
@@ -5294,7 +5294,7 @@ const App = () => {
         @media (max-width: 1220px) {
           .feature-flow-branches {
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 14px;
+            gap: 18px;
           }
           .feature-flow-branches::before {
             left: 14%;
@@ -5304,7 +5304,7 @@ const App = () => {
         @media (max-width: 920px) {
           .feature-flow-branches {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
+            gap: 14px;
           }
           .feature-flow-branches::before {
             left: 20%;
@@ -5924,12 +5924,12 @@ const App = () => {
             </div>{/* end hero-grad */}
 
             {/* Capability cards */}
-            <div style={{ maxWidth: 1360, margin: '0 auto', padding: '12px 28px 52px' }}>
+            <div style={{ maxWidth: 1500, margin: '0 auto', padding: isMobile ? '12px 16px 44px' : '20px 36px 68px' }}>
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>
                   How It Works
                 </div>
-                <h2 style={{ margin: `${isMobile ? 34 : 52}px 0 0`, fontSize: isMobile ? 20 : 26, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
+                <h2 style={{ margin: `${isMobile ? 34 : 52}px 0 0`, fontSize: isMobile ? 20 : 30, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
                   Add once, then branch into every workflow
                 </h2>
               </div>
