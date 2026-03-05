@@ -5925,12 +5925,6 @@ const App = () => {
                                 </div>
                               </div>
                             </div>
-                            <div style={{ display: 'flex', gap: 4 }}>
-                              <span className="feature-mock-tools-tab active" style={{ flex: 1, height: 10 }} />
-                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
-                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
-                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
-                            </div>
                           </div>
                         </div>
                       )}
@@ -6002,12 +5996,6 @@ const App = () => {
                                 <span className="feature-mock-chat-input-text">Ask a follow-up about this clip…</span>
                                 <span className="feature-mock-chat-send" />
                               </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: 4 }}>
-                              <span className="feature-mock-tools-tab active" style={{ flex: 1, height: 10 }} />
-                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
-                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
-                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
                             </div>
                           </div>
                         </div>
