@@ -4884,9 +4884,42 @@ const App = () => {
           background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(60,140,255,0.08) 100%);
         }
         .feature-flow-node.transcript {
+          min-width: 320px;
+          min-height: 66px;
+          height: auto;
+          padding: 6px 8px;
           border-color: rgba(84,104,168,0.26);
           color: #40548A;
           background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(84,104,168,0.08) 100%);
+        }
+        .feature-flow-transcript-preview {
+          width: 100%;
+          border-radius: 8px;
+          border: 1px solid rgba(84,104,168,0.18);
+          background: rgba(255,255,255,0.86);
+          padding: 5px 6px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .feature-flow-transcript-preview .feature-mock-url-bar {
+          height: 17px;
+          padding: 0 5px;
+          font-size: 7px;
+        }
+        .feature-flow-transcript-preview .feature-mock-cursor {
+          height: 7px;
+        }
+        .feature-flow-transcript-preview .feature-mock-ts-row {
+          gap: 4px;
+        }
+        .feature-flow-transcript-preview .feature-mock-ts-badge {
+          font-size: 6.1px;
+          opacity: 0.78;
+        }
+        .feature-flow-transcript-preview .feature-mock-line {
+          height: 6px;
+          border-radius: 4px;
         }
         .feature-flow-branches {
           position: relative;
@@ -5300,6 +5333,11 @@ const App = () => {
             min-width: 150px;
             height: 34px;
             font-size: 12.5px;
+          }
+          .feature-flow-node.transcript {
+            min-width: 100%;
+            min-height: 62px;
+            padding: 6px;
           }
           .feature-flow-branches {
             grid-template-columns: 1fr;
@@ -5893,7 +5931,23 @@ const App = () => {
               <div className="feature-workflow">
                 <div className="feature-flow-head">
                   <span className="feature-flow-node input">01 Add Video</span>
-                  <span className="feature-flow-node transcript">02 Transcript</span>
+                  <span className="feature-flow-node transcript">
+                    <span className="feature-flow-transcript-preview">
+                      <span className="feature-mock-url-bar">
+                        <span style={{ opacity: 0.45, fontSize: 9 }}>⌕</span>
+                        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>youtube.com/watch?v=dQw4w9</span>
+                        <span className="feature-mock-cursor" />
+                      </span>
+                      <span className="feature-mock-ts-row">
+                        <span className="feature-mock-ts-badge">0:12</span>
+                        <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0s' }} />
+                      </span>
+                      <span className="feature-mock-ts-row">
+                        <span className="feature-mock-ts-badge">0:38</span>
+                        <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0.22s' }} />
+                      </span>
+                    </span>
+                  </span>
                 </div>
                 <div className="feature-flow-branches">
                 {[
