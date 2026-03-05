@@ -77,6 +77,24 @@ const SUMMARY_DEMO_PREVIEWS = [
   },
 ];
 
+const FLASHCARD_DEMO_PREVIEWS = [
+  {
+    topic: 'Core Idea',
+    question: 'What is the main argument of the video?',
+    answer: 'Fast feedback loops produce better decisions and more consistent outcomes.',
+  },
+  {
+    topic: 'Method',
+    question: 'What 3-step framework is recommended?',
+    answer: 'Define a metric, test one change, then compare against a baseline.',
+  },
+  {
+    topic: 'Application',
+    question: 'How should you apply this in practice?',
+    answer: 'Run weekly experiments and summarize each result into one actionable takeaway.',
+  },
+];
+
 const BRAND_NAME = 'ScribeSnap';
 const BRAND_LOGO_SRC = '/logo-wordmark.png';
 const FOOTER_LOGO_SRC = '/scribesnap_wordmark_footer.svg';
@@ -3459,6 +3477,7 @@ const App = () => {
   const [activeLogo, setActiveLogo]               = useState('youtube');
   const [logoFlip, setLogoFlip]                   = useState('idle');    // 'idle' | 'out' | 'in'
   const [summaryDemoIdx, setSummaryDemoIdx]       = useState(0);
+  const [flashcardDemoIdx, setFlashcardDemoIdx]   = useState(0);
   const [sgQuestion, setSgQuestion]               = useState('');
   const [sgMessages, setSgMessages]               = useState([]);       // [{role, text, isError?}]
   const [sgLoading, setSgLoading]                 = useState(false);
@@ -3604,6 +3623,15 @@ const App = () => {
     const id = setInterval(() => {
       setSummaryDemoIdx((i) => (i + 1) % SUMMARY_DEMO_PREVIEWS.length);
     }, 3200);
+    return () => clearInterval(id);
+  }, [transcript]);
+
+  // Landing card animation: cycle realistic flashcard Q/A snippets
+  useEffect(() => {
+    if (transcript) return;
+    const id = setInterval(() => {
+      setFlashcardDemoIdx((i) => (i + 1) % FLASHCARD_DEMO_PREVIEWS.length);
+    }, 3800);
     return () => clearInterval(id);
   }, [transcript]);
 
@@ -4553,6 +4581,7 @@ const App = () => {
     ? (transcript.match(new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')) || []).length
     : 0;
   const summaryPreview = SUMMARY_DEMO_PREVIEWS[summaryDemoIdx % SUMMARY_DEMO_PREVIEWS.length];
+  const flashcardPreview = FLASHCARD_DEMO_PREVIEWS[flashcardDemoIdx % FLASHCARD_DEMO_PREVIEWS.length];
 
   const onNavAskAI = () => {
     if (transcript) {
@@ -5123,12 +5152,14 @@ const App = () => {
         .feature-mock-bullet-row.anim-1 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; }
         .feature-mock-bullet-row.anim-2 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:0.65s; }
         .feature-mock-bullet-row.anim-3 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:1.3s; }
-        .feature-mock-flip-scene { perspective:500px; height:46px; margin:2px 0; }
+        .feature-mock-flip-scene { perspective:500px; height:52px; margin:2px 0; }
         .feature-mock-flip-card { width:100%; height:100%; position:relative; transform-style:preserve-3d; animation:cardFlip3D 3.8s ease-in-out infinite; }
-        .feature-mock-flip-front, .feature-mock-flip-back { position:absolute; inset:0; border-radius:8px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; align-items:center; padding:0 10px; gap:7px; }
+        .feature-mock-flip-front, .feature-mock-flip-back { position:absolute; inset:0; border-radius:8px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; padding:6px 8px; gap:3px; overflow:hidden; }
         .feature-mock-flip-front { background:rgba(255,255,255,0.92); border:1px solid var(--card-pill-border); }
         .feature-mock-flip-back { background:var(--card-pill-bg); border:1px solid var(--card-pill-border); transform:rotateY(180deg); }
-        .feature-mock-flip-label { font-size:8px; font-weight:800; color:var(--card-accent); text-transform:uppercase; letter-spacing:0.05em; font-family:ui-monospace,monospace; flex-shrink:0; }
+        .feature-mock-flip-label { font-size:6.5px; font-weight:800; color:var(--card-accent); text-transform:uppercase; letter-spacing:0.05em; font-family:ui-monospace,monospace; flex-shrink:0; opacity:0.9; }
+        .feature-mock-flip-topic { font-size:6.3px; font-weight:700; color:var(--card-accent); text-transform:uppercase; letter-spacing:0.04em; border:1px solid var(--card-pill-border); background:rgba(255,255,255,0.84); border-radius:999px; padding:1px 4px; line-height:1; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .feature-mock-flip-text { font-size:6.9px; line-height:1.35; color:rgba(29,29,31,0.72); letter-spacing:0.01em; max-width:100%; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
         .feature-mock-flip-line { height:6px; flex:1; border-radius:4px; background:rgba(29,29,31,0.12); }
         .feature-mock-typing { display:flex; align-items:center; gap:3px; padding:5px 8px; background:rgba(255,255,255,0.88); border:1px solid rgba(29,29,31,0.1); border-radius:8px; align-self:flex-start; width:fit-content; margin-top:1px; }
         .feature-mock-typing-dot { width:4px; height:4px; border-radius:50%; background:rgba(29,29,31,0.38); animation:dotBounce 1.1s ease-in-out infinite; }
@@ -5840,13 +5871,13 @@ const App = () => {
                             <div className="feature-mock-flip-scene">
                               <div className="feature-mock-flip-card">
                                 <div className="feature-mock-flip-front">
-                                  <span className="feature-mock-flip-label">Q?</span>
-                                  <span className="feature-mock-flip-line" />
-                                  <span className="feature-mock-flip-line" style={{ maxWidth: 28 }} />
+                                  <span className="feature-mock-flip-label">Flashcard</span>
+                                  <span className="feature-mock-flip-topic">{flashcardPreview.topic}</span>
+                                  <span className="feature-mock-flip-text">{flashcardPreview.question}</span>
                                 </div>
                                 <div className="feature-mock-flip-back">
-                                  <span className="feature-mock-flip-label">A</span>
-                                  <span className="feature-mock-flip-line" style={{ opacity: 0.65 }} />
+                                  <span className="feature-mock-flip-label">Answer</span>
+                                  <span className="feature-mock-flip-text">{flashcardPreview.answer}</span>
                                 </div>
                               </div>
                             </div>
