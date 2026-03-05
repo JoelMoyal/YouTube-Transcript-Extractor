@@ -5556,13 +5556,16 @@ const App = () => {
                   How It Works
                 </div>
                 <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 28, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
-                  Four visual steps, one complete workflow
+                  Start with transcript, then choose any AI path
                 </h2>
+                <p style={{ margin: '8px auto 0', maxWidth: 560, fontSize: 12.5, lineHeight: 1.5, color: P.muted }}>
+                  Extract first, then use Summary, Flashcards, Study Guide, Chat, and Academic in whatever order fits your workflow.
+                </p>
               </div>
               <div className="feature-workflow">
                 {[
                   {
-                    num: '01',
+                    num: '1',
                     label: 'Instant Transcript',
                     desc: 'Paste any video URL and extract a full transcript with second-level timestamps in seconds.',
                     meta: '10+ platforms · second-level timestamps',
@@ -5584,7 +5587,7 @@ const App = () => {
                     ),
                   },
                   {
-                    num: '02',
+                    num: 'ANY',
                     label: 'AI Summaries',
                     desc: 'Create bullet point summaries and chapter breakdowns on demand from any transcript.',
                     meta: 'AI summaries · Bullet points · Chapters',
@@ -5606,7 +5609,7 @@ const App = () => {
                     ),
                   },
                   {
-                    num: '03',
+                    num: 'ANY',
                     label: 'Flash Cards + Study Guide',
                     desc: 'Build Q&A flash cards with flip mode plus objectives, concepts, and review prompts.',
                     meta: 'Flash cards · Flip mode · Study guide',
@@ -5628,7 +5631,7 @@ const App = () => {
                     ),
                   },
                   {
-                    num: '04',
+                    num: 'ANY',
                     label: 'Chat + Academic',
                     desc: 'Ask questions with transcript-grounded answers and surface references, claims, and glossary terms.',
                     meta: 'Cited answers · References · Glossary',
@@ -6943,12 +6946,13 @@ const App = () => {
                       background: '#fff',
                       border: `1.5px solid ${P.border}`,
                       borderRadius: 14,
-                      padding: '6px 6px 6px 16px',
+                      padding: '6px 6px 6px 8px',
                       transition: 'border-color 0.2s, box-shadow 0.2s',
                       boxShadow: '0 1px 4px rgba(29,29,31,0.06)',
                     }}
                     onClick={() => qaInputRef.current?.focus()}
                   >
+                    <AiBubbleAvatar size={24} iconSize={13} radius={7} />
                     <input
                       ref={qaInputRef}
                       value={qaQuestion}
@@ -7948,7 +7952,8 @@ const App = () => {
                     )}
                   </div>
                 )}
-                <div style={{ display: 'flex', alignItems: 'center', background: P.paper, border: `1.5px solid ${P.border}`, borderRadius: 14, padding: '8px 8px 8px 18px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', background: P.paper, border: `1.5px solid ${P.border}`, borderRadius: 14, padding: '8px 8px 8px 10px' }}>
+                  <AiBubbleAvatar size={24} iconSize={13} radius={7} />
                   <input value={sgQuestion} onChange={e => setSgQuestion(e.target.value)} onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askSgQuestion()} placeholder="Ask a question about this video…" disabled={sgLoading}
                     style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 14, color: P.ink, padding: '4px 0' }}
                     onFocus={e => { e.currentTarget.parentElement.style.borderColor = P.accent; e.currentTarget.parentElement.style.boxShadow = '0 0 0 3px rgba(60,140,255,0.1)'; }}
