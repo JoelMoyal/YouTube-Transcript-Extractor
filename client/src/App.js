@@ -122,6 +122,19 @@ const CHAT_DEMO_PREVIEWS = [
   },
 ];
 
+const ACADEMIC_DEMO_PREVIEW = {
+  reference: '[1] Smith et al. (2024) — Learning Loops in Applied Research',
+  claim: 'Claim: weekly constrained experiments improved retention by 18%.',
+  glossary: ['Baseline', 'Confounder', 'Effect Size'],
+};
+
+const STUDY_GUIDE_DEMO_PREVIEW = {
+  overview: 'Overview: turn transcript into a structured revision plan.',
+  objectiveOne: 'Objective: identify the 3 highest-impact ideas.',
+  objectiveTwo: 'Objective: connect each idea to one practical use case.',
+  reviewQuestion: 'Review: Which assumption changed most after the evidence section?',
+};
+
 const BRAND_NAME = 'ScribeSnap';
 const BRAND_LOGO_SRC = '/logo-wordmark.png';
 const FOOTER_LOGO_SRC = '/scribesnap_wordmark_footer.svg';
@@ -5227,6 +5240,16 @@ const App = () => {
         .feature-mock-chat-composer { display:flex; align-items:center; gap:4px; border:1px solid rgba(29,29,31,0.11); border-radius:7px; padding:2px 3px; background:#fff; }
         .feature-mock-chat-input-text { flex:1; min-width:0; font-size:6.2px; color:rgba(29,29,31,0.42); line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .feature-mock-chat-send { width:8px; height:8px; border-radius:50%; background:var(--card-accent); opacity:0.88; flex-shrink:0; }
+        .feature-mock-guide-stack { display:flex; flex-direction:column; gap:4px; }
+        .feature-mock-guide-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; }
+        .feature-mock-guide-label { font-size:5.8px; font-weight:800; color:var(--card-accent); letter-spacing:0.05em; text-transform:uppercase; line-height:1; }
+        .feature-mock-guide-line { font-size:6.3px; color:rgba(29,29,31,0.68); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .feature-mock-academic-stack { display:flex; flex-direction:column; gap:4px; }
+        .feature-mock-academic-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; }
+        .feature-mock-academic-label { font-size:5.8px; font-weight:800; color:var(--card-accent); letter-spacing:0.05em; text-transform:uppercase; line-height:1; }
+        .feature-mock-academic-line { font-size:6.4px; color:rgba(29,29,31,0.68); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .feature-mock-academic-tags { display:flex; align-items:center; gap:3px; flex-wrap:wrap; }
+        .feature-mock-academic-tag { display:inline-flex; align-items:center; height:10px; padding:0 4px; border-radius:999px; border:1px solid var(--card-pill-border); background:var(--card-pill-bg); color:var(--card-accent); font-size:5.7px; font-weight:700; letter-spacing:0.02em; }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(60,140,255,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
@@ -5725,7 +5748,7 @@ const App = () => {
                   How It Works
                 </div>
                 <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 28, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
-                  Four visual steps, one complete workflow
+                  Six visual steps, one complete workflow
                 </h2>
               </div>
               <div className="feature-workflow">
@@ -5776,10 +5799,10 @@ const App = () => {
                   },
                   {
                     num: '03',
-                    label: 'Flash Cards + Study Guide',
-                    desc: 'Build Q&A flash cards with flip mode plus objectives, concepts, and review prompts.',
-                    meta: 'Flash cards · Flip mode · Study guide',
-                    tags: ['Flash Cards', 'Q&A Flip', 'Objectives', 'Concepts', 'Review'],
+                    label: 'Flash Cards',
+                    desc: 'Generate smart Q&A flash cards with flip mode for active recall practice.',
+                    meta: 'Flash cards · Flip mode · Active recall',
+                    tags: ['Flash Cards', 'Q&A Flip', 'Active Recall'],
                     accent: '#3A7A6A',
                     gradient: 'linear-gradient(100deg, #8EC8BC 0%, #5AA090 55%, #3A7A6A 100%)',
                     bg: 'rgba(58,122,106,0.08)',
@@ -5789,7 +5812,7 @@ const App = () => {
                     pillBg: 'rgba(58,122,106,0.10)',
                     pillBorder: 'rgba(58,122,106,0.18)',
                     glow: 'rgba(58,122,106,0.22)',
-                    type: 'study',
+                    type: 'flashcards',
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="4" y="6" width="16" height="12" rx="2"/><path d="M9 10h6"/><path d="M8 14h8"/>
@@ -5798,10 +5821,32 @@ const App = () => {
                   },
                   {
                     num: '04',
-                    label: 'Chat + Academic',
-                    desc: 'Ask questions with transcript-grounded answers and surface references, claims, and glossary terms.',
-                    meta: 'Cited answers · References · Glossary',
-                    tags: ['Chat Q&A', 'References', 'Claims', 'Glossary'],
+                    label: 'Study Guide',
+                    desc: 'Create a structured study guide with overview, objectives, concepts, and review prompts.',
+                    meta: 'Overview · Objectives · Review prompts',
+                    tags: ['Study Guide', 'Objectives', 'Concepts', 'Review'],
+                    accent: '#2E6F86',
+                    gradient: 'linear-gradient(100deg, #92C2D3 0%, #5A98AE 55%, #2E6F86 100%)',
+                    bg: 'rgba(46,111,134,0.08)',
+                    panel: 'rgba(46,111,134,0.06)',
+                    panelBorder: 'rgba(46,111,134,0.15)',
+                    border: 'rgba(46,111,134,0.16)',
+                    pillBg: 'rgba(46,111,134,0.10)',
+                    pillBorder: 'rgba(46,111,134,0.18)',
+                    glow: 'rgba(46,111,134,0.22)',
+                    type: 'study-guide',
+                    icon: (
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    num: '05',
+                    label: 'Chat Q&A',
+                    desc: 'Ask transcript-grounded questions, then drill into follow-ups with cited answers.',
+                    meta: 'Cited answers · Follow-up chat',
+                    tags: ['Chat Q&A', 'Sources', 'Timestamps'],
                     accent: '#6B4E90',
                     gradient: 'linear-gradient(100deg, #C0A8DC 0%, #9070BC 55%, #6B4E90 100%)',
                     bg: 'rgba(107,78,144,0.08)',
@@ -5815,6 +5860,28 @@ const App = () => {
                     icon: (
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M8 7h12"/><path d="M8 12h12"/><path d="M8 17h8"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    num: '06',
+                    label: 'Academic',
+                    desc: 'Surface references, extract claims, and auto-build a glossary from transcript content.',
+                    meta: 'References · Claims · Glossary',
+                    tags: ['References', 'Claims', 'Glossary'],
+                    accent: '#365A8B',
+                    gradient: 'linear-gradient(100deg, #A9C2E0 0%, #6F8FB8 55%, #365A8B 100%)',
+                    bg: 'rgba(54,90,139,0.08)',
+                    panel: 'rgba(54,90,139,0.06)',
+                    panelBorder: 'rgba(54,90,139,0.15)',
+                    border: 'rgba(54,90,139,0.16)',
+                    pillBg: 'rgba(54,90,139,0.10)',
+                    pillBorder: 'rgba(54,90,139,0.18)',
+                    glow: 'rgba(54,90,139,0.22)',
+                    type: 'academic',
+                    icon: (
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h7"/><circle cx="18" cy="12" r="2"/><circle cx="14" cy="18" r="2"/>
                       </svg>
                     ),
                   },
@@ -5901,7 +5968,7 @@ const App = () => {
                           </div>
                         </div>
                       )}
-                      {card.type === 'study' && (
+                      {card.type === 'flashcards' && (
                         <div className="feature-mock-shell">
                           <div className="feature-mock-topbar">
                             <span className="feature-mock-dots">
@@ -5928,6 +5995,35 @@ const App = () => {
                           </div>
                         </div>
                       )}
+                      {card.type === 'study-guide' && (
+                        <div className="feature-mock-shell">
+                          <div className="feature-mock-topbar">
+                            <span className="feature-mock-dots">
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                            </span>
+                            <span className="feature-mock-chip">Study Guide</span>
+                          </div>
+                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 5 }}>
+                            <div className="feature-mock-guide-stack">
+                              <div className="feature-mock-guide-section">
+                                <span className="feature-mock-guide-label">Overview</span>
+                                <span className="feature-mock-guide-line">{STUDY_GUIDE_DEMO_PREVIEW.overview}</span>
+                              </div>
+                              <div className="feature-mock-guide-section">
+                                <span className="feature-mock-guide-label">Objectives</span>
+                                <span className="feature-mock-guide-line">{STUDY_GUIDE_DEMO_PREVIEW.objectiveOne}</span>
+                                <span className="feature-mock-guide-line">{STUDY_GUIDE_DEMO_PREVIEW.objectiveTwo}</span>
+                              </div>
+                              <div className="feature-mock-guide-section">
+                                <span className="feature-mock-guide-label">Review Prompt</span>
+                                <span className="feature-mock-guide-line">{STUDY_GUIDE_DEMO_PREVIEW.reviewQuestion}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       {card.type === 'evidence' && (
                         <div className="feature-mock-shell">
                           <div className="feature-mock-topbar">
@@ -5936,7 +6032,7 @@ const App = () => {
                               <span className="feature-mock-dot" />
                               <span className="feature-mock-dot" />
                             </span>
-                            <span className="feature-mock-chip">Q&A + Evidence</span>
+                            <span className="feature-mock-chip">Chat Q&amp;A</span>
                           </div>
                           <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 6 }}>
                             <div className="feature-mock-chat-panel">
@@ -5995,6 +6091,38 @@ const App = () => {
                                 </span>
                                 <span className="feature-mock-chat-input-text">Ask a follow-up about this clip…</span>
                                 <span className="feature-mock-chat-send" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {card.type === 'academic' && (
+                        <div className="feature-mock-shell">
+                          <div className="feature-mock-topbar">
+                            <span className="feature-mock-dots">
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                              <span className="feature-mock-dot" />
+                            </span>
+                            <span className="feature-mock-chip">Academic</span>
+                          </div>
+                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 5 }}>
+                            <div className="feature-mock-academic-stack">
+                              <div className="feature-mock-academic-section">
+                                <span className="feature-mock-academic-label">References</span>
+                                <span className="feature-mock-academic-line">{ACADEMIC_DEMO_PREVIEW.reference}</span>
+                              </div>
+                              <div className="feature-mock-academic-section">
+                                <span className="feature-mock-academic-label">Claim</span>
+                                <span className="feature-mock-academic-line">{ACADEMIC_DEMO_PREVIEW.claim}</span>
+                              </div>
+                              <div className="feature-mock-academic-section">
+                                <span className="feature-mock-academic-label">Glossary</span>
+                                <div className="feature-mock-academic-tags">
+                                  {ACADEMIC_DEMO_PREVIEW.glossary.map((term) => (
+                                    <span key={term} className="feature-mock-academic-tag">{term}</span>
+                                  ))}
+                                </div>
                               </div>
                             </div>
                           </div>
