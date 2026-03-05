@@ -720,7 +720,7 @@ const funnyTranscriptError = (msg = '') => {
   if (m.includes('failed to process'))
     return "We got the transcript and immediately dropped it. Very smooth. Try again.";
   if (m.includes('invalid') && m.includes('url'))
-    return "That URL looks suspicious. YouTube and Vimeo only, please.";
+    return "That URL looks suspicious. Try YouTube, Vimeo, TikTok, X, Instagram, Dailymotion, Facebook, Loom, or Wistia.";
   if (m.includes('invalid') && m.includes('vimeo'))
     return "That Vimeo URL didn't pass the vibe check. Try pasting it again.";
   if (m.includes('failed to fetch') || m.includes('failed to download'))
@@ -5237,7 +5237,7 @@ const App = () => {
                 fontSize: 12, fontWeight: 600, color: P.accent,
               }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
-                YouTube &amp; Vimeo · Free · No account required
+                YouTube, Vimeo + more · Free · No account required
               </div>
 
               <h1 style={{
@@ -5254,7 +5254,7 @@ const App = () => {
                 </span>
               </h1>
               <p style={{ fontSize: 16, color: P.muted, margin: '0 0 40px', lineHeight: 1.7, maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
-                Extract full transcripts from YouTube &amp; Vimeo, then summarize with AI, generate flashcards, ask questions, and build study guides — in seconds.
+                Extract full transcripts from YouTube, Vimeo, TikTok, X, Instagram, Dailymotion, Facebook, Loom, Wistia, and more. Then summarize with AI, generate flashcards, ask questions, and build study guides — in seconds.
               </p>
 
               {/* Input card */}
@@ -7753,7 +7753,7 @@ const App = () => {
                 />
               </div>
               <p style={{ fontSize: 13, color: P.muted, lineHeight: 1.6, maxWidth: 260, margin: 0 }}>
-                Extract transcripts from YouTube and Vimeo videos and ask AI questions — free, no account needed.
+                Extract transcripts from YouTube, Vimeo, TikTok, X, Instagram, Dailymotion, Facebook, Loom, Wistia, and more — free, no account needed.
               </p>
             </div>
 
