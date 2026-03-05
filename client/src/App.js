@@ -4845,6 +4845,8 @@ const App = () => {
         * { scrollbar-width: thin; scrollbar-color: #C4BBAD #EEEBE4; }
         input, select, textarea { font-family: inherit; }
         .hero-grad {
+          position: relative;
+          overflow: hidden;
           background: radial-gradient(
             ellipse 124% 80% at 50% -22%,
             rgba(178,194,214,0.22) 0%,
@@ -4853,6 +4855,81 @@ const App = () => {
             rgba(178,194,214,0) 100%
           );
         }
+        .hero-inner {
+          position: relative;
+          z-index: 1;
+        }
+        .hero-cosmos {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 0;
+        }
+        .hero-cosmos-planet {
+          position: absolute;
+          border-radius: 50%;
+          opacity: 0.35;
+          animation: planetFloat 14s ease-in-out infinite;
+        }
+        .hero-cosmos-planet.planet-left {
+          width: 140px;
+          height: 140px;
+          left: -46px;
+          top: 104px;
+          background: radial-gradient(circle at 33% 28%, rgba(255,255,255,0.55) 0%, rgba(191,207,231,0.34) 34%, rgba(146,165,199,0.16) 65%, rgba(146,165,199,0) 100%);
+          box-shadow: 0 0 56px rgba(146,165,199,0.12);
+          animation-delay: -2.1s;
+        }
+        .hero-cosmos-planet.planet-right {
+          width: 108px;
+          height: 108px;
+          right: -28px;
+          top: 166px;
+          background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.52) 0%, rgba(203,218,239,0.3) 36%, rgba(164,184,214,0.12) 68%, rgba(164,184,214,0) 100%);
+          box-shadow: 0 0 48px rgba(164,184,214,0.11);
+          animation-delay: -6.5s;
+        }
+        .hero-cosmos-orb {
+          position: absolute;
+          border-radius: 50%;
+          background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.58) 0%, rgba(203,217,238,0.25) 62%, rgba(203,217,238,0) 100%);
+          opacity: 0.26;
+          animation: planetFloat 11s ease-in-out infinite;
+        }
+        .hero-cosmos-orb.orb-left {
+          width: 32px;
+          height: 32px;
+          left: 104px;
+          top: 282px;
+          animation-delay: -3.2s;
+        }
+        .hero-cosmos-orb.orb-right {
+          width: 24px;
+          height: 24px;
+          right: 134px;
+          top: 116px;
+          animation-delay: -7.1s;
+        }
+        .hero-cosmos-star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.78);
+          box-shadow: 0 0 8px rgba(255,255,255,0.64);
+          animation: starTwinkle 4.8s ease-in-out infinite;
+          opacity: 0.52;
+        }
+        .hero-cosmos-star.star-1 { left: 5.5%; top: 18%; animation-delay: -0.8s; }
+        .hero-cosmos-star.star-2 { left: 11%; top: 27%; animation-delay: -2.2s; }
+        .hero-cosmos-star.star-3 { left: 7%; top: 38%; animation-delay: -1.3s; }
+        .hero-cosmos-star.star-4 { left: 16%; top: 22%; animation-delay: -3.6s; }
+        .hero-cosmos-star.star-5 { right: 6%; top: 21%; animation-delay: -2.9s; }
+        .hero-cosmos-star.star-6 { right: 12%; top: 31%; animation-delay: -1.7s; }
+        .hero-cosmos-star.star-7 { right: 8%; top: 43%; animation-delay: -4.1s; }
+        .hero-cosmos-star.star-8 { right: 16%; top: 25%; animation-delay: -0.4s; }
+        .hero-cosmos-star.star-9 { left: 22%; top: 12%; width: 1.5px; height: 1.5px; animation-delay: -3s; opacity: 0.34; }
+        .hero-cosmos-star.star-10 { right: 24%; top: 14%; width: 1.5px; height: 1.5px; animation-delay: -2.4s; opacity: 0.34; }
         .feature-workflow {
           position: relative;
           display: flex;
@@ -5306,6 +5383,11 @@ const App = () => {
             right: 14%;
           }
         }
+        @media (max-width: 1023px) {
+          .hero-cosmos {
+            display: none;
+          }
+        }
         @media (max-width: 920px) {
           .feature-flow-branches {
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5369,6 +5451,8 @@ const App = () => {
         @keyframes dotBounce { 0%,60%,100% { transform:translateY(0); opacity:0.35; } 30% { transform:translateY(-3px); opacity:0.85; } }
         @keyframes chatTurnIn { 0% { opacity:0; transform:translateY(3px); } 100% { opacity:1; transform:translateY(0); } }
         @keyframes iconPulse { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-2px); } }
+        @keyframes starTwinkle { 0%,100% { opacity:0.2; transform:scale(0.9); } 50% { opacity:0.62; transform:scale(1.15); } }
+        @keyframes planetFloat { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(7px); } }
         .feature-mock-url-bar { display:flex; align-items:center; gap:5px; height:20px; padding:0 7px; border-radius:5px; background:rgba(255,255,255,0.88); border:1px solid rgba(29,29,31,0.11); font-size:8px; color:rgba(29,29,31,0.42); font-family:ui-monospace,monospace; letter-spacing:0.01em; overflow:hidden; }
         .feature-mock-cursor { width:1.5px; height:9px; background:var(--card-accent); border-radius:1px; flex-shrink:0; animation:cursorBlink 0.9s step-end infinite; }
         .feature-mock-ts-row { display:flex; align-items:center; gap:5px; }
@@ -5622,7 +5706,23 @@ const App = () => {
             <div className="hero-grad" style={{
               paddingBottom: 56,
             }}>
-            <div style={{
+            <div className="hero-cosmos" aria-hidden="true">
+              <span className="hero-cosmos-planet planet-left" />
+              <span className="hero-cosmos-planet planet-right" />
+              <span className="hero-cosmos-orb orb-left" />
+              <span className="hero-cosmos-orb orb-right" />
+              <span className="hero-cosmos-star star-1" />
+              <span className="hero-cosmos-star star-2" />
+              <span className="hero-cosmos-star star-3" />
+              <span className="hero-cosmos-star star-4" />
+              <span className="hero-cosmos-star star-5" />
+              <span className="hero-cosmos-star star-6" />
+              <span className="hero-cosmos-star star-7" />
+              <span className="hero-cosmos-star star-8" />
+              <span className="hero-cosmos-star star-9" />
+              <span className="hero-cosmos-star star-10" />
+            </div>
+            <div className="hero-inner" style={{
               maxWidth: 700, margin: '0 auto', padding: isMobile ? '32px 16px 24px' : '72px 24px 40px',
               textAlign: 'center',
             }}>
