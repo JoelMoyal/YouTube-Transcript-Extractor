@@ -5058,6 +5058,26 @@ const App = () => {
         .feature-mock-flip-line { height:6px; flex:1; border-radius:4px; background:rgba(29,29,31,0.12); }
         .feature-mock-typing { display:flex; align-items:center; gap:3px; padding:5px 8px; background:rgba(255,255,255,0.88); border:1px solid rgba(29,29,31,0.1); border-radius:8px; align-self:flex-start; width:fit-content; margin-top:1px; }
         .feature-mock-typing-dot { width:4px; height:4px; border-radius:50%; background:rgba(29,29,31,0.38); animation:dotBounce 1.1s ease-in-out infinite; }
+        .feature-mock-chat-panel { border:1px solid rgba(29,29,31,0.11); border-radius:9px; background:rgba(255,255,255,0.95); padding:6px; display:flex; flex-direction:column; gap:5px; }
+        .feature-mock-chat-head { display:flex; align-items:center; gap:5px; }
+        .feature-mock-chat-head-avatar { width:13px; height:13px; border-radius:4px; flex-shrink:0; border:1px solid rgba(60,140,255,0.2); background:linear-gradient(135deg, rgba(60,140,255,0.14) 0%, rgba(60,140,255,0.06) 100%); display:flex; align-items:center; justify-content:center; }
+        .feature-mock-chat-head-avatar img { width:8px; height:8px; display:block; }
+        .feature-mock-chat-head-lines { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
+        .feature-mock-chat-head-line { height:3px; border-radius:999px; background:rgba(29,29,31,0.14); }
+        .feature-mock-chat-stream { display:flex; flex-direction:column; gap:4px; min-height:41px; }
+        .feature-mock-chat-row { display:flex; align-items:flex-start; gap:4px; }
+        .feature-mock-chat-row.user { justify-content:flex-end; }
+        .feature-mock-chat-avatar { width:12px; height:12px; border-radius:4px; flex-shrink:0; border:1px solid rgba(60,140,255,0.18); background:linear-gradient(135deg, rgba(60,140,255,0.14) 0%, rgba(60,140,255,0.06) 100%); display:flex; align-items:center; justify-content:center; }
+        .feature-mock-chat-avatar img { width:7px; height:7px; display:block; }
+        .feature-mock-chat-ai-stack { flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+        .feature-mock-chat-pill { height:10px; border-radius:7px; }
+        .feature-mock-chat-pill.user { background:linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%); opacity:0.92; }
+        .feature-mock-chat-pill.ai { background:rgba(29,29,31,0.11); border:1px solid rgba(29,29,31,0.08); }
+        .feature-mock-chat-mini-refs { display:flex; gap:3px; margin-top:1px; flex-wrap:wrap; }
+        .feature-mock-chat-mini-ref { height:7px; border-radius:999px; border:1px solid var(--card-pill-border); background:rgba(255,255,255,0.92); }
+        .feature-mock-chat-composer { display:flex; align-items:center; gap:4px; border:1px solid rgba(29,29,31,0.11); border-radius:7px; padding:2px 3px; background:#fff; }
+        .feature-mock-chat-input-line { flex:1; height:4px; border-radius:999px; background:rgba(29,29,31,0.14); }
+        .feature-mock-chat-send { width:8px; height:8px; border-radius:50%; background:var(--card-accent); opacity:0.88; flex-shrink:0; }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(60,140,255,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
@@ -5556,16 +5576,13 @@ const App = () => {
                   How It Works
                 </div>
                 <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 28, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
-                  Start with transcript, then choose any AI path
+                  Four visual steps, one complete workflow
                 </h2>
-                <p style={{ margin: '8px auto 0', maxWidth: 560, fontSize: 12.5, lineHeight: 1.5, color: P.muted }}>
-                  Extract first, then use Summary, Flashcards, Study Guide, Chat, and Academic in whatever order fits your workflow.
-                </p>
               </div>
               <div className="feature-workflow">
                 {[
                   {
-                    num: '1',
+                    num: '01',
                     label: 'Instant Transcript',
                     desc: 'Paste any video URL and extract a full transcript with second-level timestamps in seconds.',
                     meta: '10+ platforms · second-level timestamps',
@@ -5587,7 +5604,7 @@ const App = () => {
                     ),
                   },
                   {
-                    num: 'ANY',
+                    num: '02',
                     label: 'AI Summaries',
                     desc: 'Create bullet point summaries and chapter breakdowns on demand from any transcript.',
                     meta: 'AI summaries · Bullet points · Chapters',
@@ -5609,7 +5626,7 @@ const App = () => {
                     ),
                   },
                   {
-                    num: 'ANY',
+                    num: '03',
                     label: 'Flash Cards + Study Guide',
                     desc: 'Build Q&A flash cards with flip mode plus objectives, concepts, and review prompts.',
                     meta: 'Flash cards · Flip mode · Study guide',
@@ -5631,7 +5648,7 @@ const App = () => {
                     ),
                   },
                   {
-                    num: 'ANY',
+                    num: '04',
                     label: 'Chat + Academic',
                     desc: 'Ask questions with transcript-grounded answers and surface references, claims, and glossary terms.',
                     meta: 'Cited answers · References · Glossary',
@@ -5782,26 +5799,59 @@ const App = () => {
                             </span>
                             <span className="feature-mock-chip">Q&A + Evidence</span>
                           </div>
-                          <div className="feature-mock-body">
-                            <div className="feature-mock-chat">
-                              <span className="feature-mock-bubble question" />
-                              <span className="feature-mock-bubble answer" />
-                              <span className="feature-mock-bubble question" style={{ width: '55%' }} />
-                              <div className="feature-mock-typing">
-                                <span className="feature-mock-typing-dot" style={{ animationDelay: '0s' }} />
-                                <span className="feature-mock-typing-dot" style={{ animationDelay: '0.18s' }} />
-                                <span className="feature-mock-typing-dot" style={{ animationDelay: '0.36s' }} />
+                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 6 }}>
+                            <div className="feature-mock-chat-panel">
+                              <div className="feature-mock-chat-head">
+                                <span className="feature-mock-chat-head-avatar">
+                                  <img src="/scribesnap_icon_wave.svg" alt="" />
+                                </span>
+                                <span className="feature-mock-chat-head-lines">
+                                  <span className="feature-mock-chat-head-line" style={{ width: '52%' }} />
+                                  <span className="feature-mock-chat-head-line" style={{ width: '32%', opacity: 0.75 }} />
+                                </span>
                               </div>
-                              <div className="feature-mock-refs">
-                                <span className="feature-mock-ref" style={{ width: 31 }} />
-                                <span className="feature-mock-ref" style={{ width: 26 }} />
-                                <span className="feature-mock-ref" style={{ width: 34 }} />
+                              <div className="feature-mock-chat-stream">
+                                <div className="feature-mock-chat-row user">
+                                  <span className="feature-mock-chat-pill user" style={{ width: '58%' }} />
+                                </div>
+                                <div className="feature-mock-chat-row ai">
+                                  <span className="feature-mock-chat-avatar">
+                                    <img src="/scribesnap_icon_wave.svg" alt="" />
+                                  </span>
+                                  <div className="feature-mock-chat-ai-stack">
+                                    <span className="feature-mock-chat-pill ai" style={{ width: '85%' }} />
+                                    <span className="feature-mock-chat-pill ai" style={{ width: '68%' }} />
+                                    <div className="feature-mock-chat-mini-refs">
+                                      <span className="feature-mock-chat-mini-ref" style={{ width: 24 }} />
+                                      <span className="feature-mock-chat-mini-ref" style={{ width: 20 }} />
+                                      <span className="feature-mock-chat-mini-ref" style={{ width: 26 }} />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="feature-mock-chat-row ai">
+                                  <span className="feature-mock-chat-avatar">
+                                    <img src="/scribesnap_icon_wave.svg" alt="" />
+                                  </span>
+                                  <div className="feature-mock-typing">
+                                    <span className="feature-mock-typing-dot" style={{ animationDelay: '0s' }} />
+                                    <span className="feature-mock-typing-dot" style={{ animationDelay: '0.18s' }} />
+                                    <span className="feature-mock-typing-dot" style={{ animationDelay: '0.36s' }} />
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="feature-mock-chat-composer">
+                                <span className="feature-mock-chat-head-avatar">
+                                  <img src="/scribesnap_icon_wave.svg" alt="" />
+                                </span>
+                                <span className="feature-mock-chat-input-line" />
+                                <span className="feature-mock-chat-send" />
                               </div>
                             </div>
-                            <div className="feature-mock-tools-nav">
-                              <span className="feature-mock-tools-tab active" />
-                              <span className="feature-mock-tools-tab" />
-                              <span className="feature-mock-tools-tab" />
+                            <div style={{ display: 'flex', gap: 4 }}>
+                              <span className="feature-mock-tools-tab active" style={{ flex: 1, height: 10 }} />
+                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
+                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
+                              <span className="feature-mock-tools-tab" style={{ flex: 1, height: 10 }} />
                             </div>
                           </div>
                         </div>
