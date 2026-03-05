@@ -4848,6 +4848,24 @@ const App = () => {
           background: radial-gradient(ellipse 86% 54% at 50% -12%, rgba(200,190,175,0.16) 0%, transparent 65%),
                       ${P.paper};
         }
+        .how-it-works-cue {
+          width: 30px;
+          height: 30px;
+          margin: 2px auto 0;
+          border-radius: 999px;
+          border: 1px solid rgba(60,140,255,0.24);
+          background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(60,140,255,0.12) 100%);
+          color: ${P.accent};
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 8px 18px rgba(60,140,255,0.12);
+        }
+        .how-it-works-cue svg {
+          width: 13px;
+          height: 13px;
+          animation: downArrowFloat 1.65s ease-in-out infinite;
+        }
         .feature-workflow {
           position: relative;
           display: flex;
@@ -5351,6 +5369,7 @@ const App = () => {
           .feature-card-tag { font-size: 9px; height: 18px; }
           .feature-card-meta { font-size: 10px; }
         }
+        @keyframes downArrowFloat { 0%,100% { transform:translateY(-1px); opacity:0.82; } 50% { transform:translateY(2px); opacity:1; } }
         @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } }
         @keyframes shimmerSweep { 0% { background-position:110% center; } 100% { background-position:-110% center; } }
         @keyframes bulletReveal { 0% { opacity:0.12; transform:translateX(-4px); } 18%,68% { opacity:1; transform:translateX(0); } 85%,100% { opacity:0.12; transform:translateX(0); } }
@@ -5935,7 +5954,13 @@ const App = () => {
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>
                   How It Works
                 </div>
-                <h2 style={{ margin: `${isMobile ? 34 : 128}px 0 0`, fontSize: isMobile ? 20 : 30, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
+                <div className="how-it-works-cue" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 5v12" />
+                    <path d="m7 12 5 5 5-5" />
+                  </svg>
+                </div>
+                <h2 style={{ margin: `${isMobile ? 34 : 84}px 0 0`, fontSize: isMobile ? 20 : 30, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
                   Add once, then branch into every workflow
                 </h2>
               </div>
