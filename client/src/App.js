@@ -4241,7 +4241,7 @@ const App = () => {
       }
     });
 
-    es.addEventListener('error', (e) => {
+    es.addEventListener('transcript_error', (e) => {
       clearTimeout(killTimer); es.close();
       try {
         const data = JSON.parse(e.data);
