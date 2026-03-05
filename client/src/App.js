@@ -6019,10 +6019,10 @@ const App = () => {
                   },
                   {
                     num: '06',
-                    label: 'Chat Q&A',
+                    label: 'AI Chat Q&A',
                     desc: 'Ask transcript-grounded questions, then drill into follow-ups with cited answers.',
                     meta: 'Cited answers · Follow-up chat',
-                    tags: ['Chat Q&A', 'Sources', 'Timestamps'],
+                    tags: ['AI Chat Q&A', 'Sources', 'Timestamps'],
                     accent: '#6B4E90',
                     gradient: 'linear-gradient(100deg, #C0A8DC 0%, #9070BC 55%, #6B4E90 100%)',
                     bg: 'rgba(107,78,144,0.08)',
@@ -6208,7 +6208,7 @@ const App = () => {
                               <span className="feature-mock-dot" />
                               <span className="feature-mock-dot" />
                             </span>
-                            <span className="feature-mock-chip">Chat Q&amp;A</span>
+                            <span className="feature-mock-chip">AI Chat Q&amp;A</span>
                           </div>
                           <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 6 }}>
                             <div className="feature-mock-chat-panel">
