@@ -122,18 +122,50 @@ const CHAT_DEMO_PREVIEWS = [
   },
 ];
 
-const ACADEMIC_DEMO_PREVIEW = {
-  reference: '[1] Smith et al. (2024) — Learning Loops in Applied Research',
-  claim: 'Claim: weekly constrained experiments improved retention by 18%.',
-  glossary: ['Baseline', 'Confounder', 'Effect Size'],
-};
+const STUDY_GUIDE_DEMO_PREVIEWS = [
+  {
+    overview: 'Overview: convert the lecture into a focused weekly revision plan.',
+    objectives: [
+      'Objective: identify the 3 highest-impact ideas.',
+      'Objective: map each idea to one practical use case.',
+    ],
+    reviewQuestion: 'Review: Which assumption changed most after the evidence section?',
+  },
+  {
+    overview: 'Overview: break a long transcript into clear modules for recall.',
+    objectives: [
+      'Objective: summarize each module in one sentence.',
+      'Objective: compare the speaker framework against your current workflow.',
+    ],
+    reviewQuestion: 'Review: What tradeoff appears when speed is prioritized over depth?',
+  },
+  {
+    overview: 'Overview: synthesize the core argument into exam-ready notes.',
+    objectives: [
+      'Objective: define key terms before analyzing claims.',
+      'Objective: connect each claim to one cited source timestamp.',
+    ],
+    reviewQuestion: 'Review: Which piece of evidence is strongest and why?',
+  },
+];
 
-const STUDY_GUIDE_DEMO_PREVIEW = {
-  overview: 'Overview: turn transcript into a structured revision plan.',
-  objectiveOne: 'Objective: identify the 3 highest-impact ideas.',
-  objectiveTwo: 'Objective: connect each idea to one practical use case.',
-  reviewQuestion: 'Review: Which assumption changed most after the evidence section?',
-};
+const ACADEMIC_DEMO_PREVIEWS = [
+  {
+    reference: '[1] Smith et al. (2024) - Learning Loops in Applied Research',
+    claim: 'Claim: weekly constrained experiments improved retention by 18%.',
+    glossary: ['Baseline', 'Confounder', 'Effect Size'],
+  },
+  {
+    reference: '[2] Patel & Nguyen (2023) - Evidence-Grounded Learning Design',
+    claim: 'Claim: citation-linked summaries reduced review time without lowering accuracy.',
+    glossary: ['Cohort', 'Intervention', 'Variance'],
+  },
+  {
+    reference: '[3] Jensen (2025) - Retrieval Practice Across Long-Form Video',
+    claim: 'Claim: timestamped prompts increased long-term recall in follow-up tests.',
+    glossary: ['Retention', 'Recall', 'Signal Noise'],
+  },
+];
 
 const BRAND_NAME = 'ScribeSnap';
 const BRAND_LOGO_SRC = '/logo-wordmark.png';
@@ -3519,6 +3551,8 @@ const App = () => {
   const [summaryDemoIdx, setSummaryDemoIdx]       = useState(0);
   const [flashcardDemoIdx, setFlashcardDemoIdx]   = useState(0);
   const [chatDemoIdx, setChatDemoIdx]             = useState(0);
+  const [studyGuideDemoIdx, setStudyGuideDemoIdx] = useState(0);
+  const [academicDemoIdx, setAcademicDemoIdx]     = useState(0);
   const [sgQuestion, setSgQuestion]               = useState('');
   const [sgMessages, setSgMessages]               = useState([]);       // [{role, text, isError?}]
   const [sgLoading, setSgLoading]                 = useState(false);
@@ -3682,6 +3716,24 @@ const App = () => {
     const id = setInterval(() => {
       setChatDemoIdx((i) => (i + 1) % CHAT_DEMO_PREVIEWS.length);
     }, 6800);
+    return () => clearInterval(id);
+  }, [transcript]);
+
+  // Landing card animation: cycle study guide snippets
+  useEffect(() => {
+    if (transcript) return;
+    const id = setInterval(() => {
+      setStudyGuideDemoIdx((i) => (i + 1) % STUDY_GUIDE_DEMO_PREVIEWS.length);
+    }, 5600);
+    return () => clearInterval(id);
+  }, [transcript]);
+
+  // Landing card animation: cycle academic snippets
+  useEffect(() => {
+    if (transcript) return;
+    const id = setInterval(() => {
+      setAcademicDemoIdx((i) => (i + 1) % ACADEMIC_DEMO_PREVIEWS.length);
+    }, 6000);
     return () => clearInterval(id);
   }, [transcript]);
 
@@ -4633,6 +4685,8 @@ const App = () => {
   const summaryPreview = SUMMARY_DEMO_PREVIEWS[summaryDemoIdx % SUMMARY_DEMO_PREVIEWS.length];
   const flashcardPreview = FLASHCARD_DEMO_PREVIEWS[flashcardDemoIdx % FLASHCARD_DEMO_PREVIEWS.length];
   const chatPreview = CHAT_DEMO_PREVIEWS[chatDemoIdx % CHAT_DEMO_PREVIEWS.length];
+  const studyGuidePreview = STUDY_GUIDE_DEMO_PREVIEWS[studyGuideDemoIdx % STUDY_GUIDE_DEMO_PREVIEWS.length];
+  const academicPreview = ACADEMIC_DEMO_PREVIEWS[academicDemoIdx % ACADEMIC_DEMO_PREVIEWS.length];
 
   const onNavAskAI = () => {
     if (transcript) {
@@ -5241,15 +5295,25 @@ const App = () => {
         .feature-mock-chat-input-text { flex:1; min-width:0; font-size:6.2px; color:rgba(29,29,31,0.42); line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .feature-mock-chat-send { width:8px; height:8px; border-radius:50%; background:var(--card-accent); opacity:0.88; flex-shrink:0; }
         .feature-mock-guide-stack { display:flex; flex-direction:column; gap:4px; }
-        .feature-mock-guide-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; }
+        .feature-mock-guide-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
+        .feature-mock-guide-section.step-1 { animation-delay:0.08s; }
+        .feature-mock-guide-section.step-2 { animation-delay:0.6s; }
+        .feature-mock-guide-section.step-3 { animation-delay:1.12s; }
         .feature-mock-guide-label { font-size:5.8px; font-weight:800; color:var(--card-accent); letter-spacing:0.05em; text-transform:uppercase; line-height:1; }
         .feature-mock-guide-line { font-size:6.3px; color:rgba(29,29,31,0.68); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .feature-mock-guide-line.subtle { color:rgba(29,29,31,0.58); }
         .feature-mock-academic-stack { display:flex; flex-direction:column; gap:4px; }
-        .feature-mock-academic-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; }
+        .feature-mock-academic-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
+        .feature-mock-academic-section.step-1 { animation-delay:0.08s; }
+        .feature-mock-academic-section.step-2 { animation-delay:0.6s; }
+        .feature-mock-academic-section.step-3 { animation-delay:1.12s; }
         .feature-mock-academic-label { font-size:5.8px; font-weight:800; color:var(--card-accent); letter-spacing:0.05em; text-transform:uppercase; line-height:1; }
         .feature-mock-academic-line { font-size:6.4px; color:rgba(29,29,31,0.68); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .feature-mock-academic-tags { display:flex; align-items:center; gap:3px; flex-wrap:wrap; }
-        .feature-mock-academic-tag { display:inline-flex; align-items:center; height:10px; padding:0 4px; border-radius:999px; border:1px solid var(--card-pill-border); background:var(--card-pill-bg); color:var(--card-accent); font-size:5.7px; font-weight:700; letter-spacing:0.02em; }
+        .feature-mock-academic-tag { display:inline-flex; align-items:center; height:10px; padding:0 4px; border-radius:999px; border:1px solid var(--card-pill-border); background:var(--card-pill-bg); color:var(--card-accent); font-size:5.7px; font-weight:700; letter-spacing:0.02em; opacity:0; animation:chatTurnIn 0.45s cubic-bezier(0.22,0.74,0.2,1) both; }
+        .feature-mock-academic-tag.term-1 { animation-delay:1.22s; }
+        .feature-mock-academic-tag.term-2 { animation-delay:1.34s; }
+        .feature-mock-academic-tag.term-3 { animation-delay:1.46s; }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(60,140,255,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
@@ -6006,19 +6070,19 @@ const App = () => {
                             <span className="feature-mock-chip">Study Guide</span>
                           </div>
                           <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 5 }}>
-                            <div className="feature-mock-guide-stack">
-                              <div className="feature-mock-guide-section">
+                            <div key={`study-guide-preview-${studyGuideDemoIdx}`} className="feature-mock-guide-stack">
+                              <div className="feature-mock-guide-section step-1">
                                 <span className="feature-mock-guide-label">Overview</span>
-                                <span className="feature-mock-guide-line">{STUDY_GUIDE_DEMO_PREVIEW.overview}</span>
+                                <span className="feature-mock-guide-line">{studyGuidePreview.overview}</span>
                               </div>
-                              <div className="feature-mock-guide-section">
+                              <div className="feature-mock-guide-section step-2">
                                 <span className="feature-mock-guide-label">Objectives</span>
-                                <span className="feature-mock-guide-line">{STUDY_GUIDE_DEMO_PREVIEW.objectiveOne}</span>
-                                <span className="feature-mock-guide-line">{STUDY_GUIDE_DEMO_PREVIEW.objectiveTwo}</span>
+                                <span className="feature-mock-guide-line">{studyGuidePreview.objectives[0]}</span>
+                                <span className="feature-mock-guide-line subtle">{studyGuidePreview.objectives[1]}</span>
                               </div>
-                              <div className="feature-mock-guide-section">
+                              <div className="feature-mock-guide-section step-3">
                                 <span className="feature-mock-guide-label">Review Prompt</span>
-                                <span className="feature-mock-guide-line">{STUDY_GUIDE_DEMO_PREVIEW.reviewQuestion}</span>
+                                <span className="feature-mock-guide-line">{studyGuidePreview.reviewQuestion}</span>
                               </div>
                             </div>
                           </div>
@@ -6107,20 +6171,20 @@ const App = () => {
                             <span className="feature-mock-chip">Academic</span>
                           </div>
                           <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 5 }}>
-                            <div className="feature-mock-academic-stack">
-                              <div className="feature-mock-academic-section">
+                            <div key={`academic-preview-${academicDemoIdx}`} className="feature-mock-academic-stack">
+                              <div className="feature-mock-academic-section step-1">
                                 <span className="feature-mock-academic-label">References</span>
-                                <span className="feature-mock-academic-line">{ACADEMIC_DEMO_PREVIEW.reference}</span>
+                                <span className="feature-mock-academic-line">{academicPreview.reference}</span>
                               </div>
-                              <div className="feature-mock-academic-section">
+                              <div className="feature-mock-academic-section step-2">
                                 <span className="feature-mock-academic-label">Claim</span>
-                                <span className="feature-mock-academic-line">{ACADEMIC_DEMO_PREVIEW.claim}</span>
+                                <span className="feature-mock-academic-line">{academicPreview.claim}</span>
                               </div>
-                              <div className="feature-mock-academic-section">
+                              <div className="feature-mock-academic-section step-3">
                                 <span className="feature-mock-academic-label">Glossary</span>
                                 <div className="feature-mock-academic-tags">
-                                  {ACADEMIC_DEMO_PREVIEW.glossary.map((term) => (
-                                    <span key={term} className="feature-mock-academic-tag">{term}</span>
+                                  {academicPreview.glossary.map((term, idx) => (
+                                    <span key={term} className={`feature-mock-academic-tag term-${idx + 1}`}>{term}</span>
                                   ))}
                                 </div>
                               </div>
