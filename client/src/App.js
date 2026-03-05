@@ -3553,6 +3553,7 @@ const App = () => {
   const [chatDemoIdx, setChatDemoIdx]             = useState(0);
   const [studyGuideDemoIdx, setStudyGuideDemoIdx] = useState(0);
   const [academicDemoIdx, setAcademicDemoIdx]     = useState(0);
+  const [workflowHoverType, setWorkflowHoverType] = useState('');
   const [sgQuestion, setSgQuestion]               = useState('');
   const [sgMessages, setSgMessages]               = useState([]);       // [{role, text, isError?}]
   const [sgLoading, setSgLoading]                 = useState(false);
@@ -3694,48 +3695,58 @@ const App = () => {
 
   // Landing card animation: cycle realistic summary snippets
   useEffect(() => {
-    if (transcript) return;
+    if (transcript || workflowHoverType !== 'summaries') return;
     const id = setInterval(() => {
       setSummaryDemoIdx((i) => (i + 1) % SUMMARY_DEMO_PREVIEWS.length);
     }, 3200);
     return () => clearInterval(id);
-  }, [transcript]);
+  }, [transcript, workflowHoverType]);
 
   // Landing card animation: cycle realistic flashcard Q/A snippets
   useEffect(() => {
-    if (transcript) return;
+    if (transcript || workflowHoverType !== 'flashcards') return;
     const id = setInterval(() => {
       setFlashcardDemoIdx((i) => (i + 1) % FLASHCARD_DEMO_PREVIEWS.length);
     }, 3800);
     return () => clearInterval(id);
-  }, [transcript]);
+  }, [transcript, workflowHoverType]);
 
   // Landing card animation: cycle realistic AI chat Q/A snippets
   useEffect(() => {
-    if (transcript) return;
+    if (transcript || workflowHoverType !== 'evidence') return;
     const id = setInterval(() => {
       setChatDemoIdx((i) => (i + 1) % CHAT_DEMO_PREVIEWS.length);
     }, 6800);
     return () => clearInterval(id);
-  }, [transcript]);
+  }, [transcript, workflowHoverType]);
 
   // Landing card animation: cycle study guide snippets
   useEffect(() => {
-    if (transcript) return;
+    if (transcript || workflowHoverType !== 'study-guide') return;
     const id = setInterval(() => {
       setStudyGuideDemoIdx((i) => (i + 1) % STUDY_GUIDE_DEMO_PREVIEWS.length);
     }, 5600);
     return () => clearInterval(id);
-  }, [transcript]);
+  }, [transcript, workflowHoverType]);
 
   // Landing card animation: cycle academic snippets
   useEffect(() => {
-    if (transcript) return;
+    if (transcript || workflowHoverType !== 'academic') return;
     const id = setInterval(() => {
       setAcademicDemoIdx((i) => (i + 1) % ACADEMIC_DEMO_PREVIEWS.length);
     }, 6000);
     return () => clearInterval(id);
-  }, [transcript]);
+  }, [transcript, workflowHoverType]);
+
+  // Reset workflow demo previews to static first frame when no card is hovered
+  useEffect(() => {
+    if (transcript || workflowHoverType) return;
+    setSummaryDemoIdx(0);
+    setFlashcardDemoIdx(0);
+    setChatDemoIdx(0);
+    setStudyGuideDemoIdx(0);
+    setAcademicDemoIdx(0);
+  }, [transcript, workflowHoverType]);
 
   // YouTube IFrame API — proper SDK approach for reliable time tracking
   useEffect(() => {
@@ -4841,74 +4852,69 @@ const App = () => {
           position: relative;
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: 22px;
         }
         .feature-flow-head {
           position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 8px;
-          padding-bottom: 18px;
-        }
-        .feature-flow-head::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 2px;
-          height: 18px;
-          border-radius: 999px;
-          background: rgba(29,29,31,0.18);
+          gap: 4px;
+          padding-bottom: 2px;
         }
         .feature-flow-node {
-          min-width: 176px;
-          height: 38px;
-          padding: 0 16px;
-          border-radius: 11px;
-          border: 1px solid rgba(29,29,31,0.14);
-          background: rgba(255,255,255,0.96);
+          min-width: 180px;
+          min-height: 30px;
+          padding: 0 6px;
+          border: none;
+          background: transparent;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           color: ${P.ink};
-          font-size: 14px;
+          font-size: 15px;
           font-weight: 800;
           letter-spacing: -0.01em;
-          box-shadow: 0 6px 16px rgba(29,29,31,0.08);
+          box-shadow: none;
         }
         .feature-flow-node.input {
-          border-color: rgba(60,140,255,0.34);
-          color: ${P.accent};
-          background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(60,140,255,0.08) 100%);
+          color: rgba(29,29,31,0.84);
+        }
+        .feature-flow-arrow {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 20px;
+          height: 16px;
+          color: rgba(29,29,31,0.44);
+          font-size: 12px;
+          line-height: 1;
         }
         .feature-flow-node.transcript {
-          min-width: 320px;
-          min-height: 66px;
+          min-width: 304px;
+          min-height: 60px;
           height: auto;
-          padding: 6px 8px;
-          border-color: rgba(84,104,168,0.26);
-          color: #40548A;
-          background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(84,104,168,0.08) 100%);
+          padding: 0;
         }
         .feature-flow-transcript-preview {
           width: 100%;
           border-radius: 8px;
-          border: 1px solid rgba(84,104,168,0.18);
-          background: rgba(255,255,255,0.86);
-          padding: 5px 6px;
+          border: 1px solid rgba(84,104,168,0.12);
+          background: rgba(255,255,255,0.62);
+          padding: 5px 5px 4px;
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 3px;
         }
-        .feature-flow-transcript-preview .feature-mock-url-bar {
-          height: 17px;
-          padding: 0 5px;
-          font-size: 7px;
-        }
-        .feature-flow-transcript-preview .feature-mock-cursor {
-          height: 7px;
+        .feature-flow-transcript-title {
+          font-size: 6.5px;
+          line-height: 1;
+          font-weight: 800;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          color: #40548A;
+          opacity: 0.8;
+          font-family: ui-monospace,monospace;
         }
         .feature-flow-transcript-preview .feature-mock-ts-row {
           gap: 4px;
@@ -4925,53 +4931,36 @@ const App = () => {
           position: relative;
           display: grid;
           grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: 12px;
-          padding-top: 18px;
+          gap: 24px;
+          padding-top: 8px;
         }
         .feature-flow-branches::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 10%;
-          right: 10%;
-          height: 2px;
-          border-radius: 999px;
-          background: rgba(29,29,31,0.14);
+          content: none;
         }
         .feature-card {
           position: relative;
           display: flex;
           flex-direction: column;
-          gap: 8px;
-          padding: 10px;
-          border-radius: 16px;
-          border: 1px solid var(--card-panel-border);
-          background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, var(--card-panel-bg) 100%);
-          box-shadow: 0 8px 22px rgba(29,29,31,0.06);
+          gap: 10px;
+          padding: 4px 0;
+          border: none;
+          background: transparent;
+          box-shadow: none;
           isolation: isolate;
-          transition: transform 0.18s ease, box-shadow 0.18s ease;
+          transition: transform 0.18s ease;
         }
         .feature-card::before {
-          content: '';
-          position: absolute;
-          top: -18px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 2px;
-          height: 18px;
-          border-radius: 999px;
-          background: rgba(29,29,31,0.14);
+          content: none;
         }
         .feature-card:hover {
           transform: translateY(-2px);
-          box-shadow: 0 10px 28px rgba(29,29,31,0.09);
         }
         .feature-card-top {
           position: relative;
           z-index: 1;
           display: flex;
           align-items: center;
-          justify-content: space-between;
+          justify-content: flex-start;
         }
         .feature-card-num {
           display: inline-flex;
@@ -4990,8 +4979,8 @@ const App = () => {
           box-shadow: 0 4px 10px rgba(29,29,31,0.14);
         }
         .feature-card-icon {
-          width: 28px;
-          height: 28px;
+          width: 30px;
+          height: 30px;
           border-radius: 9px;
           display: inline-flex;
           align-items: center;
@@ -5007,7 +4996,7 @@ const App = () => {
           position: relative;
           z-index: 1;
           margin: 0;
-          font-size: 16px;
+          font-size: 18px;
           line-height: 1.25;
           font-weight: 800;
           letter-spacing: -0.02em;
@@ -5017,7 +5006,7 @@ const App = () => {
           position: relative;
           z-index: 1;
           margin: 0;
-          font-size: 12.3px;
+          font-size: 13.1px;
           line-height: 1.55;
           color: ${P.muted};
         }
@@ -5025,10 +5014,10 @@ const App = () => {
           position: relative;
           z-index: 1;
           margin: 0 0 4px;
-          padding: 8px;
+          padding: 9px;
           border-radius: 12px;
-          background: rgba(255,255,255,0.66);
-          border: 1px solid var(--card-panel-border);
+          background: rgba(255,255,255,0.52);
+          border: 1px solid rgba(29,29,31,0.08);
           display: flex;
           flex-direction: column;
           gap: 8px;
@@ -5261,7 +5250,7 @@ const App = () => {
         .feature-card-tags {
           position: relative;
           z-index: 1;
-          margin-top: 2px;
+          margin-top: 1px;
           display: flex;
           flex-wrap: wrap;
           gap: 5px;
@@ -5284,7 +5273,7 @@ const App = () => {
         .feature-card-meta {
           position: relative;
           z-index: 1;
-          margin-top: 2px;
+          margin-top: 0;
           display: inline-flex;
           align-items: center;
           gap: 6px;
@@ -5305,6 +5294,7 @@ const App = () => {
         @media (max-width: 1220px) {
           .feature-flow-branches {
             grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
           }
           .feature-flow-branches::before {
             left: 14%;
@@ -5314,6 +5304,7 @@ const App = () => {
         @media (max-width: 920px) {
           .feature-flow-branches {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
           }
           .feature-flow-branches::before {
             left: 20%;
@@ -5322,7 +5313,8 @@ const App = () => {
         }
         @media (max-width: 740px) {
           .feature-flow-head {
-            padding-bottom: 6px;
+            gap: 2px;
+            padding-bottom: 2px;
           }
           .feature-flow-head::after,
           .feature-flow-branches::before,
@@ -5330,26 +5322,31 @@ const App = () => {
             display: none;
           }
           .feature-flow-node {
-            min-width: 150px;
-            height: 34px;
-            font-size: 12.5px;
+            min-width: 130px;
+            min-height: 28px;
+            font-size: 12.8px;
           }
           .feature-flow-node.transcript {
             min-width: 100%;
-            min-height: 62px;
-            padding: 6px;
+            min-height: 56px;
+            padding: 0;
           }
           .feature-flow-branches {
             grid-template-columns: 1fr;
             gap: 10px;
             padding-top: 0;
           }
+          .feature-flow-arrow {
+            width: 18px;
+            height: 14px;
+            font-size: 11px;
+          }
           .feature-card-icon {
             width: 26px;
             height: 26px;
             border-radius: 8px;
           }
-          .feature-card-label { font-size: 15px; }
+          .feature-card-label { font-size: 16px; }
           .feature-card-desc { font-size: 12px; }
           .feature-card-tag { font-size: 9px; height: 18px; }
           .feature-card-meta { font-size: 10px; }
@@ -5368,11 +5365,15 @@ const App = () => {
         .feature-mock-line.shimmer { background:linear-gradient(90deg, rgba(29,29,31,0.09) 0%, rgba(29,29,31,0.09) 20%, rgba(255,255,255,0.88) 50%, rgba(29,29,31,0.09) 80%, rgba(29,29,31,0.09) 100%); background-size:300% 100%; animation:shimmerSweep 2s ease-in-out infinite; }
         .feature-mock-bullet-row { display:flex; align-items:center; gap:5px; }
         .feature-mock-bullet-dot { width:4px; height:4px; border-radius:50%; flex-shrink:0; background:var(--card-accent); opacity:0.7; }
-        .feature-mock-bullet-row.anim-1 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; }
-        .feature-mock-bullet-row.anim-2 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:0.65s; }
-        .feature-mock-bullet-row.anim-3 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:1.3s; }
+        .feature-mock-bullet-row.anim-1,
+        .feature-mock-bullet-row.anim-2,
+        .feature-mock-bullet-row.anim-3 { animation:none; opacity:1; transform:none; }
+        .feature-card.is-hovered .feature-mock-bullet-row.anim-1 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; }
+        .feature-card.is-hovered .feature-mock-bullet-row.anim-2 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:0.65s; }
+        .feature-card.is-hovered .feature-mock-bullet-row.anim-3 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:1.3s; }
         .feature-mock-flip-scene { perspective:500px; height:58px; margin:2px 0; }
-        .feature-mock-flip-card { width:100%; height:100%; position:relative; transform-style:preserve-3d; animation:cardFlip3D 3.8s ease-in-out infinite; }
+        .feature-mock-flip-card { width:100%; height:100%; position:relative; transform-style:preserve-3d; animation:none; }
+        .feature-card.is-hovered .feature-mock-flip-card { animation:cardFlip3D 3.8s ease-in-out infinite; }
         .feature-mock-flip-front, .feature-mock-flip-back { position:absolute; inset:0; border-radius:8px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; padding:5px 7px; gap:2px; overflow:hidden; }
         .feature-mock-flip-front { background:rgba(255,255,255,0.92); border:1px solid var(--card-pill-border); }
         .feature-mock-flip-back { background:var(--card-pill-bg); border:1px solid var(--card-pill-border); transform:rotateY(180deg); }
@@ -5399,34 +5400,38 @@ const App = () => {
         .feature-mock-chat-message.ai { max-width:88%; background:rgba(255,255,255,0.95); border:1px solid rgba(29,29,31,0.12); color:rgba(29,29,31,0.74); }
         .feature-mock-chat-source { display:flex; align-items:center; gap:3px; font-size:5.8px; font-weight:700; color:rgba(29,29,31,0.48); text-transform:uppercase; letter-spacing:0.04em; }
         .feature-mock-chat-timestamp { color:#1F6BFF; font-size:6.3px; font-weight:800; text-decoration:underline; text-underline-offset:1px; cursor:pointer; letter-spacing:0.01em; padding:0; border:none; background:none; line-height:1; font-family:inherit; }
-        .feature-mock-chat-turn { opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
-        .feature-mock-chat-turn.turn-1 { animation-delay:0.08s; }
-        .feature-mock-chat-turn.turn-2 { animation-delay:0.86s; }
-        .feature-mock-chat-turn.turn-3 { animation-delay:2.02s; }
-        .feature-mock-chat-turn.turn-4 { animation-delay:2.84s; }
+        .feature-mock-chat-turn { opacity:1; animation:none; }
+        .feature-card.is-hovered .feature-mock-chat-turn { opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
+        .feature-card.is-hovered .feature-mock-chat-turn.turn-1 { animation-delay:0.08s; }
+        .feature-card.is-hovered .feature-mock-chat-turn.turn-2 { animation-delay:0.86s; }
+        .feature-card.is-hovered .feature-mock-chat-turn.turn-3 { animation-delay:2.02s; }
+        .feature-card.is-hovered .feature-mock-chat-turn.turn-4 { animation-delay:2.84s; }
         .feature-mock-chat-composer { display:flex; align-items:center; gap:4px; border:1px solid rgba(29,29,31,0.11); border-radius:7px; padding:2px 3px; background:#fff; }
         .feature-mock-chat-input-text { flex:1; min-width:0; font-size:6.2px; color:rgba(29,29,31,0.42); line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .feature-mock-chat-send { width:8px; height:8px; border-radius:50%; background:var(--card-accent); opacity:0.88; flex-shrink:0; }
         .feature-mock-guide-stack { display:flex; flex-direction:column; gap:4px; }
-        .feature-mock-guide-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
-        .feature-mock-guide-section.step-1 { animation-delay:0.08s; }
-        .feature-mock-guide-section.step-2 { animation-delay:0.6s; }
-        .feature-mock-guide-section.step-3 { animation-delay:1.12s; }
+        .feature-mock-guide-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; opacity:1; animation:none; }
+        .feature-card.is-hovered .feature-mock-guide-section { opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
+        .feature-card.is-hovered .feature-mock-guide-section.step-1 { animation-delay:0.08s; }
+        .feature-card.is-hovered .feature-mock-guide-section.step-2 { animation-delay:0.6s; }
+        .feature-card.is-hovered .feature-mock-guide-section.step-3 { animation-delay:1.12s; }
         .feature-mock-guide-label { font-size:5.8px; font-weight:800; color:var(--card-accent); letter-spacing:0.05em; text-transform:uppercase; line-height:1; }
         .feature-mock-guide-line { font-size:6.3px; color:rgba(29,29,31,0.68); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .feature-mock-guide-line.subtle { color:rgba(29,29,31,0.58); }
         .feature-mock-academic-stack { display:flex; flex-direction:column; gap:4px; }
-        .feature-mock-academic-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
-        .feature-mock-academic-section.step-1 { animation-delay:0.08s; }
-        .feature-mock-academic-section.step-2 { animation-delay:0.6s; }
-        .feature-mock-academic-section.step-3 { animation-delay:1.12s; }
+        .feature-mock-academic-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; opacity:1; animation:none; }
+        .feature-card.is-hovered .feature-mock-academic-section { opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
+        .feature-card.is-hovered .feature-mock-academic-section.step-1 { animation-delay:0.08s; }
+        .feature-card.is-hovered .feature-mock-academic-section.step-2 { animation-delay:0.6s; }
+        .feature-card.is-hovered .feature-mock-academic-section.step-3 { animation-delay:1.12s; }
         .feature-mock-academic-label { font-size:5.8px; font-weight:800; color:var(--card-accent); letter-spacing:0.05em; text-transform:uppercase; line-height:1; }
         .feature-mock-academic-line { font-size:6.4px; color:rgba(29,29,31,0.68); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .feature-mock-academic-tags { display:flex; align-items:center; gap:3px; flex-wrap:wrap; }
-        .feature-mock-academic-tag { display:inline-flex; align-items:center; height:10px; padding:0 4px; border-radius:999px; border:1px solid var(--card-pill-border); background:var(--card-pill-bg); color:var(--card-accent); font-size:5.7px; font-weight:700; letter-spacing:0.02em; opacity:0; animation:chatTurnIn 0.45s cubic-bezier(0.22,0.74,0.2,1) both; }
-        .feature-mock-academic-tag.term-1 { animation-delay:1.22s; }
-        .feature-mock-academic-tag.term-2 { animation-delay:1.34s; }
-        .feature-mock-academic-tag.term-3 { animation-delay:1.46s; }
+        .feature-mock-academic-tag { display:inline-flex; align-items:center; height:10px; padding:0 4px; border-radius:999px; border:1px solid var(--card-pill-border); background:var(--card-pill-bg); color:var(--card-accent); font-size:5.7px; font-weight:700; letter-spacing:0.02em; opacity:1; animation:none; }
+        .feature-card.is-hovered .feature-mock-academic-tag { opacity:0; animation:chatTurnIn 0.45s cubic-bezier(0.22,0.74,0.2,1) both; }
+        .feature-card.is-hovered .feature-mock-academic-tag.term-1 { animation-delay:1.22s; }
+        .feature-card.is-hovered .feature-mock-academic-tag.term-2 { animation-delay:1.34s; }
+        .feature-card.is-hovered .feature-mock-academic-tag.term-3 { animation-delay:1.46s; }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(60,140,255,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
@@ -5919,7 +5924,7 @@ const App = () => {
             </div>{/* end hero-grad */}
 
             {/* Capability cards */}
-            <div style={{ maxWidth: 1180, margin: '0 auto', padding: '10px 24px 44px' }}>
+            <div style={{ maxWidth: 1360, margin: '0 auto', padding: '12px 28px 52px' }}>
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>
                   How It Works
@@ -5930,14 +5935,11 @@ const App = () => {
               </div>
               <div className="feature-workflow">
                 <div className="feature-flow-head">
-                  <span className="feature-flow-node input">01 Add Video</span>
+                  <span className="feature-flow-node input">Add Video</span>
+                  <span className="feature-flow-arrow" aria-hidden="true">↓</span>
                   <span className="feature-flow-node transcript">
                     <span className="feature-flow-transcript-preview">
-                      <span className="feature-mock-url-bar">
-                        <span style={{ opacity: 0.45, fontSize: 9 }}>⌕</span>
-                        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>youtube.com/watch?v=dQw4w9</span>
-                        <span className="feature-mock-cursor" />
-                      </span>
+                      <span className="feature-flow-transcript-title">Transcript</span>
                       <span className="feature-mock-ts-row">
                         <span className="feature-mock-ts-badge">0:12</span>
                         <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0s' }} />
@@ -5946,13 +5948,16 @@ const App = () => {
                         <span className="feature-mock-ts-badge">0:38</span>
                         <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0.22s' }} />
                       </span>
+                      <span className="feature-mock-ts-row">
+                        <span className="feature-mock-ts-badge">1:04</span>
+                        <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0.44s' }} />
+                      </span>
                     </span>
                   </span>
                 </div>
                 <div className="feature-flow-branches">
                 {[
                   {
-                    num: '03',
                     label: 'AI Summaries',
                     desc: 'Create bullet point summaries and chapter breakdowns on demand from any transcript.',
                     meta: 'AI summaries · Bullet points · Chapters',
@@ -5974,7 +5979,6 @@ const App = () => {
                     ),
                   },
                   {
-                    num: '04',
                     label: 'Flash Cards',
                     desc: 'Generate smart Q&A flash cards with flip mode for active recall practice.',
                     meta: 'Flash cards · Flip mode · Active recall',
@@ -5996,7 +6000,6 @@ const App = () => {
                     ),
                   },
                   {
-                    num: '05',
                     label: 'Study Guide',
                     desc: 'Create a structured study guide with overview, objectives, concepts, and review prompts.',
                     meta: 'Overview · Objectives · Review prompts',
@@ -6018,7 +6021,6 @@ const App = () => {
                     ),
                   },
                   {
-                    num: '06',
                     label: 'AI Chat Q&A',
                     desc: 'Ask transcript-grounded questions, then drill into follow-ups with cited answers.',
                     meta: 'Cited answers · Follow-up chat',
@@ -6040,7 +6042,6 @@ const App = () => {
                     ),
                   },
                   {
-                    num: '07',
                     label: 'Academic',
                     desc: 'Surface references, extract claims, and auto-build a glossary from transcript content.',
                     meta: 'References · Claims · Glossary',
@@ -6064,7 +6065,9 @@ const App = () => {
                 ].map((card, cardIndex) => (
                   <div
                     key={card.label}
-                    className="feature-card"
+                    className={`feature-card ${workflowHoverType === card.type ? 'is-hovered' : ''}`}
+                    onMouseEnter={() => setWorkflowHoverType(card.type)}
+                    onMouseLeave={() => setWorkflowHoverType('')}
                     style={{
                       '--card-index': cardIndex,
                       '--card-accent': card.accent,
@@ -6078,7 +6081,6 @@ const App = () => {
                     }}
                   >
                     <div className="feature-card-top">
-                      <span className="feature-card-num">{card.num}</span>
                       <span className="feature-card-icon">{card.icon}</span>
                     </div>
                     <h3 className="feature-card-label">{card.label}</h3>
