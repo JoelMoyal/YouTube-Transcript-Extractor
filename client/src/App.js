@@ -5920,11 +5920,11 @@ const App = () => {
 
             {/* Capability cards */}
             <div style={{ maxWidth: 1180, margin: '0 auto', padding: '10px 24px 44px' }}>
-              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <div style={{ textAlign: 'center', marginBottom: 16 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>
                   How It Works
                 </div>
-                <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 28, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
+                <h2 style={{ margin: `${isMobile ? 34 : 52}px 0 0`, fontSize: isMobile ? 20 : 26, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
                   Add once, then branch into every workflow
                 </h2>
               </div>
