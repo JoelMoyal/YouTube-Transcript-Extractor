@@ -4865,62 +4865,62 @@ const App = () => {
           inset: 0;
           pointer-events: none;
           z-index: 0;
-          opacity: 0.72;
+          opacity: 0.86;
         }
         .hero-cosmos-planet {
           position: absolute;
           border-radius: 50%;
-          opacity: 0.3;
+          opacity: 0.4;
           animation: planetFloat 14s ease-in-out infinite;
         }
         .hero-cosmos-planet.planet-left {
-          width: 132px;
-          height: 132px;
-          left: 2.2%;
-          top: 98px;
-          background: radial-gradient(circle at 33% 28%, rgba(255,255,255,0.5) 0%, rgba(186,205,234,0.33) 36%, rgba(132,154,195,0.15) 66%, rgba(132,154,195,0) 100%);
-          box-shadow: 0 0 44px rgba(132,154,195,0.11);
+          width: 150px;
+          height: 150px;
+          left: 1.8%;
+          top: 96px;
+          background: radial-gradient(circle at 33% 28%, rgba(255,255,255,0.56) 0%, rgba(186,205,234,0.39) 36%, rgba(132,154,195,0.18) 66%, rgba(132,154,195,0) 100%);
+          box-shadow: 0 0 50px rgba(132,154,195,0.14);
           animation-delay: -2.1s;
         }
         .hero-cosmos-planet.planet-right {
-          width: 102px;
-          height: 102px;
-          right: 3.6%;
-          top: 162px;
-          background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.5) 0%, rgba(195,214,238,0.3) 38%, rgba(144,167,205,0.14) 68%, rgba(144,167,205,0) 100%);
-          box-shadow: 0 0 38px rgba(144,167,205,0.1);
+          width: 116px;
+          height: 116px;
+          right: 3.2%;
+          top: 158px;
+          background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.56) 0%, rgba(195,214,238,0.36) 38%, rgba(144,167,205,0.18) 68%, rgba(144,167,205,0) 100%);
+          box-shadow: 0 0 44px rgba(144,167,205,0.13);
           animation-delay: -6.5s;
         }
         .hero-cosmos-orb {
           position: absolute;
           border-radius: 50%;
-          background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.54) 0%, rgba(189,210,239,0.22) 62%, rgba(189,210,239,0) 100%);
-          opacity: 0.22;
+          background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.6) 0%, rgba(189,210,239,0.28) 62%, rgba(189,210,239,0) 100%);
+          opacity: 0.28;
           animation: planetFloat 11s ease-in-out infinite;
         }
         .hero-cosmos-orb.orb-left {
-          width: 28px;
-          height: 28px;
-          left: 96px;
-          top: 292px;
+          width: 34px;
+          height: 34px;
+          left: 92px;
+          top: 286px;
           animation-delay: -3.2s;
         }
         .hero-cosmos-orb.orb-right {
-          width: 20px;
-          height: 20px;
-          right: 128px;
-          top: 132px;
+          width: 24px;
+          height: 24px;
+          right: 124px;
+          top: 128px;
           animation-delay: -7.1s;
         }
         .hero-cosmos-star {
           position: absolute;
-          width: 2px;
-          height: 2px;
+          width: 2.2px;
+          height: 2.2px;
           border-radius: 999px;
-          background: rgba(146,170,210,0.72);
-          box-shadow: 0 0 8px rgba(146,170,210,0.3), 0 0 2px rgba(255,255,255,0.42);
+          background: rgba(134,162,206,0.82);
+          box-shadow: 0 0 10px rgba(134,162,206,0.38), 0 0 2px rgba(255,255,255,0.52);
           animation: starTwinkle 4.8s ease-in-out infinite;
-          opacity: 0.44;
+          opacity: 0.58;
         }
         .hero-cosmos-star.star-1 { left: 4.6%; top: 17%; animation-delay: -0.8s; }
         .hero-cosmos-star.star-2 { left: 10.4%; top: 26%; animation-delay: -2.2s; }
@@ -4930,8 +4930,12 @@ const App = () => {
         .hero-cosmos-star.star-6 { right: 11.3%; top: 30%; animation-delay: -1.7s; }
         .hero-cosmos-star.star-7 { right: 7.5%; top: 42%; animation-delay: -4.1s; }
         .hero-cosmos-star.star-8 { right: 18%; top: 24%; animation-delay: -0.4s; }
-        .hero-cosmos-star.star-9 { left: 24%; top: 12%; width: 1.6px; height: 1.6px; animation-delay: -3s; opacity: 0.3; }
-        .hero-cosmos-star.star-10 { right: 26%; top: 14%; width: 1.6px; height: 1.6px; animation-delay: -2.4s; opacity: 0.3; }
+        .hero-cosmos-star.star-9 { left: 24%; top: 12%; width: 1.8px; height: 1.8px; animation-delay: -3s; opacity: 0.42; }
+        .hero-cosmos-star.star-10 { right: 26%; top: 14%; width: 1.8px; height: 1.8px; animation-delay: -2.4s; opacity: 0.42; }
+        .hero-cosmos-star.star-11 { left: 30%; top: 31%; animation-delay: -1.1s; opacity: 0.5; }
+        .hero-cosmos-star.star-12 { right: 31%; top: 35%; animation-delay: -3.3s; opacity: 0.5; }
+        .hero-cosmos-star.star-13 { left: 26%; top: 44%; width: 1.7px; height: 1.7px; animation-delay: -2.6s; opacity: 0.36; }
+        .hero-cosmos-star.star-14 { right: 28%; top: 46%; width: 1.7px; height: 1.7px; animation-delay: -0.9s; opacity: 0.36; }
         .feature-workflow {
           position: relative;
           display: flex;
@@ -5723,6 +5727,10 @@ const App = () => {
               <span className="hero-cosmos-star star-8" />
               <span className="hero-cosmos-star star-9" />
               <span className="hero-cosmos-star star-10" />
+              <span className="hero-cosmos-star star-11" />
+              <span className="hero-cosmos-star star-12" />
+              <span className="hero-cosmos-star star-13" />
+              <span className="hero-cosmos-star star-14" />
             </div>
             <div className="hero-inner" style={{
               maxWidth: 700, margin: '0 auto', padding: isMobile ? '32px 16px 24px' : '72px 24px 40px',
