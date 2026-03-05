@@ -5605,7 +5605,16 @@ const App = () => {
         />
       )}
 
-      <div style={{ minHeight: '100vh', paddingTop: topChromeOffset, background: P.paper, transition: 'padding-top 0.3s ease', display: view === 'dashboard' ? 'none' : 'block' }}>
+      <div style={{
+        minHeight: '100vh',
+        paddingTop: topChromeOffset,
+        background: `radial-gradient(120% 62% at 50% -10%, rgba(200,190,175,0.16) 0%, transparent 67%),
+                     radial-gradient(86% 58% at 14% 42%, rgba(123,182,255,0.08) 0%, transparent 70%),
+                     radial-gradient(92% 60% at 85% 82%, rgba(107,150,205,0.09) 0%, transparent 72%),
+                     linear-gradient(180deg, #F6F2EA 0%, #F4F1EB 26%, #F1EEE8 56%, #EDF2F7 100%)`,
+        transition: 'padding-top 0.3s ease',
+        display: view === 'dashboard' ? 'none' : 'block',
+      }}>
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* LANDING VIEW */}
