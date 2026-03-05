@@ -4841,84 +4841,141 @@ const App = () => {
           position: relative;
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 14px;
         }
-        .feature-card {
-          --step-col: 48px;
+        .feature-flow-head {
           position: relative;
-          display: grid;
-          grid-template-columns: var(--step-col) minmax(0, 1fr);
-          column-gap: 14px;
-          row-gap: 0;
-          padding: 10px 0 22px;
-          isolation: isolate;
-          transition: transform 0.18s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          padding-bottom: 18px;
         }
-        .feature-card:hover {
-          transform: translateX(2px);
-        }
-        .feature-card::after {
+        .feature-flow-head::after {
           content: '';
           position: absolute;
-          left: calc((var(--step-col) / 2) - 1px);
-          top: 42px;
-          bottom: -2px;
+          bottom: 0;
+          left: 50%;
+          transform: translateX(-50%);
           width: 2px;
+          height: 18px;
           border-radius: 999px;
-          background: linear-gradient(180deg, var(--card-rail) 0%, rgba(29,29,31,0.08) 100%);
-          opacity: 0.8;
-          z-index: 0;
+          background: rgba(29,29,31,0.18);
         }
-        .feature-card:last-child::after {
-          display: none;
+        .feature-flow-node {
+          min-width: 176px;
+          height: 38px;
+          padding: 0 16px;
+          border-radius: 11px;
+          border: 1px solid rgba(29,29,31,0.14);
+          background: rgba(255,255,255,0.96);
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          color: ${P.ink};
+          font-size: 14px;
+          font-weight: 800;
+          letter-spacing: -0.01em;
+          box-shadow: 0 6px 16px rgba(29,29,31,0.08);
+        }
+        .feature-flow-node.input {
+          border-color: rgba(60,140,255,0.34);
+          color: ${P.accent};
+          background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(60,140,255,0.08) 100%);
+        }
+        .feature-flow-node.transcript {
+          border-color: rgba(84,104,168,0.26);
+          color: #40548A;
+          background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(84,104,168,0.08) 100%);
+        }
+        .feature-flow-branches {
+          position: relative;
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 12px;
+          padding-top: 18px;
+        }
+        .feature-flow-branches::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 10%;
+          right: 10%;
+          height: 2px;
+          border-radius: 999px;
+          background: rgba(29,29,31,0.14);
+        }
+        .feature-card {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding: 10px;
+          border-radius: 16px;
+          border: 1px solid var(--card-panel-border);
+          background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, var(--card-panel-bg) 100%);
+          box-shadow: 0 8px 22px rgba(29,29,31,0.06);
+          isolation: isolate;
+          transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .feature-card::before {
+          content: '';
+          position: absolute;
+          top: -18px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 2px;
+          height: 18px;
+          border-radius: 999px;
+          background: rgba(29,29,31,0.14);
+        }
+        .feature-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 28px rgba(29,29,31,0.09);
         }
         .feature-card-top {
           position: relative;
           z-index: 1;
           display: flex;
-          flex-direction: column;
           align-items: center;
-          gap: 10px;
-          grid-column: 1;
-          grid-row: 1 / span 6;
-          padding-top: 2px;
+          justify-content: space-between;
         }
         .feature-card-num {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 36px;
-          height: 36px;
+          min-width: 30px;
+          height: 20px;
+          padding: 0 7px;
           border-radius: 999px;
           background: var(--card-gradient);
           color: #fff;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 800;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.07em;
           font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-          box-shadow: 0 6px 16px rgba(29,29,31,0.16);
+          box-shadow: 0 4px 10px rgba(29,29,31,0.14);
         }
         .feature-card-icon {
-          width: 34px;
-          height: 34px;
-          border-radius: 10px;
+          width: 28px;
+          height: 28px;
+          border-radius: 9px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           color: var(--card-accent);
           background: rgba(255,255,255,0.9);
           border: 1px solid var(--card-pill-border);
-          box-shadow: 0 3px 10px rgba(29,29,31,0.08);
+          box-shadow: 0 2px 8px rgba(29,29,31,0.07);
           animation: iconPulse 3.6s ease-in-out infinite;
           animation-delay: calc(var(--card-index) * 0.24s);
         }
         .feature-card-label {
           position: relative;
           z-index: 1;
-          grid-column: 2;
-          margin: 2px 0 6px;
-          font-size: 19px;
-          line-height: 1.2;
+          margin: 0;
+          font-size: 16px;
+          line-height: 1.25;
           font-weight: 800;
           letter-spacing: -0.02em;
           color: ${P.ink};
@@ -4926,25 +4983,22 @@ const App = () => {
         .feature-card-desc {
           position: relative;
           z-index: 1;
-          grid-column: 2;
           margin: 0;
-          font-size: 13px;
-          line-height: 1.62;
+          font-size: 12.3px;
+          line-height: 1.55;
           color: ${P.muted};
         }
         .feature-card-visual {
           position: relative;
           z-index: 1;
-          grid-column: 2;
-          margin: 0 0 11px;
+          margin: 0 0 4px;
           padding: 8px;
-          border-radius: 14px;
-          background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, var(--card-panel-bg) 100%);
+          border-radius: 12px;
+          background: rgba(255,255,255,0.66);
           border: 1px solid var(--card-panel-border);
           display: flex;
           flex-direction: column;
           gap: 8px;
-          box-shadow: 0 8px 22px rgba(29,29,31,0.06);
         }
         .feature-mock-shell {
           border-radius: 10px;
@@ -5174,22 +5228,21 @@ const App = () => {
         .feature-card-tags {
           position: relative;
           z-index: 1;
-          grid-column: 2;
-          margin-top: 10px;
+          margin-top: 2px;
           display: flex;
           flex-wrap: wrap;
-          gap: 6px;
+          gap: 5px;
         }
         .feature-card-tag {
           display: inline-flex;
           align-items: center;
-          height: 21px;
-          padding: 0 9px;
+          height: 19px;
+          padding: 0 8px;
           border-radius: 999px;
           border: 1px solid var(--card-pill-border);
           background: rgba(255,255,255,0.74);
           color: var(--card-accent);
-          font-size: 10px;
+          font-size: 9.5px;
           font-weight: 700;
           letter-spacing: 0.025em;
           line-height: 1;
@@ -5198,12 +5251,11 @@ const App = () => {
         .feature-card-meta {
           position: relative;
           z-index: 1;
-          grid-column: 2;
-          margin-top: 9px;
+          margin-top: 2px;
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          font-size: 11px;
+          gap: 6px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.03em;
           text-transform: uppercase;
@@ -5217,28 +5269,51 @@ const App = () => {
           background: var(--card-accent);
           opacity: 0.72;
         }
+        @media (max-width: 1220px) {
+          .feature-flow-branches {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+          .feature-flow-branches::before {
+            left: 14%;
+            right: 14%;
+          }
+        }
+        @media (max-width: 920px) {
+          .feature-flow-branches {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .feature-flow-branches::before {
+            left: 20%;
+            right: 20%;
+          }
+        }
         @media (max-width: 740px) {
-          .feature-card {
-            --step-col: 42px;
-            column-gap: 11px;
-            padding: 8px 0 18px;
+          .feature-flow-head {
+            padding-bottom: 6px;
           }
-          .feature-card::after {
-            top: 38px;
+          .feature-flow-head::after,
+          .feature-flow-branches::before,
+          .feature-card::before {
+            display: none;
           }
-          .feature-card-num {
-            width: 32px;
-            height: 32px;
-            font-size: 10.5px;
+          .feature-flow-node {
+            min-width: 150px;
+            height: 34px;
+            font-size: 12.5px;
+          }
+          .feature-flow-branches {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            padding-top: 0;
           }
           .feature-card-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 9px;
+            width: 26px;
+            height: 26px;
+            border-radius: 8px;
           }
-          .feature-card-label { font-size: 17px; }
-          .feature-card-desc { font-size: 12.5px; }
-          .feature-card-tag { font-size: 9.5px; height: 20px; }
+          .feature-card-label { font-size: 15px; }
+          .feature-card-desc { font-size: 12px; }
+          .feature-card-tag { font-size: 9px; height: 18px; }
           .feature-card-meta { font-size: 10px; }
         }
         @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } }
@@ -5806,41 +5881,24 @@ const App = () => {
             </div>{/* end hero-grad */}
 
             {/* Capability cards */}
-            <div style={{ maxWidth: 860, margin: '0 auto', padding: '10px 24px 44px' }}>
+            <div style={{ maxWidth: 1180, margin: '0 auto', padding: '10px 24px 44px' }}>
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>
                   How It Works
                 </div>
                 <h2 style={{ margin: 0, fontSize: isMobile ? 22 : 28, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
-                  Six visual steps, one complete workflow
+                  Add once, then branch into every workflow
                 </h2>
               </div>
               <div className="feature-workflow">
+                <div className="feature-flow-head">
+                  <span className="feature-flow-node input">01 Add Video</span>
+                  <span className="feature-flow-node transcript">02 Transcript</span>
+                </div>
+                <div className="feature-flow-branches">
                 {[
                   {
-                    num: '01',
-                    label: 'Instant Transcript',
-                    desc: 'Paste any video URL and extract a full transcript with second-level timestamps in seconds.',
-                    meta: '10+ platforms · second-level timestamps',
-                    tags: ['YouTube', 'TikTok', 'Vimeo', '6+ more'],
-                    accent: '#5468A8',
-                    gradient: 'linear-gradient(100deg, #B0BDDC 0%, #7484B8 55%, #5468A8 100%)',
-                    bg: 'rgba(84,104,168,0.08)',
-                    panel: 'rgba(84,104,168,0.06)',
-                    panelBorder: 'rgba(84,104,168,0.15)',
-                    border: 'rgba(84,104,168,0.16)',
-                    pillBg: 'rgba(84,104,168,0.10)',
-                    pillBorder: 'rgba(84,104,168,0.19)',
-                    glow: 'rgba(84,104,168,0.22)',
-                    type: 'transcript',
-                    icon: (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
-                      </svg>
-                    ),
-                  },
-                  {
-                    num: '02',
+                    num: '03',
                     label: 'AI Summaries',
                     desc: 'Create bullet point summaries and chapter breakdowns on demand from any transcript.',
                     meta: 'AI summaries · Bullet points · Chapters',
@@ -5862,7 +5920,7 @@ const App = () => {
                     ),
                   },
                   {
-                    num: '03',
+                    num: '04',
                     label: 'Flash Cards',
                     desc: 'Generate smart Q&A flash cards with flip mode for active recall practice.',
                     meta: 'Flash cards · Flip mode · Active recall',
@@ -5884,7 +5942,7 @@ const App = () => {
                     ),
                   },
                   {
-                    num: '04',
+                    num: '05',
                     label: 'Study Guide',
                     desc: 'Create a structured study guide with overview, objectives, concepts, and review prompts.',
                     meta: 'Overview · Objectives · Review prompts',
@@ -5906,7 +5964,7 @@ const App = () => {
                     ),
                   },
                   {
-                    num: '05',
+                    num: '06',
                     label: 'Chat Q&A',
                     desc: 'Ask transcript-grounded questions, then drill into follow-ups with cited answers.',
                     meta: 'Cited answers · Follow-up chat',
@@ -5928,7 +5986,7 @@ const App = () => {
                     ),
                   },
                   {
-                    num: '06',
+                    num: '07',
                     label: 'Academic',
                     desc: 'Surface references, extract claims, and auto-build a glossary from transcript content.',
                     meta: 'References · Claims · Glossary',
@@ -6203,6 +6261,7 @@ const App = () => {
                   </div>
                 ))}
               </div>
+            </div>
             </div>
 
             {/* Testimonials */}
