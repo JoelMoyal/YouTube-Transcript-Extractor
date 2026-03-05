@@ -5354,7 +5354,13 @@ const App = () => {
         @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } }
         @keyframes shimmerSweep { 0% { background-position:110% center; } 100% { background-position:-110% center; } }
         @keyframes bulletReveal { 0% { opacity:0.12; transform:translateX(-4px); } 18%,68% { opacity:1; transform:translateX(0); } 85%,100% { opacity:0.12; transform:translateX(0); } }
-        @keyframes cardFlip3D { 0%,33% { transform:rotateY(0deg); } 50%,83% { transform:rotateY(180deg); } 100% { transform:rotateY(360deg); } }
+        @keyframes cardFlip3D {
+          0% { transform:rotateY(0deg); }
+          14% { transform:rotateY(180deg); }
+          50% { transform:rotateY(180deg); }
+          64% { transform:rotateY(360deg); }
+          100% { transform:rotateY(360deg); }
+        }
         @keyframes dotBounce { 0%,60%,100% { transform:translateY(0); opacity:0.35; } 30% { transform:translateY(-3px); opacity:0.85; } }
         @keyframes chatTurnIn { 0% { opacity:0; transform:translateY(3px); } 100% { opacity:1; transform:translateY(0); } }
         @keyframes iconPulse { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-2px); } }
@@ -5372,8 +5378,8 @@ const App = () => {
         .feature-card.is-hovered .feature-mock-bullet-row.anim-2 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:0.65s; }
         .feature-card.is-hovered .feature-mock-bullet-row.anim-3 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:1.3s; }
         .feature-mock-flip-scene { perspective:500px; height:58px; margin:2px 0; }
-        .feature-mock-flip-card { width:100%; height:100%; position:relative; transform-style:preserve-3d; animation:none; }
-        .feature-card.is-hovered .feature-mock-flip-card { animation:cardFlip3D 3.8s ease-in-out infinite; }
+        .feature-mock-flip-card { width:100%; height:100%; position:relative; transform-style:preserve-3d; animation:none; will-change:transform; }
+        .feature-card.is-hovered .feature-mock-flip-card { animation:cardFlip3D 3.1s cubic-bezier(0.26,0.78,0.24,1) infinite; }
         .feature-mock-flip-front, .feature-mock-flip-back { position:absolute; inset:0; border-radius:8px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; padding:5px 7px; gap:2px; overflow:hidden; }
         .feature-mock-flip-front { background:rgba(255,255,255,0.92); border:1px solid var(--card-pill-border); }
         .feature-mock-flip-back { background:var(--card-pill-bg); border:1px solid var(--card-pill-border); transform:rotateY(180deg); }
