@@ -50,6 +50,33 @@ const DEMO_CHIPS = [
   'What is the main argument?',
 ];
 
+const SUMMARY_DEMO_PREVIEWS = [
+  {
+    bullets: [
+      'Speaker explains the core thesis in under 2 minutes.',
+      'Main takeaway: shorter feedback loops improve outcomes.',
+      'Action item: test one change per week and compare results.',
+    ],
+    metrics: ['3 key points', '2m read', '4 chapters'],
+  },
+  {
+    bullets: [
+      'Video compares three strategies with real examples.',
+      'Most effective pattern: clear constraints before execution.',
+      'Recommended next step: create a checklist for repeatability.',
+    ],
+    metrics: ['4 key points', '90s read', '5 chapters'],
+  },
+  {
+    bullets: [
+      'Host breaks down mistakes that caused poor retention.',
+      'Best insight: pairing visuals with timestamps boosts recall.',
+      'Practical move: summarize each section into one sentence.',
+    ],
+    metrics: ['3 key points', '75s read', '3 chapters'],
+  },
+];
+
 const BRAND_NAME = 'ScribeSnap';
 const BRAND_LOGO_SRC = '/logo-wordmark.png';
 const FOOTER_LOGO_SRC = '/scribesnap_wordmark_footer.svg';
@@ -3431,6 +3458,7 @@ const App = () => {
   const [academicInsightsFull, setAcademicInsightsFull]       = useState(false);
   const [activeLogo, setActiveLogo]               = useState('youtube');
   const [logoFlip, setLogoFlip]                   = useState('idle');    // 'idle' | 'out' | 'in'
+  const [summaryDemoIdx, setSummaryDemoIdx]       = useState(0);
   const [sgQuestion, setSgQuestion]               = useState('');
   const [sgMessages, setSgMessages]               = useState([]);       // [{role, text, isError?}]
   const [sgLoading, setSgLoading]                 = useState(false);
@@ -3569,6 +3597,15 @@ const App = () => {
     }, 2800);
     return () => clearInterval(id);
   }, [videoUrl]);
+
+  // Landing card animation: cycle realistic summary snippets
+  useEffect(() => {
+    if (transcript) return;
+    const id = setInterval(() => {
+      setSummaryDemoIdx((i) => (i + 1) % SUMMARY_DEMO_PREVIEWS.length);
+    }, 3200);
+    return () => clearInterval(id);
+  }, [transcript]);
 
   // YouTube IFrame API — proper SDK approach for reliable time tracking
   useEffect(() => {
@@ -4515,6 +4552,7 @@ const App = () => {
   const matchCount   = search.trim() && transcript
     ? (transcript.match(new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi')) || []).length
     : 0;
+  const summaryPreview = SUMMARY_DEMO_PREVIEWS[summaryDemoIdx % SUMMARY_DEMO_PREVIEWS.length];
 
   const onNavAskAI = () => {
     if (transcript) {
@@ -4882,6 +4920,42 @@ const App = () => {
           height: 6px;
           border-radius: 4px;
           background: rgba(29,29,31,0.11);
+        }
+        .feature-mock-summary-stack {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+        .feature-mock-summary-text {
+          flex: 1;
+          min-width: 0;
+          font-size: 7.2px;
+          line-height: 1.35;
+          color: rgba(29,29,31,0.58);
+          letter-spacing: 0.01em;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .feature-mock-summary-metrics {
+          display: flex;
+          gap: 4px;
+          margin-top: 2px;
+          flex-wrap: wrap;
+        }
+        .feature-mock-summary-metric {
+          height: 13px;
+          padding: 0 5px;
+          border-radius: 999px;
+          border: 1px solid var(--card-pill-border);
+          background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, var(--card-pill-bg) 100%);
+          color: var(--card-accent);
+          font-size: 6.8px;
+          font-weight: 700;
+          letter-spacing: 0.02em;
+          display: inline-flex;
+          align-items: center;
+          line-height: 1;
         }
         .feature-mock-mini-grid {
           display: grid;
@@ -5735,23 +5809,19 @@ const App = () => {
                             <span className="feature-mock-chip">Summaries</span>
                           </div>
                           <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 5 }}>
-                            <span className="feature-mock-title" style={{ width: '60%' }} />
-                            <div className="feature-mock-bullet-row anim-1">
-                              <span className="feature-mock-bullet-dot" />
-                              <span className="feature-mock-bullet" style={{ flex: 1, width: '90%' }} />
+                            <span className="feature-mock-title" style={{ width: '66%' }} />
+                            <div key={`summary-preview-${summaryDemoIdx}`} className="feature-mock-summary-stack">
+                              {summaryPreview.bullets.map((text, idx) => (
+                                <div key={`summary-bullet-${idx}`} className={`feature-mock-bullet-row anim-${idx + 1}`}>
+                                  <span className="feature-mock-bullet-dot" />
+                                  <span className="feature-mock-summary-text">{text}</span>
+                                </div>
+                              ))}
                             </div>
-                            <div className="feature-mock-bullet-row anim-2">
-                              <span className="feature-mock-bullet-dot" />
-                              <span className="feature-mock-bullet" style={{ flex: 1, width: '80%' }} />
-                            </div>
-                            <div className="feature-mock-bullet-row anim-3">
-                              <span className="feature-mock-bullet-dot" />
-                              <span className="feature-mock-bullet" style={{ flex: 1, width: '85%' }} />
-                            </div>
-                            <div className="feature-mock-kpi-row" style={{ marginTop: 2 }}>
-                              <span className="feature-mock-kpi" style={{ width: 40 }} />
-                              <span className="feature-mock-kpi" style={{ width: 50 }} />
-                              <span className="feature-mock-kpi" style={{ width: 44 }} />
+                            <div className="feature-mock-summary-metrics">
+                              {summaryPreview.metrics.map((m) => (
+                                <span key={m} className="feature-mock-summary-metric">{m}</span>
+                              ))}
                             </div>
                           </div>
                         </div>
