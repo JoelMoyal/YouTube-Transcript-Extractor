@@ -21,10 +21,7 @@ const P = {
   error:       '#B42318',
 };
 
-const MAIN_SITE_BACKGROUND = `radial-gradient(120% 62% at 50% -10%, rgba(200,190,175,0.16) 0%, transparent 67%),
-                              radial-gradient(86% 58% at 14% 42%, rgba(123,182,255,0.08) 0%, transparent 70%),
-                              radial-gradient(92% 60% at 85% 82%, rgba(107,150,205,0.09) 0%, transparent 72%),
-                              linear-gradient(180deg, #F5F2EA 0%, #F2F0EA 26%, #EEEDE8 56%, #E8EEF5 100%)`;
+const MAIN_SITE_BACKGROUND = `linear-gradient(180deg, #F6F2EA 0%, #F4F1EB 34%, #F0EEE9 64%, #EBEFF4 100%)`;
 
 const MOBILE_BREAKPOINT = 640;
 const TABLET_BREAKPOINT = 1024;
@@ -4850,8 +4847,7 @@ const App = () => {
         * { scrollbar-width: thin; scrollbar-color: #C4BBAD #EEEBE4; }
         input, select, textarea { font-family: inherit; }
         .hero-grad {
-          background: radial-gradient(ellipse 86% 54% at 50% -12%, rgba(200,190,175,0.16) 0%, transparent 65%),
-                      transparent;
+          background: transparent;
         }
         .feature-workflow {
           position: relative;
