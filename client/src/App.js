@@ -5935,7 +5935,7 @@ const App = () => {
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>
                   How It Works
                 </div>
-                <h2 style={{ margin: `${isMobile ? 34 : 52}px 0 0`, fontSize: isMobile ? 20 : 30, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
+                <h2 style={{ margin: `${isMobile ? 34 : 128}px 0 0`, fontSize: isMobile ? 20 : 30, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
                   Add once, then branch into every workflow
                 </h2>
               </div>
