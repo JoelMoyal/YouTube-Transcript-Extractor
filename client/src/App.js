@@ -4845,8 +4845,13 @@ const App = () => {
         * { scrollbar-width: thin; scrollbar-color: #C4BBAD #EEEBE4; }
         input, select, textarea { font-family: inherit; }
         .hero-grad {
-          background: radial-gradient(ellipse 86% 54% at 50% -12%, rgba(200,190,175,0.16) 0%, transparent 65%),
-                      ${P.paper};
+          background: radial-gradient(
+            ellipse 124% 80% at 50% -22%,
+            rgba(178,194,214,0.22) 0%,
+            rgba(178,194,214,0.14) 42%,
+            rgba(178,194,214,0.06) 68%,
+            rgba(178,194,214,0) 100%
+          );
         }
         .feature-workflow {
           position: relative;
