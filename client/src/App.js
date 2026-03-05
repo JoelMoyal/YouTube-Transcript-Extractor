@@ -95,6 +95,33 @@ const FLASHCARD_DEMO_PREVIEWS = [
   },
 ];
 
+const CHAT_DEMO_PREVIEWS = [
+  {
+    questionOne: 'What is the main thesis in this lecture?',
+    answerOne: 'The speaker argues shorter feedback cycles produce better long-term decisions.',
+    timestampOne: '15:35',
+    questionTwo: 'Do they give a concrete framework?',
+    answerTwo: 'Yes. They suggest a 3-step loop: choose one metric, test weekly, compare to baseline.',
+    timestampTwo: '22:10',
+  },
+  {
+    questionOne: 'Why does retention drop after section 2?',
+    answerOne: 'The transcript notes jargon spikes and fewer examples, which lowers comprehension.',
+    timestampOne: '09:42',
+    questionTwo: 'What fix do they recommend?',
+    answerTwo: 'Pair each concept with one practical case study and a recap checkpoint.',
+    timestampTwo: '12:28',
+  },
+  {
+    questionOne: 'What claim is best supported by evidence?',
+    answerOne: 'Their strongest claim is that constrained experiments outperform broad planning.',
+    timestampOne: '18:04',
+    questionTwo: 'Any actionable next step for a student?',
+    answerTwo: 'Create a weekly experiment log and review outcomes every Friday.',
+    timestampTwo: '24:16',
+  },
+];
+
 const BRAND_NAME = 'ScribeSnap';
 const BRAND_LOGO_SRC = '/logo-wordmark.png';
 const FOOTER_LOGO_SRC = '/scribesnap_wordmark_footer.svg';
@@ -3478,6 +3505,7 @@ const App = () => {
   const [logoFlip, setLogoFlip]                   = useState('idle');    // 'idle' | 'out' | 'in'
   const [summaryDemoIdx, setSummaryDemoIdx]       = useState(0);
   const [flashcardDemoIdx, setFlashcardDemoIdx]   = useState(0);
+  const [chatDemoIdx, setChatDemoIdx]             = useState(0);
   const [sgQuestion, setSgQuestion]               = useState('');
   const [sgMessages, setSgMessages]               = useState([]);       // [{role, text, isError?}]
   const [sgLoading, setSgLoading]                 = useState(false);
@@ -3632,6 +3660,15 @@ const App = () => {
     const id = setInterval(() => {
       setFlashcardDemoIdx((i) => (i + 1) % FLASHCARD_DEMO_PREVIEWS.length);
     }, 3800);
+    return () => clearInterval(id);
+  }, [transcript]);
+
+  // Landing card animation: cycle realistic AI chat Q/A snippets
+  useEffect(() => {
+    if (transcript) return;
+    const id = setInterval(() => {
+      setChatDemoIdx((i) => (i + 1) % CHAT_DEMO_PREVIEWS.length);
+    }, 6800);
     return () => clearInterval(id);
   }, [transcript]);
 
@@ -4582,6 +4619,7 @@ const App = () => {
     : 0;
   const summaryPreview = SUMMARY_DEMO_PREVIEWS[summaryDemoIdx % SUMMARY_DEMO_PREVIEWS.length];
   const flashcardPreview = FLASHCARD_DEMO_PREVIEWS[flashcardDemoIdx % FLASHCARD_DEMO_PREVIEWS.length];
+  const chatPreview = CHAT_DEMO_PREVIEWS[chatDemoIdx % CHAT_DEMO_PREVIEWS.length];
 
   const onNavAskAI = () => {
     if (transcript) {
@@ -5141,6 +5179,7 @@ const App = () => {
         @keyframes bulletReveal { 0% { opacity:0.12; transform:translateX(-4px); } 18%,68% { opacity:1; transform:translateX(0); } 85%,100% { opacity:0.12; transform:translateX(0); } }
         @keyframes cardFlip3D { 0%,33% { transform:rotateY(0deg); } 50%,83% { transform:rotateY(180deg); } 100% { transform:rotateY(360deg); } }
         @keyframes dotBounce { 0%,60%,100% { transform:translateY(0); opacity:0.35; } 30% { transform:translateY(-3px); opacity:0.85; } }
+        @keyframes chatTurnIn { 0% { opacity:0; transform:translateY(3px); } 100% { opacity:1; transform:translateY(0); } }
         @keyframes iconPulse { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-2px); } }
         .feature-mock-url-bar { display:flex; align-items:center; gap:5px; height:20px; padding:0 7px; border-radius:5px; background:rgba(255,255,255,0.88); border:1px solid rgba(29,29,31,0.11); font-size:8px; color:rgba(29,29,31,0.42); font-family:ui-monospace,monospace; letter-spacing:0.01em; overflow:hidden; }
         .feature-mock-cursor { width:1.5px; height:9px; background:var(--card-accent); border-radius:1px; flex-shrink:0; animation:cursorBlink 0.9s step-end infinite; }
@@ -5168,20 +5207,25 @@ const App = () => {
         .feature-mock-chat-head-avatar { width:13px; height:13px; border-radius:4px; flex-shrink:0; border:1px solid rgba(60,140,255,0.2); background:linear-gradient(135deg, rgba(60,140,255,0.14) 0%, rgba(60,140,255,0.06) 100%); display:flex; align-items:center; justify-content:center; }
         .feature-mock-chat-head-avatar img { width:8px; height:8px; display:block; }
         .feature-mock-chat-head-lines { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
-        .feature-mock-chat-head-line { height:3px; border-radius:999px; background:rgba(29,29,31,0.14); }
-        .feature-mock-chat-stream { display:flex; flex-direction:column; gap:4px; min-height:41px; }
+        .feature-mock-chat-head-title { font-size:6.7px; font-weight:700; color:rgba(29,29,31,0.74); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .feature-mock-chat-head-sub { font-size:6px; color:rgba(29,29,31,0.52); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .feature-mock-chat-stream { display:flex; flex-direction:column; gap:3px; min-height:58px; }
         .feature-mock-chat-row { display:flex; align-items:flex-start; gap:4px; }
         .feature-mock-chat-row.user { justify-content:flex-end; }
         .feature-mock-chat-avatar { width:12px; height:12px; border-radius:4px; flex-shrink:0; border:1px solid rgba(60,140,255,0.18); background:linear-gradient(135deg, rgba(60,140,255,0.14) 0%, rgba(60,140,255,0.06) 100%); display:flex; align-items:center; justify-content:center; }
         .feature-mock-chat-avatar img { width:7px; height:7px; display:block; }
-        .feature-mock-chat-ai-stack { flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
-        .feature-mock-chat-pill { height:10px; border-radius:7px; }
-        .feature-mock-chat-pill.user { background:linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%); opacity:0.92; }
-        .feature-mock-chat-pill.ai { background:rgba(29,29,31,0.11); border:1px solid rgba(29,29,31,0.08); }
-        .feature-mock-chat-mini-refs { display:flex; gap:3px; margin-top:1px; flex-wrap:wrap; }
-        .feature-mock-chat-mini-ref { height:7px; border-radius:999px; border:1px solid var(--card-pill-border); background:rgba(255,255,255,0.92); }
+        .feature-mock-chat-message { max-width:100%; border-radius:7px; padding:4px 6px; display:flex; flex-direction:column; gap:2px; font-size:6.8px; line-height:1.3; letter-spacing:0.01em; }
+        .feature-mock-chat-message.user { margin-left:auto; max-width:79%; background:linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%); border:1px solid rgba(31,107,255,0.26); color:rgba(255,255,255,0.96); }
+        .feature-mock-chat-message.ai { max-width:88%; background:rgba(255,255,255,0.95); border:1px solid rgba(29,29,31,0.12); color:rgba(29,29,31,0.74); }
+        .feature-mock-chat-source { display:flex; align-items:center; gap:3px; font-size:5.8px; font-weight:700; color:rgba(29,29,31,0.48); text-transform:uppercase; letter-spacing:0.04em; }
+        .feature-mock-chat-timestamp { color:#1F6BFF; font-size:6.3px; font-weight:800; text-decoration:underline; text-underline-offset:1px; cursor:pointer; letter-spacing:0.01em; padding:0; border:none; background:none; line-height:1; font-family:inherit; }
+        .feature-mock-chat-turn { opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
+        .feature-mock-chat-turn.turn-1 { animation-delay:0.08s; }
+        .feature-mock-chat-turn.turn-2 { animation-delay:0.86s; }
+        .feature-mock-chat-turn.turn-3 { animation-delay:2.02s; }
+        .feature-mock-chat-turn.turn-4 { animation-delay:2.84s; }
         .feature-mock-chat-composer { display:flex; align-items:center; gap:4px; border:1px solid rgba(29,29,31,0.11); border-radius:7px; padding:2px 3px; background:#fff; }
-        .feature-mock-chat-input-line { flex:1; height:4px; border-radius:999px; background:rgba(29,29,31,0.14); }
+        .feature-mock-chat-input-text { flex:1; min-width:0; font-size:6.2px; color:rgba(29,29,31,0.42); line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .feature-mock-chat-send { width:8px; height:8px; border-radius:50%; background:var(--card-accent); opacity:0.88; flex-shrink:0; }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(60,140,255,0.06) !important; }
@@ -5907,44 +5951,55 @@ const App = () => {
                                   <img src="/scribesnap_icon_wave.svg" alt="" />
                                 </span>
                                 <span className="feature-mock-chat-head-lines">
-                                  <span className="feature-mock-chat-head-line" style={{ width: '52%' }} />
-                                  <span className="feature-mock-chat-head-line" style={{ width: '32%', opacity: 0.75 }} />
+                                  <span className="feature-mock-chat-head-title">Transcript-grounded Q&amp;A</span>
+                                  <span className="feature-mock-chat-head-sub">Ask, cite, and jump to source moments</span>
                                 </span>
                               </div>
-                              <div className="feature-mock-chat-stream">
+                              <div key={`chat-preview-${chatDemoIdx}`} className="feature-mock-chat-stream">
                                 <div className="feature-mock-chat-row user">
-                                  <span className="feature-mock-chat-pill user" style={{ width: '58%' }} />
+                                  <span className="feature-mock-chat-message user feature-mock-chat-turn turn-1">
+                                    {chatPreview.questionOne}
+                                  </span>
                                 </div>
                                 <div className="feature-mock-chat-row ai">
                                   <span className="feature-mock-chat-avatar">
                                     <img src="/scribesnap_icon_wave.svg" alt="" />
                                   </span>
-                                  <div className="feature-mock-chat-ai-stack">
-                                    <span className="feature-mock-chat-pill ai" style={{ width: '85%' }} />
-                                    <span className="feature-mock-chat-pill ai" style={{ width: '68%' }} />
-                                    <div className="feature-mock-chat-mini-refs">
-                                      <span className="feature-mock-chat-mini-ref" style={{ width: 24 }} />
-                                      <span className="feature-mock-chat-mini-ref" style={{ width: 20 }} />
-                                      <span className="feature-mock-chat-mini-ref" style={{ width: 26 }} />
-                                    </div>
-                                  </div>
+                                  <span className="feature-mock-chat-message ai feature-mock-chat-turn turn-2">
+                                    <span>{chatPreview.answerOne}</span>
+                                    <span className="feature-mock-chat-source">
+                                      Source
+                                      <button type="button" className="feature-mock-chat-timestamp" aria-label={`Jump to ${chatPreview.timestampOne}`}>
+                                        {chatPreview.timestampOne}
+                                      </button>
+                                    </span>
+                                  </span>
+                                </div>
+                                <div className="feature-mock-chat-row user">
+                                  <span className="feature-mock-chat-message user feature-mock-chat-turn turn-3">
+                                    {chatPreview.questionTwo}
+                                  </span>
                                 </div>
                                 <div className="feature-mock-chat-row ai">
                                   <span className="feature-mock-chat-avatar">
                                     <img src="/scribesnap_icon_wave.svg" alt="" />
                                   </span>
-                                  <div className="feature-mock-typing">
-                                    <span className="feature-mock-typing-dot" style={{ animationDelay: '0s' }} />
-                                    <span className="feature-mock-typing-dot" style={{ animationDelay: '0.18s' }} />
-                                    <span className="feature-mock-typing-dot" style={{ animationDelay: '0.36s' }} />
-                                  </div>
+                                  <span className="feature-mock-chat-message ai feature-mock-chat-turn turn-4">
+                                    <span>{chatPreview.answerTwo}</span>
+                                    <span className="feature-mock-chat-source">
+                                      Source
+                                      <button type="button" className="feature-mock-chat-timestamp" aria-label={`Jump to ${chatPreview.timestampTwo}`}>
+                                        {chatPreview.timestampTwo}
+                                      </button>
+                                    </span>
+                                  </span>
                                 </div>
                               </div>
                               <div className="feature-mock-chat-composer">
                                 <span className="feature-mock-chat-head-avatar">
                                   <img src="/scribesnap_icon_wave.svg" alt="" />
                                 </span>
-                                <span className="feature-mock-chat-input-line" />
+                                <span className="feature-mock-chat-input-text">Ask a follow-up about this clip…</span>
                                 <span className="feature-mock-chat-send" />
                               </div>
                             </div>
