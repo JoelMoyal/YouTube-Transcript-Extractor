@@ -5930,7 +5930,7 @@ const App = () => {
             </div>{/* end hero-grad */}
 
             {/* Capability cards */}
-            <div style={{ maxWidth: 1500, margin: '0 auto', padding: isMobile ? '16px 16px 44px' : '40px 36px 68px' }}>
+            <div style={{ maxWidth: 1500, margin: '0 auto', padding: isMobile ? '10px 16px 44px' : '24px 36px 68px' }}>
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>
                   How It Works
