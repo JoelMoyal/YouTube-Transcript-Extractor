@@ -7581,52 +7581,49 @@ const App = () => {
 
               </div>}
 
-              {/* Insights — always on desktop (original design), tab-gated on mobile (rich cards) */}
-              {isDesktop && <div style={{ height: 1, background: P.border, margin: '0 18px' }} />}
-              {(isDesktop || sidebarTab === 'insights') && (
-                isDesktop ? (
-                  /* ── Desktop: original compact row list ── */
-                  <div style={{ padding: '14px 18px 16px' }}>
-                    {[
-                      { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(60,140,255,0.1)',
-                        icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-                        onClick: summary ? () => setActiveTab('summary') : summarize, active: !!summary, loading: summarizing },
-                      { title: 'Flash Cards', sub: 'Q&A cards with flip mode', color: P.warning, bg: 'rgba(180,83,9,0.1)',
-                        icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-                        onClick: flashcards.length > 0 ? () => setActiveTab('flashcards') : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
-                      { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
-                        icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-                        onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
-                      { title: 'Academic', sub: 'References, claims & glossary', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
-                        icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
-                        onClick: academicInsights && !academicInsights._error ? () => setActiveTab('academic') : generateAcademicInsights, active: !!academicInsights && !academicInsights._error, loading: academicInsightsLoading },
-                    ].map(item => (
-                      <div key={item.title} onClick={item.loading ? undefined : item.onClick}
-                        style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 10px', borderRadius: 11, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 3 }}
-                        onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                      >
-                        <div style={{ width: 42, height: 42, borderRadius: 12, background: item.active ? item.bg : item.bg.replace('0.1', '0.07'), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color }}>
-                          {item.loading ? <SpinnerIcon size={14} /> : item.icon}
-                        </div>
-                        <div style={{ minWidth: 0, flex: 1 }}>
-                          <div style={{ fontSize: 13.5, fontWeight: 600, color: item.active ? item.color : P.ink }}>{item.title}</div>
-                          <div style={{ fontSize: 11.5, color: P.muted, marginTop: 1 }}>{item.sub}</div>
-                        </div>
-                        {item.active
-                          ? <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
-                          : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.4 }}><polyline points="9 18 15 12 9 6"/></svg>
-                        }
-                      </div>
-                    ))}
-                    {studyGuide?._error && (
-                      <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(180,35,24,0.05)', border: `1px solid rgba(180,35,24,0.2)`, borderRadius: 8, fontSize: 12, color: P.error }}>
-                        Failed to generate study guide: {studyGuide._error}
-                      </div>
-                    )}
+              {/* History — desktop only, compact list below AI Chat */}
+              {isDesktop && (
+                <>
+                  <div style={{ height: 1, background: P.border, margin: '0 18px' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', padding: '11px 18px 7px', flexShrink: 0 }}>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: P.ink }}>Recent</span>
                   </div>
-                ) : (
-                  /* ── Mobile: rich card design ── */
+                  <div style={{ overflowY: 'auto', padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    {history.length === 0 ? (
+                      <div style={{ padding: '16px 8px', textAlign: 'center', color: P.muted, fontSize: 12 }}>No recent transcripts</div>
+                    ) : history.map((entry) => {
+                      const hTitle = entry.title || entry.id;
+                      const isActive = entry.id === currentVideoId;
+                      return (
+                        <button key={entry.id} onClick={() => loadFromHistory(entry)} style={{
+                          display: 'flex', alignItems: 'flex-start', gap: 9, padding: '8px 10px',
+                          borderRadius: 10, border: `1px solid ${isActive ? 'rgba(60,140,255,0.2)' : 'transparent'}`,
+                          background: isActive ? P.accentLight : 'transparent',
+                          cursor: 'pointer', transition: 'background 0.1s', textAlign: 'left', width: '100%',
+                        }}
+                          onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(29,29,31,0.05)'; e.currentTarget.style.borderColor = P.border; } }}
+                          onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; } }}
+                        >
+                          <div style={{ flexShrink: 0 }}>
+                            {entry.thumbnail
+                              ? <img src={entry.thumbnail} alt="" style={{ width: 60, height: 38, objectFit: 'cover', borderRadius: 6, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+                              : <div style={{ width: 60, height: 38, borderRadius: 6, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlatformIcon platform={entry.platform || 'youtube'} /></div>
+                            }
+                          </div>
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.35, marginBottom: 2 }}>{hTitle}</div>
+                            <div style={{ fontSize: 10.5, color: P.muted }}>{timeAgo(entry.date)}</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+
+              {/* Insights — tab-gated on mobile/tablet (rich cards) */}
+              {!isDesktop && sidebarTab === 'insights' && (
+                /* ── Mobile: rich card design ── */
                   <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '10px 14px 20px' }}>
                     <div style={{ marginBottom: 10 }}>
                       <div style={{ fontSize: 15, fontWeight: 800, color: P.ink, letterSpacing: '-0.01em', marginBottom: 2 }}>AI Insights</div>
@@ -7683,8 +7680,9 @@ const App = () => {
                       </div>
                     )}
                   </div>
-                )
               )}
+
+              {/* Summary sidebar tab
 
               {/* Summary sidebar tab — mobile/tablet only */}
               {!isDesktop && sidebarTab === 'summary' && (
