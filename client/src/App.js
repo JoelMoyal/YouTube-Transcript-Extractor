@@ -7409,6 +7409,22 @@ const App = () => {
                           allowFullScreen
                           title="Loom player"
                         />
+                      ) : currentPlatform === 'upload' ? (
+                        // Local uploaded file — no embeddable player
+                        <div style={{ width: '100%', aspectRatio: '16/9', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, background: `linear-gradient(135deg, ${P.surface} 0%, rgba(60,140,255,0.06) 100%)` }}>
+                          {/* Headphones icon */}
+                          <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(60,140,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid rgba(60,140,255,0.2)' }}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+                              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/>
+                              <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+                            </svg>
+                          </div>
+                          <div style={{ textAlign: 'center', padding: '0 20px' }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260 }}>{currentTitle || 'Local file'}</div>
+                            <div style={{ fontSize: 11, color: P.muted, marginTop: 3 }}>Local recording · Whisper AI transcription</div>
+                          </div>
+                        </div>
                       ) : (
                         // Generic platform: show thumbnail + open link
                         <a href={currentVideoId} target="_blank" rel="noopener noreferrer" style={{ display: 'block', position: 'relative', width: '100%', aspectRatio: '16/9', background: '#000', textDecoration: 'none' }}>
