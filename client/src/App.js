@@ -1294,13 +1294,6 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   // ON ICE: const [prefLangSaved, setPrefLangSaved] = React.useState(false);
   const [copyRefDone, setCopyRefDone] = React.useState(false);
   const [showAllHistory, setShowAllHistory] = React.useState(false);
-  const [dashboardViewport, setDashboardViewport] = React.useState(() => window.innerWidth);
-
-  React.useEffect(() => {
-    const onResize = () => setDashboardViewport(window.innerWidth);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
 
   // Profile editing
   const [editingName, setEditingName] = React.useState(false);
@@ -1535,8 +1528,6 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
   const weekSegments = Array.from({ length: 7 }, (_, i) => i);
   const activeDay = Math.min(6, Math.round((pct / 100) * 6));
-  const isDashboardMobile = dashboardViewport <= 900;
-  const isDashboardVeryNarrow = dashboardViewport <= 420;
 
   const renderContinueCard = ({ mobile = false }) => {
     if (mobile) {
@@ -1649,30 +1640,25 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
     return (
       <section className="ds-card ds-referral">
-        <div className="ds-referral-banner">
-          <div className="ds-referral-head">
-            <div className="ds-referral-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            </div>
-            <div>
-              <h2 className="ds-referral-title">Invite friends, earn credits</h2>
-              <p className="ds-referral-subtitle">Share your link · both get rewarded</p>
-            </div>
+        <div className="ds-referral-head">
+          <div className="ds-referral-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
           </div>
-          <div className="ds-referral-badge">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            +3 free credits per friend who signs up
+          <div>
+            <h2 className="ds-referral-title">Invite friends, earn credits</h2>
+            <p className="ds-referral-subtitle">Share your link · both get rewarded</p>
           </div>
         </div>
+        <div className="ds-referral-badge">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          +3 free credits per friend who signs up
+        </div>
         <div className="ds-referral-body">
-          <p className="ds-referral-desc">
-            Share your personal link. Every friend who signs up gets a bonus — and so do you.
-          </p>
           <div className="ds-referral-link-row">
             <div className="ds-referral-link-box">{refLink}</div>
             <button className={`ds-referral-copy-btn${copyRefDone ? ' done' : ''}`} onClick={copyRefLink}>
@@ -1680,22 +1666,22 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
             </button>
           </div>
           <div className="ds-referral-share-row">
-            <button className="ds-referral-share-btn ds-referral-share-wa" onClick={onShareReferralWhatsApp}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+            <button className="ds-referral-share-btn" onClick={onShareReferralWhatsApp}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
               WhatsApp
             </button>
-            <button className="ds-referral-share-btn ds-referral-share-x" onClick={onShareReferralX}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            <button className="ds-referral-share-btn" onClick={onShareReferralX}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#1D1D1F"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               Share on X
             </button>
-            <button className="ds-referral-share-btn ds-referral-share-ig" onClick={onShareReferralInstagram}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" stroke="white">
+            <button className="ds-referral-share-btn" onClick={onShareReferralInstagram}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" stroke="#E1306C">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
               </svg>
               Instagram
             </button>
-            <button className="ds-referral-share-btn ds-referral-share-email" onClick={onShareReferralEmail}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+            <button className="ds-referral-share-btn" onClick={onShareReferralEmail}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3C8CFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
               Email
             </button>
           </div>
@@ -1745,17 +1731,17 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
     ];
 
     return (
-      <div className="ds-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: isDashboardVeryNarrow ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+      <div className="ds-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 6 }}>
+        <div className="ds-mobile-metrics">
           {metricCards.map((card, idx) => (
             <div
               key={card.key}
+              className={`ds-mobile-metric${idx === 2 ? ' is-wide' : ''}`}
               style={{
                 background: '#FFFFFF',
                 border: '1px solid #E6E0D6',
                 borderRadius: 12,
                 padding: '10px 11px',
-                ...(isDashboardVeryNarrow ? {} : idx === 2 ? { gridColumn: '1 / -1' } : {}),
               }}
             >
               <div style={{ width: 28, height: 28, borderRadius: 8, background: card.iconBg, color: card.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>{card.icon}</div>
@@ -1903,6 +1889,10 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-view-all-btn { display: block; width: 100%; padding: 12px 22px; border: none; border-top: 1px solid #E6E0D6; background: transparent; color: #3C8CFF; font-size: 13px; font-weight: 600; cursor: pointer; text-align: left; transition: background 0.12s ease; }
         .ds-view-all-btn:hover { background: rgba(60,140,255,0.03); }
         /* ── Overview 2-col grid ── */
+        .ds-overview-mobile { display: none; }
+        .ds-overview-desktop { display: block; }
+        .ds-mobile-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .ds-mobile-metric.is-wide { grid-column: 1 / -1; }
         .ds-overview-grid { display: grid; grid-template-columns: minmax(0,1.6fr) minmax(270px,1fr); gap: 18px; align-items: start; }
         /* ── Settings 2-col grid ── */
         .ds-settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
@@ -1921,6 +1911,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         /* ── Responsive ── */
         @media (max-width: 900px) {
           .ds-sidebar { display: none; }
+          .ds-overview-mobile { display: block; }
+          .ds-overview-desktop { display: none; }
+          .ds-mobile-header { position: static; top: auto; z-index: auto; }
           .ds-main { padding: 16px 16px calc(106px + env(safe-area-inset-bottom, 0px)); overflow-x: hidden; }
           .ds-overview-grid { grid-template-columns: 1fr; gap: 14px; }
           .ds-stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
@@ -1993,6 +1986,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           .ds-referral-title { font-size: 13.5px; }
         }
         @media (max-width: 420px) {
+          .ds-mobile-metrics { grid-template-columns: 1fr; }
+          .ds-mobile-metric.is-wide { grid-column: auto; }
           .ds-mobile-header { padding: 10px 12px; }
           .ds-main { padding: 10px 10px calc(96px + env(safe-area-inset-bottom, 0px)); }
           .ds-stats-row { grid-template-columns: 1fr; }
@@ -2557,101 +2552,76 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         /* ── Referral card ── */
         .ds-referral {
           padding: 0; overflow: hidden;
-          border: 1.5px solid rgba(60,140,255,0.2) !important;
-          box-shadow: 0 4px 20px rgba(60,140,255,0.1), 0 1px 4px rgba(0,0,0,0.05);
-        }
-        .ds-referral-banner {
-          background: linear-gradient(135deg, #3C8CFF 0%, #6C47D9 100%);
-          padding: 16px 18px 14px;
-          position: relative; overflow: hidden;
-        }
-        .ds-referral-banner::before {
-          content: ''; position: absolute;
-          width: 100px; height: 100px; border-radius: 50%;
-          background: rgba(255,255,255,0.08);
-          top: -30px; right: -20px;
-        }
-        .ds-referral-banner::after {
-          content: ''; position: absolute;
-          width: 60px; height: 60px; border-radius: 50%;
-          background: rgba(255,255,255,0.06);
-          bottom: -15px; right: 40px;
         }
         .ds-referral-head {
-          display: flex; align-items: center; gap: 10px; margin-bottom: 10px; position: relative; z-index: 1;
+          display: flex; align-items: flex-start; gap: 12px;
+          padding: 20px 20px 0;
         }
         .ds-referral-icon {
-          width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-          background: rgba(255,255,255,0.2);
-          border: 1px solid rgba(255,255,255,0.25);
-          color: white;
+          width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+          background: rgba(60,140,255,0.08); color: #3C8CFF;
           display: flex; align-items: center; justify-content: center;
         }
         .ds-referral-title {
-          margin: 0 0 1px; font-size: 14.5px; font-weight: 700; color: white; letter-spacing: -0.01em;
+          margin: 0 0 2px; font-size: 14px; font-weight: 700; color: #1D1D1F; letter-spacing: -0.01em;
         }
         .ds-referral-subtitle {
-          margin: 0; font-size: 12px; color: rgba(255,255,255,0.74);
+          margin: 0; font-size: 12px; color: #8B8F97;
         }
         .ds-referral-badge {
-          display: inline-flex; align-items: center; gap: 5px; position: relative; z-index: 1;
-          background: rgba(255,255,255,0.18); color: white;
-          border: 1px solid rgba(255,255,255,0.3);
+          display: inline-flex; align-items: center; gap: 5px;
+          margin: 12px 20px 0;
+          background: rgba(60,140,255,0.07); color: #3C8CFF;
+          border: 1px solid rgba(60,140,255,0.16);
           border-radius: 999px; padding: 4px 11px 4px 8px;
-          font-size: 11.5px; font-weight: 700;
+          font-size: 11px; font-weight: 600;
         }
         .ds-referral-body {
-          padding: 14px 18px 18px; background: white;
-        }
-        .ds-referral-desc {
-          margin: 0 0 12px; font-size: 13px; color: #6F7480; line-height: 1.5;
+          padding: 12px 20px 20px;
         }
         .ds-referral-link-row {
-          display: flex; gap: 7px; align-items: stretch; margin-bottom: 10px;
+          display: flex; gap: 6px; align-items: stretch; margin-bottom: 9px;
         }
         .ds-referral-link-box {
           flex: 1; min-width: 0;
-          background: #F8F6F2; border: 1.5px solid #E6E0D6; border-radius: 9px;
-          padding: 8px 11px; font-size: 11.5px; color: #8B8F97;
+          background: #F6F2EA; border: 1px solid #E6E0D6; border-radius: 9px;
+          padding: 8px 10px; font-size: 11px; color: #8B8F97;
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-          font-family: monospace; letter-spacing: -0.01em;
+          font-family: monospace;
         }
         .ds-referral-copy-btn {
           border: none; border-radius: 9px;
           background: #3C8CFF; color: white;
           font-size: 12px; font-weight: 700;
           padding: 8px 14px; cursor: pointer; flex-shrink: 0;
-          transition: all 0.15s; white-space: nowrap;
-          box-shadow: 0 2px 8px rgba(60,140,255,0.35);
+          transition: background 0.15s; white-space: nowrap;
         }
-        .ds-referral-copy-btn:hover { background: #1F6BFF; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(60,140,255,0.45); }
-        .ds-referral-copy-btn.done { background: #0F766E; box-shadow: 0 2px 8px rgba(15,118,110,0.3); }
+        .ds-referral-copy-btn:hover { background: #1F6BFF; }
+        .ds-referral-copy-btn.done { background: #0F766E; }
         .ds-referral-share-row {
-          display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
+          display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
         }
         .ds-referral-share-btn {
-          display: flex; align-items: center; justify-content: center; gap: 6px;
-          padding: 9px 6px; border-radius: 9px; font-size: 12px; font-weight: 600;
-          cursor: pointer; transition: all 0.15s; border: none; color: white;
+          display: flex; align-items: center; justify-content: center; gap: 7px;
+          padding: 8px 6px; border-radius: 9px; font-size: 12px; font-weight: 500;
+          cursor: pointer; transition: all 0.12s;
+          border: 1px solid #E6E0D6; background: #FFFFFF; color: #1D1D1F;
         }
-        .ds-referral-share-btn:hover { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
-        .ds-referral-share-wa { background: #25D366; }
-        .ds-referral-share-x { background: #1a1a2e; }
-        .ds-referral-share-ig { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
-        .ds-referral-share-email { background: #4A86D4; }
+        .ds-referral-share-btn:hover { background: #F6F2EA; border-color: #D0CAC0; }
         .ds-referral-stats {
-          display: flex; gap: 8px; margin-top: 12px;
+          display: flex; gap: 0; margin-top: 14px;
+          border-top: 1px solid #E6E0D6; padding-top: 14px;
         }
         .ds-referral-stat {
-          flex: 1; background: linear-gradient(135deg, rgba(60,140,255,0.05), rgba(108,71,217,0.05));
-          border: 1.5px solid rgba(60,140,255,0.15);
-          border-radius: 10px; padding: 9px 10px; text-align: center;
+          flex: 1; text-align: center;
+          border-right: 1px solid #E6E0D6;
         }
+        .ds-referral-stat:last-child { border-right: none; }
         .ds-referral-stat-value {
-          display: block; font-size: 19px; font-weight: 800; color: #3C8CFF; line-height: 1;
+          display: block; font-size: 18px; font-weight: 800; color: #1D1D1F; line-height: 1;
         }
         .ds-referral-stat-label {
-          display: block; font-size: 12px; color: #6F7480; margin-top: 3px;
+          display: block; font-size: 11px; color: #8B8F97; margin-top: 3px;
         }
         .ds-empty {
           text-align: center;
@@ -2932,8 +2902,12 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         {/* ── Main content ── */}
         <main className="ds-main">
           {tab === 'overview' && (
-            isDashboardMobile ? renderMobileOverview() : (
-              <div key="overview" className="ds-fade-in ds-overview-grid">
+            <>
+              <div className="ds-overview-mobile">
+                {renderMobileOverview()}
+              </div>
+              <div className="ds-overview-desktop">
+                <div key="overview" className="ds-fade-in ds-overview-grid">
                 {/* Left column: stats + credits + history */}
                 <div>
                   <div className="ds-stats-row">
@@ -3032,7 +3006,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                   {renderReferralCard({ mobile: false })}
                 </div>
               </div>
-            )
+              </div>
+            </>
           )}
 
           {tab === 'settings' && (
