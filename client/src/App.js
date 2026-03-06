@@ -2714,31 +2714,313 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         </div>
       </div>
 
-      {/* ═══ MOBILE LAYOUT (pure inline styles, no CSS class overflow) ═══ */}
-      {isMobile && (
-        <div style={{ position: 'fixed', top: 56, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', background: '#F6F2EA', overflowX: 'hidden', overflowY: 'hidden' }}>
-          {/* Fixed header: flex-shrink:0 means it NEVER scrolls — no sticky/overflow issues */}
-          <div style={{ background: '#FFFFFF', borderBottom: '1px solid #E6E0D6', flexShrink: 0 }}>
-            {/* Row 1: back button + avatar + name/email */}
-            <div style={{ padding: '10px 14px 8px', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <button onClick={onBack} style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#8B8F97', padding: '4px 4px 4px 0', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                <ChevronIcon size={16} dir="left" />
+      {/* ═══ UNIFIED LAYOUT ═══ */}
+      <div className="ds-layout">
+        {/* ── Sidebar (desktop only, hidden on mobile via CSS) ── */}
+        <aside className="ds-sidebar">
+          <div className="ds-sidebar-user">
+            <div className="ds-sidebar-avatar">{initial}</div>
+            <p className="ds-sidebar-name">{displayName}</p>
+            <p className="ds-sidebar-email">{user.email}</p>
+            <span className="ds-sidebar-plan">Free · {tierMax} credits / 7d</span>
+          </div>
+          <nav className="ds-sidebar-nav">
+            {[
+              { key: 'overview', label: 'Overview', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor"/></svg> },
+              { key: 'settings', label: 'Settings', icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M2.93 2.93l1.41 1.41M11.66 11.66l1.41 1.41M2.93 13.07l1.41-1.41M11.66 4.34l1.41-1.41" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg> },
+            ].map(({ key, label, icon }) => (
+              <button key={key} className={`ds-nav-btn${tab === key ? ' is-active' : ''}`} onClick={() => setTab(key)}>
+                {icon}{label}
               </button>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#3C8CFF', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, flexShrink: 0 }}>{initial}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
-                <div style={{ fontSize: 12, color: '#8B8F97', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+            ))}
+          </nav>
+          <div className="ds-sidebar-footer">
+            <button className="ds-back-btn" onClick={onBack}>
+              <ChevronIcon size={13} dir="left" />Back to app
+            </button>
+          </div>
+        </aside>
+
+        {/* ── Main content ── */}
+        <main className="ds-main">
+          {tab === 'overview' && (
+            <div key="overview" className="ds-fade-in ds-overview-grid">
+              {/* Left column: stats + credits + history */}
+              <div>
+                <div className="ds-stats-row">
+                  <div className="ds-stat-card">
+                    <div className="ds-stat-icon" style={{ background: 'rgba(60,140,255,0.1)', color: '#3C8CFF' }}>
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2"/><path d="M9 5.5v3.5l2 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    <div className="ds-stat-val">{used}<span style={{ fontSize: 13, fontWeight: 500, color: '#8B8F97' }}> / {tierMax}</span></div>
+                    <div className="ds-stat-lbl">Credits used</div>
+                  </div>
+                  <div className="ds-stat-card">
+                    <div className="ds-stat-icon" style={{ background: 'rgba(15,118,110,0.1)', color: '#0F766E' }}>
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M5 7h8M5 10h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                    </div>
+                    <div className="ds-stat-val">{history.length}</div>
+                    <div className="ds-stat-lbl">Transcripts saved</div>
+                  </div>
+                  <div className="ds-stat-card">
+                    <div className="ds-stat-icon" style={{ background: 'rgba(180,83,9,0.1)', color: '#B45309' }}>
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2"/><path d="M9 5v4.5l2.5 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                    </div>
+                    <div className="ds-stat-val">{daysLeft}</div>
+                    <div className="ds-stat-lbl">Days until reset</div>
+                  </div>
+                </div>
+
+                <div className="ds-section" style={{ marginBottom: 18 }}>
+                  <div className="ds-section-head">
+                    <h2 className="ds-section-title">Weekly credits</h2>
+                    <span style={{ fontSize: 12, color: '#8B8F97' }}>Resets in <strong style={{ color: '#1D1D1F' }}>{daysLeft}d</strong></span>
+                  </div>
+                  <div style={{ padding: '0 22px 18px' }}>
+                    <div className="ds-credit-track">
+                      <div className="ds-credit-fill" style={{ width: `${pct}%`, background: pct >= 80 ? '#B45309' : '#3C8CFF' }} />
+                    </div>
+                    <div className="ds-credit-meta">
+                      <span>{used} / {tierMax} used</span>
+                      <span>{remaining} remaining</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="ds-section">
+                  <div className="ds-section-head">
+                    <h2 className="ds-section-title">Recent transcripts</h2>
+                    {history.length > 0 && (
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#8B8F97', background: 'rgba(29,29,31,0.05)', padding: '3px 9px', borderRadius: 999, border: '1px solid rgba(29,29,31,0.08)' }}>{history.length}</span>
+                    )}
+                  </div>
+                  {history.length === 0 ? (
+                    <div style={{ padding: '32px 22px', textAlign: 'center' }}>
+                      <p style={{ margin: '0 0 12px', color: '#8B8F97', fontSize: 14 }}>No transcripts yet.</p>
+                      <button onClick={onBack} style={{ border: 'none', borderRadius: 10, background: '#3C8CFF', color: 'white', fontSize: 13, fontWeight: 600, padding: '8px 20px', cursor: 'pointer' }}>Extract one</button>
+                    </div>
+                  ) : (
+                    <>
+                      {(showAllHistory ? history : history.slice(0, 4)).map((h, idx) => {
+                        const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
+                        const title = h.title || h.id;
+                        const channel = h.channel || (h.platform ? h.platform.charAt(0).toUpperCase() + h.platform.slice(1) : 'YouTube');
+                        return (
+                          <div key={`${h.id}-${idx}`} className="ds-hist-row" onClick={() => openTranscript(h)}>
+                            <div className="ds-hist-thumb">
+                              {h.thumbnail ? (
+                                <img src={h.thumbnail} alt={title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+                              ) : (
+                                <PlatformIcon platform={h.platform || 'youtube'} size={22} />
+                              )}
+                            </div>
+                            <div className="ds-hist-info">
+                              <p className="ds-hist-title">{title}</p>
+                              <p className="ds-hist-meta">
+                                <PlatformIcon platform={h.platform || 'youtube'} size={11} />
+                                {channel}{wc > 0 ? ` · ${wc.toLocaleString()} words` : ''} · {timeAgo(h.date)}
+                              </p>
+                            </div>
+                            <button className="ds-open-btn" onClick={e => { e.stopPropagation(); openTranscript(h); }}>Open</button>
+                          </div>
+                        );
+                      })}
+                      {history.length > 4 && (
+                        <div style={{ padding: '12px 22px', borderTop: '1px solid #E6E0D6' }}>
+                          <button className="ds-view-all-btn" onClick={() => setShowAllHistory(v => !v)}>
+                            {showAllHistory ? 'Show less' : `+ View all ${history.length} transcripts`}
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Right column: continue + referral */}
+              <div>
+                {renderContinueCard({ mobile: false })}
+                {renderReferralCard({ mobile: false })}
               </div>
             </div>
-            {/* Row 2: full-width tab pills */}
-            <div style={{ padding: '0 14px 10px', display: 'flex', gap: 6 }}>
-              {[['overview', 'Overview'], ['settings', 'Settings']].map(([key, label]) => (
-                <button key={key} onClick={() => setTab(key)} style={{ flex: 1, border: 'none', background: tab === key ? '#3C8CFF' : 'rgba(29,29,31,0.06)', color: tab === key ? 'white' : '#8B8F97', fontWeight: tab === key ? 700 : 500, fontSize: 13, padding: '7px 0', borderRadius: 9, cursor: 'pointer', transition: 'all 0.15s' }}>
-                  {label}
-                </button>
-              ))}
+          )}
+
+          {tab === 'settings' && (
+            <div key="settings" className="ds-fade-in ds-settings-grid">
+              {/* ── Card 1: Profile ── */}
+              <div className="ds-settings-card-2">
+                <h3 className="ds-settings-card-title">Profile</h3>
+                <div className="ds-setting-row" style={{ alignItems: 'flex-start', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                    <span className="ds-setting-label">Display name</span>
+                    {!editingName && (
+                      <div className="ds-settings-row-actions">
+                        {nameSaved && <span style={{ fontSize: 12, color: P.success, fontWeight: 600 }}>Saved ✓</span>}
+                        <button className="ds-settings-edit-btn" onClick={() => setEditingName(true)}>Edit</button>
+                      </div>
+                    )}
+                  </div>
+                  {editingName ? (
+                    <div style={{ width: '100%' }}>
+                      <input className="ds-settings-input" value={nameInput} onChange={e => setNameInput(e.target.value)} placeholder="Your display name" autoFocus onKeyDown={e => { if (e.key === 'Enter') saveDisplayName(); if (e.key === 'Escape') { setEditingName(false); setNameError(''); } }} />
+                      {nameError && <div className="ds-settings-feedback error" style={{ marginTop: 4 }}>{nameError}</div>}
+                      <div className="ds-settings-row-actions" style={{ marginTop: 6 }}>
+                        <button className="ds-settings-save-btn" onClick={saveDisplayName} disabled={nameSaving}>{nameSaving ? 'Saving…' : 'Save name'}</button>
+                        <button className="ds-settings-cancel-btn" onClick={() => { setEditingName(false); setNameError(''); }}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="ds-setting-value" style={{ textAlign: 'left' }}>{displayName}</span>
+                  )}
+                </div>
+                <div className="ds-setting-row">
+                  <span className="ds-setting-label">Email</span>
+                  <span className="ds-setting-value">{user.email}</span>
+                </div>
+                <div className="ds-setting-row">
+                  <span className="ds-setting-label">Member since</span>
+                  <span className="ds-setting-value">{memberSince}</span>
+                </div>
+                <div className="ds-setting-row">
+                  <span className="ds-setting-label">Current plan</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20, background: 'rgba(60,140,255,0.1)', color: '#3C8CFF' }}>Free</span>
+                    <span className="ds-setting-value" style={{ maxWidth: 'none' }}>{tierMax} credits / 7 days</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Card 2: Preferences ── */}
+              <div className="ds-settings-card-2">
+                <h3 className="ds-settings-card-title">Preferences</h3>
+                <div className="ds-setting-row" style={{ alignItems: 'center', opacity: 0.45 }}>
+                  <span className="ds-setting-label">Transcript language</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <select value={lang} disabled style={{ fontSize: 13, padding: '5px 10px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, color: P.ink, cursor: 'not-allowed', outline: 'none' }}>
+                      {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+                    </select>
+                    <span style={{ fontSize: 11, color: P.muted, fontWeight: 500, fontStyle: 'italic' }}>Coming soon</span>
+                  </div>
+                </div>
+                <div className="ds-setting-row" style={{ alignItems: 'center' }}>
+                  <span className="ds-setting-label">Default export format</span>
+                  <select value={prefFormat} onChange={e => { setPrefFormat(e.target.value); try { localStorage.setItem(prefKey('format'), e.target.value); } catch {} savePrefsToCloud({ format: e.target.value }); }} style={{ fontSize: 13, padding: '5px 10px', borderRadius: 8, border: `1px solid ${P.border}`, background: P.paper, color: P.ink, cursor: 'pointer', outline: 'none' }}>
+                    <option value="plain">Plain text (.txt)</option>
+                    <option value="srt">Subtitles (.srt)</option>
+                    <option value="pdf">Document (.pdf)</option>
+                  </select>
+                </div>
+                <div className="ds-setting-row" style={{ alignItems: 'center' }}>
+                  <div>
+                    <span className="ds-setting-label">Show timestamps</span>
+                    <p style={{ margin: '2px 0 0', fontSize: 11, color: '#9B9490' }}>Display time markers in transcripts</p>
+                  </div>
+                  <label className="ds-toggle">
+                    <input type="checkbox" checked={prefTimestamps} onChange={e => { setPrefTimestamps(e.target.checked); try { localStorage.setItem(prefKey('timestamps'), String(e.target.checked)); } catch {} savePrefsToCloud({ timestamps: e.target.checked }); }} />
+                    <span className="ds-toggle-track" />
+                  </label>
+                </div>
+                <div className="ds-setting-row" style={{ alignItems: 'center' }}>
+                  <div>
+                    <span className="ds-setting-label">Auto-copy transcript</span>
+                    <p style={{ margin: '2px 0 0', fontSize: 11, color: '#9B9490' }}>Copy to clipboard after extraction</p>
+                  </div>
+                  <label className="ds-toggle">
+                    <input type="checkbox" checked={prefAutoCopy} onChange={e => { setPrefAutoCopy(e.target.checked); try { localStorage.setItem(prefKey('autocopy'), String(e.target.checked)); } catch {} savePrefsToCloud({ autocopy: e.target.checked }); }} />
+                    <span className="ds-toggle-track" />
+                  </label>
+                </div>
+              </div>
+
+              {/* ── Card 3: Security ── */}
+              <div className="ds-settings-card-2" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <h3 className="ds-settings-card-title" style={{ marginBottom: 2 }}>Security</h3>
+                {pwStep === 'idle' && (
+                  <button className="ds-settings-btn" onClick={() => { setPwStep('form'); setPwError(''); }}>Change password</button>
+                )}
+                {(pwStep === 'form' || pwStep === 'confirm') && (
+                  <div className="ds-settings-form">
+                    <div>
+                      <label className="ds-settings-form-label">Current password</label>
+                      <input className="ds-settings-input" type="password" value={pwCurrent} onChange={e => setPwCurrent(e.target.value)} placeholder="Enter current password" />
+                    </div>
+                    <div>
+                      <label className="ds-settings-form-label">New password</label>
+                      <input className="ds-settings-input" type="password" value={pwNew} onChange={e => setPwNew(e.target.value)} placeholder="Min. 6 characters" />
+                    </div>
+                    <div>
+                      <label className="ds-settings-form-label">Confirm new password</label>
+                      <input className="ds-settings-input" type="password" value={pwConfirm} onChange={e => setPwConfirm(e.target.value)} placeholder="Repeat new password" />
+                    </div>
+                    {pwError && <div className="ds-settings-feedback error">{pwError}</div>}
+                    {pwStep === 'form' && (
+                      <div className="ds-settings-row-actions">
+                        <button className="ds-settings-save-btn" style={{ flex: 1 }} onClick={() => { if (!pwCurrent) { setPwError('Enter your current password.'); return; } if (pwNew.length < 6) { setPwError('New password must be at least 6 characters.'); return; } if (pwNew !== pwConfirm) { setPwError('New passwords do not match.'); return; } setPwError(''); setPwStep('confirm'); }}>Continue</button>
+                        <button className="ds-settings-cancel-btn" onClick={() => { setPwStep('idle'); setPwCurrent(''); setPwNew(''); setPwConfirm(''); setPwError(''); }}>Cancel</button>
+                      </div>
+                    )}
+                    {pwStep === 'confirm' && (
+                      <div className="ds-settings-confirm-box neutral">
+                        <p className="ds-settings-confirm-text">Are you sure you want to change your password? You'll stay signed in on this device.</p>
+                        <div className="ds-settings-confirm-row">
+                          <button className="ds-settings-save-btn" style={{ flex: 1 }} onClick={handlePasswordChange}>Yes, change it</button>
+                          <button className="ds-settings-cancel-btn" onClick={() => setPwStep('form')}>Go back</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {pwStep === 'loading' && <div className="ds-settings-feedback loading">Updating your password…</div>}
+                {pwStep === 'success' && <div className="ds-settings-feedback success">Password updated successfully ✓</div>}
+                <div style={{ borderTop: `1px solid ${P.border}`, paddingTop: 10, marginTop: 2 }}>
+                  {!signOutConfirm ? (
+                    <button className="ds-settings-btn danger" onClick={() => setSignOutConfirm(true)}>Sign out of account</button>
+                  ) : (
+                    <div className="ds-settings-confirm-box">
+                      <p className="ds-settings-confirm-text">Are you sure you want to sign out?</p>
+                      <div className="ds-settings-confirm-row">
+                        <button className="ds-settings-save-btn" style={{ flex: 1, background: P.error }} onClick={onSignOut}>Yes, sign out</button>
+                        <button className="ds-settings-cancel-btn" onClick={() => setSignOutConfirm(false)}>Cancel</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div style={{ borderTop: `1px solid ${P.border}`, paddingTop: 10 }}>
+                  <button onClick={() => { setShowDeleteModal(true); setDeleteStep('reason'); setDeleteReason(''); setDeleteTyped(''); setDeleteCountdown(8); setDeleteError(''); }} className="ds-settings-btn danger">Delete account</button>
+                </div>
+              </div>
+
+              {/* ── Card 4: Data & Storage ── */}
+              <div className="ds-settings-card-2" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <h3 className="ds-settings-card-title" style={{ marginBottom: 2 }}>Data & Storage</h3>
+                <p className="ds-settings-help">Your transcripts are stored locally on this device.</p>
+                <div className="ds-setting-row" style={{ border: 'none', padding: '4px 0' }}>
+                  <span className="ds-setting-label">Saved transcripts</span>
+                  <span className="ds-setting-value">{history.length} / 10</span>
+                </div>
+                <button className="ds-settings-btn" onClick={exportHistory} disabled={history.length === 0} style={{ opacity: history.length === 0 ? 0.45 : 1 }}>Export history as JSON</button>
+                {!clearConfirm ? (
+                  <button className="ds-settings-btn danger" onClick={() => setClearConfirm(true)} disabled={history.length === 0} style={{ opacity: history.length === 0 ? 0.45 : 1 }}>Clear all history</button>
+                ) : (
+                  <div className="ds-settings-confirm-box">
+                    {clearDone ? (
+                      <div className="ds-settings-feedback success" style={{ margin: 0 }}>History cleared ✓</div>
+                    ) : (
+                      <>
+                        <p className="ds-settings-confirm-text">This will permanently delete all {history.length} saved transcript{history.length !== 1 ? 's' : ''}. This cannot be undone.</p>
+                        <div className="ds-settings-confirm-row">
+                          <button className="ds-settings-save-btn" style={{ flex: 1, background: P.error }} onClick={handleClearHistory}>Yes, clear all</button>
+                          <button className="ds-settings-cancel-btn" onClick={() => setClearConfirm(false)}>Cancel</button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
+          {false && (
+          <div>
 
           <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain', padding: '12px 14px', paddingBottom: 'max(80px, calc(env(safe-area-inset-bottom, 0px) + 60px))', display: 'flex', flexDirection: 'column', gap: 10 }}>
 
@@ -2969,21 +3251,29 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                 </div>
               </>
             )}
-
           </div>
         </div>
       )}
+        </main>
+      </div>
 
-      {/* ═══ DESKTOP LAYOUT ═══ */}
-      <div className="ds-wrap" style={{ display: isMobile ? 'none' : undefined }}>
-        {/* Top navigation bar */}
-        <nav className="ds-topnav">
-          <button className="ds-topnav-back" onClick={onBack} title="Back to extractor">
-            <ChevronIcon size={16} dir="left" />
-          </button>
-          <h2 className="ds-topnav-title">Dashboard</h2>
-        </nav>
+      {/* Mobile bottom tabs */}
+      <div className="ds-mobile-tabs">
+        <div style={{ display: 'flex', padding: '8px 16px' }}>
+          {[
+            { key: 'overview', label: 'Overview' },
+            { key: 'settings', label: 'Settings' },
+          ].map(({ key, label }) => (
+            <button key={key} className={`ds-mob-tab${tab === key ? ' is-active' : ''}`} onClick={() => setTab(key)} style={{ flex: 1, border: 'none', background: 'none', fontSize: 13, fontWeight: tab === key ? 700 : 500, color: tab === key ? '#3C8CFF' : '#8B8F97', padding: '6px', cursor: 'pointer' }}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
 
+      {false && (
+      <div>
+        <nav></nav>
         <div className="ds-grid">
           <main>
             <section className="ds-card ds-profile">
@@ -3367,14 +3657,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
             )}
           </main>
 
-          {tab === 'overview' && (
-            <aside className="ds-side">
-              {renderContinueCard({ mobile: false })}
-              {renderReferralCard({ mobile: false })}
-            </aside>
-          )}
         </div>
       </div>
+      )}
 
       {/* ── Delete Account Modal ── */}
       {showDeleteModal && (
