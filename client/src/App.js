@@ -6377,12 +6377,6 @@ const App = () => {
                       )}
                     </div>
                     <p className="feature-card-desc">{card.desc}</p>
-                    <div className="feature-card-tags">
-                      {card.tags.map(tag => (
-                        <span key={`${card.label}-${tag}`} className="feature-card-tag">{tag}</span>
-                      ))}
-                    </div>
-                    <div className="feature-card-meta">{card.meta}</div>
                   </div>
                 ))}
               </div>
