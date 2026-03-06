@@ -4699,9 +4699,9 @@ const App = () => {
     if (_used >= _max) return;
     if (!file) { setError('Please select a file first.'); return; }
 
-    const MAX_BYTES = 24 * 1024 * 1024;
+    const MAX_BYTES = 500 * 1024 * 1024;
     if (file.size > MAX_BYTES) {
-      setError('That file is too big (max 24 MB). Try converting to mp3 at 128 kbps first.');
+      setError('That file is too big (max 500 MB). Please trim or compress the video first.');
       return;
     }
 
@@ -6413,7 +6413,7 @@ const App = () => {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg,.opus,.flac,.mpeg,.mpga,audio/*,video/mp4,video/webm"
+                      accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg,.opus,.flac,.mpeg,.mpga,.mov,.avi,.mkv,.wmv,.3gp,audio/*,video/*"
                       style={{ display: 'none' }}
                       onChange={e => {
                         const f = e.target.files?.[0];
@@ -6474,7 +6474,7 @@ const App = () => {
                           </span>
                           {!isMobile && (
                             <span style={{ fontSize: 11, color: P.muted, marginLeft: 'auto', flexShrink: 0 }}>
-                              mp3 · mp4 · m4a · wav · max 24 MB
+                              mp4 · mov · mp3 · wav + more · max 500 MB
                             </span>
                           )}
                         </>
@@ -6527,7 +6527,7 @@ const App = () => {
                 {/* Mobile format hint for upload mode */}
                 {inputMode === 'upload' && isMobile && (
                   <p style={{ margin: '6px 4px 0', fontSize: 11, color: P.muted, textAlign: 'center' }}>
-                    mp3 · mp4 · m4a · wav · webm · max 24 MB
+                    mp4 · mov · mp3 · wav · m4a + more · max 500 MB
                   </p>
                 )}
               </div>
@@ -6735,8 +6735,8 @@ const App = () => {
                   {
                     label: 'Flash Cards',
                     desc: 'Generate smart Q&A flash cards with flip mode for active recall practice.',
-                    meta: 'Flash cards · Flip mode · Active recall',
-                    tags: ['Flash Cards', 'Q&A Flip', 'Active Recall'],
+                    meta: '',
+                    tags: [],
                     accent: '#3A7A6A',
                     gradient: 'linear-gradient(100deg, #8EC8BC 0%, #5AA090 55%, #3A7A6A 100%)',
                     bg: 'rgba(58,122,106,0.08)',
@@ -6756,8 +6756,8 @@ const App = () => {
                   {
                     label: 'Study Guide',
                     desc: 'Create a structured study guide with overview, objectives, concepts, and review prompts.',
-                    meta: 'Overview · Objectives · Review prompts',
-                    tags: ['Study Guide', 'Objectives', 'Concepts', 'Review'],
+                    meta: '',
+                    tags: [],
                     accent: '#2E6F86',
                     gradient: 'linear-gradient(100deg, #92C2D3 0%, #5A98AE 55%, #2E6F86 100%)',
                     bg: 'rgba(46,111,134,0.08)',
@@ -6777,8 +6777,8 @@ const App = () => {
                   {
                     label: 'AI Chat Q&A',
                     desc: 'Ask transcript-grounded questions, then drill into follow-ups with cited answers.',
-                    meta: 'Cited answers · Follow-up chat',
-                    tags: ['AI Chat Q&A', 'Sources', 'Timestamps'],
+                    meta: '',
+                    tags: [],
                     accent: '#6B4E90',
                     gradient: 'linear-gradient(100deg, #C0A8DC 0%, #9070BC 55%, #6B4E90 100%)',
                     bg: 'rgba(107,78,144,0.08)',
@@ -6798,8 +6798,8 @@ const App = () => {
                   {
                     label: 'Academic',
                     desc: 'Surface references, extract claims, and auto-build a glossary from transcript content.',
-                    meta: 'References · Claims · Glossary',
-                    tags: ['References', 'Claims', 'Glossary'],
+                    meta: '',
+                    tags: [],
                     accent: '#365A8B',
                     gradient: 'linear-gradient(100deg, #A9C2E0 0%, #6F8FB8 55%, #365A8B 100%)',
                     bg: 'rgba(54,90,139,0.08)',

@@ -27,19 +27,40 @@ const ALLOWED_AUDIO_MIME = new Set([
   'audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/m4a',
   'audio/wav', 'audio/x-wav', 'audio/webm', 'video/webm',
   'audio/ogg', 'audio/opus', 'audio/flac', 'video/mp4',
+  'video/quicktime', 'video/x-msvideo', 'video/x-matroska',
+  'video/x-ms-wmv', 'video/mpeg', 'video/3gpp',
 ]);
 
 const uploadMiddleware = multer({
   storage: uploadStorage,
-  limits: { fileSize: 24 * 1024 * 1024 },
+  limits: { fileSize: 500 * 1024 * 1024 },  // 500 MB — ffmpeg compresses before Whisper
   fileFilter: (_req, file, cb) => {
     if (ALLOWED_AUDIO_MIME.has(file.mimetype)) return cb(null, true);
     const ext = path.extname(file.originalname).toLowerCase().slice(1);
-    const ALLOWED_EXT = ['mp3', 'mp4', 'm4a', 'wav', 'webm', 'ogg', 'opus', 'flac', 'mpeg', 'mpga'];
+    const ALLOWED_EXT = ['mp3', 'mp4', 'm4a', 'wav', 'webm', 'ogg', 'opus', 'flac', 'mpeg', 'mpga', 'mov', 'avi', 'mkv', 'wmv', '3gp'];
     if (ALLOWED_EXT.includes(ext)) return cb(null, true);
-    cb(new Error('Unsupported file type. Use mp3, mp4, m4a, wav, webm, ogg, opus, or flac.'));
+    cb(new Error('Unsupported file type. Use mp4, mov, mp3, m4a, wav, or similar.'));
   },
 }).single('file');
+
+// ── Compress any audio/video to a tiny speech-quality mp3 for Whisper ────────
+// 16 kHz mono 16 kbps ≈ 7 MB/hour — comfortably under Groq's 25 MB limit
+async function compressForWhisper(inputFile) {
+  const outFile = inputFile.replace(/(\.[^.]+)?$/, '_whisper.mp3');
+  await withTimeout(
+    execFileAsync('ffmpeg', [
+      '-i', inputFile,
+      '-vn',           // strip video
+      '-ar', '16000',  // 16 kHz (Whisper's native rate)
+      '-ac', '1',      // mono
+      '-b:a', '16k',   // 16 kbps — tiny, excellent for speech
+      '-y',            // overwrite if exists
+      outFile,
+    ]),
+    300000  // 5-minute cap for very large files
+  );
+  return outFile;
+}
 
 // ── Supabase admin client (server-side only, uses service role key) ───────────
 let supabaseAdmin = null;
@@ -1117,7 +1138,7 @@ app.post('/api/transcript/upload', (req, res) => {
       const isSize = multerErr.code === 'LIMIT_FILE_SIZE';
       send('transcript_error', {
         error: isSize
-          ? 'File exceeds 24 MB. Please trim it or convert to a lower-bitrate format (e.g. mp3 at 128 kbps).'
+          ? 'File exceeds 500 MB. Please trim or compress the video first.'
           : multerErr.message || 'Upload failed',
       });
       return res.end();
@@ -1128,23 +1149,30 @@ app.post('/api/transcript/upload', (req, res) => {
       return res.end();
     }
 
-    const audioFile = req.file.path;
+    const uploadedFile = req.file.path;
 
     if (!process.env.GROQ_API_KEY) {
-      await fsPromises.unlink(audioFile).catch(() => {});
+      await fsPromises.unlink(uploadedFile).catch(() => {});
       send('transcript_error', { error: 'AI transcription is not configured on this server.' });
       return res.end();
     }
 
+    let compressedFile = null;
     try {
-      send('progress', { stage: 'upload', message: 'File received — preparing for transcription…', percent: 30 });
-      send('progress', { stage: 'whisper', message: 'Transcribing with Groq Whisper AI…', percent: 60 });
-      const { transcript, segments } = await whisperTranscribe(audioFile, 'en');
+      send('progress', { stage: 'upload', message: 'File received — extracting audio…', percent: 20 });
+      compressedFile = await compressForWhisper(uploadedFile);
+      await fsPromises.unlink(uploadedFile).catch(() => {});  // free disk space immediately
+
+      send('progress', { stage: 'whisper', message: 'Transcribing with Groq Whisper AI…', percent: 55 });
+      const { transcript, segments } = await whisperTranscribe(compressedFile, 'en');
+      // whisperTranscribe unlinks compressedFile itself on success
+
       send('progress', { stage: 'whisper', message: 'Finalising transcript…', percent: 90 });
       send('done', { transcript, segments, source: 'whisper', thumbnail: null });
       res.end();
     } catch (err) {
-      await fsPromises.unlink(audioFile).catch(() => {});
+      await fsPromises.unlink(uploadedFile).catch(() => {});
+      if (compressedFile) await fsPromises.unlink(compressedFile).catch(() => {});
       send('transcript_error', { error: 'Transcription failed', details: err.message });
       res.end();
     }
