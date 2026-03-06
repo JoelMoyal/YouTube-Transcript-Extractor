@@ -6381,8 +6381,8 @@ const App = () => {
                   {
                     label: 'AI Summaries',
                     desc: 'Create bullet point summaries and chapter breakdowns on demand from any transcript.',
-                    meta: 'AI summaries · Bullet points · Chapters',
-                    tags: ['AI Summary', 'Bullet Points', 'Chapters'],
+                    meta: '',
+                    tags: [],
                     accent: '#8A6640',
                     gradient: 'linear-gradient(100deg, #D4BC98 0%, #B09070 55%, #8A6640 100%)',
                     bg: 'rgba(138,102,64,0.08)',
@@ -6729,6 +6729,14 @@ const App = () => {
                       )}
                     </div>
                     <p className="feature-card-desc">{card.desc}</p>
+                    {card.tags.length > 0 && (
+                      <div className="feature-card-tags">
+                        {card.tags.map(tag => (
+                          <span key={`${card.label}-${tag}`} className="feature-card-tag">{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                    {card.meta && <div className="feature-card-meta">{card.meta}</div>}
                   </div>
                 ))}
               </div>
