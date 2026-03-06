@@ -4119,6 +4119,7 @@ const App = () => {
   const [mobilePanel, setMobilePanel]         = useState('transcript'); // 'transcript'|'ai'|'insights'|'history'
   const [sidebarTab, setSidebarTab]           = useState('ai'); // 'ai'|'insights'|'summary'|'flashcards'|'study-guide'
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
+  const [recentOpen, setRecentOpen]               = useState(false);
   const [hideMobileNavForFooter, setHideMobileNavForFooter] = useState(false);
   const isMobile  = windowWidth < MOBILE_BREAKPOINT;
   const isTablet  = windowWidth >= MOBILE_BREAKPOINT && windowWidth < TABLET_BREAKPOINT;
@@ -5477,6 +5478,13 @@ const App = () => {
         @keyframes logoFlipIn  { 0% { transform: perspective(300px) rotateX(80deg);  opacity:0; } 100% { transform: perspective(300px) rotateX(0deg);   opacity:1; } }
         @keyframes tabHighlight { 0% { box-shadow: 0 0 0 0 rgba(60,140,255,0); } 30% { box-shadow: 0 0 0 3px rgba(60,140,255,0.34), 0 0 12px rgba(60,140,255,0.22); } 100% { box-shadow: 0 0 0 0 rgba(60,140,255,0); } }
         .fade-up { animation: fadeUp 0.3s ease forwards; }
+        .left-rail { position: relative; width: 64px; flex-shrink: 0; z-index: 15; overflow: visible; }
+        .left-rail-inner { position: absolute; top: 0; left: 0; bottom: 0; width: 64px; overflow: hidden; display: flex; flex-direction: column; transition: width 0.22s cubic-bezier(0.4,0,0.2,1), box-shadow 0.22s; }
+        .left-rail:hover .left-rail-inner { width: 284px; box-shadow: 4px 0 24px rgba(29,29,31,0.09); }
+        .lr-collapsed { display: flex; flex-direction: column; align-items: center; flex: 1; transition: opacity 0.09s; }
+        .left-rail:hover .lr-collapsed { opacity: 0; pointer-events: none; }
+        .lr-expanded { opacity: 0; pointer-events: none; position: absolute; inset: 0; display: flex; flex-direction: column; transition: opacity 0.14s 0.07s; width: 284px; overflow-y: auto; }
+        .left-rail:hover .lr-expanded { opacity: 1; pointer-events: auto; }
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
         * { box-sizing: border-box; }
@@ -7315,22 +7323,167 @@ const App = () => {
           <>
           <div className="fade-up" style={{
             display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 300px' : '320px 1fr 360px',
+            gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 300px' : '64px 1fr 360px',
             gridTemplateRows: '1fr',
             height: isMobile ? `calc(100dvh - ${mobileBottomNavHeight}px)` : 'calc(100dvh - 56px)',
             minHeight: isMobile ? `calc(100vh - ${mobileBottomNavHeight}px)` : 'calc(100vh - 56px)',
             overflow: 'hidden',
           }}>
 
-            {/* ── LEFT SIDEBAR — col 1 (desktop only) ──────────────────────────── */}
+            {/* ── LEFT SIDEBAR — col 1 (desktop only, hover-to-expand rail) ─── */}
             {isDesktop && (
-              <div style={{
-                gridColumn: 1, gridRow: 1,
-                display: 'flex', flexDirection: 'column',
-                background: P.paper, borderRight: `1px solid ${P.border}`,
-                minHeight: 0, overflowY: 'auto',
-              }}>
-                {renderSidebarContent()}
+              <div className="left-rail" style={{ gridColumn: 1, gridRow: 1 }}>
+                <div className="left-rail-inner" style={{ background: P.paper, borderRight: `1px solid ${P.border}` }}>
+
+                  {/* ── COLLAPSED: icon rail ── */}
+                  <div className="lr-collapsed" style={{ padding: '14px 0 12px', gap: 4 }}>
+                    {[
+                      { title: 'AI Summaries', color: P.accent,
+                        icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+                        onClick: summary ? () => setActiveTab('summary') : summarize, active: !!summary, loading: summarizing },
+                      { title: 'Flash Cards', color: P.warning,
+                        icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+                        onClick: flashcards.length > 0 ? () => setActiveTab('flashcards') : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
+                      { title: 'Study Guide', color: P.success,
+                        icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+                        onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
+                      { title: 'Academic', color: '#7C3AED',
+                        icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+                        onClick: academicInsights && !academicInsights._error ? () => setActiveTab('academic') : generateAcademicInsights, active: !!academicInsights && !academicInsights._error, loading: academicInsightsLoading },
+                    ].map(item => (
+                      <button key={item.title} onClick={item.loading ? undefined : item.onClick} title={item.title} style={{
+                        width: 40, height: 40, borderRadius: 11, border: 'none', cursor: item.loading ? 'default' : 'pointer',
+                        background: item.active ? item.color + '22' : 'transparent',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: item.active ? item.color : P.muted, transition: 'background 0.12s', flexShrink: 0,
+                      }}
+                        onMouseEnter={e => { if (!item.active) e.currentTarget.style.background = P.surface; }}
+                        onMouseLeave={e => { if (!item.active) e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        {item.loading ? <SpinnerIcon size={14} /> : item.icon}
+                      </button>
+                    ))}
+                    <div style={{ height: 1, background: P.border, width: 32, margin: '4px 0', flexShrink: 0 }} />
+                    <button title="Recent" style={{ width: 40, height: 40, borderRadius: 11, border: 'none', cursor: 'pointer', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.muted, transition: 'background 0.12s', position: 'relative', flexShrink: 0 }}
+                      onMouseEnter={e => { e.currentTarget.style.background = P.surface; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}>
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      {history.length > 0 && <span style={{ position: 'absolute', top: 7, right: 7, width: 6, height: 6, borderRadius: '50%', background: P.accent }} />}
+                    </button>
+                    <div style={{ flex: 1 }} />
+                    <button onClick={startNewSearch} title="New search" style={{ width: 40, height: 40, borderRadius: 11, border: 'none', cursor: 'pointer', background: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.muted, flexShrink: 0, marginBottom: 8 }}
+                      onMouseEnter={e => { e.currentTarget.style.background = P.surface; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </button>
+                  </div>
+
+                  {/* ── EXPANDED: full sidebar content ── */}
+                  <div className="lr-expanded">
+                    <div style={{ padding: '18px 18px 6px', flexShrink: 0 }}>
+                      <div style={{ fontSize: 10.5, fontWeight: 700, color: P.muted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Insights</div>
+                    </div>
+                    <div style={{ padding: '0 10px', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+                      {[
+                        { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(60,140,255,0.1)',
+                          icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+                          onClick: summary ? () => setActiveTab('summary') : summarize, active: !!summary, loading: summarizing },
+                        { title: 'Flash Cards', sub: 'Q&A cards with flip mode', color: P.warning, bg: 'rgba(180,83,9,0.1)',
+                          icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+                          onClick: flashcards.length > 0 ? () => setActiveTab('flashcards') : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
+                        { title: 'Study Guide', sub: 'Objectives & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
+                          icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+                          onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
+                        { title: 'Academic', sub: 'References & glossary', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
+                          icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+                          onClick: academicInsights && !academicInsights._error ? () => setActiveTab('academic') : generateAcademicInsights, active: !!academicInsights && !academicInsights._error, loading: academicInsightsLoading },
+                      ].map(item => (
+                        <div key={item.title} onClick={item.loading ? undefined : item.onClick}
+                          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 10px', borderRadius: 12, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 2 }}
+                          onMouseEnter={e => { e.currentTarget.style.background = P.surface; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          <div style={{ width: 46, height: 46, borderRadius: 13, background: item.active ? item.bg : item.bg.replace('0.1', '0.06'), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color }}>
+                            {item.loading ? <SpinnerIcon size={15} /> : item.icon}
+                          </div>
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: item.active ? item.color : P.ink, whiteSpace: 'nowrap' }}>{item.title}</div>
+                            <div style={{ fontSize: 11.5, color: P.muted, marginTop: 1, whiteSpace: 'nowrap' }}>{item.sub}</div>
+                          </div>
+                          {item.active
+                            ? <div style={{ width: 7, height: 7, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
+                            : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.35 }}><polyline points="9 18 15 12 9 6"/></svg>
+                          }
+                        </div>
+                      ))}
+                      {studyGuide?._error && (
+                        <div style={{ margin: '2px 0 6px', padding: '7px 10px', background: 'rgba(180,35,24,0.05)', border: '1px solid rgba(180,35,24,0.2)', borderRadius: 8, fontSize: 11.5, color: P.error }}>
+                          Failed to generate study guide.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Recent — collapsible */}
+                    <div style={{ margin: '8px 10px 0', borderTop: `1px solid ${P.border}`, flexShrink: 0 }}>
+                      <button onClick={() => setRecentOpen(v => !v)} style={{
+                        display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '10px 10px 8px',
+                        border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left',
+                      }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: P.muted, letterSpacing: '0.07em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Recent</span>
+                        {history.length > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: P.muted, background: P.surface, padding: '1px 6px', borderRadius: 99, marginLeft: 2 }}>{history.length}</span>}
+                        <div style={{ flex: 1 }} />
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: recentOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.18s', flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
+                      </button>
+                      {recentOpen && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, paddingBottom: 8 }}>
+                          {history.length === 0 ? (
+                            <div style={{ padding: '8px 10px', fontSize: 12, color: P.muted, textAlign: 'center' }}>No recent transcripts</div>
+                          ) : history.slice(0, 6).map((entry) => {
+                            const hTitle = entry.title || entry.id;
+                            const isActive = entry.id === currentVideoId;
+                            return (
+                              <button key={entry.id} onClick={() => loadFromHistory(entry)} style={{
+                                display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px',
+                                borderRadius: 8, border: `1px solid ${isActive ? 'rgba(60,140,255,0.18)' : 'transparent'}`,
+                                background: isActive ? P.accentLight : 'transparent',
+                                cursor: 'pointer', textAlign: 'left', width: '100%', transition: 'background 0.1s',
+                              }}
+                                onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(29,29,31,0.05)'; e.currentTarget.style.borderColor = P.border; }}}
+                                onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; }}}
+                              >
+                                {entry.thumbnail
+                                  ? <img src={entry.thumbnail} alt="" style={{ width: 44, height: 28, objectFit: 'cover', borderRadius: 5, display: 'block', flexShrink: 0 }} onError={e => { e.target.style.display = 'none'; }} />
+                                  : <div style={{ width: 44, height: 28, borderRadius: 5, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><PlatformIcon platform={entry.platform || 'youtube'} size={10} /></div>
+                                }
+                                <div style={{ minWidth: 0, flex: 1 }}>
+                                  <div style={{ fontSize: 11.5, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hTitle}</div>
+                                  <div style={{ fontSize: 10, color: P.muted }}>{timeAgo(entry.date)}</div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* New search pinned at bottom */}
+                    <div style={{ marginTop: 'auto', padding: '12px 12px', borderTop: `1px solid ${P.border}`, flexShrink: 0 }}>
+                      <button onClick={startNewSearch} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%',
+                        padding: '9px', border: `1px solid ${P.accentHover}`, borderRadius: 9,
+                        background: P.accent, cursor: 'pointer', fontSize: 12.5, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap',
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.background = P.accentHover; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = P.accent; }}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        New search
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
               </div>
             )}
 
@@ -8401,46 +8554,8 @@ const App = () => {
 
               </div>}
 
-              {/* History — desktop only, compact list below AI Chat */}
-              {isDesktop && (
-                <>
-                  <div style={{ height: 1, background: P.border, margin: '0 18px' }} />
-                  <div style={{ display: 'flex', alignItems: 'center', padding: '11px 18px 7px', flexShrink: 0 }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 700, color: P.ink }}>Recent</span>
-                  </div>
-                  <div style={{ overflowY: 'auto', maxHeight: 220, padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                    {history.length === 0 ? (
-                      <div style={{ padding: '16px 8px', textAlign: 'center', color: P.muted, fontSize: 12 }}>No recent transcripts</div>
-                    ) : history.map((entry) => {
-                      const hTitle = entry.title || entry.id;
-                      const isActive = entry.id === currentVideoId;
-                      return (
-                        <button key={entry.id} onClick={() => loadFromHistory(entry)} style={{
-                          display: 'flex', alignItems: 'flex-start', gap: 9, padding: '8px 10px',
-                          borderRadius: 10, border: `1px solid ${isActive ? 'rgba(60,140,255,0.2)' : 'transparent'}`,
-                          background: isActive ? P.accentLight : 'transparent',
-                          cursor: 'pointer', transition: 'background 0.1s', textAlign: 'left', width: '100%',
-                        }}
-                          onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(29,29,31,0.05)'; e.currentTarget.style.borderColor = P.border; } }}
-                          onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; } }}
-                        >
-                          <div style={{ flexShrink: 0 }}>
-                            {entry.thumbnail
-                              ? <img src={entry.thumbnail} alt="" style={{ width: 60, height: 38, objectFit: 'cover', borderRadius: 6, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
-                              : <div style={{ width: 60, height: 38, borderRadius: 6, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlatformIcon platform={entry.platform || 'youtube'} /></div>
-                            }
-                          </div>
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.35, marginBottom: 2 }}>{hTitle}</div>
-                            <div style={{ fontSize: 10.5, color: P.muted }}>{timeAgo(entry.date)}</div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
 
+              {/* Insights — tab-gated
               {/* Insights — tab-gated on mobile/tablet (rich cards) */}
               {!isDesktop && sidebarTab === 'insights' && (
                 /* ── Mobile: rich card design ── */
