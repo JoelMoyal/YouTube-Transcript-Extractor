@@ -5,14 +5,55 @@
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/scribesnap_icon_wave.svg" type="image/svg+xml" />
     <link rel="icon" href="%PUBLIC_URL%/logo.png" type="image/png" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#FF0000" />
-    <meta name="description" content="ScribeSnap extracts YouTube and Vimeo transcripts with AI summaries and Q&A." />
-    <title>ScribeSnap.ai | Transcript + AI Summary + Q&amp;A</title>
+
+    <!-- Primary meta -->
+    <title>ScribeSnap | Free YouTube Transcript Extractor with AI Summaries</title>
+    <meta name="description" content="ScribeSnap extracts YouTube and Vimeo transcripts instantly. Get AI-powered summaries, Q&A flashcards, chapter breakdowns, and study guides — free." />
+    <link rel="canonical" href="https://scribesnap.ai/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://scribesnap.ai/" />
+    <meta property="og:title" content="ScribeSnap | Free YouTube Transcript Extractor with AI Summaries" />
+    <meta property="og:description" content="Extract YouTube and Vimeo transcripts instantly. Get AI summaries, Q&A flashcards, and study guides in seconds." />
+    <meta property="og:image" content="https://scribesnap.ai/logo.png" />
+    <meta property="og:site_name" content="ScribeSnap" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ScribeSnap | Free YouTube Transcript Extractor with AI Summaries" />
+    <meta name="twitter:description" content="Extract YouTube and Vimeo transcripts instantly. AI summaries, flashcards, and study guides in seconds." />
+    <meta name="twitter:image" content="https://scribesnap.ai/logo.png" />
+
+    <!-- JSON-LD structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "ScribeSnap",
+      "url": "https://scribesnap.ai/",
+      "description": "ScribeSnap extracts YouTube and Vimeo transcripts with AI-powered summaries, Q&A flashcards, chapter breakdowns, and study guides.",
+      "applicationCategory": "EducationApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+
     <style>
       html { scroll-behavior: smooth; }
       body { margin: 0; background: #F6F3EE; }
       #root { min-height: 100vh; background: #F6F3EE; }
+
+      /* Pre-render skeleton — visible to crawlers, hidden once React mounts */
+      #seo-skeleton { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; color: #2C2825; }
+      #root:not(:empty) + * { display: none; }
 
       /* Custom scrollbar */
       ::-webkit-scrollbar {
@@ -38,8 +79,32 @@
     </style>
   </head>
   <body>
+    <div id="root">
+      <!-- Static content for search engine crawlers. React replaces this on load. -->
+      <main id="seo-skeleton">
+        <h1>Free YouTube Transcript Extractor with AI Summaries</h1>
+        <p>ScribeSnap extracts full transcripts from YouTube and Vimeo videos in seconds. Paste any video URL and instantly get the complete transcript, an AI-generated summary, Q&amp;A flashcards, chapter breakdowns, and a structured study guide.</p>
+
+        <h2>Key Features</h2>
+        <ul>
+          <li><strong>Transcript extraction</strong> — Full, accurate transcripts from YouTube and Vimeo</li>
+          <li><strong>AI summaries</strong> — Concise summaries powered by large language models</li>
+          <li><strong>Q&amp;A flashcards</strong> — Auto-generated flashcards for studying and review</li>
+          <li><strong>Chapter breakdown</strong> — Automatically splits long videos into named chapters</li>
+          <li><strong>Study guide</strong> — Structured notes with key concepts and review questions</li>
+          <li><strong>File upload</strong> — Upload audio or video files for transcription via AI Whisper</li>
+        </ul>
+
+        <h2>How It Works</h2>
+        <p>Paste a YouTube or Vimeo URL into ScribeSnap. The app fetches the transcript, then uses AI to generate summaries, flashcards, and study materials — all in your browser, no downloads required.</p>
+
+        <h2>Who Uses ScribeSnap</h2>
+        <p>Students, researchers, journalists, and content creators use ScribeSnap to save time on note-taking, studying lecture recordings, and repurposing video content into written form.</p>
+
+        <h2>Try ScribeSnap Free</h2>
+        <p>ScribeSnap is free to use. No account required to extract a transcript. Sign up to unlock AI features including summaries, flashcards, and study guides.</p>
+      </main>
+    </div>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
   </body>
 </html>
-  

@@ -1,4 +1,5 @@
 const express = require('express');
+const compression = require('compression');
 const cors = require('cors');
 const path = require('path');
 const fsPromises = require('fs').promises;
@@ -276,8 +277,19 @@ const proxyArgs = process.env.WEBSHARE_PROXY_URL ? ['--proxy', process.env.WEBSH
 if (process.env.WEBSHARE_PROXY_URL) console.log('Webshare proxy loaded');
 else console.log('No proxy configured — running without proxy');
 
+app.disable('x-powered-by');
+app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
+
+// Redirect www → non-www (canonical domain)
+app.use((req, res, next) => {
+  if (req.hostname && req.hostname.startsWith('www.')) {
+    const nonWww = req.hostname.slice(4);
+    return res.redirect(301, `${req.protocol}://${nonWww}${req.originalUrl}`);
+  }
+  next();
+});
 
 // Serve static files from React app
 // `index: false` prevents `/` from resolving to client/public/index.html (template).
