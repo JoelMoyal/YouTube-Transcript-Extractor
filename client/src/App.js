@@ -1294,12 +1294,6 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   // ON ICE: const [prefLangSaved, setPrefLangSaved] = React.useState(false);
   const [copyRefDone, setCopyRefDone] = React.useState(false);
   const [showAllHistory, setShowAllHistory] = React.useState(false);
-  const [isMobile, setIsMobile] = React.useState(() => window.innerWidth < MOBILE_BREAKPOINT);
-  React.useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
 
   // Profile editing
   const [editingName, setEditingName] = React.useState(false);
@@ -1721,9 +1715,10 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           padding-top: 56px;
           background: #F6F2EA;
           position: relative;
+          overflow-x: hidden;
         }
         /* ── Sidebar layout ── */
-        .ds-layout { display: flex; min-height: calc(100vh - 56px); }
+        .ds-layout { display: flex; min-height: calc(100vh - 56px); overflow-x: hidden; }
         .ds-sidebar {
           width: 224px; flex-shrink: 0; background: #FFFFFF;
           border-right: 1px solid #E6E0D6; display: flex; flex-direction: column;
@@ -1811,18 +1806,71 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         /* ── Responsive ── */
         @media (max-width: 900px) {
           .ds-sidebar { display: none; }
-          .ds-main { padding: 16px 16px 100px; }
-          .ds-overview-grid { grid-template-columns: 1fr; }
-          .ds-stats-row { grid-template-columns: repeat(2,1fr); gap: 10px; }
-          .ds-settings-grid { grid-template-columns: 1fr; }
+          .ds-main { padding: 16px 16px calc(106px + env(safe-area-inset-bottom, 0px)); overflow-x: hidden; }
+          .ds-overview-grid { grid-template-columns: 1fr; gap: 14px; }
+          .ds-stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+          .ds-settings-grid { grid-template-columns: 1fr; gap: 12px; }
+          .ds-settings-card-2 { padding: 18px; border-radius: 14px; }
+          .ds-section { border-radius: 14px; margin-bottom: 14px; }
+          .ds-section-head { flex-wrap: wrap; align-items: flex-start; gap: 8px; padding: 14px 16px 12px; }
+          .ds-credit-track { margin: 10px 16px 0; }
+          .ds-credit-meta { padding: 8px 16px 14px; flex-wrap: wrap; gap: 6px 12px; }
+          .ds-hist-row { padding: 11px 16px; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+          .ds-hist-info { min-width: min(190px, 100%); flex: 1 1 190px; }
+          .ds-hist-meta { flex-wrap: wrap; }
+          .ds-open-btn { margin-left: auto; min-height: 32px; }
+          .ds-view-all-btn { padding: 11px 16px; }
+          .ds-continue, .ds-referral { margin-bottom: 14px; }
+          .ds-referral-link-row { flex-wrap: wrap; }
           .ds-mobile-header { display: flex !important; }
           .ds-mobile-tabs { display: block !important; }
         }
         @media (max-width: 600px) {
-          .ds-main { padding: 12px 12px 100px; }
-          .ds-stat-card { padding: 14px 16px; }
+          .ds-main { padding: 12px 12px calc(100px + env(safe-area-inset-bottom, 0px)); }
+          .ds-stats-row { grid-template-columns: 1fr; }
+          .ds-stat-card { padding: 14px 14px; border-radius: 13px; }
           .ds-stat-val { font-size: 24px; }
-          .ds-hist-thumb { width: 70px; height: 40px; }
+          .ds-hist-row { padding: 10px 12px; }
+          .ds-hist-thumb { width: 72px; height: 40px; border-radius: 7px; }
+          .ds-hist-info { min-width: 0; flex: 1 1 100%; }
+          .ds-hist-title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+          .ds-hist-meta { font-size: 11px; gap: 4px; }
+          .ds-open-btn { margin-left: 0; align-self: flex-end; }
+          .ds-settings-card-2 { padding: 14px; }
+          .ds-settings-card-title { font-size: 15px; margin-bottom: 12px; }
+          .ds-setting-row { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+          .ds-setting-value { max-width: 100%; text-align: left; white-space: normal; overflow-wrap: anywhere; }
+          .ds-settings-row-actions { width: 100%; }
+          .ds-settings-row-actions .ds-settings-save-btn,
+          .ds-settings-row-actions .ds-settings-cancel-btn { flex: 1 1 0; text-align: center; }
+          .ds-settings-confirm-row { flex-wrap: wrap; }
+          .ds-settings-confirm-row .ds-settings-save-btn,
+          .ds-settings-confirm-row .ds-settings-cancel-btn { flex: 1 1 100%; text-align: center; }
+          .ds-referral-link-row { flex-direction: column; }
+          .ds-referral-copy-btn { width: 100%; padding: 9px 12px; }
+          .ds-referral-share-row { grid-template-columns: 1fr; }
+          .ds-referral-badge { max-width: 100%; white-space: normal; line-height: 1.35; }
+          .ds-continue-quick { flex-wrap: wrap; }
+          .ds-continue-quick-btn { flex: 1 1 calc(50% - 5px); min-width: 120px; }
+        }
+        @media (max-width: 420px) {
+          .ds-mobile-header { padding: 10px 12px; }
+          .ds-main { padding: 10px 10px calc(96px + env(safe-area-inset-bottom, 0px)); }
+          .ds-stat-card { padding: 12px; }
+          .ds-stat-val { font-size: 22px; }
+          .ds-section-head { padding: 12px 12px 10px; }
+          .ds-credit-track { margin: 8px 12px 0; }
+          .ds-credit-meta { padding: 8px 12px 12px; font-size: 12px; }
+          .ds-hist-row { padding: 9px 10px; }
+          .ds-hist-thumb { width: 64px; height: 36px; }
+          .ds-hist-title { font-size: 12px; }
+          .ds-hist-meta { font-size: 10.5px; }
+          .ds-open-btn { padding: 5px 10px; font-size: 11px; }
+          .ds-settings-card-2 { padding: 12px; }
+          .ds-settings-btn { min-height: 40px; }
+          .ds-referral-title { font-size: 13.5px; }
+          .ds-referral-share-btn { min-height: 38px; }
+          .ds-continue-quick-btn { min-width: 100%; }
         }
         @media (min-width: 1300px) { .ds-main { padding: 40px 60px 80px; } }
         .ds-wrap {
