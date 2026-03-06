@@ -1719,30 +1719,112 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-shell {
           min-height: 100vh;
           padding-top: 56px;
-          background: radial-gradient(ellipse 90% 55% at 50% -15%, rgba(60,140,255,0.1) 0%, transparent 65%), #F6F2EA;
+          background: #F6F2EA;
           position: relative;
-          overflow-x: hidden;
         }
-        .ds-shell::before {
-          content: '';
-          position: absolute;
-          inset: 36px auto auto -220px;
-          width: 760px;
-          height: 760px;
-          background: radial-gradient(circle at center, rgba(60,140,255,0.06) 0%, transparent 68%);
-          border-radius: 50%;
-          pointer-events: none;
+        /* ── Sidebar layout ── */
+        .ds-layout { display: flex; min-height: calc(100vh - 56px); }
+        .ds-sidebar {
+          width: 224px; flex-shrink: 0; background: #FFFFFF;
+          border-right: 1px solid #E6E0D6; display: flex; flex-direction: column;
+          position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto;
         }
-        .ds-shell::after {
-          content: '';
-          position: absolute;
-          inset: auto -160px -260px auto;
-          width: 620px;
-          height: 620px;
-          border-radius: 50%;
-          background: radial-gradient(circle at center, rgba(60,140,255,0.05) 0%, transparent 72%);
-          pointer-events: none;
+        .ds-sidebar-user { padding: 26px 20px 18px; border-bottom: 1px solid #E6E0D6; }
+        .ds-sidebar-avatar {
+          width: 50px; height: 50px; border-radius: 50%;
+          background: #3C8CFF; color: white; font-size: 21px; font-weight: 700;
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 11px; box-shadow: 0 4px 14px rgba(60,140,255,0.28);
         }
+        .ds-sidebar-name { font-size: 14px; font-weight: 700; color: #1D1D1F; margin: 0 0 2px; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ds-sidebar-email { font-size: 11.5px; color: #8B8F97; margin: 0 0 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ds-sidebar-plan { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; background: rgba(60,140,255,0.09); color: #3C8CFF; font-size: 11px; font-weight: 700; }
+        .ds-sidebar-nav { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 2px; }
+        .ds-nav-btn {
+          display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 12px;
+          border: none; border-radius: 10px; background: transparent; color: #8B8F97;
+          font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; transition: all 0.15s ease;
+        }
+        .ds-nav-btn:hover { background: #F6F2EA; color: #1D1D1F; }
+        .ds-nav-btn.is-active { background: rgba(60,140,255,0.08); color: #3C8CFF; font-weight: 600; }
+        .ds-nav-btn svg { flex-shrink: 0; opacity: 0.7; }
+        .ds-nav-btn.is-active svg { opacity: 1; }
+        .ds-sidebar-footer { padding: 10px; border-top: 1px solid #E6E0D6; }
+        .ds-back-btn {
+          display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px;
+          border: none; border-radius: 10px; background: transparent; color: #8B8F97;
+          font-size: 13px; font-weight: 500; cursor: pointer; text-align: left; transition: all 0.15s ease;
+        }
+        .ds-back-btn:hover { background: #F6F2EA; color: #1D1D1F; }
+        /* ── Main content ── */
+        .ds-main { flex: 1; min-width: 0; padding: 36px 44px 72px; overflow-y: auto; }
+        .ds-main-header { margin-bottom: 26px; }
+        .ds-main-title { font-size: 26px; font-weight: 800; color: #1D1D1F; letter-spacing: -0.03em; margin: 0 0 4px; }
+        .ds-main-sub { font-size: 14px; color: #8B8F97; margin: 0; }
+        /* ── Stats row ── */
+        .ds-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 24px; }
+        .ds-stat-card {
+          background: #FFFFFF; border: 1px solid #E6E0D6; border-radius: 16px;
+          padding: 18px 20px; transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .ds-stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(29,29,31,0.07); }
+        .ds-stat-icon { width: 32px; height: 32px; border-radius: 9px; background: rgba(60,140,255,0.08); color: #3C8CFF; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+        .ds-stat-val { font-size: 30px; font-weight: 800; color: #1D1D1F; letter-spacing: -0.03em; line-height: 1; margin-bottom: 4px; }
+        .ds-stat-lbl { font-size: 13px; color: #8B8F97; font-weight: 500; }
+        /* ── Section card ── */
+        .ds-section { background: #FFFFFF; border: 1px solid #E6E0D6; border-radius: 18px; margin-bottom: 18px; overflow: hidden; }
+        .ds-section-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 14px; border-bottom: 1px solid #E6E0D6; }
+        .ds-section-title { font-size: 15px; font-weight: 700; color: #1D1D1F; letter-spacing: -0.01em; margin: 0; }
+        /* ── Credit bar ── */
+        .ds-credit-track { height: 8px; border-radius: 999px; background: #E6E0D6; overflow: hidden; margin: 14px 22px 0; }
+        .ds-credit-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg,#5B9BD5 0%,#3C8CFF 60%,#1F6BFF 100%); transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+        .ds-credit-meta { display: flex; justify-content: space-between; align-items: center; padding: 10px 22px 18px; font-size: 13px; color: #8B8F97; }
+        /* ── Transcript rows ── */
+        .ds-hist-row { display: flex; align-items: center; gap: 12px; padding: 12px 22px; border-top: 1px solid #E6E0D6; transition: background 0.12s ease; cursor: pointer; }
+        .ds-hist-row:first-of-type { border-top: none; }
+        .ds-hist-row:hover { background: rgba(60,140,255,0.025); }
+        .ds-hist-thumb { width: 88px; height: 50px; border-radius: 9px; overflow: hidden; flex-shrink: 0; background: rgba(60,140,255,0.06); border: 1px solid rgba(60,140,255,0.1); display: flex; align-items: center; justify-content: center; }
+        .ds-hist-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .ds-hist-info { flex: 1; min-width: 0; }
+        .ds-hist-title { font-size: 13px; font-weight: 600; color: #1D1D1F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 3px; }
+        .ds-hist-meta { font-size: 12px; color: #8B8F97; display: flex; align-items: center; gap: 5px; }
+        .ds-open-btn { flex-shrink: 0; border: none; border-radius: 8px; padding: 6px 14px; background: rgba(60,140,255,0.09); color: #3C8CFF; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; }
+        .ds-open-btn:hover { background: #3C8CFF; color: white; }
+        .ds-view-all-btn { display: block; width: 100%; padding: 12px 22px; border: none; border-top: 1px solid #E6E0D6; background: transparent; color: #3C8CFF; font-size: 13px; font-weight: 600; cursor: pointer; text-align: left; transition: background 0.12s ease; }
+        .ds-view-all-btn:hover { background: rgba(60,140,255,0.03); }
+        /* ── Overview 2-col grid ── */
+        .ds-overview-grid { display: grid; grid-template-columns: minmax(0,1.6fr) minmax(270px,1fr); gap: 18px; align-items: start; }
+        /* ── Settings 2-col grid ── */
+        .ds-settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .ds-settings-card-2 { background: #FFFFFF; border: 1px solid #E6E0D6; border-radius: 18px; padding: 22px; }
+        .ds-settings-card-title { font-size: 16px; font-weight: 700; color: #1D1D1F; margin: 0 0 16px; letter-spacing: -0.01em; }
+        /* ── Fade animation ── */
+        .ds-fade-in { animation: dsFadeIn 0.2s ease both; }
+        @keyframes dsFadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+        /* ── Mobile header ── */
+        .ds-mobile-header { display: none; align-items: center; gap: 10px; padding: 12px 16px; background: #FFFFFF; border-bottom: 1px solid #E6E0D6; position: sticky; top: 56px; z-index: 10; }
+        /* ── Mobile bottom tabs ── */
+        .ds-mobile-tabs { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #FFFFFF; border-top: 1px solid #E6E0D6; padding-bottom: env(safe-area-inset-bottom, 0); z-index: 50; }
+        .ds-mobile-tabs-inner { display: flex; height: 56px; }
+        .ds-mob-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border: none; background: transparent; color: #8B8F97; font-size: 10px; font-weight: 500; cursor: pointer; transition: color 0.15s ease; }
+        .ds-mob-tab.is-active { color: #3C8CFF; font-weight: 700; }
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+          .ds-sidebar { display: none; }
+          .ds-main { padding: 16px 16px 100px; }
+          .ds-overview-grid { grid-template-columns: 1fr; }
+          .ds-stats-row { grid-template-columns: repeat(2,1fr); gap: 10px; }
+          .ds-settings-grid { grid-template-columns: 1fr; }
+          .ds-mobile-header { display: flex !important; }
+          .ds-mobile-tabs { display: block !important; }
+        }
+        @media (max-width: 600px) {
+          .ds-main { padding: 12px 12px 100px; }
+          .ds-stat-card { padding: 14px 16px; }
+          .ds-stat-val { font-size: 24px; }
+          .ds-hist-thumb { width: 70px; height: 40px; }
+        }
+        @media (min-width: 1300px) { .ds-main { padding: 40px 60px 80px; } }
         .ds-wrap {
           max-width: 1200px;
           margin: 0 auto;
@@ -2616,7 +2698,21 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           .ds-thumb { width: 64px; height: 36px; }
           .ds-credits-mobile { display: block !important; }
         }
+        /* ── Hide old layout wrappers ── */
+        .ds-wrap { display: none !important; }
       `}</style>
+
+      {/* ── Mobile sticky header (hidden on desktop) ── */}
+      <div className="ds-mobile-header">
+        <button onClick={onBack} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, padding: '4px 4px 4px 0', display: 'flex', alignItems: 'center' }}>
+          <ChevronIcon size={16} dir="left" />
+        </button>
+        <div style={{ width: 34, height: 34, borderRadius: '50%', background: P.accent, color: 'white', fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{initial}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
+          <div style={{ fontSize: 11, color: P.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+        </div>
+      </div>
 
       {/* ═══ MOBILE LAYOUT (pure inline styles, no CSS class overflow) ═══ */}
       {isMobile && (
@@ -3488,6 +3584,9 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, on
 // ── Main App ──────────────────────────────────────────────────────────────────
 const App = () => {
   const [videoUrl, setVideoUrl]           = useState('');
+  const [inputMode, setInputMode]         = useState('url');   // 'url' | 'upload'
+  const [uploadFile, setUploadFile]       = useState(null);
+  const [uploadDragOver, setUploadDragOver] = useState(false);
   const [lang, setLang]                   = useState(() => localStorage.getItem('yte_lang') || 'en');
   const [transcript, setTranscript]       = useState('');
   const [segments, setSegments]           = useState([]);
@@ -3589,6 +3688,7 @@ const App = () => {
   const timeIntervalRef    = useRef(null);
   const segmentsRef        = useRef([]);
   const urlInputRef     = useRef(null);
+  const fileInputRef    = useRef(null);
   const qaRef           = useRef(null);
   const chatMessagesRef = useRef(null);
   const recoveryIntentRef = useRef(false);
@@ -4258,6 +4358,99 @@ const App = () => {
       setError(funnyTranscriptError('connection'));
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     };
+  };
+
+  const getTranscriptFromUpload = async (file) => {
+    const _used = credits?.used ?? 0;
+    const _max  = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+    if (_used >= _max) return;
+    if (!file) { setError('Please select a file first.'); return; }
+
+    const MAX_BYTES = 24 * 1024 * 1024;
+    if (file.size > MAX_BYTES) {
+      setError('That file is too big (max 24 MB). Try converting to mp3 at 128 kbps first.');
+      return;
+    }
+
+    setError(''); setTranscript(''); setTranscriptSource('');
+    setSegments([]); setCurrentVideoId(null); setCurrentPlatform('upload'); setCurrentThumbnail(null); setSearch('');
+    setSummary(''); setTimeline(null); setShowTopics(false);
+    setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); setExpandedCards(new Set()); setStudyGuide(null); setSgMessages([]); setStudyGuideFull(false); setQaMessages([]); setShowQA(false);
+    setAcademicInsights(null); setAcademicInsightsLoading(false); setAcademicInsightsFull(false);
+    setMobilePanel('transcript'); setHistoryDrawerOpen(false);
+    setPendingHistoryAction(null);
+    setLoading(true); setLoadingMsg('Uploading file…');
+    setLoadingPercent(5); setLoadingStage('upload');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/transcript/upload', { method: 'POST', body: formData });
+      if (!response.ok || !response.body) throw new Error(`Server error ${response.status}`);
+
+      const reader  = response.body.getReader();
+      const decoder = new TextDecoder();
+      let   buffer  = '';
+
+      const killTimer = setTimeout(() => {
+        reader.cancel();
+        setError('Transcription timed out. Try a shorter file.');
+        setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+      }, 180000);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const messages = buffer.split('\n\n');
+        buffer = messages.pop();
+        for (const raw of messages) {
+          if (!raw.trim()) continue;
+          const lines     = raw.split('\n');
+          const eventLine = lines.find(l => l.startsWith('event:'));
+          const dataLine  = lines.find(l => l.startsWith('data:'));
+          if (!dataLine) continue;
+          const event = eventLine ? eventLine.slice(6).trim() : 'message';
+          let data;
+          try { data = JSON.parse(dataLine.slice(5).trim()); } catch { continue; }
+
+          if (event === 'progress') {
+            setLoadingMsg(data.message || ''); setLoadingPercent(data.percent || 0); setLoadingStage(data.stage || '');
+          } else if (event === 'done') {
+            clearTimeout(killTimer);
+            const fileName = file.name.replace(/\.[^/.]+$/, '');
+            const syntheticId = `upload_${Date.now()}`;
+            setTranscript(data.transcript);
+            setSegments(data.segments || []);
+            setIsTranslated(false);
+            setTranscriptSource(data.source || 'whisper');
+            setCurrentVideoId(syntheticId);
+            setCurrentThumbnail(null);
+            setCurrentTitle(fileName);
+            setCurrentChannel('Local file');
+            setLoadingPercent(100);
+            incrementCredits();
+            saveToHistory({
+              id: syntheticId, platform: 'upload',
+              transcript: data.transcript, segments: data.segments || [],
+              source: 'whisper', date: new Date().toISOString(),
+              thumbnail: null, title: fileName, channel: 'Local file', url: null,
+            });
+            setTimeout(() => {
+              setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+            }, 600);
+          } else if (event === 'transcript_error') {
+            clearTimeout(killTimer);
+            setError(data.error || 'Transcription failed.');
+            setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+          }
+        }
+      }
+    } catch (err) {
+      setError('Upload failed — ' + (err.message || 'please try again.'));
+      setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+    }
   };
 
   // ON ICE — language translation disabled; restore refetchWithLang when feature is ready
@@ -5776,75 +5969,234 @@ const App = () => {
                 borderRadius: isMobile ? 16 : 20, boxShadow: '0 12px 56px rgba(29,29,31,0.13)',
                 padding: isMobile ? '7px 7px 7px 7px' : 10,
               }}>
-                <div style={{ display: 'flex', gap: isMobile ? 6 : 8, flexDirection: isMobile ? 'column' : 'row' }}>
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: isMobile ? '11px 12px' : '16px 20px', minHeight: isMobile ? 44 : undefined, background: P.paper, borderRadius: isMobile ? 11 : 14, border: `1px solid ${P.border}` }}>
-                    {(() => {
-                      const platform = parseVideoUrl(videoUrl)?.platform;
-                      if (platform) return <PlatformIcon platform={platform} />;
-                      // Flip-clock animation between logos
-                      const flipStyle = {
-                        display: 'inline-flex', flexShrink: 0,
-                        animation: logoFlip === 'out'
-                          ? 'logoFlipOut 0.22s ease-in forwards'
-                          : logoFlip === 'in'
-                          ? 'logoFlipIn 0.22s ease-out forwards'
-                          : 'none',
-                      };
-                      return (
-                        <span style={flipStyle}>
-                          <PlatformIcon platform={activeLogo} />
-                        </span>
-                      );
-                    })()}
-                    <input
-                      ref={urlInputRef}
-                      type="text"
-                      value={videoUrl}
-                      onChange={e => setVideoUrl(e.target.value)}
-                      onFocus={handleInputFocus}
-                      onKeyDown={e => e.key === 'Enter' && !loading && getTranscript()}
-                      placeholder="Paste a YouTube, TikTok, Loom, Vimeo, Dailymotion URL…"
-                      style={{
-                        flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                        minHeight: isMobile ? 44 : undefined, fontSize: isMobile ? 16 : 17, color: P.ink,
-                      }}
-                    />
-                  </div>
-                  {(() => {
-                    const _used = credits?.used ?? 0;
-                    const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
-                    const outOfCredits = _used >= _max;
-                    const btnDisabled = loading || outOfCredits;
-                    const btnBg = btnDisabled
-                      ? (outOfCredits ? 'rgba(220,38,38,0.1)' : 'rgba(60,140,255,0.5)')
-                      : P.accent;
+                {/* Mode toggle tabs */}
+                <div style={{
+                  display: 'flex', marginBottom: isMobile ? 6 : 8,
+                  borderBottom: `1px solid ${P.border}`,
+                  paddingBottom: 0,
+                }}>
+                  {[
+                    { id: 'url', label: isMobile ? 'URL' : 'Paste URL' },
+                    { id: 'upload', label: isMobile ? 'Upload' : 'Upload File' },
+                  ].map(({ id, label }) => {
+                    const active = inputMode === id;
                     return (
                       <button
-                        onClick={getTranscript}
-                        disabled={btnDisabled}
+                        key={id}
+                        onClick={() => setInputMode(id)}
                         style={{
-                          flexShrink: 0, padding: isMobile ? '9px 18px' : '0 28px', borderRadius: isMobile ? 11 : 14, border: 'none',
-                          minHeight: isMobile ? 44 : undefined,
-                          background: btnBg,
-                          color: outOfCredits ? P.error : 'white',
-                          fontSize: isMobile ? 14 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, whiteSpace: 'nowrap',
-                          transition: 'background 0.15s',
-                          width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
+                          flex: 1, padding: isMobile ? '7px 0' : '8px 0',
+                          border: 'none', background: 'none',
+                          fontSize: isMobile ? 13 : 13, fontWeight: active ? 700 : 500,
+                          color: active ? P.accent : P.muted,
+                          borderBottom: active ? `2px solid ${P.accent}` : '2px solid transparent',
+                          cursor: 'pointer', transition: 'all 0.15s', marginBottom: -1,
                         }}
-                        onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
+                        onMouseEnter={e => { if (!active) e.currentTarget.style.color = P.ink; }}
+                        onMouseLeave={e => { if (!active) e.currentTarget.style.color = P.muted; }}
                       >
-                        {loading ? <SpinnerIcon /> : (
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={outOfCredits ? P.error : 'currentColor'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polygon points="5 3 19 12 5 21 5 3"/>
-                          </svg>
-                        )}
-                        {loading ? 'Extracting…' : outOfCredits ? 'No Credits' : 'Extract'}
+                        {label}
                       </button>
                     );
-                  })()}
+                  })}
                 </div>
+
+                {/* URL mode */}
+                {inputMode === 'url' && (
+                  <div style={{ display: 'flex', gap: isMobile ? 6 : 8, flexDirection: isMobile ? 'column' : 'row' }}>
+                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: isMobile ? '11px 12px' : '16px 20px', minHeight: isMobile ? 44 : undefined, background: P.paper, borderRadius: isMobile ? 11 : 14, border: `1px solid ${P.border}` }}>
+                      {(() => {
+                        const platform = parseVideoUrl(videoUrl)?.platform;
+                        if (platform) return <PlatformIcon platform={platform} />;
+                        const flipStyle = {
+                          display: 'inline-flex', flexShrink: 0,
+                          animation: logoFlip === 'out'
+                            ? 'logoFlipOut 0.22s ease-in forwards'
+                            : logoFlip === 'in'
+                            ? 'logoFlipIn 0.22s ease-out forwards'
+                            : 'none',
+                        };
+                        return (
+                          <span style={flipStyle}>
+                            <PlatformIcon platform={activeLogo} />
+                          </span>
+                        );
+                      })()}
+                      <input
+                        ref={urlInputRef}
+                        type="text"
+                        value={videoUrl}
+                        onChange={e => setVideoUrl(e.target.value)}
+                        onFocus={handleInputFocus}
+                        onKeyDown={e => e.key === 'Enter' && !loading && getTranscript()}
+                        placeholder="Paste a YouTube, TikTok, Loom, Vimeo, Dailymotion URL…"
+                        style={{
+                          flex: 1, border: 'none', background: 'transparent', outline: 'none',
+                          minHeight: isMobile ? 44 : undefined, fontSize: isMobile ? 16 : 17, color: P.ink,
+                        }}
+                      />
+                    </div>
+                    {(() => {
+                      const _used = credits?.used ?? 0;
+                      const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+                      const outOfCredits = _used >= _max;
+                      const btnDisabled = loading || outOfCredits;
+                      const btnBg = btnDisabled
+                        ? (outOfCredits ? 'rgba(220,38,38,0.1)' : 'rgba(60,140,255,0.5)')
+                        : P.accent;
+                      return (
+                        <button
+                          onClick={getTranscript}
+                          disabled={btnDisabled}
+                          style={{
+                            flexShrink: 0, padding: isMobile ? '9px 18px' : '0 28px', borderRadius: isMobile ? 11 : 14, border: 'none',
+                            minHeight: isMobile ? 44 : undefined,
+                            background: btnBg,
+                            color: outOfCredits ? P.error : 'white',
+                            fontSize: isMobile ? 14 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, whiteSpace: 'nowrap',
+                            transition: 'background 0.15s',
+                            width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
+                          }}
+                          onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
+                        >
+                          {loading ? <SpinnerIcon /> : (
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={outOfCredits ? P.error : 'currentColor'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polygon points="5 3 19 12 5 21 5 3"/>
+                            </svg>
+                          )}
+                          {loading ? 'Extracting…' : outOfCredits ? 'No Credits' : 'Extract'}
+                        </button>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* Upload mode */}
+                {inputMode === 'upload' && (
+                  <div style={{ display: 'flex', gap: isMobile ? 6 : 8, flexDirection: isMobile ? 'column' : 'row' }}>
+                    {/* Hidden native file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg,.opus,.flac,.mpeg,.mpga,audio/*,video/mp4,video/webm"
+                      style={{ display: 'none' }}
+                      onChange={e => {
+                        const f = e.target.files?.[0];
+                        if (f) setUploadFile(f);
+                        e.target.value = '';
+                      }}
+                    />
+
+                    {/* Drop zone */}
+                    <div
+                      onClick={() => !loading && fileInputRef.current?.click()}
+                      onDragOver={e => { e.preventDefault(); setUploadDragOver(true); }}
+                      onDragLeave={() => setUploadDragOver(false)}
+                      onDrop={e => {
+                        e.preventDefault(); setUploadDragOver(false);
+                        const f = e.dataTransfer.files?.[0];
+                        if (f) setUploadFile(f);
+                      }}
+                      style={{
+                        flex: 1, display: 'flex', alignItems: 'center', gap: 10,
+                        padding: isMobile ? '11px 12px' : '14px 18px',
+                        background: uploadDragOver ? 'rgba(60,140,255,0.06)' : P.paper,
+                        border: `1px ${uploadDragOver ? 'solid' : uploadFile ? 'solid' : 'dashed'} ${uploadDragOver ? P.accent : P.border}`,
+                        borderRadius: isMobile ? 11 : 14,
+                        cursor: loading ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.15s',
+                        minHeight: isMobile ? 44 : undefined,
+                      }}
+                    >
+                      {uploadFile ? (
+                        <>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                          </svg>
+                          <span style={{ flex: 1, fontSize: isMobile ? 14 : 15, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {uploadFile.name}
+                          </span>
+                          <span style={{ fontSize: 11, color: P.muted, flexShrink: 0 }}>
+                            {(uploadFile.size / (1024 * 1024)).toFixed(1)} MB
+                          </span>
+                          <button
+                            onClick={e => { e.stopPropagation(); setUploadFile(null); }}
+                            style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: P.muted, display: 'flex', alignItems: 'center' }}
+                          >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                          </svg>
+                          <span style={{ fontSize: isMobile ? 14 : 15, color: P.muted }}>
+                            {isMobile ? 'Tap to choose a file' : 'Drop or click to choose a file'}
+                          </span>
+                          {!isMobile && (
+                            <span style={{ fontSize: 11, color: P.muted, marginLeft: 'auto', flexShrink: 0 }}>
+                              mp3 · mp4 · m4a · wav · max 24 MB
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    {/* Transcribe button */}
+                    {(() => {
+                      const _used = credits?.used ?? 0;
+                      const _max  = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+                      const outOfCredits = _used >= _max;
+                      const btnDisabled  = loading || outOfCredits || !uploadFile;
+                      const btnBg = btnDisabled
+                        ? (outOfCredits ? 'rgba(220,38,38,0.1)' : 'rgba(60,140,255,0.5)')
+                        : P.accent;
+                      return (
+                        <button
+                          onClick={() => getTranscriptFromUpload(uploadFile)}
+                          disabled={btnDisabled}
+                          style={{
+                            flexShrink: 0, padding: isMobile ? '9px 18px' : '0 24px',
+                            borderRadius: isMobile ? 11 : 14, border: 'none',
+                            minHeight: isMobile ? 44 : undefined,
+                            background: btnBg,
+                            color: outOfCredits ? P.error : 'white',
+                            fontSize: isMobile ? 14 : 15, fontWeight: 700,
+                            cursor: btnDisabled ? 'not-allowed' : 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                            whiteSpace: 'nowrap', transition: 'background 0.15s',
+                            width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
+                          }}
+                          onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
+                        >
+                          {loading ? <SpinnerIcon /> : (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                              stroke={outOfCredits ? P.error : 'currentColor'}
+                              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                          )}
+                          {loading ? 'Transcribing…' : outOfCredits ? 'No Credits' : 'Transcribe'}
+                        </button>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* Mobile format hint for upload mode */}
+                {inputMode === 'upload' && isMobile && (
+                  <p style={{ margin: '6px 4px 0', fontSize: 11, color: P.muted, textAlign: 'center' }}>
+                    mp3 · mp4 · m4a · wav · webm · max 24 MB
+                  </p>
+                )}
               </div>
 
               {/* Credits exhausted banner */}
@@ -5940,7 +6292,7 @@ const App = () => {
                     <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                   </svg>
                   <span style={{ flex: 1 }}>{error}</span>
-                  <button onClick={getTranscript} style={{ flexShrink: 0, border: `1px solid rgba(180,35,24,0.25)`, background: 'white', borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 600, color: P.error, cursor: 'pointer' }}>Retry</button>
+                  <button onClick={() => inputMode === 'upload' ? getTranscriptFromUpload(uploadFile) : getTranscript()} style={{ flexShrink: 0, border: `1px solid rgba(180,35,24,0.25)`, background: 'white', borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 600, color: P.error, cursor: 'pointer' }}>Retry</button>
                 </div>
               )}
 
@@ -7582,7 +7934,7 @@ const App = () => {
                   <div style={{ display: 'flex', alignItems: 'center', padding: '11px 18px 7px', flexShrink: 0 }}>
                     <span style={{ fontSize: 12.5, fontWeight: 700, color: P.ink }}>Recent</span>
                   </div>
-                  <div style={{ overflowY: 'auto', padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  <div style={{ overflowY: 'auto', maxHeight: 220, padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
                     {history.length === 0 ? (
                       <div style={{ padding: '16px 8px', textAlign: 'center', color: P.muted, fontSize: 12 }}>No recent transcripts</div>
                     ) : history.map((entry) => {

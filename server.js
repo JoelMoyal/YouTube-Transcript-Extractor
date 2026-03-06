@@ -9,8 +9,37 @@ const crypto = require('crypto');
 const Groq = require('groq-sdk');
 const { Supadata } = require('@supadata/js');
 const { createClient } = require('@supabase/supabase-js');
+const multer = require('multer');
 
 const hashEmail = (email) => crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
+
+// ── Multer config for local file uploads ──────────────────────────────────────
+const uploadStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, os.tmpdir()),
+  filename: (_req, file, cb) => {
+    const ext  = path.extname(file.originalname).toLowerCase() || '.mp3';
+    const name = `upload_${Date.now()}_${crypto.randomBytes(6).toString('hex')}${ext}`;
+    cb(null, name);
+  },
+});
+
+const ALLOWED_AUDIO_MIME = new Set([
+  'audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/m4a',
+  'audio/wav', 'audio/x-wav', 'audio/webm', 'video/webm',
+  'audio/ogg', 'audio/opus', 'audio/flac', 'video/mp4',
+]);
+
+const uploadMiddleware = multer({
+  storage: uploadStorage,
+  limits: { fileSize: 24 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_AUDIO_MIME.has(file.mimetype)) return cb(null, true);
+    const ext = path.extname(file.originalname).toLowerCase().slice(1);
+    const ALLOWED_EXT = ['mp3', 'mp4', 'm4a', 'wav', 'webm', 'ogg', 'opus', 'flac', 'mpeg', 'mpga'];
+    if (ALLOWED_EXT.includes(ext)) return cb(null, true);
+    cb(new Error('Unsupported file type. Use mp3, mp4, m4a, wav, webm, ogg, opus, or flac.'));
+  },
+}).single('file');
 
 // ── Supabase admin client (server-side only, uses service role key) ───────────
 let supabaseAdmin = null;
@@ -1070,6 +1099,56 @@ app.post('/api/restore-account', requireAuth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// ── Local file upload transcription ───────────────────────────────────────────
+app.post('/api/transcript/upload', (req, res) => {
+  uploadMiddleware(req, res, async (multerErr) => {
+    // SSE headers must be sent before any write
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    const send = (event, data) =>
+      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+
+    if (multerErr) {
+      const isSize = multerErr.code === 'LIMIT_FILE_SIZE';
+      send('transcript_error', {
+        error: isSize
+          ? 'File exceeds 24 MB. Please trim it or convert to a lower-bitrate format (e.g. mp3 at 128 kbps).'
+          : multerErr.message || 'Upload failed',
+      });
+      return res.end();
+    }
+
+    if (!req.file) {
+      send('transcript_error', { error: 'No file received.' });
+      return res.end();
+    }
+
+    const audioFile = req.file.path;
+
+    if (!process.env.GROQ_API_KEY) {
+      await fsPromises.unlink(audioFile).catch(() => {});
+      send('transcript_error', { error: 'AI transcription is not configured on this server.' });
+      return res.end();
+    }
+
+    try {
+      send('progress', { stage: 'upload', message: 'File received — preparing for transcription…', percent: 30 });
+      send('progress', { stage: 'whisper', message: 'Transcribing with Groq Whisper AI…', percent: 60 });
+      const { transcript, segments } = await whisperTranscribe(audioFile, 'en');
+      send('progress', { stage: 'whisper', message: 'Finalising transcript…', percent: 90 });
+      send('done', { transcript, segments, source: 'whisper', thumbnail: null });
+      res.end();
+    } catch (err) {
+      await fsPromises.unlink(audioFile).catch(() => {});
+      send('transcript_error', { error: 'Transcription failed', details: err.message });
+      res.end();
+    }
+  });
 });
 
 // Unknown API routes should return JSON 404
