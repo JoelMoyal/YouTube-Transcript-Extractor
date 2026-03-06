@@ -1761,6 +1761,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-stat-card {
           background: #FFFFFF; border: 1px solid #E6E0D6; border-radius: 16px;
           padding: 18px 20px; transition: transform 0.18s ease, box-shadow 0.18s ease;
+          min-height: 0;
+          height: auto;
         }
         .ds-stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(29,29,31,0.07); }
         .ds-stat-icon { width: 32px; height: 32px; border-radius: 9px; background: rgba(60,140,255,0.08); color: #3C8CFF; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
@@ -1827,15 +1829,19 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         }
         @media (max-width: 600px) {
           .ds-main { padding: 12px 12px calc(100px + env(safe-area-inset-bottom, 0px)); }
-          .ds-stats-row { grid-template-columns: 1fr; }
-          .ds-stat-card { padding: 14px 14px; border-radius: 13px; }
-          .ds-stat-val { font-size: 24px; }
+          .ds-stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+          .ds-stats-row .ds-stat-card:last-child { grid-column: 1 / -1; }
+          .ds-stat-card { padding: 12px; border-radius: 12px; }
+          .ds-stat-icon { width: 26px; height: 26px; margin-bottom: 8px; }
+          .ds-stat-val { font-size: 22px; margin-bottom: 3px; }
+          .ds-stat-lbl { font-size: 12px; line-height: 1.25; }
+          .ds-section { margin-bottom: 10px; border-radius: 12px; }
           .ds-hist-row { padding: 10px 12px; }
           .ds-hist-thumb { width: 72px; height: 40px; border-radius: 7px; }
           .ds-hist-info { min-width: 0; flex: 1 1 100%; }
           .ds-hist-title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
           .ds-hist-meta { font-size: 11px; gap: 4px; }
-          .ds-open-btn { margin-left: 0; align-self: flex-end; }
+          .ds-open-btn { display: none; }
           .ds-settings-card-2 { padding: 14px; }
           .ds-settings-card-title { font-size: 15px; margin-bottom: 12px; }
           .ds-setting-row { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
@@ -1853,11 +1859,33 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           .ds-continue-quick { flex-wrap: wrap; }
           .ds-continue-quick-btn { flex: 1 1 calc(50% - 5px); min-width: 120px; }
         }
+        @media (max-width: 520px) {
+          .ds-main { padding: 10px 10px calc(96px + env(safe-area-inset-bottom, 0px)); }
+          .ds-mobile-header { padding: 10px 12px; }
+          .ds-stat-card { padding: 10px; }
+          .ds-stat-icon { width: 24px; height: 24px; margin-bottom: 7px; }
+          .ds-stat-val { font-size: 20px; }
+          .ds-stat-lbl { font-size: 11px; }
+          .ds-section-head { padding: 12px; }
+          .ds-section-title { font-size: 14px; }
+          .ds-credit-track { margin: 8px 12px 0; height: 7px; }
+          .ds-credit-meta { padding: 8px 12px 12px; font-size: 12px; }
+          .ds-hist-row { padding: 9px 10px; gap: 8px; }
+          .ds-hist-thumb { width: 64px; height: 36px; }
+          .ds-hist-title { font-size: 12px; }
+          .ds-hist-meta { font-size: 10.5px; }
+          .ds-view-all-btn { padding: 10px 12px; font-size: 12px; }
+          .ds-referral-body { padding: 12px; }
+          .ds-referral-banner { padding: 13px 12px 11px; }
+          .ds-referral-title { font-size: 13.5px; }
+        }
         @media (max-width: 420px) {
           .ds-mobile-header { padding: 10px 12px; }
           .ds-main { padding: 10px 10px calc(96px + env(safe-area-inset-bottom, 0px)); }
-          .ds-stat-card { padding: 12px; }
-          .ds-stat-val { font-size: 22px; }
+          .ds-stats-row { grid-template-columns: 1fr; }
+          .ds-stats-row .ds-stat-card:last-child { grid-column: auto; }
+          .ds-stat-card { padding: 10px; }
+          .ds-stat-val { font-size: 21px; }
           .ds-section-head { padding: 12px 12px 10px; }
           .ds-credit-track { margin: 8px 12px 0; }
           .ds-credit-meta { padding: 8px 12px 12px; font-size: 12px; }
@@ -1865,7 +1893,6 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           .ds-hist-thumb { width: 64px; height: 36px; }
           .ds-hist-title { font-size: 12px; }
           .ds-hist-meta { font-size: 10.5px; }
-          .ds-open-btn { padding: 5px 10px; font-size: 11px; }
           .ds-settings-card-2 { padding: 12px; }
           .ds-settings-btn { min-height: 40px; }
           .ds-referral-title { font-size: 13.5px; }
