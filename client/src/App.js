@@ -4237,7 +4237,9 @@ const App = () => {
       } catch {
         setError(funnyTranscriptError('failed to process'));
       } finally {
-        setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+        setTimeout(() => {
+          setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+        }, 600);
       }
     });
 
@@ -4751,51 +4753,50 @@ const App = () => {
       {/* Divider */}
       <div style={{ height: 1, background: P.border, margin: '0 16px' }} />
 
-      {/* History header */}
-      {history.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px 8px' }}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: P.ink }}>History</span>
-          <button onClick={() => {}} style={{ border: 'none', background: 'none', cursor: 'pointer', color: P.muted, padding: 4, display: 'flex', alignItems: 'center', borderRadius: 6, transition: 'background 0.1s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = P.border; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          </button>
-        </div>
-      )}
+      {/* Insights header */}
+      <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px 8px' }}>
+        <span style={{ fontSize: 14, fontWeight: 700, color: P.ink }}>Insights</span>
+      </div>
 
-      {/* History list */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 10px 12px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {history.map((entry) => {
-          const hTitle = entry.title || entry.id;
-          const hChannel = entry.channel || (entry.platform ? entry.platform.charAt(0).toUpperCase() + entry.platform.slice(1) : 'YouTube');
-          const isActive = entry.id === currentVideoId;
-          return (
-            <button key={entry.id} onClick={() => loadFromHistory(entry)} style={{
-              display: 'flex', alignItems: 'flex-start', gap: 11, padding: '10px 12px',
-              borderRadius: 12, border: `1px solid ${isActive ? 'rgba(60,140,255,0.2)' : 'transparent'}`,
-              background: isActive ? P.accentLight : 'transparent',
-              cursor: 'pointer', transition: 'background 0.1s', textAlign: 'left', width: '100%',
-            }}
-              onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(29,29,31,0.05)'; e.currentTarget.style.borderColor = P.border; } }}
-              onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; } }}
-            >
-              <div style={{ position: 'relative', flexShrink: 0 }}>
-                {entry.thumbnail
-                  ? <img src={entry.thumbnail} alt="" style={{ width: 112, height: 70, objectFit: 'cover', borderRadius: 8, display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
-                  : <div style={{ width: 112, height: 70, borderRadius: 8, background: P.border, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlatformIcon platform={entry.platform || 'youtube'} /></div>
-                }
-              </div>
-              <div style={{ minWidth: 0, flex: 1, paddingTop: 2 }}>
-                <div style={{ fontSize: 13.5, fontWeight: 600, color: isActive ? P.accent : P.ink, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', lineHeight: 1.4, marginBottom: 5 }}>{hTitle}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: P.muted, marginBottom: 2 }}>
-                  <PlatformIcon platform={entry.platform || 'youtube'} size={9} />
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{hChannel}</span>
-                </div>
-                <div style={{ fontSize: 11, color: P.muted }}>{timeAgo(entry.date)}</div>
-              </div>
-            </button>
-          );
-        })}
+      {/* Insights rows */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 8px 12px', display: 'flex', flexDirection: 'column' }}>
+        {[
+          { title: 'AI Summaries', sub: 'Bullet point summaries', color: P.accent, bg: 'rgba(60,140,255,0.1)',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+            onClick: summary ? () => setActiveTab('summary') : summarize, active: !!summary, loading: summarizing },
+          { title: 'Flash Cards', sub: 'Q&A cards with flip mode', color: P.warning, bg: 'rgba(180,83,9,0.1)',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+            onClick: flashcards.length > 0 ? () => setActiveTab('flashcards') : generateFlashcards, active: flashcards.length > 0, loading: flashcardsLoading },
+          { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+            onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
+          { title: 'Academic', sub: 'References, claims & glossary', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+            onClick: academicInsights && !academicInsights._error ? () => setActiveTab('academic') : generateAcademicInsights, active: !!academicInsights && !academicInsights._error, loading: academicInsightsLoading },
+        ].map(item => (
+          <div key={item.title} onClick={item.loading ? undefined : item.onClick}
+            style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 10px', borderRadius: 11, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 3 }}
+            onMouseEnter={e => { e.currentTarget.style.background = P.surface; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+          >
+            <div style={{ width: 42, height: 42, borderRadius: 12, background: item.active ? item.bg : item.bg.replace('0.1', '0.07'), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: item.color }}>
+              {item.loading ? <SpinnerIcon size={14} /> : item.icon}
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 600, color: item.active ? item.color : P.ink }}>{item.title}</div>
+              <div style={{ fontSize: 11.5, color: P.muted, marginTop: 1 }}>{item.sub}</div>
+            </div>
+            {item.active
+              ? <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
+              : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.4 }}><polyline points="9 18 15 12 9 6"/></svg>
+            }
+          </div>
+        ))}
+        {studyGuide?._error && (
+          <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(180,35,24,0.05)', border: `1px solid rgba(180,35,24,0.2)`, borderRadius: 8, fontSize: 12, color: P.error }}>
+            Failed to generate study guide: {studyGuide._error}
+          </div>
+        )}
       </div>
 
       {/* Back button pinned at bottom */}
@@ -5897,96 +5898,37 @@ const App = () => {
                 );
               })()}
 
-              {/* Loading card */}
+              {/* Loading */}
               {loading && (
-                <div className="fade-up" style={{
-                  marginTop: 18,
-                  padding: '16px 18px',
-                  background: 'rgba(60,140,255,0.04)',
-                  border: `1px solid rgba(60,140,255,0.14)`,
-                  borderRadius: 14,
-                }}>
-                  {/* Step indicators */}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: 14 }}>
-                    {['subtitles', 'audio', 'whisper'].map((s, idx) => {
-                      const labels = { subtitles: 'Captions', audio: 'Audio', whisper: 'AI Transcribe' };
-                      const order = ['subtitles', 'audio', 'whisper'];
-                      const isDone = loadingStage && order.indexOf(s) < order.indexOf(loadingStage);
-                      const isActive = s === loadingStage;
-                      return (
-                        <React.Fragment key={s}>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-                            <div style={{
-                              width: 28, height: 28, borderRadius: '50%',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              background: isDone ? 'rgba(15,118,110,0.11)' : isActive ? P.accentLight : P.surface,
-                              border: `1.5px solid ${isDone ? P.success : isActive ? P.accent : P.border}`,
-                              transition: 'all 0.35s',
-                              animation: isActive ? 'pulse 1.8s ease-in-out infinite' : 'none',
-                              flexShrink: 0,
-                            }}>
-                              {isDone ? (
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12"/>
-                                </svg>
-                              ) : isActive ? (
-                                <span style={{ width: 8, height: 8, borderRadius: '50%', background: P.accent, display: 'block' }} />
-                              ) : (
-                                <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.border, display: 'block' }} />
-                              )}
-                            </div>
-                            <span style={{
-                              fontSize: 10, fontWeight: isActive ? 700 : 500,
-                              color: isDone ? P.success : isActive ? P.accent : P.muted,
-                              transition: 'all 0.3s', whiteSpace: 'nowrap',
-                            }}>{labels[s]}</span>
-                          </div>
-                          {idx < 2 && (
-                            <div style={{
-                              flex: 1, height: 1.5, marginTop: 13, marginBottom: 0,
-                              background: isDone ? 'rgba(15,118,110,0.35)' : P.border,
-                              transition: 'background 0.5s',
-                            }} />
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                  </div>
-
-                  {/* Progress bar — shimmer when 0%, glowing fill when > 0% */}
-                  <div style={{ height: 6, borderRadius: 999, background: P.border, overflow: 'hidden', position: 'relative', marginBottom: 10 }}>
+                <div className="fade-up" style={{ marginTop: 16 }}>
+                  <div style={{ height: 3, borderRadius: 999, background: P.border, overflow: 'hidden', position: 'relative', marginBottom: 9 }}>
                     {loadingPercent > 0 ? (
                       <div style={{
                         height: '100%', width: `${loadingPercent}%`,
                         background: `linear-gradient(90deg, ${P.accent}, #5B9BD5)`,
-                        borderRadius: 999, transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
-                        boxShadow: '0 0 8px rgba(60,140,255,0.45)',
+                        borderRadius: 999, transition: 'width 0.5s ease',
                       }} />
                     ) : (
-                      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, transparent, rgba(60,140,255,0.45), transparent)`, animation: 'shimmer 1.4s infinite' }} />
+                      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, transparent, rgba(45,108,223,0.4), transparent)`, animation: 'shimmer 1.4s infinite' }} />
                     )}
                   </div>
-
-                  {/* Status message + percent */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                      <span style={{ fontSize: 12.5, color: P.muted, fontWeight: 500 }}>
-                        {loadingMsg || 'Fetching transcript'}
-                      </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 12, color: P.muted }}>{loadingMsg || 'Fetching transcript'}</span>
                       <span style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
                         {[0, 1, 2].map(i => (
-                          <span key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: `dot-flicker 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+                          <span key={i} style={{ width: 3, height: 3, borderRadius: '50%', background: P.muted, display: 'inline-block', animation: `dot-flicker 1.2s ease-in-out ${i * 0.2}s infinite` }} />
                         ))}
                       </span>
                     </div>
                     {loadingPercent > 0 && (
-                      <span style={{ fontSize: 11, color: P.accent, fontWeight: 700 }}>{loadingPercent}%</span>
+                      <span style={{ fontSize: 11, color: P.muted }}>{loadingPercent}%</span>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* Error */}
+                            {/* Error */}
               {error && (
                 <div className="fade-up" style={{
                   marginTop: 14, padding: '11px 14px', textAlign: 'left',
