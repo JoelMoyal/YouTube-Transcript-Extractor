@@ -1294,6 +1294,13 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   // ON ICE: const [prefLangSaved, setPrefLangSaved] = React.useState(false);
   const [copyRefDone, setCopyRefDone] = React.useState(false);
   const [showAllHistory, setShowAllHistory] = React.useState(false);
+  const [dashboardViewport, setDashboardViewport] = React.useState(() => window.innerWidth);
+
+  React.useEffect(() => {
+    const onResize = () => setDashboardViewport(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // Profile editing
   const [editingName, setEditingName] = React.useState(false);
@@ -1528,6 +1535,8 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
   const weekSegments = Array.from({ length: 7 }, (_, i) => i);
   const activeDay = Math.min(6, Math.round((pct / 100) * 6));
+  const isDashboardMobile = dashboardViewport <= 900;
+  const isDashboardVeryNarrow = dashboardViewport <= 420;
 
   const renderContinueCard = ({ mobile = false }) => {
     if (mobile) {
@@ -1704,6 +1713,110 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           )}
         </div>
       </section>
+    );
+  };
+
+  const renderMobileOverview = () => {
+    const metricCards = [
+      {
+        key: 'credits',
+        value: `${used} / ${tierMax}`,
+        label: 'Credits used',
+        iconBg: 'rgba(60,140,255,0.12)',
+        iconColor: '#3C8CFF',
+        icon: <svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2"/><path d="M9 5.5v3.5l2 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+      },
+      {
+        key: 'saved',
+        value: `${history.length}`,
+        label: 'Transcripts saved',
+        iconBg: 'rgba(15,118,110,0.12)',
+        iconColor: '#0F766E',
+        icon: <svg width="14" height="14" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M5 7h8M5 10h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
+      },
+      {
+        key: 'reset',
+        value: `${daysLeft}`,
+        label: 'Days until reset',
+        iconBg: 'rgba(180,83,9,0.12)',
+        iconColor: '#B45309',
+        icon: <svg width="14" height="14" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2"/><path d="M9 5v4.5l2.5 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
+      },
+    ];
+
+    return (
+      <div className="ds-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isDashboardVeryNarrow ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
+          {metricCards.map((card, idx) => (
+            <div
+              key={card.key}
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid #E6E0D6',
+                borderRadius: 12,
+                padding: '10px 11px',
+                ...(isDashboardVeryNarrow ? {} : idx === 2 ? { gridColumn: '1 / -1' } : {}),
+              }}
+            >
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: card.iconBg, color: card.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>{card.icon}</div>
+              <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.02em', color: '#1D1D1F', lineHeight: 1 }}>{card.value}</div>
+              <div style={{ marginTop: 4, fontSize: 12, color: '#8B8F97', fontWeight: 600 }}>{card.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 12, padding: '10px 12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#1D1D1F' }}>Weekly credits</span>
+            <span style={{ fontSize: 12, color: '#6F7480' }}>resets in {daysLeft}d</span>
+          </div>
+          <div style={{ height: 6, borderRadius: 999, background: '#E6E0D6', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: pct >= 80 ? '#B45309' : '#3C8CFF', transition: 'width 0.4s ease' }} />
+          </div>
+          <div style={{ marginTop: 5, fontSize: 12, color: '#6F7480' }}>{remaining} credits remaining</div>
+        </div>
+
+        {renderContinueCard({ mobile: true })}
+
+        <div style={{ background: '#FFFFFF', border: '1px solid #E6E0D6', borderRadius: 12, overflow: 'hidden' }}>
+          <div style={{ padding: '9px 12px 8px', borderBottom: '1px solid #E6E0D6' }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#1D1D1F' }}>Recent transcripts</span>
+          </div>
+          {history.length === 0 ? (
+            <div style={{ padding: '16px 12px', textAlign: 'center' }}>
+              <p style={{ margin: '0 0 10px', fontSize: 13, color: '#8B8F97' }}>No transcripts yet.</p>
+              <button onClick={onBack} style={{ border: 'none', borderRadius: 9, background: '#3C8CFF', color: 'white', fontSize: 13, fontWeight: 600, padding: '7px 16px', cursor: 'pointer' }}>Extract one</button>
+            </div>
+          ) : (
+            <>
+              {(showAllHistory ? history : history.slice(0, 4)).map((h, idx) => {
+                const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
+                const title = h.title || h.id;
+                return (
+                  <div key={`m-${h.id}-${idx}`} onClick={() => openTranscript(h)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderTop: '1px solid #E6E0D6', cursor: 'pointer' }}>
+                    <div style={{ width: 62, height: 36, borderRadius: 6, overflow: 'hidden', flexShrink: 0, background: 'rgba(60,140,255,0.06)', border: '1px solid rgba(60,140,255,0.1)' }}>
+                      {h.thumbnail && <img src={h.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{title}</div>
+                      <div style={{ fontSize: 11, color: '#6F7480', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{wc > 0 ? `${wc.toLocaleString()} words · ` : ''}{timeAgo(h.date)}</div>
+                    </div>
+                  </div>
+                );
+              })}
+              {history.length > 4 && (
+                <div style={{ padding: '8px 12px 10px', borderTop: '1px solid #E6E0D6' }}>
+                  <button onClick={() => setShowAllHistory(v => !v)} style={{ border: 'none', background: 'none', color: '#3C8CFF', fontSize: 12, fontWeight: 600, cursor: 'pointer', padding: 0 }}>
+                    {showAllHistory ? 'Show less' : `+ View all ${history.length} transcripts`}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {renderReferralCard({ mobile: true })}
+      </div>
     );
   };
 
@@ -2819,105 +2932,107 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         {/* ── Main content ── */}
         <main className="ds-main">
           {tab === 'overview' && (
-            <div key="overview" className="ds-fade-in ds-overview-grid">
-              {/* Left column: stats + credits + history */}
-              <div>
-                <div className="ds-stats-row">
-                  <div className="ds-stat-card">
-                    <div className="ds-stat-icon" style={{ background: 'rgba(60,140,255,0.1)', color: '#3C8CFF' }}>
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2"/><path d="M9 5.5v3.5l2 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            isDashboardMobile ? renderMobileOverview() : (
+              <div key="overview" className="ds-fade-in ds-overview-grid">
+                {/* Left column: stats + credits + history */}
+                <div>
+                  <div className="ds-stats-row">
+                    <div className="ds-stat-card">
+                      <div className="ds-stat-icon" style={{ background: 'rgba(60,140,255,0.1)', color: '#3C8CFF' }}>
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2"/><path d="M9 5.5v3.5l2 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </div>
+                      <div className="ds-stat-val">{used}<span style={{ fontSize: 13, fontWeight: 500, color: '#8B8F97' }}> / {tierMax}</span></div>
+                      <div className="ds-stat-lbl">Credits used</div>
                     </div>
-                    <div className="ds-stat-val">{used}<span style={{ fontSize: 13, fontWeight: 500, color: '#8B8F97' }}> / {tierMax}</span></div>
-                    <div className="ds-stat-lbl">Credits used</div>
-                  </div>
-                  <div className="ds-stat-card">
-                    <div className="ds-stat-icon" style={{ background: 'rgba(15,118,110,0.1)', color: '#0F766E' }}>
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M5 7h8M5 10h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                    <div className="ds-stat-card">
+                      <div className="ds-stat-icon" style={{ background: 'rgba(15,118,110,0.1)', color: '#0F766E' }}>
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="3" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="2"/><path d="M5 7h8M5 10h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                      </div>
+                      <div className="ds-stat-val">{history.length}</div>
+                      <div className="ds-stat-lbl">Transcripts saved</div>
                     </div>
-                    <div className="ds-stat-val">{history.length}</div>
-                    <div className="ds-stat-lbl">Transcripts saved</div>
-                  </div>
-                  <div className="ds-stat-card">
-                    <div className="ds-stat-icon" style={{ background: 'rgba(180,83,9,0.1)', color: '#B45309' }}>
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2"/><path d="M9 5v4.5l2.5 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                    <div className="ds-stat-card">
+                      <div className="ds-stat-icon" style={{ background: 'rgba(180,83,9,0.1)', color: '#B45309' }}>
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="2"/><path d="M9 5v4.5l2.5 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                      </div>
+                      <div className="ds-stat-val">{daysLeft}</div>
+                      <div className="ds-stat-lbl">Days until reset</div>
                     </div>
-                    <div className="ds-stat-val">{daysLeft}</div>
-                    <div className="ds-stat-lbl">Days until reset</div>
                   </div>
-                </div>
 
-                <div className="ds-section" style={{ marginBottom: 18 }}>
-                  <div className="ds-section-head">
-                    <h2 className="ds-section-title">Weekly credits</h2>
-                    <span style={{ fontSize: 12, color: '#8B8F97' }}>Resets in <strong style={{ color: '#1D1D1F' }}>{daysLeft}d</strong></span>
-                  </div>
-                  <div style={{ padding: '0 22px 18px' }}>
-                    <div className="ds-credit-track">
-                      <div className="ds-credit-fill" style={{ width: `${pct}%`, background: pct >= 80 ? '#B45309' : '#3C8CFF' }} />
+                  <div className="ds-section" style={{ marginBottom: 18 }}>
+                    <div className="ds-section-head">
+                      <h2 className="ds-section-title">Weekly credits</h2>
+                      <span style={{ fontSize: 12, color: '#8B8F97' }}>Resets in <strong style={{ color: '#1D1D1F' }}>{daysLeft}d</strong></span>
                     </div>
-                    <div className="ds-credit-meta">
-                      <span>{used} / {tierMax} used</span>
-                      <span>{remaining} remaining</span>
+                    <div style={{ padding: '0 22px 18px' }}>
+                      <div className="ds-credit-track">
+                        <div className="ds-credit-fill" style={{ width: `${pct}%`, background: pct >= 80 ? '#B45309' : '#3C8CFF' }} />
+                      </div>
+                      <div className="ds-credit-meta">
+                        <span>{used} / {tierMax} used</span>
+                        <span>{remaining} remaining</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="ds-section">
-                  <div className="ds-section-head">
-                    <h2 className="ds-section-title">Recent transcripts</h2>
-                    {history.length > 0 && (
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#8B8F97', background: 'rgba(29,29,31,0.05)', padding: '3px 9px', borderRadius: 999, border: '1px solid rgba(29,29,31,0.08)' }}>{history.length}</span>
+                  <div className="ds-section">
+                    <div className="ds-section-head">
+                      <h2 className="ds-section-title">Recent transcripts</h2>
+                      {history.length > 0 && (
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#8B8F97', background: 'rgba(29,29,31,0.05)', padding: '3px 9px', borderRadius: 999, border: '1px solid rgba(29,29,31,0.08)' }}>{history.length}</span>
+                      )}
+                    </div>
+                    {history.length === 0 ? (
+                      <div style={{ padding: '32px 22px', textAlign: 'center' }}>
+                        <p style={{ margin: '0 0 12px', color: '#8B8F97', fontSize: 14 }}>No transcripts yet.</p>
+                        <button onClick={onBack} style={{ border: 'none', borderRadius: 10, background: '#3C8CFF', color: 'white', fontSize: 13, fontWeight: 600, padding: '8px 20px', cursor: 'pointer' }}>Extract one</button>
+                      </div>
+                    ) : (
+                      <>
+                        {(showAllHistory ? history : history.slice(0, 4)).map((h, idx) => {
+                          const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
+                          const title = h.title || h.id;
+                          const channel = h.channel || (h.platform ? h.platform.charAt(0).toUpperCase() + h.platform.slice(1) : 'YouTube');
+                          return (
+                            <div key={`${h.id}-${idx}`} className="ds-hist-row" onClick={() => openTranscript(h)}>
+                              <div className="ds-hist-thumb">
+                                {h.thumbnail ? (
+                                  <img src={h.thumbnail} alt={title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+                                ) : (
+                                  <PlatformIcon platform={h.platform || 'youtube'} size={22} />
+                                )}
+                              </div>
+                              <div className="ds-hist-info">
+                                <p className="ds-hist-title">{title}</p>
+                                <p className="ds-hist-meta">
+                                  <PlatformIcon platform={h.platform || 'youtube'} size={11} />
+                                  {channel}{wc > 0 ? ` · ${wc.toLocaleString()} words` : ''} · {timeAgo(h.date)}
+                                </p>
+                              </div>
+                              <button className="ds-open-btn" onClick={e => { e.stopPropagation(); openTranscript(h); }}>Open</button>
+                            </div>
+                          );
+                        })}
+                        {history.length > 4 && (
+                          <div style={{ padding: '12px 22px', borderTop: '1px solid #E6E0D6' }}>
+                            <button className="ds-view-all-btn" onClick={() => setShowAllHistory(v => !v)}>
+                              {showAllHistory ? 'Show less' : `+ View all ${history.length} transcripts`}
+                            </button>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
-                  {history.length === 0 ? (
-                    <div style={{ padding: '32px 22px', textAlign: 'center' }}>
-                      <p style={{ margin: '0 0 12px', color: '#8B8F97', fontSize: 14 }}>No transcripts yet.</p>
-                      <button onClick={onBack} style={{ border: 'none', borderRadius: 10, background: '#3C8CFF', color: 'white', fontSize: 13, fontWeight: 600, padding: '8px 20px', cursor: 'pointer' }}>Extract one</button>
-                    </div>
-                  ) : (
-                    <>
-                      {(showAllHistory ? history : history.slice(0, 4)).map((h, idx) => {
-                        const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
-                        const title = h.title || h.id;
-                        const channel = h.channel || (h.platform ? h.platform.charAt(0).toUpperCase() + h.platform.slice(1) : 'YouTube');
-                        return (
-                          <div key={`${h.id}-${idx}`} className="ds-hist-row" onClick={() => openTranscript(h)}>
-                            <div className="ds-hist-thumb">
-                              {h.thumbnail ? (
-                                <img src={h.thumbnail} alt={title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
-                              ) : (
-                                <PlatformIcon platform={h.platform || 'youtube'} size={22} />
-                              )}
-                            </div>
-                            <div className="ds-hist-info">
-                              <p className="ds-hist-title">{title}</p>
-                              <p className="ds-hist-meta">
-                                <PlatformIcon platform={h.platform || 'youtube'} size={11} />
-                                {channel}{wc > 0 ? ` · ${wc.toLocaleString()} words` : ''} · {timeAgo(h.date)}
-                              </p>
-                            </div>
-                            <button className="ds-open-btn" onClick={e => { e.stopPropagation(); openTranscript(h); }}>Open</button>
-                          </div>
-                        );
-                      })}
-                      {history.length > 4 && (
-                        <div style={{ padding: '12px 22px', borderTop: '1px solid #E6E0D6' }}>
-                          <button className="ds-view-all-btn" onClick={() => setShowAllHistory(v => !v)}>
-                            {showAllHistory ? 'Show less' : `+ View all ${history.length} transcripts`}
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
+                </div>
+
+                {/* Right column: continue + referral */}
+                <div>
+                  {renderContinueCard({ mobile: false })}
+                  {renderReferralCard({ mobile: false })}
                 </div>
               </div>
-
-              {/* Right column: continue + referral */}
-              <div>
-                {renderContinueCard({ mobile: false })}
-                {renderReferralCard({ mobile: false })}
-              </div>
-            </div>
+            )
           )}
 
           {tab === 'settings' && (
