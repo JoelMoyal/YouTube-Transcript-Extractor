@@ -5594,6 +5594,62 @@ const App = () => {
           animation-iteration-count: infinite;
         }
 
+        /* ── Feature section cosmos ───────────────────────────────────────── */
+        .feat-cosmos {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          overflow: hidden;
+          z-index: 0;
+        }
+        .feat-orb-1 {
+          position: absolute;
+          width: 320px;
+          height: 320px;
+          right: -80px;
+          top: -40px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 42% 42%, rgba(123,90,255,0.35), rgba(100,140,255,0.1) 55%, transparent 80%);
+          filter: blur(48px);
+          opacity: 0.14;
+          animation: orbitFloat 22s ease-in-out infinite;
+          animation-delay: -6s;
+        }
+        .feat-orb-2 {
+          position: absolute;
+          width: 180px;
+          height: 180px;
+          left: -40px;
+          bottom: 10%;
+          border-radius: 50%;
+          background: radial-gradient(circle at 40% 40%, rgba(60,140,255,0.4), rgba(123,211,255,0.1) 58%, transparent 80%);
+          filter: blur(36px);
+          opacity: 0.12;
+          animation: planetFloat 18s ease-in-out infinite;
+          animation-delay: -9s;
+        }
+        .feat-orb-3 {
+          position: absolute;
+          width: 110px;
+          height: 110px;
+          left: 42%;
+          bottom: 0;
+          border-radius: 50%;
+          background: radial-gradient(circle at 38% 38%, rgba(90,60,220,0.3), transparent 70%);
+          filter: blur(28px);
+          opacity: 0.1;
+          animation: orbitFloat 14s ease-in-out infinite;
+          animation-delay: -3s;
+        }
+        .feat-star {
+          position: absolute;
+          border-radius: 50%;
+          background: rgba(110,80,255,0.7);
+          animation-name: starTwinkle;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+        }
+
         .feature-workflow {
           position: relative;
           display: flex;
@@ -6121,7 +6177,9 @@ const App = () => {
         .feature-mock-cursor { width:1.5px; height:9px; background:var(--card-accent); border-radius:1px; flex-shrink:0; animation:cursorBlink 0.9s step-end infinite; }
         .feature-mock-ts-row { display:flex; align-items:center; gap:5px; }
         .feature-mock-ts-badge { font-size:7px; font-weight:700; color:var(--card-accent); font-family:ui-monospace,monospace; opacity:0.7; flex-shrink:0; white-space:nowrap; }
-        .feature-mock-line.shimmer { background:linear-gradient(90deg, rgba(29,29,31,0.09) 0%, rgba(29,29,31,0.09) 20%, rgba(255,255,255,0.88) 50%, rgba(29,29,31,0.09) 80%, rgba(29,29,31,0.09) 100%); background-size:300% 100%; animation:shimmerSweep 2s ease-in-out infinite; }
+        .feature-mock-line.shimmer { background:linear-gradient(90deg, rgba(29,29,31,0.09) 0%, rgba(29,29,31,0.09) 20%, rgba(255,255,255,0.88) 50%, rgba(29,29,31,0.09) 80%, rgba(29,29,31,0.09) 100%); background-size:300% 100%; background-position:110% center; animation:none; }
+        .feature-flow-node.transcript:hover .feature-mock-line.shimmer,
+        .feature-card.is-hovered .feature-mock-line.shimmer { animation:shimmerSweep 2s ease-in-out infinite; }
         .feature-mock-bullet-row { display:flex; align-items:center; gap:5px; }
         .feature-mock-bullet-dot { width:4px; height:4px; border-radius:50%; flex-shrink:0; background:var(--card-accent); opacity:0.7; }
         .feature-mock-bullet-row.anim-1,
@@ -6805,8 +6863,23 @@ const App = () => {
 
             {/* Features */}
             {/* Capability cards */}
-            <div style={{ maxWidth: 1500, margin: '0 auto', padding: isMobile ? '24px 16px 44px' : '96px 36px 68px' }}>
-              <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 52 }}>
+            <div style={{ position: 'relative', overflow: 'hidden', maxWidth: 1500, margin: '0 auto', padding: isMobile ? '24px 16px 44px' : '96px 36px 68px' }}>
+
+              {/* Feature section cosmos decorations */}
+              <div className="feat-cosmos" aria-hidden="true">
+                <div className="feat-orb-1" />
+                <div className="feat-orb-2" />
+                <div className="feat-orb-3" />
+                <span className="feat-star" style={{ top: '6%',   left: '5%',   width: 2, height: 2, opacity: 0.32, animationDuration: '3.1s', animationDelay: '-0.4s' }} />
+                <span className="feat-star" style={{ top: '10%',  right: '8%',  width: 3, height: 3, opacity: 0.38, animationDuration: '2.6s', animationDelay: '-1.2s' }} />
+                <span className="feat-star" style={{ top: '22%',  left: '2%',   width: 2, height: 2, opacity: 0.25, animationDuration: '4.0s', animationDelay: '-2.1s' }} />
+                <span className="feat-star" style={{ top: '18%',  right: '3%',  width: 2, height: 2, opacity: 0.28, animationDuration: '2.9s', animationDelay: '-0.7s' }} />
+                <span className="feat-star" style={{ bottom:'14%',left: '6%',   width: 3, height: 3, opacity: 0.30, animationDuration: '3.4s', animationDelay: '-1.8s' }} />
+                <span className="feat-star" style={{ bottom:'8%', right: '5%',  width: 2, height: 2, opacity: 0.35, animationDuration: '2.4s', animationDelay: '-0.9s' }} />
+                <span className="feat-star" style={{ top: '50%',  left: '1%',   width: 2, height: 2, opacity: 0.22, animationDuration: '3.7s', animationDelay: '-2.6s' }} />
+                <span className="feat-star" style={{ top: '55%',  right: '2%',  width: 3, height: 3, opacity: 0.28, animationDuration: '3.0s', animationDelay: '-1.4s' }} />
+              </div>
+              <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', marginBottom: isMobile ? 32 : 52 }}>
                 <div style={{
                   display: 'inline-block',
                   fontSize: 11, fontWeight: 700, letterSpacing: '0.11em', textTransform: 'uppercase',
@@ -6829,7 +6902,7 @@ const App = () => {
                   Extract once, then let AI branch it into anything you need — in seconds.
                 </p>
               </div>
-              <div className="feature-workflow">
+              <div className="feature-workflow" style={{ position: 'relative', zIndex: 1 }}>
                 <div className="feature-flow-head">
                   <span className="feature-flow-node input">Add Video</span>
                   <span className="feature-flow-arrow" aria-hidden="true">↓</span>
