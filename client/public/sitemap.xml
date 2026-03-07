@@ -16,6 +16,46 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://scribesnap.ai/vimeo-transcript</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scribesnap.ai/tiktok-transcript</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scribesnap.ai/loom-transcript</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scribesnap.ai/instagram-transcript</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scribesnap.ai/facebook-transcript</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scribesnap.ai/twitter-transcript</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scribesnap.ai/transcribe-audio</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://scribesnap.ai/transcribe-video</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://scribesnap.ai/privacy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>

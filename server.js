@@ -1208,6 +1208,30 @@ app.get('/youtube-transcript', (_req, res) => {
 app.get('/youtube-summarizer', (_req, res) => {
   res.sendFile(path.join(__dirname, 'client/public', 'youtube-summarizer.html'));
 });
+app.get('/vimeo-transcript', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'client/public', 'vimeo-transcript.html'));
+});
+app.get('/tiktok-transcript', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'client/public', 'tiktok-transcript.html'));
+});
+app.get('/loom-transcript', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'client/public', 'loom-transcript.html'));
+});
+app.get('/instagram-transcript', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'client/public', 'instagram-transcript.html'));
+});
+app.get('/facebook-transcript', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'client/public', 'facebook-transcript.html'));
+});
+app.get('/twitter-transcript', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'client/public', 'twitter-transcript.html'));
+});
+app.get('/transcribe-audio', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'client/public', 'transcribe-audio.html'));
+});
+app.get('/transcribe-video', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'client/public', 'transcribe-video.html'));
+});
 
 // Unknown web routes get branded 404 page
 app.get('*', (_req, res) => {
