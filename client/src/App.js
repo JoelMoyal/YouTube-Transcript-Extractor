@@ -5604,47 +5604,47 @@ const App = () => {
         }
         .feat-orb-1 {
           position: absolute;
-          width: 320px;
-          height: 320px;
-          right: -80px;
-          top: -40px;
+          width: 420px;
+          height: 420px;
+          right: -60px;
+          top: -60px;
           border-radius: 50%;
-          background: radial-gradient(circle at 42% 42%, rgba(123,90,255,0.35), rgba(100,140,255,0.1) 55%, transparent 80%);
-          filter: blur(48px);
-          opacity: 0.14;
+          background: radial-gradient(circle at 42% 42%, rgba(123,90,255,0.55), rgba(100,140,255,0.18) 50%, transparent 75%);
+          filter: blur(40px);
+          opacity: 0.28;
           animation: orbitFloat 22s ease-in-out infinite;
           animation-delay: -6s;
         }
         .feat-orb-2 {
           position: absolute;
-          width: 180px;
-          height: 180px;
-          left: -40px;
-          bottom: 10%;
+          width: 280px;
+          height: 280px;
+          left: -50px;
+          bottom: 8%;
           border-radius: 50%;
-          background: radial-gradient(circle at 40% 40%, rgba(60,140,255,0.4), rgba(123,211,255,0.1) 58%, transparent 80%);
-          filter: blur(36px);
-          opacity: 0.12;
+          background: radial-gradient(circle at 40% 40%, rgba(60,140,255,0.6), rgba(123,211,255,0.15) 55%, transparent 78%);
+          filter: blur(32px);
+          opacity: 0.24;
           animation: planetFloat 18s ease-in-out infinite;
           animation-delay: -9s;
         }
         .feat-orb-3 {
           position: absolute;
-          width: 110px;
-          height: 110px;
-          left: 42%;
-          bottom: 0;
+          width: 160px;
+          height: 160px;
+          left: 44%;
+          bottom: -20px;
           border-radius: 50%;
-          background: radial-gradient(circle at 38% 38%, rgba(90,60,220,0.3), transparent 70%);
-          filter: blur(28px);
-          opacity: 0.1;
+          background: radial-gradient(circle at 38% 38%, rgba(90,60,220,0.5), transparent 68%);
+          filter: blur(24px);
+          opacity: 0.18;
           animation: orbitFloat 14s ease-in-out infinite;
           animation-delay: -3s;
         }
         .feat-star {
           position: absolute;
           border-radius: 50%;
-          background: rgba(110,80,255,0.7);
+          background: rgba(110,80,255,0.85);
           animation-name: starTwinkle;
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
@@ -6870,14 +6870,14 @@ const App = () => {
                 <div className="feat-orb-1" />
                 <div className="feat-orb-2" />
                 <div className="feat-orb-3" />
-                <span className="feat-star" style={{ top: '6%',   left: '5%',   width: 2, height: 2, opacity: 0.32, animationDuration: '3.1s', animationDelay: '-0.4s' }} />
-                <span className="feat-star" style={{ top: '10%',  right: '8%',  width: 3, height: 3, opacity: 0.38, animationDuration: '2.6s', animationDelay: '-1.2s' }} />
-                <span className="feat-star" style={{ top: '22%',  left: '2%',   width: 2, height: 2, opacity: 0.25, animationDuration: '4.0s', animationDelay: '-2.1s' }} />
-                <span className="feat-star" style={{ top: '18%',  right: '3%',  width: 2, height: 2, opacity: 0.28, animationDuration: '2.9s', animationDelay: '-0.7s' }} />
-                <span className="feat-star" style={{ bottom:'14%',left: '6%',   width: 3, height: 3, opacity: 0.30, animationDuration: '3.4s', animationDelay: '-1.8s' }} />
-                <span className="feat-star" style={{ bottom:'8%', right: '5%',  width: 2, height: 2, opacity: 0.35, animationDuration: '2.4s', animationDelay: '-0.9s' }} />
-                <span className="feat-star" style={{ top: '50%',  left: '1%',   width: 2, height: 2, opacity: 0.22, animationDuration: '3.7s', animationDelay: '-2.6s' }} />
-                <span className="feat-star" style={{ top: '55%',  right: '2%',  width: 3, height: 3, opacity: 0.28, animationDuration: '3.0s', animationDelay: '-1.4s' }} />
+                <span className="feat-star" style={{ top: '6%',   left: '5%',   width: 3, height: 3, opacity: 0.55, animationDuration: '3.1s', animationDelay: '-0.4s' }} />
+                <span className="feat-star" style={{ top: '10%',  right: '8%',  width: 4, height: 4, opacity: 0.60, animationDuration: '2.6s', animationDelay: '-1.2s' }} />
+                <span className="feat-star" style={{ top: '22%',  left: '2%',   width: 2, height: 2, opacity: 0.45, animationDuration: '4.0s', animationDelay: '-2.1s' }} />
+                <span className="feat-star" style={{ top: '18%',  right: '3%',  width: 3, height: 3, opacity: 0.50, animationDuration: '2.9s', animationDelay: '-0.7s' }} />
+                <span className="feat-star" style={{ bottom:'14%',left: '6%',   width: 4, height: 4, opacity: 0.52, animationDuration: '3.4s', animationDelay: '-1.8s' }} />
+                <span className="feat-star" style={{ bottom:'8%', right: '5%',  width: 3, height: 3, opacity: 0.55, animationDuration: '2.4s', animationDelay: '-0.9s' }} />
+                <span className="feat-star" style={{ top: '50%',  left: '1%',   width: 2, height: 2, opacity: 0.42, animationDuration: '3.7s', animationDelay: '-2.6s' }} />
+                <span className="feat-star" style={{ top: '55%',  right: '2%',  width: 4, height: 4, opacity: 0.48, animationDuration: '3.0s', animationDelay: '-1.4s' }} />
               </div>
               <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', marginBottom: isMobile ? 32 : 52 }}>
                 <div style={{
