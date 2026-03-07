@@ -6865,6 +6865,7 @@ const App = () => {
             <div style={{
               backgroundImage: `linear-gradient(rgba(60,80,160,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(60,80,160,0.045) 1px, transparent 1px)`,
               backgroundSize: '40px 40px',
+            }}><div style={{
               maxWidth: 1500, margin: '0 auto', padding: isMobile ? '24px 16px 44px' : '64px 36px 68px',
             }}>
               <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 52 }}>
@@ -6877,16 +6878,22 @@ const App = () => {
                 }}>
                   What you get
                 </div>
-                <h2 style={{
-                  margin: 0,
-                  fontSize: isMobile ? 'clamp(26px, 8vw, 34px)' : 'clamp(32px, 4vw, 46px)',
-                  fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.08,
-                  color: P.ink,
-                }}>
-                  One transcript.<br />
-                  <span style={{ color: P.accent }}>Every workflow.</span>
+                <h2 style={{ margin: 0, letterSpacing: '-0.03em', lineHeight: 1.1 }}>
+                  <span style={{
+                    display: 'block',
+                    fontSize: isMobile ? 'clamp(18px, 5vw, 22px)' : 'clamp(20px, 2.2vw, 26px)',
+                    fontWeight: 400, color: P.muted, letterSpacing: '-0.01em',
+                  }}>One transcript.</span>
+                  <span style={{
+                    display: 'block',
+                    fontSize: isMobile ? 'clamp(30px, 9vw, 40px)' : 'clamp(38px, 4.5vw, 54px)',
+                    fontWeight: 900, letterSpacing: '-0.04em',
+                    background: 'linear-gradient(135deg, #3C8CFF 0%, #7B5FFF 100%)',
+                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}>Every workflow.</span>
                 </h2>
-                <p style={{ margin: '16px auto 0', fontSize: 15, color: P.muted, lineHeight: 1.7, maxWidth: 420 }}>
+                <p style={{ margin: '18px auto 0', fontSize: 15, color: P.muted, lineHeight: 1.7, maxWidth: 400 }}>
                   Extract once, then let AI branch it into anything you need — in seconds.
                 </p>
               </div>
@@ -7276,6 +7283,7 @@ const App = () => {
                   </div>
                 ))}
               </div>
+            </div>
             </div>
             </div>
             {/* Testimonials */}
