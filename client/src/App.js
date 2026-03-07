@@ -5680,7 +5680,16 @@ const App = () => {
           box-shadow: none;
         }
         .feature-flow-node.input {
-          color: rgba(29,29,31,0.84);
+          color: rgba(29,29,31,0.72);
+          background: rgba(255,255,255,0.75);
+          border: 1px solid rgba(29,29,31,0.10);
+          border-radius: 10px;
+          padding: 8px 18px;
+          font-weight: 600;
+          font-size: 14px;
+          gap: 7px;
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
         }
         .feature-flow-arrow {
           display: inline-flex;
@@ -6899,7 +6908,13 @@ const App = () => {
               </div>
               <div className="feature-workflow">
                 <div className="feature-flow-head">
-                  <span className="feature-flow-node input">Add Video</span>
+                  <span className="feature-flow-node input">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{opacity:0.55,flexShrink:0}}>
+                      <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+                      <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+                    </svg>
+                    Add Video
+                  </span>
                   <span className="feature-flow-arrow" aria-hidden="true">↓</span>
                   <span className="feature-flow-node transcript">
                     <span className="feature-flow-transcript-preview">
