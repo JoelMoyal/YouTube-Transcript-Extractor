@@ -6424,235 +6424,207 @@ const App = () => {
               {/* Input card */}
               <div style={{
                 background: P.surface, border: `1px solid ${P.border}`,
-                borderRadius: isMobile ? 16 : 20, boxShadow: '0 12px 56px rgba(29,29,31,0.13)',
-                padding: isMobile ? '7px 7px 7px 7px' : 10,
+                borderRadius: isMobile ? 18 : 22, boxShadow: '0 12px 56px rgba(29,29,31,0.13)',
+                padding: isMobile ? 12 : 14,
+                display: 'flex', flexDirection: 'column', gap: isMobile ? 10 : 12,
               }}>
-                {/* Mode toggle tabs */}
-                <div style={{
-                  display: 'flex', marginBottom: isMobile ? 6 : 8,
-                  borderBottom: `1px solid ${P.border}`,
-                  paddingBottom: 0,
-                }}>
-                  {[
-                    { id: 'url', label: isMobile ? 'URL' : 'Paste URL' },
-                    { id: 'upload', label: isMobile ? 'Upload' : 'Upload File' },
-                  ].map(({ id, label }) => {
-                    const active = inputMode === id;
-                    return (
-                      <button
-                        key={id}
-                        onClick={() => setInputMode(id)}
-                        style={{
-                          flex: 1, padding: isMobile ? '7px 0' : '8px 0',
-                          border: 'none', background: 'none',
-                          fontSize: isMobile ? 13 : 13, fontWeight: active ? 700 : 500,
-                          color: active ? P.accent : P.muted,
-                          borderBottom: active ? `2px solid ${P.accent}` : '2px solid transparent',
-                          cursor: 'pointer', transition: 'all 0.15s', marginBottom: -1,
-                        }}
-                        onMouseEnter={e => { if (!active) e.currentTarget.style.color = P.ink; }}
-                        onMouseLeave={e => { if (!active) e.currentTarget.style.color = P.muted; }}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
 
-                {/* URL mode */}
-                {inputMode === 'url' && (
-                  <div style={{ display: 'flex', gap: isMobile ? 6 : 8, flexDirection: isMobile ? 'column' : 'row' }}>
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: isMobile ? '11px 12px' : '16px 20px', minHeight: isMobile ? 44 : undefined, background: P.paper, borderRadius: isMobile ? 11 : 14, border: `1px solid ${P.border}` }}>
-                      {(() => {
-                        const platform = parseVideoUrl(videoUrl)?.platform;
-                        if (platform) return <PlatformIcon platform={platform} />;
-                        const flipStyle = {
-                          display: 'inline-flex', flexShrink: 0,
-                          animation: logoFlip === 'out'
-                            ? 'logoFlipOut 0.22s ease-in forwards'
-                            : logoFlip === 'in'
-                            ? 'logoFlipIn 0.22s ease-out forwards'
-                            : 'none',
-                        };
-                        return (
-                          <span style={flipStyle}>
-                            <PlatformIcon platform={activeLogo} />
-                          </span>
-                        );
-                      })()}
-                      <input
-                        ref={urlInputRef}
-                        type="text"
-                        value={videoUrl}
-                        onChange={e => setVideoUrl(e.target.value)}
-                        onFocus={handleInputFocus}
-                        onKeyDown={e => e.key === 'Enter' && !loading && getTranscript()}
-                        placeholder="Paste a YouTube, TikTok, Loom, Vimeo, Dailymotion URL…"
-                        style={{
-                          flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                          minHeight: isMobile ? 44 : undefined, fontSize: isMobile ? 16 : 17, color: P.ink,
-                        }}
-                      />
-                    </div>
+                {/* ── URL row ── */}
+                <div style={{ display: 'flex', gap: isMobile ? 8 : 10, flexDirection: isMobile ? 'column' : 'row' }}>
+                  <div style={{
+                    flex: 1, display: 'flex', alignItems: 'center', gap: 10,
+                    padding: isMobile ? '13px 14px' : '15px 18px',
+                    background: P.paper, borderRadius: isMobile ? 12 : 14,
+                    border: `1px solid ${P.border}`,
+                  }}>
                     {(() => {
-                      const _used = credits?.used ?? 0;
-                      const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
-                      const outOfCredits = _used >= _max;
-                      const btnDisabled = loading || outOfCredits;
-                      const btnBg = btnDisabled
-                        ? (outOfCredits ? 'rgba(220,38,38,0.1)' : 'rgba(60,140,255,0.5)')
-                        : P.accent;
-                      return (
-                        <button
-                          onClick={getTranscript}
-                          disabled={btnDisabled}
-                          style={{
-                            flexShrink: 0, padding: isMobile ? '9px 18px' : '0 28px', borderRadius: isMobile ? 11 : 14, border: 'none',
-                            minHeight: isMobile ? 44 : undefined,
-                            background: btnBg,
-                            color: outOfCredits ? P.error : 'white',
-                            fontSize: isMobile ? 14 : 16, fontWeight: 700, cursor: btnDisabled ? 'not-allowed' : 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, whiteSpace: 'nowrap',
-                            transition: 'background 0.15s',
-                            width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
-                          }}
-                          onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
-                        >
-                          {loading ? <SpinnerIcon /> : (
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={outOfCredits ? P.error : 'currentColor'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <polygon points="5 3 19 12 5 21 5 3"/>
-                            </svg>
-                          )}
-                          {loading ? 'Extracting…' : outOfCredits ? 'No Credits' : 'Extract'}
-                        </button>
-                      );
+                      const platform = parseVideoUrl(videoUrl)?.platform;
+                      if (platform) return <PlatformIcon platform={platform} />;
+                      const flipStyle = {
+                        display: 'inline-flex', flexShrink: 0,
+                        animation: logoFlip === 'out'
+                          ? 'logoFlipOut 0.22s ease-in forwards'
+                          : logoFlip === 'in'
+                          ? 'logoFlipIn 0.22s ease-out forwards'
+                          : 'none',
+                      };
+                      return <span style={flipStyle}><PlatformIcon platform={activeLogo} /></span>;
                     })()}
-                  </div>
-                )}
-
-                {/* Upload mode */}
-                {inputMode === 'upload' && (
-                  <div style={{ display: 'flex', gap: isMobile ? 6 : 8, flexDirection: isMobile ? 'column' : 'row' }}>
-                    {/* Hidden native file input */}
                     <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg,.opus,.flac,.mpeg,.mpga,.mov,.avi,.mkv,.wmv,.3gp,audio/*,video/*"
-                      style={{ display: 'none' }}
-                      onChange={e => {
-                        const f = e.target.files?.[0];
-                        if (f) setUploadFile(f);
-                        e.target.value = '';
+                      ref={urlInputRef}
+                      type="text"
+                      value={videoUrl}
+                      onChange={e => setVideoUrl(e.target.value)}
+                      onFocus={handleInputFocus}
+                      onKeyDown={e => e.key === 'Enter' && !loading && getTranscript()}
+                      placeholder="Paste a YouTube, TikTok, Loom, Vimeo, Dailymotion URL…"
+                      style={{
+                        flex: 1, border: 'none', background: 'transparent', outline: 'none',
+                        fontSize: isMobile ? 15 : 16, color: P.ink,
+                        minHeight: isMobile ? 24 : undefined,
                       }}
                     />
-
-                    {/* Drop zone */}
-                    <div
-                      onClick={() => !loading && fileInputRef.current?.click()}
-                      onDragOver={e => { e.preventDefault(); setUploadDragOver(true); }}
-                      onDragLeave={() => setUploadDragOver(false)}
-                      onDrop={e => {
-                        e.preventDefault(); setUploadDragOver(false);
-                        const f = e.dataTransfer.files?.[0];
-                        if (f) setUploadFile(f);
-                      }}
-                      style={{
-                        flex: 1, display: 'flex', alignItems: 'center', gap: 10,
-                        padding: isMobile ? '11px 12px' : '14px 18px',
-                        background: uploadDragOver ? 'rgba(60,140,255,0.06)' : P.paper,
-                        border: `1px ${uploadDragOver ? 'solid' : uploadFile ? 'solid' : 'dashed'} ${uploadDragOver ? P.accent : P.border}`,
-                        borderRadius: isMobile ? 11 : 14,
-                        cursor: loading ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.15s',
-                        minHeight: isMobile ? 44 : undefined,
-                      }}
-                    >
-                      {uploadFile ? (
-                        <>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                            <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                  </div>
+                  {(() => {
+                    const _used = credits?.used ?? 0;
+                    const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+                    const outOfCredits = _used >= _max;
+                    const btnDisabled = loading || outOfCredits;
+                    const btnBg = btnDisabled ? (outOfCredits ? 'rgba(220,38,38,0.1)' : 'rgba(60,140,255,0.5)') : P.accent;
+                    return (
+                      <button
+                        onClick={() => { setInputMode('url'); getTranscript(); }}
+                        disabled={btnDisabled}
+                        style={{
+                          flexShrink: 0, padding: isMobile ? '13px 20px' : '0 28px',
+                          borderRadius: isMobile ? 12 : 14, border: 'none',
+                          background: btnBg, color: outOfCredits ? P.error : 'white',
+                          fontSize: isMobile ? 15 : 16, fontWeight: 700,
+                          cursor: btnDisabled ? 'not-allowed' : 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                          whiteSpace: 'nowrap', transition: 'background 0.15s',
+                          width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
+                        }}
+                        onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
+                      >
+                        {loading && inputMode === 'url' ? <SpinnerIcon /> : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={outOfCredits ? P.error : 'currentColor'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
                           </svg>
-                          <span style={{ flex: 1, fontSize: isMobile ? 14 : 15, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {uploadFile.name}
+                        )}
+                        {loading && inputMode === 'url' ? 'Extracting…' : outOfCredits ? 'No Credits' : 'Extract'}
+                      </button>
+                    );
+                  })()}
+                </div>
+
+                {/* ── Divider ── */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ flex: 1, height: 1, background: P.border }} />
+                  <span style={{ fontSize: 11, color: P.muted, fontWeight: 500, whiteSpace: 'nowrap', userSelect: 'none' }}>
+                    or upload a file
+                  </span>
+                  <div style={{ flex: 1, height: 1, background: P.border }} />
+                </div>
+
+                {/* ── Upload zone ── */}
+                <div style={{ display: 'flex', gap: isMobile ? 8 : 10, flexDirection: isMobile ? 'column' : 'row' }}>
+                  {/* Hidden native file input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg,.opus,.flac,.mpeg,.mpga,.mov,.avi,.mkv,.wmv,.3gp,audio/*,video/*"
+                    style={{ display: 'none' }}
+                    onChange={e => {
+                      const f = e.target.files?.[0];
+                      if (f) setUploadFile(f);
+                      e.target.value = '';
+                    }}
+                  />
+
+                  {/* Drop zone */}
+                  <div
+                    onClick={() => !loading && fileInputRef.current?.click()}
+                    onDragOver={e => { e.preventDefault(); setUploadDragOver(true); }}
+                    onDragLeave={() => setUploadDragOver(false)}
+                    onDrop={e => {
+                      e.preventDefault(); setUploadDragOver(false);
+                      const f = e.dataTransfer.files?.[0];
+                      if (f) setUploadFile(f);
+                    }}
+                    style={{
+                      flex: 1, display: 'flex', alignItems: 'center', gap: 10,
+                      padding: isMobile ? '13px 14px' : '13px 18px',
+                      background: uploadDragOver ? 'rgba(60,140,255,0.05)' : P.paper,
+                      border: `1.5px dashed ${uploadDragOver ? P.accent : uploadFile ? P.accent : P.border}`,
+                      borderRadius: isMobile ? 12 : 14,
+                      cursor: loading ? 'default' : 'pointer',
+                      transition: 'border-color 0.15s, background 0.15s',
+                    }}
+                  >
+                    {uploadFile ? (
+                      <>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                          <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                        </svg>
+                        <span style={{ flex: 1, fontSize: 14, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>
+                          {uploadFile.name}
+                        </span>
+                        <span style={{ fontSize: 11, color: P.muted, flexShrink: 0 }}>
+                          {(uploadFile.size / (1024 * 1024)).toFixed(1)} MB
+                        </span>
+                        <button
+                          onClick={e => { e.stopPropagation(); setUploadFile(null); }}
+                          style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: P.muted, display: 'flex', alignItems: 'center', borderRadius: 6 }}
+                          onMouseEnter={e => e.currentTarget.style.color = P.ink}
+                          onMouseLeave={e => e.currentTarget.style.color = P.muted}
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                          </svg>
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                          <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <span style={{ fontSize: 14, color: P.muted }}>
+                          {isMobile ? 'Tap to choose a file' : 'Drop a file here, or click to browse'}
+                        </span>
+                        {!isMobile && (
+                          <span style={{ fontSize: 11, color: P.muted, marginLeft: 'auto', flexShrink: 0, opacity: 0.7 }}>
+                            mp4 · mov · mp3 · wav · max 500 MB
                           </span>
-                          <span style={{ fontSize: 11, color: P.muted, flexShrink: 0 }}>
-                            {(uploadFile.size / (1024 * 1024)).toFixed(1)} MB
-                          </span>
-                          <button
-                            onClick={e => { e.stopPropagation(); setUploadFile(null); }}
-                            style={{ flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: P.muted, display: 'flex', alignItems: 'center' }}
-                          >
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                            </svg>
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Transcribe button */}
+                  {(() => {
+                    const _used = credits?.used ?? 0;
+                    const _max  = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+                    const outOfCredits = _used >= _max;
+                    const btnDisabled  = loading || outOfCredits || !uploadFile;
+                    const btnBg = btnDisabled ? (outOfCredits ? 'rgba(220,38,38,0.1)' : `rgba(60,140,255,${uploadFile ? '0.5' : '0.28'})`) : P.accent;
+                    return (
+                      <button
+                        onClick={() => { setInputMode('upload'); getTranscriptFromUpload(uploadFile); }}
+                        disabled={btnDisabled}
+                        style={{
+                          flexShrink: 0, padding: isMobile ? '13px 20px' : '0 24px',
+                          borderRadius: isMobile ? 12 : 14, border: 'none',
+                          background: btnBg, color: outOfCredits ? P.error : 'white',
+                          fontSize: isMobile ? 15 : 15, fontWeight: 700,
+                          cursor: btnDisabled ? 'default' : 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                          whiteSpace: 'nowrap', transition: 'background 0.15s',
+                          width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
+                        }}
+                        onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
+                      >
+                        {loading && inputMode === 'upload' ? <SpinnerIcon /> : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke={outOfCredits ? P.error : 'currentColor'}
+                            strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                             <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                           </svg>
-                          <span style={{ fontSize: isMobile ? 14 : 15, color: P.muted }}>
-                            {isMobile ? 'Tap to choose a file' : 'Drop or click to choose a file'}
-                          </span>
-                          {!isMobile && (
-                            <span style={{ fontSize: 11, color: P.muted, marginLeft: 'auto', flexShrink: 0 }}>
-                              mp4 · mov · mp3 · wav + more · max 500 MB
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </div>
+                        )}
+                        {loading && inputMode === 'upload' ? 'Transcribing…' : outOfCredits ? 'No Credits' : 'Transcribe'}
+                      </button>
+                    );
+                  })()}
+                </div>
 
-                    {/* Transcribe button */}
-                    {(() => {
-                      const _used = credits?.used ?? 0;
-                      const _max  = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
-                      const outOfCredits = _used >= _max;
-                      const btnDisabled  = loading || outOfCredits || !uploadFile;
-                      const btnBg = btnDisabled
-                        ? (outOfCredits ? 'rgba(220,38,38,0.1)' : 'rgba(60,140,255,0.5)')
-                        : P.accent;
-                      return (
-                        <button
-                          onClick={() => getTranscriptFromUpload(uploadFile)}
-                          disabled={btnDisabled}
-                          style={{
-                            flexShrink: 0, padding: isMobile ? '9px 18px' : '0 24px',
-                            borderRadius: isMobile ? 11 : 14, border: 'none',
-                            minHeight: isMobile ? 44 : undefined,
-                            background: btnBg,
-                            color: outOfCredits ? P.error : 'white',
-                            fontSize: isMobile ? 14 : 15, fontWeight: 700,
-                            cursor: btnDisabled ? 'not-allowed' : 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                            whiteSpace: 'nowrap', transition: 'background 0.15s',
-                            width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
-                          }}
-                          onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
-                        >
-                          {loading ? <SpinnerIcon /> : (
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                              stroke={outOfCredits ? P.error : 'currentColor'}
-                              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                            </svg>
-                          )}
-                          {loading ? 'Transcribing…' : outOfCredits ? 'No Credits' : 'Transcribe'}
-                        </button>
-                      );
-                    })()}
-                  </div>
-                )}
-
-                {/* Mobile format hint for upload mode */}
-                {inputMode === 'upload' && isMobile && (
-                  <p style={{ margin: '6px 4px 0', fontSize: 11, color: P.muted, textAlign: 'center' }}>
-                    mp4 · mov · mp3 · wav · m4a + more · max 500 MB
+                {/* Mobile format hint */}
+                {isMobile && (
+                  <p style={{ margin: 0, fontSize: 11, color: P.muted, textAlign: 'center', opacity: 0.8 }}>
+                    mp4 · mov · mp3 · wav · m4a · max 500 MB
                   </p>
                 )}
               </div>

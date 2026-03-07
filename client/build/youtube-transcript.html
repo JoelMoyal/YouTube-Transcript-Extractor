@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube Transcript Extractor — Get Any Video's Full Text Free | ScribeSnap</title>
+    <meta name="description" content="Extract the full transcript from any YouTube video in seconds. Free YouTube to text tool — no login needed. Copy, search, and use AI to summarize any video instantly." />
+    <link rel="canonical" href="https://scribesnap.ai/youtube-transcript" />
+    <link rel="icon" href="/scribesnap_icon_wave.svg" type="image/svg+xml" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://scribesnap.ai/youtube-transcript" />
+    <meta property="og:title" content="YouTube Transcript Extractor — Get Any Video's Full Text Free" />
+    <meta property="og:description" content="Extract the full transcript from any YouTube video in seconds. Free, no login needed." />
+    <meta property="og:image" content="https://scribesnap.ai/logo.png" />
+    <meta property="og:site_name" content="ScribeSnap" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="YouTube Transcript Extractor — Free | ScribeSnap" />
+    <meta name="twitter:description" content="Get the full transcript from any YouTube video instantly. Free, no login required." />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      "name": "How to Get a YouTube Transcript",
+      "description": "Extract the full text transcript from any YouTube video using ScribeSnap.",
+      "step": [
+        { "@type": "HowToStep", "name": "Copy the YouTube URL", "text": "Find the YouTube video you want to transcribe and copy its URL from the address bar." },
+        { "@type": "HowToStep", "name": "Paste into ScribeSnap", "text": "Go to scribesnap.ai, paste the URL, and click Extract." },
+        { "@type": "HowToStep", "name": "Get your transcript", "text": "The full transcript appears in seconds. Copy it or use AI tools to summarize and study it." }
+      ]
+    }
+    </script>
+    <style>
+      :root {
+        --bg: #F6F2EA;
+        --surface: #FFFFFF;
+        --surface2: #FBF8F3;
+        --ink: #1D1D1F;
+        --muted: #6B7280;
+        --border: #E6E0D6;
+        --accent: #3C8CFF;
+        --accent-hover: #1F6BFF;
+        --accent-light: rgba(60,140,255,0.08);
+        --accent-glow: rgba(123,211,255,0.18);
+        --radius: 14px;
+        --radius-sm: 8px;
+      }
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ── Nav ── */
+      nav {
+        position: sticky; top: 0; z-index: 100;
+        background: rgba(246,242,234,0.88);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 0 24px;
+      }
+      .nav-inner {
+        max-width: 1000px; margin: 0 auto;
+        display: flex; align-items: center; justify-content: space-between;
+        height: 60px;
+      }
+      nav img { height: 36px; display: block; }
+      .nav-cta {
+        background: var(--accent); color: #fff;
+        padding: 8px 18px; border-radius: var(--radius-sm);
+        font-size: 14px; font-weight: 600; text-decoration: none;
+        transition: background 0.15s;
+      }
+      .nav-cta:hover { background: var(--accent-hover); }
+
+      /* ── Hero ── */
+      .hero {
+        background: radial-gradient(ellipse 80% 50% at 50% -10%, var(--accent-glow) 0%, transparent 70%);
+        padding: 72px 24px 64px;
+        text-align: center;
+      }
+      .hero-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--accent-light);
+        border: 1px solid rgba(60,140,255,0.2);
+        color: var(--accent-hover);
+        font-size: 12.5px; font-weight: 600;
+        padding: 5px 12px; border-radius: 999px;
+        margin-bottom: 20px;
+        letter-spacing: 0.01em;
+      }
+      .hero h1 {
+        font-size: clamp(32px, 5vw, 52px);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        color: var(--ink);
+        max-width: 700px;
+        margin: 0 auto 18px;
+      }
+      .hero h1 span { color: var(--accent); }
+      .hero p {
+        font-size: 17px; color: var(--muted);
+        max-width: 520px; margin: 0 auto 32px;
+        line-height: 1.6;
+      }
+      .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+      .btn-primary {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--accent); color: #fff;
+        padding: 13px 26px; border-radius: var(--radius-sm);
+        font-size: 15px; font-weight: 600; text-decoration: none;
+        transition: background 0.15s, transform 0.1s;
+        box-shadow: 0 4px 16px rgba(60,140,255,0.3);
+      }
+      .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+      .btn-secondary {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--surface); color: var(--ink);
+        padding: 13px 26px; border-radius: var(--radius-sm);
+        font-size: 15px; font-weight: 600; text-decoration: none;
+        border: 1px solid var(--border);
+        transition: border-color 0.15s, transform 0.1s;
+      }
+      .btn-secondary:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+      /* ── Sections ── */
+      section { padding: 64px 24px; }
+      .section-inner { max-width: 1000px; margin: 0 auto; }
+      .section-label {
+        font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--accent);
+        margin-bottom: 10px;
+      }
+      .section-title {
+        font-size: clamp(22px, 3vw, 30px);
+        font-weight: 700; letter-spacing: -0.02em;
+        color: var(--ink); margin-bottom: 10px;
+      }
+      .section-sub {
+        font-size: 15px; color: var(--muted);
+        max-width: 520px; margin-bottom: 40px;
+      }
+
+      /* ── Steps ── */
+      .steps { display: flex; flex-direction: column; gap: 0; }
+      .step {
+        display: flex; gap: 24px; align-items: flex-start;
+        padding: 28px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .step:last-child { border-bottom: none; }
+      .step-num {
+        flex-shrink: 0;
+        width: 40px; height: 40px;
+        border-radius: 50%;
+        background: var(--accent); color: #fff;
+        font-weight: 700; font-size: 16px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 12px rgba(60,140,255,0.3);
+      }
+      .step-content h3 {
+        font-size: 16px; font-weight: 700;
+        color: var(--ink); margin-bottom: 6px;
+      }
+      .step-content p { font-size: 14.5px; color: var(--muted); }
+
+      /* ── Feature grid ── */
+      .features { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 2px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      .feature {
+        background: var(--surface);
+        padding: 28px 24px;
+      }
+      .feature-icon {
+        font-size: 24px; margin-bottom: 12px; display: block;
+      }
+      .feature h3 {
+        font-size: 15px; font-weight: 700; color: var(--ink);
+        margin-bottom: 6px;
+      }
+      .feature p { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+
+      /* ── Use-cases ── */
+      .usecases-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+      }
+      .usecase {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 22px 20px;
+      }
+      .usecase-icon { font-size: 22px; margin-bottom: 10px; display: block; }
+      .usecase h3 { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+      .usecase p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+      /* ── FAQ ── */
+      .faq { background: var(--surface2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+      .faq-list { display: flex; flex-direction: column; gap: 0; }
+      .faq-item {
+        padding: 22px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .faq-item:last-child { border-bottom: none; }
+      .faq-item h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+      .faq-item p { font-size: 14px; color: var(--muted); }
+
+      /* ── CTA Banner ── */
+      .cta-banner {
+        background: var(--ink);
+        padding: 64px 24px;
+        text-align: center;
+      }
+      .cta-banner h2 {
+        font-size: clamp(22px, 3vw, 32px);
+        font-weight: 700; letter-spacing: -0.02em;
+        color: #fff; margin-bottom: 12px;
+      }
+      .cta-banner p { color: rgba(255,255,255,0.55); font-size: 15px; margin-bottom: 28px; }
+      .btn-white {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #fff; color: var(--ink);
+        padding: 13px 28px; border-radius: var(--radius-sm);
+        font-size: 15px; font-weight: 700; text-decoration: none;
+        transition: opacity 0.15s, transform 0.1s;
+      }
+      .btn-white:hover { opacity: 0.9; transform: translateY(-1px); }
+
+      /* ── Footer ── */
+      footer {
+        background: var(--bg);
+        border-top: 1px solid var(--border);
+        padding: 32px 24px;
+      }
+      .footer-inner {
+        max-width: 1000px; margin: 0 auto;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 16px;
+      }
+      footer img { height: 28px; }
+      .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+      .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; }
+      .footer-links a:hover { color: var(--accent); }
+      .footer-copy { font-size: 12px; color: var(--muted); width: 100%; text-align: center; margin-top: 8px; }
+
+      @media (max-width: 600px) {
+        .hero { padding: 52px 20px 48px; }
+        section { padding: 48px 20px; }
+        .footer-inner { justify-content: center; text-align: center; }
+        .footer-links { justify-content: center; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Nav -->
+    <nav>
+      <div class="nav-inner">
+        <a href="/" aria-label="ScribeSnap home">
+          <img src="/logo-wordmark.png" alt="ScribeSnap" />
+        </a>
+        <a href="/" class="nav-cta">Try it free &rarr;</a>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-badge">&#128196; Free YouTube Transcript Tool</div>
+      <h1>Extract Any <span>YouTube Transcript</span> in Seconds</h1>
+      <p>Paste a YouTube URL and get the full text transcript instantly — then summarize it, study it, or export it.</p>
+      <div class="hero-actions">
+        <a href="/" class="btn-primary">Extract a transcript &rarr;</a>
+        <a href="/youtube-summarizer" class="btn-secondary">AI Summarizer &darr;</a>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <section>
+      <div class="section-inner">
+        <div class="section-label">How it works</div>
+        <h2 class="section-title">Three steps to get your transcript</h2>
+        <p class="section-sub">No account needed. No extensions. Just paste and get.</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <h3>Copy the YouTube URL</h3>
+              <p>Open any YouTube video and copy the URL from your browser's address bar. Works with any public video that has captions — auto-generated or manual.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <h3>Paste into ScribeSnap</h3>
+              <p>Go to <a href="/" style="color:var(--accent)">scribesnap.ai</a>, paste the URL into the input box, and press Enter. ScribeSnap fetches the transcript in seconds.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <h3>Read, copy, or analyse</h3>
+              <p>Your full transcript is ready. Copy it to your clipboard, search within it, or use the AI tools to generate a summary, flashcards, or a study guide.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+      <div class="section-inner">
+        <div class="section-label">Features</div>
+        <h2 class="section-title">More than just a transcript</h2>
+        <p class="section-sub">Once you have the transcript, ScribeSnap's AI tools turn it into something useful.</p>
+        <div class="features-grid">
+          <div class="feature">
+            <span class="feature-icon">&#128196;</span>
+            <h3>Full Transcript</h3>
+            <p>Word-for-word text from the video, accurately extracted from YouTube's caption data.</p>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">&#129302;</span>
+            <h3>AI Summary</h3>
+            <p>A concise summary of the video's key points, generated by a large language model in seconds.</p>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">&#128218;</span>
+            <h3>Flashcards</h3>
+            <p>Auto-generated Q&amp;A flashcards for studying, reviewing, or preparing for exams.</p>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">&#128195;</span>
+            <h3>Chapter Breakdown</h3>
+            <p>Splits long videos into named, timestamped sections so you can jump to what matters.</p>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">&#128214;</span>
+            <h3>Study Guide</h3>
+            <p>Structured notes with key concepts, learning objectives, and review questions.</p>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">&#128269;</span>
+            <h3>Full-text Search</h3>
+            <p>Search within the transcript to find and jump to any moment in the video.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Who uses it -->
+    <section>
+      <div class="section-inner">
+        <div class="section-label">Use cases</div>
+        <h2 class="section-title">Who uses YouTube transcripts?</h2>
+        <p class="section-sub">Transcripts turn videos into documents you can actually work with.</p>
+        <div class="usecases-grid">
+          <div class="usecase">
+            <span class="usecase-icon">&#127979;</span>
+            <h3>Students</h3>
+            <p>Turn lecture recordings into notes and flashcards without re-watching the whole video.</p>
+          </div>
+          <div class="usecase">
+            <span class="usecase-icon">&#128300;</span>
+            <h3>Researchers</h3>
+            <p>Pull exact quotes from interviews, talks, and academic videos for citations and analysis.</p>
+          </div>
+          <div class="usecase">
+            <span class="usecase-icon">&#9997;&#65039;</span>
+            <h3>Content creators</h3>
+            <p>Repurpose video content into blog posts, newsletters, and social captions.</p>
+          </div>
+          <div class="usecase">
+            <span class="usecase-icon">&#128188;</span>
+            <h3>Professionals</h3>
+            <p>Summarize webinars and training videos and share the key points with your team.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+      <div class="section-inner">
+        <div class="section-label">FAQ</div>
+        <h2 class="section-title">Common questions</h2>
+        <div class="faq-list">
+          <div class="faq-item">
+            <h3>Is it free to use?</h3>
+            <p>Yes. Transcript extraction is free with no account required. AI features like summaries, flashcards, and study guides are available free with a ScribeSnap account.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Does it work on all YouTube videos?</h3>
+            <p>It works on any public YouTube video that has captions — either auto-generated by YouTube or manually uploaded by the creator. The vast majority of popular videos qualify.</p>
+          </div>
+          <div class="faq-item">
+            <h3>How accurate is the transcript?</h3>
+            <p>For videos with auto-generated captions, accuracy is typically 90–95% for clear English speech. Videos with manually added captions are effectively 100% accurate. For your own audio files, ScribeSnap uses OpenAI Whisper — one of the most accurate speech-to-text models available.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Can I get transcripts from Vimeo too?</h3>
+            <p>Yes — ScribeSnap supports YouTube and Vimeo. You can also upload your own audio or video file (mp3, mp4, wav, and more) for transcription.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Can I get a transcript from a private YouTube video?</h3>
+            <p>No. ScribeSnap can only access publicly available videos. Private or unlisted videos cannot be transcribed this way — but you can download the video and upload the file directly.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-banner">
+      <h2>Start extracting transcripts for free</h2>
+      <p>No sign-up needed. Paste a URL and get your transcript in seconds.</p>
+      <a href="/" class="btn-white">Open ScribeSnap &rarr;</a>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-inner">
+        <a href="/" aria-label="ScribeSnap home">
+          <img src="/logo-wordmark.png" alt="ScribeSnap" />
+        </a>
+        <div class="footer-links">
+          <a href="/">Home</a>
+          <a href="/youtube-summarizer">YouTube Summarizer</a>
+          <a href="/privacy">Privacy</a>
+        </div>
+      </div>
+      <p class="footer-copy">&copy; 2026 ScribeSnap. All rights reserved.</p>
+    </footer>
+
+  </body>
+</html>
