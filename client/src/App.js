@@ -1911,10 +1911,16 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         /* ── Responsive ── */
         @media (max-width: 900px) {
           .ds-sidebar { display: none; }
+          .ds-layout { display: block; min-height: auto; }
           .ds-overview-mobile { display: block; }
           .ds-overview-desktop { display: none; }
           .ds-mobile-header { position: static; top: auto; z-index: auto; }
-          .ds-main { padding: 16px 16px calc(106px + env(safe-area-inset-bottom, 0px)); overflow-x: hidden; }
+          .ds-main {
+            padding: 16px 16px calc(106px + env(safe-area-inset-bottom, 0px));
+            overflow-x: hidden;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: auto;
+          }
           .ds-overview-grid { grid-template-columns: 1fr; gap: 14px; }
           .ds-stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
           .ds-settings-grid { grid-template-columns: 1fr; gap: 12px; }
