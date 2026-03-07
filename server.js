@@ -1201,12 +1201,12 @@ app.get('/privacy', (_req, res) => {
   res.sendFile(path.join(__dirname, 'client/build', 'privacy.html'));
 });
 
-// SEO landing pages
+// SEO landing pages — served from client/public so they work before and after build
 app.get('/youtube-transcript', (_req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'youtube-transcript.html'));
+  res.sendFile(path.join(__dirname, 'client/public', 'youtube-transcript.html'));
 });
 app.get('/youtube-summarizer', (_req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build', 'youtube-summarizer.html'));
+  res.sendFile(path.join(__dirname, 'client/public', 'youtube-summarizer.html'));
 });
 
 // Unknown web routes get branded 404 page
