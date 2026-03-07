@@ -6806,13 +6806,28 @@ const App = () => {
             {/* Features */}
             {/* Capability cards */}
             <div style={{ maxWidth: 1500, margin: '0 auto', padding: isMobile ? '24px 16px 44px' : '96px 36px 68px' }}>
-              <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>
-                  How It Works
+              <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 52 }}>
+                <div style={{
+                  display: 'inline-block',
+                  fontSize: 11, fontWeight: 700, letterSpacing: '0.11em', textTransform: 'uppercase',
+                  color: P.accent, marginBottom: 18,
+                  padding: '5px 14px', borderRadius: 999,
+                  background: 'rgba(60,140,255,0.07)', border: '1px solid rgba(60,140,255,0.15)',
+                }}>
+                  What you get
                 </div>
-                <h2 style={{ margin: `${isMobile ? 30 : 72}px 0 0`, fontSize: isMobile ? 20 : 30, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
-                  Add once, then branch into every workflow
+                <h2 style={{
+                  margin: 0,
+                  fontSize: isMobile ? 'clamp(26px, 8vw, 34px)' : 'clamp(32px, 4vw, 46px)',
+                  fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.08,
+                  color: P.ink,
+                }}>
+                  One transcript.<br />
+                  <span style={{ color: P.accent }}>Every workflow.</span>
                 </h2>
+                <p style={{ margin: '16px auto 0', fontSize: 15, color: P.muted, lineHeight: 1.7, maxWidth: 420 }}>
+                  Extract once, then let AI branch it into anything you need — in seconds.
+                </p>
               </div>
               <div className="feature-workflow">
                 <div className="feature-flow-head">
