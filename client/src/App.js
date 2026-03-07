@@ -4185,6 +4185,9 @@ const App = () => {
     window.location.replace(target);
   }, []);
 
+  // Remove the SEO loading overlay once React has mounted
+  useEffect(() => { document.getElementById('app-loader')?.remove(); }, []);
+
   useEffect(() => {
     const handler = (e) => {
       if (downloadMenuRef.current && !downloadMenuRef.current.contains(e.target))
