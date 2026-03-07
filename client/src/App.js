@@ -6862,23 +6862,26 @@ const App = () => {
             </div>{/* end hero-grad */}
 
             {/* Features */}
-            {/* Capability cards */}
-            <div style={{ position: 'relative', overflow: 'hidden', maxWidth: 1500, margin: '0 auto', padding: isMobile ? '24px 16px 44px' : '96px 36px 68px' }}>
+            {/* Capability cards — full-width wrapper so cosmos isn't clipped */}
+            <div style={{ position: 'relative', overflow: 'hidden' }}>
 
-              {/* Feature section cosmos decorations */}
+              {/* Feature section cosmos decorations — spans full viewport width */}
               <div className="feat-cosmos" aria-hidden="true">
                 <div className="feat-orb-1" />
                 <div className="feat-orb-2" />
                 <div className="feat-orb-3" />
-                <span className="feat-star" style={{ top: '6%',   left: '5%',   width: 3, height: 3, opacity: 0.55, animationDuration: '3.1s', animationDelay: '-0.4s' }} />
-                <span className="feat-star" style={{ top: '10%',  right: '8%',  width: 4, height: 4, opacity: 0.60, animationDuration: '2.6s', animationDelay: '-1.2s' }} />
-                <span className="feat-star" style={{ top: '22%',  left: '2%',   width: 2, height: 2, opacity: 0.45, animationDuration: '4.0s', animationDelay: '-2.1s' }} />
-                <span className="feat-star" style={{ top: '18%',  right: '3%',  width: 3, height: 3, opacity: 0.50, animationDuration: '2.9s', animationDelay: '-0.7s' }} />
-                <span className="feat-star" style={{ bottom:'14%',left: '6%',   width: 4, height: 4, opacity: 0.52, animationDuration: '3.4s', animationDelay: '-1.8s' }} />
-                <span className="feat-star" style={{ bottom:'8%', right: '5%',  width: 3, height: 3, opacity: 0.55, animationDuration: '2.4s', animationDelay: '-0.9s' }} />
+                <span className="feat-star" style={{ top: '6%',   left: '3%',   width: 3, height: 3, opacity: 0.55, animationDuration: '3.1s', animationDelay: '-0.4s' }} />
+                <span className="feat-star" style={{ top: '10%',  right: '4%',  width: 4, height: 4, opacity: 0.60, animationDuration: '2.6s', animationDelay: '-1.2s' }} />
+                <span className="feat-star" style={{ top: '22%',  left: '1%',   width: 2, height: 2, opacity: 0.45, animationDuration: '4.0s', animationDelay: '-2.1s' }} />
+                <span className="feat-star" style={{ top: '18%',  right: '2%',  width: 3, height: 3, opacity: 0.50, animationDuration: '2.9s', animationDelay: '-0.7s' }} />
+                <span className="feat-star" style={{ bottom:'14%',left: '4%',   width: 4, height: 4, opacity: 0.52, animationDuration: '3.4s', animationDelay: '-1.8s' }} />
+                <span className="feat-star" style={{ bottom:'8%', right: '3%',  width: 3, height: 3, opacity: 0.55, animationDuration: '2.4s', animationDelay: '-0.9s' }} />
                 <span className="feat-star" style={{ top: '50%',  left: '1%',   width: 2, height: 2, opacity: 0.42, animationDuration: '3.7s', animationDelay: '-2.6s' }} />
-                <span className="feat-star" style={{ top: '55%',  right: '2%',  width: 4, height: 4, opacity: 0.48, animationDuration: '3.0s', animationDelay: '-1.4s' }} />
+                <span className="feat-star" style={{ top: '55%',  right: '1%',  width: 4, height: 4, opacity: 0.48, animationDuration: '3.0s', animationDelay: '-1.4s' }} />
               </div>
+
+              {/* Content constrained to maxWidth */}
+              <div style={{ position: 'relative', zIndex: 1, maxWidth: 1500, margin: '0 auto', padding: isMobile ? '24px 16px 44px' : '96px 36px 68px' }}>
               <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', marginBottom: isMobile ? 32 : 52 }}>
                 <div style={{
                   display: 'inline-block',
@@ -7287,9 +7290,10 @@ const App = () => {
                     {card.meta && <div className="feature-card-meta">{card.meta}</div>}
                   </div>
                 ))}
-              </div>
-            </div>
-            </div>
+              </div>{/* end feature-flow-branches */}
+              </div>{/* end feature-workflow */}
+              </div>{/* end maxWidth inner */}
+            </div>{/* end full-width wrapper */}
             {/* Testimonials */}
             <BlurFade delay={0.15} yOffset={20}>
             <div style={{ maxWidth: 820, margin: '0 auto', padding: isMobile ? '0 16px 48px' : '0 24px 64px' }}>
