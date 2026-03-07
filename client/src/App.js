@@ -6376,7 +6376,6 @@ const App = () => {
           background: P.ink, color: 'rgba(255,255,255,0.92)',
           fontSize: 13,
         }}>
-          <span style={{ fontSize: 15 }}>🚀</span>
           <span>
             Like this tool? Press{' '}
             <kbd style={{
@@ -6867,8 +6866,10 @@ const App = () => {
               backgroundImage: `
                 radial-gradient(ellipse 55% 40% at 92% 15%, rgba(100,80,255,0.10) 0%, transparent 70%),
                 radial-gradient(ellipse 45% 35% at 8%  85%, rgba(60,140,255,0.10) 0%, transparent 70%),
-                radial-gradient(ellipse 30% 25% at 50% 105%, rgba(80,60,200,0.07) 0%, transparent 60%)
+                radial-gradient(ellipse 30% 25% at 50% 105%, rgba(80,60,200,0.07) 0%, transparent 60%),
+                radial-gradient(circle, rgba(100,80,255,0.13) 1px, transparent 1px)
               `,
+              backgroundSize: 'auto, auto, auto, 28px 28px',
               maxWidth: 1500, margin: '0 auto', padding: isMobile ? '24px 16px 44px' : '64px 36px 68px',
             }}>
               <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 52 }}>
