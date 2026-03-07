@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube Video Summarizer — AI Summary in Seconds | ScribeSnap</title>
+    <meta name="description" content="Summarize any YouTube video with AI in seconds. Get the key points, main ideas, and takeaways without watching the whole video. Free YouTube summarizer tool." />
+    <link rel="canonical" href="https://scribesnap.ai/youtube-summarizer" />
+    <link rel="icon" href="/scribesnap_icon_wave.svg" type="image/svg+xml" />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://scribesnap.ai/youtube-summarizer" />
+    <meta property="og:title" content="YouTube Video Summarizer — AI Summary in Seconds | ScribeSnap" />
+    <meta property="og:description" content="Summarize any YouTube video with AI in seconds. Get the key points without watching the whole thing." />
+    <meta property="og:image" content="https://scribesnap.ai/logo.png" />
+    <meta property="og:site_name" content="ScribeSnap" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="YouTube Video Summarizer — Free AI Tool | ScribeSnap" />
+    <meta name="twitter:description" content="Get an AI-generated summary of any YouTube video in seconds. Free tool, no login needed." />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      "name": "How to Summarize a YouTube Video with AI",
+      "description": "Use ScribeSnap to get an AI-generated summary of any YouTube video in seconds.",
+      "step": [
+        { "@type": "HowToStep", "name": "Paste the YouTube URL", "text": "Copy the video URL from YouTube and paste it into ScribeSnap." },
+        { "@type": "HowToStep", "name": "Extract the transcript", "text": "ScribeSnap fetches the full transcript automatically." },
+        { "@type": "HowToStep", "name": "Generate an AI summary", "text": "Click the Summary button and get a concise AI-written overview of the video's key points." }
+      ]
+    }
+    </script>
+    <style>
+      :root {
+        --bg: #F6F2EA;
+        --surface: #FBF7F0;
+        --ink: #1D1D1F;
+        --muted: #5A5960;
+        --border: #E5DDCF;
+        --accent: #3C8CFF;
+        --accent2: #1F6BFF;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(ellipse 70% 45% at 50% -6%, rgba(123,211,255,0.18) 0%, rgba(123,211,255,0) 70%), var(--bg);
+      }
+      header {
+        padding: 24px 24px 0;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        max-width: 860px;
+        margin: 0 auto;
+      }
+      header img { height: 44px; }
+      main {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 12px 24px 64px;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 36px 36px 40px;
+        box-shadow: 0 12px 36px rgba(29,29,31,0.06);
+      }
+      h1 { margin: 0 0 10px; font-size: 32px; letter-spacing: -0.02em; line-height: 1.2; }
+      h2 { margin: 36px 0 12px; font-size: 20px; letter-spacing: -0.01em; }
+      h3 { margin: 20px 0 8px; font-size: 16px; }
+      p, li { color: var(--muted); font-size: 15px; line-height: 1.65; margin: 0 0 12px; }
+      ul, ol { padding-left: 20px; margin: 0 0 16px; }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { color: var(--accent2); }
+      .subtitle { color: var(--muted); font-size: 17px; line-height: 1.5; margin: 0 0 28px; }
+      .cta-btn {
+        display: inline-block;
+        background: var(--accent);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        padding: 12px 28px;
+        border-radius: 10px;
+        text-decoration: none;
+        margin: 4px 0 36px;
+        transition: background 0.15s;
+      }
+      .cta-btn:hover { background: var(--accent2); color: #fff; }
+      .steps { display: flex; flex-direction: column; gap: 16px; margin: 0 0 32px; }
+      .step {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px 20px;
+      }
+      .step-num {
+        flex-shrink: 0;
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .step-body h3 { margin: 0 0 4px; font-size: 15px; color: var(--ink); }
+      .step-body p { margin: 0; font-size: 14px; }
+      .use-cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 0 0 32px; }
+      .use-case {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+      }
+      .use-case h3 { margin: 0 0 6px; font-size: 14px; color: var(--ink); }
+      .use-case p { margin: 0; font-size: 13px; }
+      .faq-item { margin-bottom: 20px; }
+      .faq-item h3 { font-size: 15px; color: var(--ink); margin: 0 0 6px; }
+      .faq-item p { font-size: 14px; margin: 0; }
+      .divider { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+      .breadcrumb { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+      .breadcrumb a { color: var(--muted); }
+      .breadcrumb a:hover { color: var(--accent); }
+      .also-try { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+      .also-try p { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--ink); }
+      .also-try a { display: inline-block; margin-right: 12px; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="/" aria-label="Back to ScribeSnap">
+        <img src="/logo-wordmark.png" alt="ScribeSnap" />
+      </a>
+    </header>
+    <main>
+      <div class="card">
+        <nav class="breadcrumb">
+          <a href="/">Home</a> &rsaquo; YouTube Video Summarizer
+        </nav>
+
+        <h1>YouTube Video Summarizer</h1>
+        <p class="subtitle">Get a clear, concise AI summary of any YouTube video — without watching the whole thing.</p>
+        <a href="/" class="cta-btn">Summarize a Video Now &rarr;</a>
+
+        <h2>How to Summarize a YouTube Video</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>Paste the YouTube URL</h3>
+              <p>Copy any YouTube video URL and paste it into ScribeSnap. Works with lectures, podcasts, tutorials, interviews, and more.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>Extract the transcript</h3>
+              <p>ScribeSnap automatically fetches the full transcript. This takes just a few seconds.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>Get your AI summary</h3>
+              <p>Click <strong>Summary</strong> in the Insights panel. The AI reads the transcript and returns a structured overview of the video's key points.</p>
+            </div>
+          </div>
+        </div>
+
+        <h2>Who Uses the YouTube Summarizer</h2>
+        <div class="use-cases">
+          <div class="use-case">
+            <h3>Students</h3>
+            <p>Summarize long lecture recordings before exams. Get the key concepts without re-watching hours of video.</p>
+          </div>
+          <div class="use-case">
+            <h3>Researchers</h3>
+            <p>Quickly assess whether a talk or interview contains relevant information before diving in.</p>
+          </div>
+          <div class="use-case">
+            <h3>Professionals</h3>
+            <p>Summarize webinars, training videos, and conference talks to share takeaways with your team.</p>
+          </div>
+          <div class="use-case">
+            <h3>Content Creators</h3>
+            <p>Turn video content into blog posts, newsletters, and social captions using the AI summary as a starting point.</p>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <h2>More Than Just a Summary</h2>
+        <p>ScribeSnap goes further than a basic YouTube summarizer. After extracting the transcript, you can also:</p>
+        <ul>
+          <li><strong>Q&amp;A Flashcards</strong> — generate study flashcards from the video content for revision and memorization</li>
+          <li><strong>Chapter Breakdown</strong> — split the video into labeled sections so you can jump to what matters</li>
+          <li><strong>Study Guide</strong> — get a structured document with key concepts, objectives, and review questions</li>
+          <li><strong>Full Transcript</strong> — read the complete word-for-word text and search within it</li>
+        </ul>
+
+        <hr class="divider" />
+
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+          <h3>How long does it take to summarize a YouTube video?</h3>
+          <p>Typically 10–30 seconds from paste to summary, depending on video length. A 1-hour lecture takes about 20 seconds to fully process.</p>
+        </div>
+        <div class="faq-item">
+          <h3>How accurate is the AI summary?</h3>
+          <p>ScribeSnap's AI reads the full transcript — not just a clip — so it captures the complete context of the video. Summaries are concise and accurate for most spoken content.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Does it work with long videos?</h3>
+          <p>Yes. ScribeSnap handles videos of any length, from 2-minute clips to 3-hour lectures.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Is it free?</h3>
+          <p>Yes. AI summaries are available free with a ScribeSnap account. No credit card required.</p>
+        </div>
+        <div class="faq-item">
+          <h3>Does it work with Vimeo and uploaded files?</h3>
+          <p>Yes — ScribeSnap supports YouTube, Vimeo, and direct audio/video file uploads (mp4, mp3, wav, and more).</p>
+        </div>
+
+        <hr class="divider" />
+
+        <div class="also-try">
+          <p>Also useful:</p>
+          <a href="/youtube-transcript">YouTube Transcript Extractor</a>
+          <a href="/">ScribeSnap Home</a>
+        </div>
+
+        <p style="text-align:center; margin: 32px 0 0;">
+          <a href="/" class="cta-btn">Try ScribeSnap Free &rarr;</a>
+        </p>
+      </div>
+    </main>
+  </body>
+</html>
