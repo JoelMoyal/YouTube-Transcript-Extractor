@@ -6681,17 +6681,17 @@ const App = () => {
                   </p>
                 )}
 
-                {/* ── Tab control ── */}
-                <div style={{ display: 'flex', borderTop: `1px solid ${P.border}`, marginTop: 2 }}>
+                {/* ── Ghost chip toggle ── */}
+                <div style={{ display: 'flex', gap: 6 }}>
                   {[
                     {
                       id: 'url',
-                      icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+                      icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
                       label: 'Paste URL',
                     },
                     {
                       id: 'upload',
-                      icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+                      icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
                       label: isMobile ? 'Upload' : 'Upload File',
                     },
                   ].map(({ id, icon, label }) => {
@@ -6701,18 +6701,18 @@ const App = () => {
                         key={id}
                         onClick={() => setInputMode(id)}
                         style={{
-                          display: 'flex', alignItems: 'center', gap: 6,
-                          padding: isMobile ? '8px 12px' : '9px 16px',
-                          background: 'transparent', border: 'none',
-                          borderTop: active ? `2px solid ${P.accent}` : '2px solid transparent',
-                          marginTop: '-1px',
-                          color: active ? P.ink : P.muted,
-                          fontSize: 13, fontWeight: active ? 600 : 400,
-                          cursor: 'pointer', transition: 'color 0.15s',
+                          display: 'flex', alignItems: 'center', gap: 5,
+                          padding: '5px 11px',
+                          borderRadius: 7,
+                          border: active ? '1px solid rgba(60,140,255,0.22)' : '1px solid transparent',
+                          background: active ? 'rgba(60,140,255,0.08)' : 'transparent',
+                          color: active ? P.accent : P.muted,
+                          fontSize: 12.5, fontWeight: active ? 600 : 400,
+                          cursor: 'pointer', transition: 'all 0.15s',
                           whiteSpace: 'nowrap',
                         }}
-                        onMouseEnter={e => { if (!active) e.currentTarget.style.color = P.ink; }}
-                        onMouseLeave={e => { if (!active) e.currentTarget.style.color = P.muted; }}
+                        onMouseEnter={e => { if (!active) { e.currentTarget.style.background = 'rgba(29,29,31,0.04)'; e.currentTarget.style.color = P.ink; } }}
+                        onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; } }}
                       >
                         {icon}{label}
                       </button>
