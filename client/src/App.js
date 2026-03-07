@@ -2,6 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 import { supabase } from './supabase';
 import ReactGA from 'react-ga4';
+import { BorderBeam } from './components/BorderBeam';
+import { AnimatedGradientText } from './components/AnimatedGradientText';
+import { ShimmerButton } from './components/ShimmerButton';
+import { BlurFade } from './components/BlurFade';
 
 ReactGA.initialize('G-34EYP3ZVZQ');
 ReactGA.send({ hitType: 'pageview', page: window.location.pathname });
@@ -5521,683 +5525,62 @@ const App = () => {
           position: relative;
           z-index: 1;
         }
-        .hero-cosmos {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          z-index: 0;
-          opacity: 1;
+
+        /* ── Feature grid ─────────────────────────────────────────────────── */
+        @keyframes cardEntrance { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        .feature-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+          margin-top: 40px;
         }
-        .hero-cosmos-planet {
-          position: absolute;
-          border-radius: 50%;
-          opacity: 0.72;
-          animation: planetFloat 14s ease-in-out infinite;
-        }
-        .hero-cosmos-planet.planet-left {
-          width: 208px;
-          height: 208px;
-          left: 28px;
-          top: 72px;
-          background: radial-gradient(circle at 33% 28%, rgba(255,255,255,0.72) 0%, rgba(186,205,234,0.56) 36%, rgba(132,154,195,0.34) 66%, rgba(132,154,195,0) 100%);
-          border: 1px solid rgba(137,165,209,0.34);
-          box-shadow: 0 0 78px rgba(132,154,195,0.28);
-          animation-delay: -2.1s;
-        }
-        .hero-cosmos-planet.planet-right {
-          width: 164px;
-          height: 164px;
-          right: 42px;
-          top: 138px;
-          background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.7) 0%, rgba(195,214,238,0.52) 38%, rgba(144,167,205,0.32) 68%, rgba(144,167,205,0) 100%);
-          border: 1px solid rgba(144,167,205,0.3);
-          box-shadow: 0 0 70px rgba(144,167,205,0.24);
-          animation-delay: -6.5s;
-        }
-        .hero-cosmos-orb {
-          position: absolute;
-          border-radius: 50%;
-          background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.68) 0%, rgba(189,210,239,0.38) 62%, rgba(189,210,239,0) 100%);
-          opacity: 0.5;
-          animation: planetFloat 11s ease-in-out infinite;
-        }
-        .hero-cosmos-orb.orb-left {
-          width: 56px;
-          height: 56px;
-          left: 96px;
-          top: 304px;
-          animation-delay: -3.2s;
-        }
-        .hero-cosmos-orb.orb-right {
-          width: 40px;
-          height: 40px;
-          right: 136px;
-          top: 114px;
-          animation-delay: -7.1s;
-        }
-        .hero-cosmos-star {
-          position: absolute;
-          width: 3.2px;
-          height: 3.2px;
-          border-radius: 999px;
-          background: rgba(88,134,206,0.96);
-          box-shadow: 0 0 18px rgba(88,134,206,0.6), 0 0 4px rgba(255,255,255,0.72);
-          animation: starTwinkle 4.8s ease-in-out infinite;
-          opacity: 0.82;
-        }
-        .hero-cosmos-star.star-1 { left: 4.6%; top: 17%; animation-delay: -0.8s; }
-        .hero-cosmos-star.star-2 { left: 10.4%; top: 26%; animation-delay: -2.2s; }
-        .hero-cosmos-star.star-3 { left: 6.4%; top: 39%; animation-delay: -1.3s; }
-        .hero-cosmos-star.star-4 { left: 18.2%; top: 21%; animation-delay: -3.6s; }
-        .hero-cosmos-star.star-5 { right: 5.3%; top: 20%; animation-delay: -2.9s; }
-        .hero-cosmos-star.star-6 { right: 11.3%; top: 30%; animation-delay: -1.7s; }
-        .hero-cosmos-star.star-7 { right: 7.5%; top: 42%; animation-delay: -4.1s; }
-        .hero-cosmos-star.star-8 { right: 18%; top: 24%; animation-delay: -0.4s; }
-        .hero-cosmos-star.star-9 { left: 24%; top: 12%; width: 2.2px; height: 2.2px; animation-delay: -3s; opacity: 0.55; }
-        .hero-cosmos-star.star-10 { right: 26%; top: 14%; width: 2.2px; height: 2.2px; animation-delay: -2.4s; opacity: 0.55; }
-        .hero-cosmos-star.star-11 { left: 30%; top: 31%; animation-delay: -1.1s; opacity: 0.5; }
-        .hero-cosmos-star.star-12 { right: 31%; top: 35%; animation-delay: -3.3s; opacity: 0.5; }
-        .hero-cosmos-star.star-13 { left: 26%; top: 44%; width: 1.7px; height: 1.7px; animation-delay: -2.6s; opacity: 0.36; }
-        .hero-cosmos-star.star-14 { right: 28%; top: 46%; width: 1.7px; height: 1.7px; animation-delay: -0.9s; opacity: 0.36; }
-        .hero-cosmos-star.star-15 { left: 36%; top: 24%; width: 2.1px; height: 2.1px; animation-delay: -1.9s; opacity: 0.5; }
-        .hero-cosmos-star.star-16 { right: 36%; top: 28%; width: 2.1px; height: 2.1px; animation-delay: -2.8s; opacity: 0.5; }
-        .feature-workflow {
-          position: relative;
+        .feature-grid-card {
+          background: #FFFFFF;
+          border: 1px solid #E6E0D6;
+          border-radius: 18px;
+          padding: 28px 24px 26px;
           display: flex;
           flex-direction: column;
-          gap: 28px;
+          gap: 14px;
+          transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+          cursor: default;
         }
-        .feature-flow-head {
-          position: relative;
+        .feature-grid-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 16px 40px rgba(29,29,31,0.08);
+          border-color: rgba(60,140,255,0.2);
+        }
+        .feature-grid-icon {
+          width: 46px;
+          height: 46px;
+          border-radius: 13px;
           display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 6px;
-          padding-bottom: 2px;
-        }
-        .feature-flow-node {
-          min-width: 206px;
-          min-height: 36px;
-          padding: 0 6px;
-          border: none;
-          background: transparent;
-          display: inline-flex;
           align-items: center;
           justify-content: center;
-          color: ${P.ink};
-          font-size: 16px;
-          font-weight: 800;
+          flex-shrink: 0;
+        }
+        .feature-grid-title {
+          font-size: 15px;
+          font-weight: 700;
+          color: #1D1D1F;
           letter-spacing: -0.01em;
-          box-shadow: none;
-        }
-        .feature-flow-node.input {
-          color: rgba(29,29,31,0.84);
-        }
-        .feature-flow-arrow {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 22px;
-          height: 18px;
-          color: rgba(29,29,31,0.44);
-          font-size: 13px;
-          line-height: 1;
-        }
-        .feature-flow-node.transcript {
-          min-width: 350px;
-          min-height: 72px;
-          height: auto;
-          padding: 0;
-        }
-        .feature-flow-transcript-preview {
-          width: 100%;
-          border-radius: 10px;
-          border: 1px solid rgba(84,104,168,0.12);
-          background: rgba(255,255,255,0.62);
-          padding: 7px 7px 6px;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-        .feature-flow-transcript-title {
-          font-size: 7.2px;
-          line-height: 1;
-          font-weight: 800;
-          letter-spacing: 0.05em;
-          text-transform: uppercase;
-          color: #40548A;
-          opacity: 0.8;
-          font-family: ui-monospace,monospace;
-        }
-        .feature-flow-transcript-preview .feature-mock-ts-row {
-          gap: 4px;
-        }
-        .feature-flow-transcript-preview .feature-mock-ts-badge {
-          font-size: 6.8px;
-          opacity: 0.78;
-        }
-        .feature-flow-transcript-preview .feature-mock-line {
-          height: 7px;
-          border-radius: 4px;
-        }
-        .feature-flow-branches {
-          position: relative;
-          display: grid;
-          grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: 30px;
-          padding-top: 12px;
-        }
-        .feature-flow-branches::before {
-          content: none;
-        }
-        .feature-card {
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          padding: 6px 0;
-          border: none;
-          background: transparent;
-          box-shadow: none;
-          isolation: isolate;
-          transition: transform 0.18s ease;
-        }
-        .feature-card::before {
-          content: none;
-        }
-        .feature-card:hover {
-          transform: translateY(-2px);
-        }
-        .feature-card-top {
-          position: relative;
-          z-index: 1;
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-        }
-        .feature-card-num {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          min-width: 30px;
-          height: 20px;
-          padding: 0 7px;
-          border-radius: 999px;
-          background: var(--card-gradient);
-          color: #fff;
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.07em;
-          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-          box-shadow: 0 4px 10px rgba(29,29,31,0.14);
-        }
-        .feature-card-icon {
-          width: 34px;
-          height: 34px;
-          border-radius: 10px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--card-accent);
-          background: rgba(255,255,255,0.9);
-          border: 1px solid var(--card-pill-border);
-          box-shadow: 0 2px 8px rgba(29,29,31,0.07);
-          animation: iconPulse 3.6s ease-in-out infinite;
-          animation-delay: calc(var(--card-index) * 0.24s);
-        }
-        .feature-card-label {
-          position: relative;
-          z-index: 1;
           margin: 0;
-          font-size: 20px;
           line-height: 1.25;
-          font-weight: 800;
-          letter-spacing: -0.02em;
-          color: ${P.ink};
         }
-        .feature-card-desc {
-          position: relative;
-          z-index: 1;
+        .feature-grid-desc {
+          font-size: 13.5px;
+          color: #8B8F97;
+          line-height: 1.65;
           margin: 0;
-          font-size: 14px;
-          line-height: 1.55;
-          color: ${P.muted};
-        }
-        .feature-card-visual {
-          position: relative;
-          z-index: 1;
-          margin: 0 0 6px;
-          padding: 11px;
-          border-radius: 14px;
-          background: rgba(255,255,255,0.52);
-          border: 1px solid rgba(29,29,31,0.08);
-          display: flex;
-          flex-direction: column;
-          gap: 9px;
-        }
-        .feature-mock-shell {
-          border-radius: 12px;
-          border: 1px solid rgba(29,29,31,0.12);
-          background: rgba(255,255,255,0.96);
-          overflow: hidden;
-          box-shadow: 0 2px 6px rgba(29,29,31,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
-        }
-        .feature-mock-topbar {
-          height: 24px;
-          padding: 0 8px;
-          border-bottom: 1px solid rgba(29,29,31,0.09);
-          background: linear-gradient(180deg, rgba(29,29,31,0.045) 0%, rgba(29,29,31,0.02) 100%);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .feature-mock-dots {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-        }
-        .feature-mock-dot {
-          width: 5px;
-          height: 5px;
-          border-radius: 999px;
-          background: rgba(29,29,31,0.3);
-        }
-        .feature-mock-chip {
-          border: 1px solid var(--card-pill-border);
-          background: rgba(255,255,255,0.88);
-          color: var(--card-accent);
-          border-radius: 999px;
-          font-size: 9.5px;
-          font-weight: 700;
-          letter-spacing: 0.03em;
-          text-transform: uppercase;
-          padding: 2px 7px;
-          line-height: 1;
-        }
-        .feature-mock-body {
-          min-height: 100px;
-          padding: 9px;
-          display: flex;
-          gap: 9px;
-        }
-        .feature-mock-timeline {
-          width: 16px;
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-          padding-top: 3px;
-        }
-        .feature-mock-timeline-bar {
-          height: 7px;
-          border-radius: 999px;
-          background: rgba(29,29,31,0.13);
-        }
-        .feature-mock-timeline-bar.active {
-          background: var(--card-accent);
-          opacity: 0.85;
-        }
-        .feature-mock-lines {
           flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
         }
-        .feature-mock-line {
-          height: 7px;
-          border-radius: 4px;
-          background: rgba(29,29,31,0.11);
+        @media (max-width: 880px) {
+          .feature-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
         }
-        .feature-mock-line.active {
-          background: linear-gradient(90deg, rgba(123,211,255,0.28) 0%, rgba(255,255,255,0.88) 100%);
-          border: 1px solid var(--card-pill-border);
-          height: 8px;
+        @media (max-width: 520px) {
+          .feature-grid { grid-template-columns: 1fr; gap: 10px; }
+          .feature-grid-card { padding: 22px 18px; border-radius: 14px; }
         }
-        .feature-mock-tools-nav {
-          width: 56px;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-        .feature-mock-tools-tab {
-          height: 11px;
-          border-radius: 4px;
-          background: rgba(29,29,31,0.12);
-        }
-        .feature-mock-tools-tab.active {
-          background: var(--card-accent);
-          opacity: 0.8;
-        }
-        .feature-mock-tools-main {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
-        .feature-mock-title {
-          height: 8px;
-          width: 66%;
-          border-radius: 4px;
-          background: rgba(29,29,31,0.2);
-        }
-        .feature-mock-bullet {
-          height: 6px;
-          border-radius: 4px;
-          background: rgba(29,29,31,0.11);
-        }
-        .feature-mock-summary-stack {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
-        .feature-mock-summary-text {
-          flex: 1;
-          min-width: 0;
-          font-size: 7.2px;
-          line-height: 1.35;
-          color: rgba(29,29,31,0.58);
-          letter-spacing: 0.01em;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        .feature-mock-summary-metrics {
-          display: flex;
-          gap: 4px;
-          margin-top: 2px;
-          flex-wrap: wrap;
-        }
-        .feature-mock-summary-metric {
-          height: 13px;
-          padding: 0 5px;
-          border-radius: 999px;
-          border: 1px solid var(--card-pill-border);
-          background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, var(--card-pill-bg) 100%);
-          color: var(--card-accent);
-          font-size: 6.8px;
-          font-weight: 700;
-          letter-spacing: 0.02em;
-          display: inline-flex;
-          align-items: center;
-          line-height: 1;
-        }
-        .feature-mock-mini-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 4px;
-          margin-top: auto;
-        }
-        .feature-mock-mini-card {
-          height: 17px;
-          border-radius: 5px;
-          background: var(--card-pill-bg);
-          border: 1px solid var(--card-pill-border);
-        }
-        .feature-mock-chat {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
-        .feature-mock-bubble {
-          height: 15px;
-          border-radius: 8px;
-        }
-        .feature-mock-bubble.question {
-          width: 63%;
-          background: rgba(29,29,31,0.11);
-        }
-        .feature-mock-bubble.answer {
-          width: 78%;
-          align-self: flex-end;
-          background: var(--card-pill-bg);
-          border: 1px solid var(--card-pill-border);
-        }
-        .feature-mock-source-row {
-          display: flex;
-          gap: 4px;
-          margin-top: 1px;
-        }
-        .feature-mock-source {
-          width: 22px;
-          height: 8px;
-          border-radius: 4px;
-          border: 1px solid var(--card-pill-border);
-          background: rgba(255,255,255,0.9);
-        }
-        .feature-mock-meter {
-          margin-top: 2px;
-          height: 5px;
-          border-radius: 999px;
-          background: rgba(29,29,31,0.1);
-          overflow: hidden;
-        }
-        .feature-mock-meter-fill {
-          width: 76%;
-          height: 100%;
-          border-radius: 999px;
-          background: linear-gradient(90deg, #7BD3FF 0%, var(--card-accent) 58%, #1F6BFF 100%);
-        }
-        .feature-mock-kpi-row {
-          display: flex;
-          gap: 4px;
-          margin-top: auto;
-        }
-        .feature-mock-kpi {
-          height: 13px;
-          border-radius: 5px;
-          border: 1px solid var(--card-pill-border);
-          background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, var(--card-pill-bg) 100%);
-        }
-        .feature-mock-refs {
-          display: flex;
-          gap: 4px;
-          margin-top: auto;
-          flex-wrap: wrap;
-        }
-        .feature-mock-ref {
-          height: 11px;
-          border-radius: 999px;
-          border: 1px solid var(--card-pill-border);
-          background: rgba(255,255,255,0.92);
-        }
-        .feature-card-tags {
-          position: relative;
-          z-index: 1;
-          margin-top: 1px;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-        }
-        .feature-card-tag {
-          display: inline-flex;
-          align-items: center;
-          height: 21px;
-          padding: 0 9px;
-          border-radius: 999px;
-          border: 1px solid var(--card-pill-border);
-          background: rgba(255,255,255,0.74);
-          color: var(--card-accent);
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.025em;
-          line-height: 1;
-          white-space: nowrap;
-        }
-        .feature-card-meta {
-          position: relative;
-          z-index: 1;
-          margin-top: 0;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 10.5px;
-          font-weight: 700;
-          letter-spacing: 0.03em;
-          text-transform: uppercase;
-          color: var(--card-accent);
-        }
-        .feature-card-meta::before {
-          content: '';
-          width: 16px;
-          height: 2px;
-          border-radius: 999px;
-          background: var(--card-accent);
-          opacity: 0.72;
-        }
-        @media (max-width: 1220px) {
-          .feature-flow-branches {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 18px;
-          }
-          .feature-flow-branches::before {
-            left: 14%;
-            right: 14%;
-          }
-        }
-        @media (max-width: 1023px) {
-          .hero-cosmos {
-            display: none;
-          }
-        }
-        @media (max-width: 920px) {
-          .feature-flow-branches {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-          }
-          .feature-flow-branches::before {
-            left: 20%;
-            right: 20%;
-          }
-        }
-        @media (max-width: 740px) {
-          .feature-flow-head {
-            gap: 2px;
-            padding-bottom: 2px;
-          }
-          .feature-flow-head::after,
-          .feature-flow-branches::before,
-          .feature-card::before {
-            display: none;
-          }
-          .feature-flow-node {
-            min-width: 130px;
-            min-height: 28px;
-            font-size: 12.8px;
-          }
-          .feature-flow-node.transcript {
-            min-width: 100%;
-            min-height: 56px;
-            padding: 0;
-          }
-          .feature-flow-branches {
-            grid-template-columns: 1fr;
-            gap: 10px;
-            padding-top: 0;
-          }
-          .feature-flow-arrow {
-            width: 18px;
-            height: 14px;
-            font-size: 11px;
-          }
-          .feature-card-icon {
-            width: 26px;
-            height: 26px;
-            border-radius: 8px;
-          }
-          .feature-card-label { font-size: 16px; }
-          .feature-card-desc { font-size: 12px; }
-          .feature-card-tag { font-size: 9px; height: 18px; }
-          .feature-card-meta { font-size: 10px; }
-        }
-        @keyframes cursorBlink { 0%,100% { opacity:1; } 50% { opacity:0; } }
-        @keyframes shimmerSweep { 0% { background-position:110% center; } 100% { background-position:-110% center; } }
-        @keyframes bulletReveal { 0% { opacity:0.12; transform:translateX(-4px); } 18%,68% { opacity:1; transform:translateX(0); } 85%,100% { opacity:0.12; transform:translateX(0); } }
-        @keyframes cardFlip3D {
-          0% { transform:rotateY(0deg); }
-          14% { transform:rotateY(180deg); }
-          50% { transform:rotateY(180deg); }
-          64% { transform:rotateY(360deg); }
-          100% { transform:rotateY(360deg); }
-        }
-        @keyframes dotBounce { 0%,60%,100% { transform:translateY(0); opacity:0.35; } 30% { transform:translateY(-3px); opacity:0.85; } }
-        @keyframes chatTurnIn { 0% { opacity:0; transform:translateY(3px); } 100% { opacity:1; transform:translateY(0); } }
-        @keyframes iconPulse { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-2px); } }
-        @keyframes starTwinkle { 0%,100% { opacity:0.2; transform:scale(0.9); } 50% { opacity:0.62; transform:scale(1.15); } }
-        @keyframes planetFloat { 0%,100% { transform:translateY(0px); } 50% { transform:translateY(7px); } }
-        .feature-mock-url-bar { display:flex; align-items:center; gap:5px; height:20px; padding:0 7px; border-radius:5px; background:rgba(255,255,255,0.88); border:1px solid rgba(29,29,31,0.11); font-size:8px; color:rgba(29,29,31,0.42); font-family:ui-monospace,monospace; letter-spacing:0.01em; overflow:hidden; }
-        .feature-mock-cursor { width:1.5px; height:9px; background:var(--card-accent); border-radius:1px; flex-shrink:0; animation:cursorBlink 0.9s step-end infinite; }
-        .feature-mock-ts-row { display:flex; align-items:center; gap:5px; }
-        .feature-mock-ts-badge { font-size:7px; font-weight:700; color:var(--card-accent); font-family:ui-monospace,monospace; opacity:0.7; flex-shrink:0; white-space:nowrap; }
-        .feature-mock-line.shimmer { background:linear-gradient(90deg, rgba(29,29,31,0.09) 0%, rgba(29,29,31,0.09) 20%, rgba(255,255,255,0.88) 50%, rgba(29,29,31,0.09) 80%, rgba(29,29,31,0.09) 100%); background-size:300% 100%; animation:shimmerSweep 2s ease-in-out infinite; }
-        .feature-mock-bullet-row { display:flex; align-items:center; gap:5px; }
-        .feature-mock-bullet-dot { width:4px; height:4px; border-radius:50%; flex-shrink:0; background:var(--card-accent); opacity:0.7; }
-        .feature-mock-bullet-row.anim-1,
-        .feature-mock-bullet-row.anim-2,
-        .feature-mock-bullet-row.anim-3 { animation:none; opacity:1; transform:none; }
-        .feature-card.is-hovered .feature-mock-bullet-row.anim-1 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; }
-        .feature-card.is-hovered .feature-mock-bullet-row.anim-2 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:0.65s; }
-        .feature-card.is-hovered .feature-mock-bullet-row.anim-3 { animation:bulletReveal 3.6s ease-in-out infinite; animation-fill-mode:both; animation-delay:1.3s; }
-        .feature-mock-flip-scene { perspective:500px; height:58px; margin:2px 0; }
-        .feature-mock-flip-card { width:100%; height:100%; position:relative; transform-style:preserve-3d; animation:none; will-change:transform; }
-        .feature-card.is-hovered .feature-mock-flip-card { animation:cardFlip3D 3.1s cubic-bezier(0.26,0.78,0.24,1) infinite; }
-        .feature-mock-flip-front, .feature-mock-flip-back { position:absolute; inset:0; border-radius:8px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; padding:5px 7px; gap:2px; overflow:hidden; }
-        .feature-mock-flip-front { background:rgba(255,255,255,0.92); border:1px solid var(--card-pill-border); }
-        .feature-mock-flip-back { background:var(--card-pill-bg); border:1px solid var(--card-pill-border); transform:rotateY(180deg); }
-        .feature-mock-flip-label { font-size:6.2px; font-weight:800; color:var(--card-accent); text-transform:uppercase; letter-spacing:0.05em; font-family:ui-monospace,monospace; flex-shrink:0; opacity:0.9; }
-        .feature-mock-flip-topic { font-size:6.1px; font-weight:700; color:var(--card-accent); text-transform:uppercase; letter-spacing:0.04em; border:1px solid var(--card-pill-border); background:rgba(255,255,255,0.84); border-radius:999px; padding:1px 4px; line-height:1; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .feature-mock-flip-text { font-size:6.7px; line-height:1.28; color:rgba(29,29,31,0.72); letter-spacing:0.01em; max-width:100%; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-        .feature-mock-flip-line { height:6px; flex:1; border-radius:4px; background:rgba(29,29,31,0.12); }
-        .feature-mock-typing { display:flex; align-items:center; gap:3px; padding:5px 8px; background:rgba(255,255,255,0.88); border:1px solid rgba(29,29,31,0.1); border-radius:8px; align-self:flex-start; width:fit-content; margin-top:1px; }
-        .feature-mock-typing-dot { width:4px; height:4px; border-radius:50%; background:rgba(29,29,31,0.38); animation:dotBounce 1.1s ease-in-out infinite; }
-        .feature-mock-chat-panel { border:1px solid rgba(29,29,31,0.11); border-radius:9px; background:rgba(255,255,255,0.95); padding:6px; display:flex; flex-direction:column; gap:5px; }
-        .feature-mock-chat-head { display:flex; align-items:center; gap:5px; }
-        .feature-mock-chat-head-avatar { width:13px; height:13px; border-radius:4px; flex-shrink:0; border:1px solid rgba(60,140,255,0.2); background:linear-gradient(135deg, rgba(60,140,255,0.14) 0%, rgba(60,140,255,0.06) 100%); display:flex; align-items:center; justify-content:center; }
-        .feature-mock-chat-head-avatar img { width:8px; height:8px; display:block; }
-        .feature-mock-chat-head-lines { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
-        .feature-mock-chat-head-title { font-size:6.7px; font-weight:700; color:rgba(29,29,31,0.74); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .feature-mock-chat-head-sub { font-size:6px; color:rgba(29,29,31,0.52); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .feature-mock-chat-stream { display:flex; flex-direction:column; gap:3px; min-height:58px; }
-        .feature-mock-chat-row { display:flex; align-items:flex-start; gap:4px; }
-        .feature-mock-chat-row.user { justify-content:flex-end; }
-        .feature-mock-chat-avatar { width:12px; height:12px; border-radius:4px; flex-shrink:0; border:1px solid rgba(60,140,255,0.18); background:linear-gradient(135deg, rgba(60,140,255,0.14) 0%, rgba(60,140,255,0.06) 100%); display:flex; align-items:center; justify-content:center; }
-        .feature-mock-chat-avatar img { width:7px; height:7px; display:block; }
-        .feature-mock-chat-message { max-width:100%; border-radius:7px; padding:4px 6px; display:flex; flex-direction:column; gap:2px; font-size:6.8px; line-height:1.3; letter-spacing:0.01em; }
-        .feature-mock-chat-message.user { margin-left:auto; max-width:79%; background:linear-gradient(135deg, #5ba4f5 0%, #3C8CFF 100%); border:1px solid rgba(31,107,255,0.26); color:rgba(255,255,255,0.96); }
-        .feature-mock-chat-message.ai { max-width:88%; background:rgba(255,255,255,0.95); border:1px solid rgba(29,29,31,0.12); color:rgba(29,29,31,0.74); }
-        .feature-mock-chat-source { display:flex; align-items:center; gap:3px; font-size:5.8px; font-weight:700; color:rgba(29,29,31,0.48); text-transform:uppercase; letter-spacing:0.04em; }
-        .feature-mock-chat-timestamp { color:#1F6BFF; font-size:6.3px; font-weight:800; text-decoration:underline; text-underline-offset:1px; cursor:pointer; letter-spacing:0.01em; padding:0; border:none; background:none; line-height:1; font-family:inherit; }
-        .feature-mock-chat-turn { opacity:1; animation:none; }
-        .feature-card.is-hovered .feature-mock-chat-turn { opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
-        .feature-card.is-hovered .feature-mock-chat-turn.turn-1 { animation-delay:0.08s; }
-        .feature-card.is-hovered .feature-mock-chat-turn.turn-2 { animation-delay:0.86s; }
-        .feature-card.is-hovered .feature-mock-chat-turn.turn-3 { animation-delay:2.02s; }
-        .feature-card.is-hovered .feature-mock-chat-turn.turn-4 { animation-delay:2.84s; }
-        .feature-mock-chat-composer { display:flex; align-items:center; gap:4px; border:1px solid rgba(29,29,31,0.11); border-radius:7px; padding:2px 3px; background:#fff; }
-        .feature-mock-chat-input-text { flex:1; min-width:0; font-size:6.2px; color:rgba(29,29,31,0.42); line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .feature-mock-chat-send { width:8px; height:8px; border-radius:50%; background:var(--card-accent); opacity:0.88; flex-shrink:0; }
-        .feature-mock-guide-stack { display:flex; flex-direction:column; gap:4px; }
-        .feature-mock-guide-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; opacity:1; animation:none; }
-        .feature-card.is-hovered .feature-mock-guide-section { opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
-        .feature-card.is-hovered .feature-mock-guide-section.step-1 { animation-delay:0.08s; }
-        .feature-card.is-hovered .feature-mock-guide-section.step-2 { animation-delay:0.6s; }
-        .feature-card.is-hovered .feature-mock-guide-section.step-3 { animation-delay:1.12s; }
-        .feature-mock-guide-label { font-size:5.8px; font-weight:800; color:var(--card-accent); letter-spacing:0.05em; text-transform:uppercase; line-height:1; }
-        .feature-mock-guide-line { font-size:6.3px; color:rgba(29,29,31,0.68); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .feature-mock-guide-line.subtle { color:rgba(29,29,31,0.58); }
-        .feature-mock-academic-stack { display:flex; flex-direction:column; gap:4px; }
-        .feature-mock-academic-section { border:1px solid var(--card-pill-border); border-radius:7px; background:rgba(255,255,255,0.94); padding:4px 5px; display:flex; flex-direction:column; gap:2px; opacity:1; animation:none; }
-        .feature-card.is-hovered .feature-mock-academic-section { opacity:0; animation:chatTurnIn 0.55s cubic-bezier(0.22,0.74,0.2,1) both; }
-        .feature-card.is-hovered .feature-mock-academic-section.step-1 { animation-delay:0.08s; }
-        .feature-card.is-hovered .feature-mock-academic-section.step-2 { animation-delay:0.6s; }
-        .feature-card.is-hovered .feature-mock-academic-section.step-3 { animation-delay:1.12s; }
-        .feature-mock-academic-label { font-size:5.8px; font-weight:800; color:var(--card-accent); letter-spacing:0.05em; text-transform:uppercase; line-height:1; }
-        .feature-mock-academic-line { font-size:6.4px; color:rgba(29,29,31,0.68); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .feature-mock-academic-tags { display:flex; align-items:center; gap:3px; flex-wrap:wrap; }
-        .feature-mock-academic-tag { display:inline-flex; align-items:center; height:10px; padding:0 4px; border-radius:999px; border:1px solid var(--card-pill-border); background:var(--card-pill-bg); color:var(--card-accent); font-size:5.7px; font-weight:700; letter-spacing:0.02em; opacity:1; animation:none; }
-        .feature-card.is-hovered .feature-mock-academic-tag { opacity:0; animation:chatTurnIn 0.45s cubic-bezier(0.22,0.74,0.2,1) both; }
-        .feature-card.is-hovered .feature-mock-academic-tag.term-1 { animation-delay:1.22s; }
-        .feature-card.is-hovered .feature-mock-academic-tag.term-2 { animation-delay:1.34s; }
-        .feature-card.is-hovered .feature-mock-academic-tag.term-3 { animation-delay:1.46s; }
         .chip-btn { transition: all 0.15s; }
         .chip-btn:hover { border-color: ${P.accent} !important; color: ${P.accent} !important; background: rgba(60,140,255,0.06) !important; }
         @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
@@ -6377,41 +5760,18 @@ const App = () => {
             <div className="hero-grad" style={{
               paddingBottom: 56,
             }}>
-            <div className="hero-cosmos" aria-hidden="true">
-              <span className="hero-cosmos-planet planet-left" />
-              <span className="hero-cosmos-planet planet-right" />
-              <span className="hero-cosmos-orb orb-left" />
-              <span className="hero-cosmos-orb orb-right" />
-              <span className="hero-cosmos-star star-1" />
-              <span className="hero-cosmos-star star-2" />
-              <span className="hero-cosmos-star star-3" />
-              <span className="hero-cosmos-star star-4" />
-              <span className="hero-cosmos-star star-5" />
-              <span className="hero-cosmos-star star-6" />
-              <span className="hero-cosmos-star star-7" />
-              <span className="hero-cosmos-star star-8" />
-              <span className="hero-cosmos-star star-9" />
-              <span className="hero-cosmos-star star-10" />
-              <span className="hero-cosmos-star star-11" />
-              <span className="hero-cosmos-star star-12" />
-              <span className="hero-cosmos-star star-13" />
-              <span className="hero-cosmos-star star-14" />
-              <span className="hero-cosmos-star star-15" />
-              <span className="hero-cosmos-star star-16" />
-            </div>
+
             <div className="hero-inner" style={{
               maxWidth: 700, margin: '0 auto', padding: isMobile ? '32px 16px 24px' : '72px 24px 40px',
               textAlign: 'center',
             }}>
-              <div style={{
-                display: isMobile ? 'none' : 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '5px 14px', borderRadius: 999, marginBottom: 28,
-                background: 'rgba(60,140,255,0.08)', border: `1px solid rgba(60,140,255,0.18)`,
-                fontSize: 12, fontWeight: 600, color: P.accent,
-              }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, display: 'inline-block', animation: 'pulse 2s ease-in-out infinite' }} />
-                YouTube, Vimeo + more · Free · No account required
-              </div>
+              {!isMobile && (
+                <div style={{ marginBottom: 28 }}>
+                  <AnimatedGradientText>
+                    YouTube, Vimeo, TikTok + more · Free · No account required
+                  </AnimatedGradientText>
+                </div>
+              )}
 
               <h1 style={{
                 fontSize: isMobile ? 'clamp(34px, 11vw, 46px)' : 'clamp(38px, 6.5vw, 62px)', fontWeight: 800, color: P.ink,
@@ -6426,17 +5786,19 @@ const App = () => {
                   </svg>
                 </span>
               </h1>
-              <p style={{ fontSize: 16, color: P.muted, margin: '0 0 40px', lineHeight: 1.7, maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
-                Extract full transcripts from YouTube, Vimeo, TikTok, X, Instagram, Dailymotion, Facebook, Loom, Wistia, and more. Then summarize with AI, generate flashcards, ask questions, and build study guides — in seconds.
+              <p style={{ fontSize: 16, color: P.muted, margin: '0 0 40px', lineHeight: 1.75, maxWidth: 440, marginLeft: 'auto', marginRight: 'auto' }}>
+                Paste any video URL and get the full transcript in seconds. Then let AI summarize, quiz, and teach it to you.
               </p>
 
               {/* Input card */}
               <div style={{
+                position: 'relative', overflow: 'hidden',
                 background: P.surface, border: `1px solid ${P.border}`,
                 borderRadius: isMobile ? 18 : 22, boxShadow: '0 12px 56px rgba(29,29,31,0.13)',
                 padding: isMobile ? 14 : 16,
                 display: 'flex', flexDirection: 'column', gap: isMobile ? 10 : 12,
               }}>
+                <BorderBeam size={280} duration={10} colorFrom="rgba(60,140,255,0.7)" colorTo="rgba(123,211,255,0)" borderWidth={1.5} />
 
                 {/* ── Pill segmented control ── */}
                 <div>
@@ -6524,23 +5886,24 @@ const App = () => {
                     const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
                     const outOfCredits = _used >= _max;
                     const btnDisabled = loading || outOfCredits;
-                    const btnBg = btnDisabled ? (outOfCredits ? 'rgba(220,38,38,0.1)' : 'rgba(60,140,255,0.5)') : P.accent;
                     return (
-                      <button
+                      <ShimmerButton
                         onClick={() => { setInputMode('url'); getTranscript(); }}
                         disabled={btnDisabled}
+                        background={outOfCredits ? 'rgba(220,38,38,0.1)' : btnDisabled ? 'rgba(60,140,255,0.5)' : P.accent}
+                        hoverBackground={outOfCredits ? 'rgba(220,38,38,0.15)' : P.accentHover}
                         style={{
-                          flexShrink: 0, padding: isMobile ? '13px 20px' : '0 28px',
-                          borderRadius: isMobile ? 12 : 14, border: 'none',
-                          background: btnBg, color: outOfCredits ? P.error : 'white',
+                          flexShrink: 0,
+                          padding: isMobile ? '13px 20px' : '0 28px',
+                          borderRadius: isMobile ? 12 : 14,
+                          color: outOfCredits ? P.error : 'white',
                           fontSize: isMobile ? 15 : 16, fontWeight: 700,
                           cursor: btnDisabled ? 'not-allowed' : 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                          whiteSpace: 'nowrap', transition: 'background 0.15s',
-                          width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
+                          gap: 7, whiteSpace: 'nowrap',
+                          width: isMobile ? '100%' : undefined,
+                          minWidth: isMobile ? undefined : 148,
+                          height: isMobile ? undefined : 52,
                         }}
-                        onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
                       >
                         {loading && inputMode === 'url' ? <SpinnerIcon /> : (
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={outOfCredits ? P.error : 'currentColor'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -6548,7 +5911,7 @@ const App = () => {
                           </svg>
                         )}
                         {loading && inputMode === 'url' ? 'Extracting…' : outOfCredits ? 'No Credits' : 'Extract'}
-                      </button>
+                      </ShimmerButton>
                     );
                   })()}
                 </div>}
@@ -6771,16 +6134,13 @@ const App = () => {
                 </div>
               )}
 
-              {/* Feature highlights */}
-              <div style={{ marginTop: 18, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
-                {[
-                  { icon: '⚡', text: 'Instant extraction' },
-                  { icon: '🤖', text: 'AI-powered insights' },
-                  { icon: '📥', text: 'Export & download' },
-                ].map((p, i) => (
-                  <span key={p.text} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: P.muted }}>
-                    {i > 0 && <span style={{ marginRight: 6, opacity: 0.4 }}>·</span>}
-                    <span>{p.icon}</span>{p.text}
+              {/* Supported formats hint */}
+              <div style={{ marginTop: 14, display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', alignItems: 'center' }}>
+                {['Instant extraction', 'AI summaries', 'Flashcards', 'Study guides', 'Export'].map((item, i) => (
+                  <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: P.muted }}>
+                    {i > 0 && <span style={{ opacity: 0.3, marginRight: 2 }}>·</span>}
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: P.border, display: 'inline-block', flexShrink: 0 }} />
+                    {item}
                   </span>
                 ))}
               </div>
@@ -6819,407 +6179,100 @@ const App = () => {
             </div>
             </div>{/* end hero-grad */}
 
-            {/* Capability cards */}
-            <div style={{ maxWidth: 1500, margin: '0 auto', padding: isMobile ? '24px 16px 44px' : '96px 36px 68px' }}>
-              <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>
-                  How It Works
+            {/* Features */}
+            <BlurFade delay={0.1} yOffset={20}>
+            <div style={{ maxWidth: 1100, margin: '0 auto', padding: isMobile ? '48px 16px 56px' : '80px 36px 72px' }}>
+              <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 48 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: P.accent, marginBottom: 12 }}>
+                  What you get
                 </div>
-                <h2 style={{ margin: `${isMobile ? 30 : 72}px 0 0`, fontSize: isMobile ? 20 : 30, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em' }}>
-                  Add once, then branch into every workflow
+                <h2 style={{ margin: 0, fontSize: isMobile ? 24 : 34, fontWeight: 800, color: P.ink, letterSpacing: '-0.035em', lineHeight: 1.1 }}>
+                  One transcript.<br />
+                  <span style={{ color: P.accent }}>Every workflow.</span>
                 </h2>
+                <p style={{ margin: '14px auto 0', fontSize: 15, color: P.muted, lineHeight: 1.7, maxWidth: 460 }}>
+                  Extract once, then let AI branch it into anything you need — in seconds.
+                </p>
               </div>
-              <div className="feature-workflow">
-                <div className="feature-flow-head">
-                  <span className="feature-flow-node input">Add Video</span>
-                  <span className="feature-flow-arrow" aria-hidden="true">↓</span>
-                  <span className="feature-flow-node transcript">
-                    <span className="feature-flow-transcript-preview">
-                      <span className="feature-flow-transcript-title">Transcript</span>
-                      <span className="feature-mock-ts-row">
-                        <span className="feature-mock-ts-badge">0:12</span>
-                        <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0s' }} />
-                      </span>
-                      <span className="feature-mock-ts-row">
-                        <span className="feature-mock-ts-badge">0:38</span>
-                        <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0.22s' }} />
-                      </span>
-                      <span className="feature-mock-ts-row">
-                        <span className="feature-mock-ts-badge">1:04</span>
-                        <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0.44s' }} />
-                      </span>
-                    </span>
-                  </span>
-                </div>
-                <div className="feature-flow-branches">
+
+              <div className="feature-grid">
                 {[
                   {
-                    label: 'AI Summaries',
-                    desc: 'Create bullet point summaries and chapter breakdowns on demand from any transcript.',
-                    meta: '',
-                    tags: [],
-                    accent: '#8A6640',
-                    gradient: 'linear-gradient(100deg, #D4BC98 0%, #B09070 55%, #8A6640 100%)',
-                    bg: 'rgba(138,102,64,0.08)',
-                    panel: 'rgba(138,102,64,0.06)',
-                    panelBorder: 'rgba(138,102,64,0.15)',
-                    border: 'rgba(138,102,64,0.16)',
-                    pillBg: 'rgba(138,102,64,0.10)',
-                    pillBorder: 'rgba(138,102,64,0.18)',
-                    glow: 'rgba(180,140,90,0.22)',
-                    type: 'summaries',
                     icon: (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="7" y1="7" x2="17" y2="7"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="7" y1="17" x2="13" y2="17"/><circle cx="18" cy="17" r="2"/>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                       </svg>
                     ),
+                    color: P.accent, bg: 'rgba(60,140,255,0.1)',
+                    title: 'AI Summaries',
+                    desc: 'Bullet-point summaries and chapter breakdowns generated on demand from any transcript.',
                   },
                   {
-                    label: 'Flash Cards',
-                    desc: 'Generate smart Q&A flash cards with flip mode for active recall practice.',
-                    meta: '',
-                    tags: [],
-                    accent: '#3A7A6A',
-                    gradient: 'linear-gradient(100deg, #8EC8BC 0%, #5AA090 55%, #3A7A6A 100%)',
-                    bg: 'rgba(58,122,106,0.08)',
-                    panel: 'rgba(58,122,106,0.06)',
-                    panelBorder: 'rgba(58,122,106,0.15)',
-                    border: 'rgba(58,122,106,0.16)',
-                    pillBg: 'rgba(58,122,106,0.10)',
-                    pillBorder: 'rgba(58,122,106,0.18)',
-                    glow: 'rgba(58,122,106,0.22)',
-                    type: 'flashcards',
                     icon: (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                         <rect x="4" y="6" width="16" height="12" rx="2"/><path d="M9 10h6"/><path d="M8 14h8"/>
                       </svg>
                     ),
+                    color: P.warning, bg: 'rgba(180,83,9,0.1)',
+                    title: 'Flash Cards',
+                    desc: 'Smart Q&A cards with flip mode for active recall. Generate more with a single click.',
                   },
                   {
-                    label: 'Study Guide',
-                    desc: 'Create a structured study guide with overview, objectives, concepts, and review prompts.',
-                    meta: '',
-                    tags: [],
-                    accent: '#2E6F86',
-                    gradient: 'linear-gradient(100deg, #92C2D3 0%, #5A98AE 55%, #2E6F86 100%)',
-                    bg: 'rgba(46,111,134,0.08)',
-                    panel: 'rgba(46,111,134,0.06)',
-                    panelBorder: 'rgba(46,111,134,0.15)',
-                    border: 'rgba(46,111,134,0.16)',
-                    pillBg: 'rgba(46,111,134,0.10)',
-                    pillBorder: 'rgba(46,111,134,0.18)',
-                    glow: 'rgba(46,111,134,0.22)',
-                    type: 'study-guide',
                     icon: (
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                       </svg>
                     ),
+                    color: P.success, bg: 'rgba(15,118,110,0.1)',
+                    title: 'Study Guide',
+                    desc: 'Structured guide with objectives, key concepts, section breakdowns and review questions.',
                   },
                   {
-                    label: 'AI Chat Q&A',
-                    desc: 'Ask transcript-grounded questions, then drill into follow-ups with cited answers.',
-                    meta: '',
-                    tags: [],
-                    accent: '#6B4E90',
-                    gradient: 'linear-gradient(100deg, #C0A8DC 0%, #9070BC 55%, #6B4E90 100%)',
-                    bg: 'rgba(107,78,144,0.08)',
-                    panel: 'rgba(107,78,144,0.06)',
-                    panelBorder: 'rgba(107,78,144,0.15)',
-                    border: 'rgba(107,78,144,0.16)',
-                    pillBg: 'rgba(107,78,144,0.10)',
-                    pillBorder: 'rgba(107,78,144,0.18)',
-                    glow: 'rgba(107,78,144,0.22)',
-                    type: 'evidence',
                     icon: (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M8 7h12"/><path d="M8 12h12"/><path d="M8 17h8"/><circle cx="4" cy="7" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="17" r="1"/>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                       </svg>
                     ),
+                    color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
+                    title: 'AI Chat Q&A',
+                    desc: 'Ask any question about the video and get grounded, cited answers with timestamp references.',
                   },
                   {
-                    label: 'Academic',
-                    desc: 'Surface references, extract claims, and auto-build a glossary from transcript content.',
-                    meta: '',
-                    tags: [],
-                    accent: '#365A8B',
-                    gradient: 'linear-gradient(100deg, #A9C2E0 0%, #6F8FB8 55%, #365A8B 100%)',
-                    bg: 'rgba(54,90,139,0.08)',
-                    panel: 'rgba(54,90,139,0.06)',
-                    panelBorder: 'rgba(54,90,139,0.15)',
-                    border: 'rgba(54,90,139,0.16)',
-                    pillBg: 'rgba(54,90,139,0.10)',
-                    pillBorder: 'rgba(54,90,139,0.18)',
-                    glow: 'rgba(54,90,139,0.22)',
-                    type: 'academic',
                     icon: (
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h7"/><circle cx="18" cy="12" r="2"/><circle cx="14" cy="18" r="2"/>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
                       </svg>
                     ),
+                    color: '#365A8B', bg: 'rgba(54,90,139,0.1)',
+                    title: 'Academic Mode',
+                    desc: 'Surface references, extract claims and auto-build a glossary from transcript content.',
                   },
-                ].map((card, cardIndex) => (
-                  <div
-                    key={card.label}
-                    className={`feature-card ${workflowHoverType === card.type ? 'is-hovered' : ''}`}
-                    onMouseEnter={() => setWorkflowHoverType(card.type)}
-                    onMouseLeave={() => setWorkflowHoverType('')}
-                    style={{
-                      '--card-index': cardIndex,
-                      '--card-accent': card.accent,
-                      '--card-rail': card.border,
-                      '--card-glow': card.glow,
-                      '--card-pill-bg': card.pillBg,
-                      '--card-pill-border': card.pillBorder,
-                      '--card-gradient': card.gradient,
-                      '--card-panel-bg': card.panel,
-                      '--card-panel-border': card.panelBorder,
-                    }}
-                  >
-                    <div className="feature-card-top">
-                      <span className="feature-card-icon">{card.icon}</span>
+                  {
+                    icon: (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                      </svg>
+                    ),
+                    color: '#0F766E', bg: 'rgba(15,118,110,0.1)',
+                    title: 'Export & Download',
+                    desc: 'Export transcripts as PDF, plain text, or SRT subtitles. Copy with one click, anytime.',
+                  },
+                ].map((card) => (
+                  <div key={card.title} className="feature-grid-card">
+                    <div className="feature-grid-icon" style={{ background: card.bg, color: card.color }}>
+                      {card.icon}
                     </div>
-                    <h3 className="feature-card-label">{card.label}</h3>
-                    <div className="feature-card-visual">
-                      {card.type === 'transcript' && (
-                        <div className="feature-mock-shell">
-                          <div className="feature-mock-topbar">
-                            <span className="feature-mock-dots">
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                            </span>
-                            <span className="feature-mock-chip">Transcript</span>
-                          </div>
-                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 5 }}>
-                            <div className="feature-mock-url-bar">
-                              <span style={{ opacity: 0.45, fontSize: 10 }}>⌕</span>
-                              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>youtube.com/watch?v=dQw4w9</span>
-                              <span className="feature-mock-cursor" />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                              <div className="feature-mock-ts-row">
-                                <span className="feature-mock-ts-badge">0:12</span>
-                                <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0s' }} />
-                              </div>
-                              <div className="feature-mock-ts-row">
-                                <span className="feature-mock-ts-badge">0:38</span>
-                                <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0.22s' }} />
-                              </div>
-                              <div className="feature-mock-ts-row">
-                                <span className="feature-mock-ts-badge">1:04</span>
-                                <span className="feature-mock-line shimmer" style={{ flex: 1, animationDelay: '0.44s' }} />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {card.type === 'summaries' && (
-                        <div className="feature-mock-shell">
-                          <div className="feature-mock-topbar">
-                            <span className="feature-mock-dots">
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                            </span>
-                            <span className="feature-mock-chip">Summaries</span>
-                          </div>
-                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 5 }}>
-                            <span className="feature-mock-title" style={{ width: '66%' }} />
-                            <div key={`summary-preview-${summaryDemoIdx}`} className="feature-mock-summary-stack">
-                              {summaryPreview.bullets.map((text, idx) => (
-                                <div key={`summary-bullet-${idx}`} className={`feature-mock-bullet-row anim-${idx + 1}`}>
-                                  <span className="feature-mock-bullet-dot" />
-                                  <span className="feature-mock-summary-text">{text}</span>
-                                </div>
-                              ))}
-                            </div>
-                            <div className="feature-mock-summary-metrics">
-                              {summaryPreview.metrics.map((m) => (
-                                <span key={m} className="feature-mock-summary-metric">{m}</span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {card.type === 'flashcards' && (
-                        <div className="feature-mock-shell">
-                          <div className="feature-mock-topbar">
-                            <span className="feature-mock-dots">
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                            </span>
-                            <span className="feature-mock-chip">Study Mode</span>
-                          </div>
-                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 6 }}>
-                            <div className="feature-mock-flip-scene">
-                              <div className="feature-mock-flip-card">
-                                <div className="feature-mock-flip-front">
-                                  <span className="feature-mock-flip-label">Flashcard</span>
-                                  <span className="feature-mock-flip-topic">{flashcardPreview.topic}</span>
-                                  <span className="feature-mock-flip-text">{flashcardPreview.question}</span>
-                                </div>
-                                <div className="feature-mock-flip-back">
-                                  <span className="feature-mock-flip-label">Answer</span>
-                                  <span className="feature-mock-flip-text">{flashcardPreview.answer}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {card.type === 'study-guide' && (
-                        <div className="feature-mock-shell">
-                          <div className="feature-mock-topbar">
-                            <span className="feature-mock-dots">
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                            </span>
-                            <span className="feature-mock-chip">Study Guide</span>
-                          </div>
-                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 5 }}>
-                            <div key={`study-guide-preview-${studyGuideDemoIdx}`} className="feature-mock-guide-stack">
-                              <div className="feature-mock-guide-section step-1">
-                                <span className="feature-mock-guide-label">Overview</span>
-                                <span className="feature-mock-guide-line">{studyGuidePreview.overview}</span>
-                              </div>
-                              <div className="feature-mock-guide-section step-2">
-                                <span className="feature-mock-guide-label">Objectives</span>
-                                <span className="feature-mock-guide-line">{studyGuidePreview.objectives[0]}</span>
-                                <span className="feature-mock-guide-line subtle">{studyGuidePreview.objectives[1]}</span>
-                              </div>
-                              <div className="feature-mock-guide-section step-3">
-                                <span className="feature-mock-guide-label">Review Prompt</span>
-                                <span className="feature-mock-guide-line">{studyGuidePreview.reviewQuestion}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {card.type === 'evidence' && (
-                        <div className="feature-mock-shell">
-                          <div className="feature-mock-topbar">
-                            <span className="feature-mock-dots">
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                            </span>
-                            <span className="feature-mock-chip">AI Chat Q&amp;A</span>
-                          </div>
-                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 6 }}>
-                            <div className="feature-mock-chat-panel">
-                              <div className="feature-mock-chat-head">
-                                <span className="feature-mock-chat-head-avatar">
-                                  <img src="/scribesnap_icon_wave.svg" alt="" />
-                                </span>
-                                <span className="feature-mock-chat-head-lines">
-                                  <span className="feature-mock-chat-head-title">Transcript-grounded Q&amp;A</span>
-                                  <span className="feature-mock-chat-head-sub">Ask, cite, and jump to source moments</span>
-                                </span>
-                              </div>
-                              <div key={`chat-preview-${chatDemoIdx}`} className="feature-mock-chat-stream">
-                                <div className="feature-mock-chat-row user">
-                                  <span className="feature-mock-chat-message user feature-mock-chat-turn turn-1">
-                                    {chatPreview.questionOne}
-                                  </span>
-                                </div>
-                                <div className="feature-mock-chat-row ai">
-                                  <span className="feature-mock-chat-avatar">
-                                    <img src="/scribesnap_icon_wave.svg" alt="" />
-                                  </span>
-                                  <span className="feature-mock-chat-message ai feature-mock-chat-turn turn-2">
-                                    <span>{chatPreview.answerOne}</span>
-                                    <span className="feature-mock-chat-source">
-                                      Source
-                                      <button type="button" className="feature-mock-chat-timestamp" aria-label={`Jump to ${chatPreview.timestampOne}`}>
-                                        {chatPreview.timestampOne}
-                                      </button>
-                                    </span>
-                                  </span>
-                                </div>
-                                <div className="feature-mock-chat-row user">
-                                  <span className="feature-mock-chat-message user feature-mock-chat-turn turn-3">
-                                    {chatPreview.questionTwo}
-                                  </span>
-                                </div>
-                                <div className="feature-mock-chat-row ai">
-                                  <span className="feature-mock-chat-avatar">
-                                    <img src="/scribesnap_icon_wave.svg" alt="" />
-                                  </span>
-                                  <span className="feature-mock-chat-message ai feature-mock-chat-turn turn-4">
-                                    <span>{chatPreview.answerTwo}</span>
-                                    <span className="feature-mock-chat-source">
-                                      Source
-                                      <button type="button" className="feature-mock-chat-timestamp" aria-label={`Jump to ${chatPreview.timestampTwo}`}>
-                                        {chatPreview.timestampTwo}
-                                      </button>
-                                    </span>
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="feature-mock-chat-composer">
-                                <span className="feature-mock-chat-head-avatar">
-                                  <img src="/scribesnap_icon_wave.svg" alt="" />
-                                </span>
-                                <span className="feature-mock-chat-input-text">Ask a follow-up about this clip…</span>
-                                <span className="feature-mock-chat-send" />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {card.type === 'academic' && (
-                        <div className="feature-mock-shell">
-                          <div className="feature-mock-topbar">
-                            <span className="feature-mock-dots">
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                              <span className="feature-mock-dot" />
-                            </span>
-                            <span className="feature-mock-chip">Academic</span>
-                          </div>
-                          <div className="feature-mock-body" style={{ flexDirection: 'column', gap: 5 }}>
-                            <div key={`academic-preview-${academicDemoIdx}`} className="feature-mock-academic-stack">
-                              <div className="feature-mock-academic-section step-1">
-                                <span className="feature-mock-academic-label">References</span>
-                                <span className="feature-mock-academic-line">{academicPreview.reference}</span>
-                              </div>
-                              <div className="feature-mock-academic-section step-2">
-                                <span className="feature-mock-academic-label">Claim</span>
-                                <span className="feature-mock-academic-line">{academicPreview.claim}</span>
-                              </div>
-                              <div className="feature-mock-academic-section step-3">
-                                <span className="feature-mock-academic-label">Glossary</span>
-                                <div className="feature-mock-academic-tags">
-                                  {academicPreview.glossary.map((term, idx) => (
-                                    <span key={term} className={`feature-mock-academic-tag term-${idx + 1}`}>{term}</span>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <p className="feature-card-desc">{card.desc}</p>
-                    {card.tags.length > 0 && (
-                      <div className="feature-card-tags">
-                        {card.tags.map(tag => (
-                          <span key={`${card.label}-${tag}`} className="feature-card-tag">{tag}</span>
-                        ))}
-                      </div>
-                    )}
-                    {card.meta && <div className="feature-card-meta">{card.meta}</div>}
+                    <p className="feature-grid-title">{card.title}</p>
+                    <p className="feature-grid-desc">{card.desc}</p>
                   </div>
                 ))}
               </div>
             </div>
-            </div>
+            </BlurFade>
 
             {/* Testimonials */}
-            <div style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px 48px' }}>
+            <BlurFade delay={0.15} yOffset={20}>
+            <div style={{ maxWidth: 820, margin: '0 auto', padding: isMobile ? '0 16px 48px' : '0 24px 64px' }}>
               <div style={{ textAlign: 'center', marginBottom: 28 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>What people say</div>
                 <h2 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em', margin: 0 }}>Loved by Researchers &amp; Builders</h2>
@@ -7263,6 +6316,7 @@ const App = () => {
                 </div>
               </div>
             </div>
+            </BlurFade>
 
             {/* Recent transcripts */}
             {history.length > 0 && (
