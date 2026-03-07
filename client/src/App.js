@@ -5537,8 +5537,8 @@ const App = () => {
           50%       { transform: translateY(14px) rotate(2deg); }
         }
         @keyframes starTwinkle {
-          0%, 100% { opacity: var(--star-opacity, 0.4); transform: scale(1); }
-          50%       { opacity: calc(var(--star-opacity, 0.4) * 0.2); transform: scale(0.65); }
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50%       { opacity: 0.1; transform: scale(0.6); }
         }
         .hero-cosmos {
           position: absolute;
@@ -5547,53 +5547,51 @@ const App = () => {
           overflow: hidden;
           z-index: 0;
         }
-        .hero-orb {
-          position: absolute;
-          border-radius: 50%;
-          animation: planetFloat var(--float-dur, 16s) ease-in-out infinite;
-          animation-delay: var(--float-delay, 0s);
-          opacity: var(--orb-opacity, 0.12);
-        }
         .hero-orb-1 {
+          position: absolute;
           width: 260px;
           height: 260px;
           left: -80px;
           top: 20px;
+          border-radius: 50%;
           background: radial-gradient(circle at 38% 38%, rgba(60,140,255,0.45), rgba(100,170,255,0.15) 55%, transparent 80%);
           filter: blur(32px);
-          --float-dur: 20s;
-          --orb-opacity: 0.18;
+          opacity: 0.18;
+          animation: planetFloat 20s ease-in-out infinite;
         }
         .hero-orb-2 {
+          position: absolute;
           width: 160px;
           height: 160px;
           right: 4%;
           top: 15%;
+          border-radius: 50%;
           background: radial-gradient(circle at 42% 42%, rgba(123,211,255,0.5), rgba(178,194,214,0.15) 58%, transparent 80%);
           filter: blur(24px);
-          --float-dur: 15s;
-          --float-delay: -5s;
-          animation-name: orbitFloat;
-          --orb-opacity: 0.15;
+          opacity: 0.15;
+          animation: orbitFloat 15s ease-in-out infinite;
+          animation-delay: -5s;
         }
         .hero-orb-3 {
+          position: absolute;
           width: 100px;
           height: 100px;
           left: 30%;
           bottom: 5%;
+          border-radius: 50%;
           background: radial-gradient(circle at 40% 40%, rgba(60,140,255,0.3), transparent 70%);
           filter: blur(20px);
-          --float-dur: 12s;
-          --float-delay: -8s;
-          animation-name: orbitFloat;
-          --orb-opacity: 0.1;
+          opacity: 0.1;
+          animation: orbitFloat 12s ease-in-out infinite;
+          animation-delay: -8s;
         }
         .hero-star {
           position: absolute;
           border-radius: 50%;
-          background: rgba(60,140,255,0.9);
-          animation: starTwinkle var(--twinkle-dur, 3s) ease-in-out infinite;
-          animation-delay: var(--twinkle-delay, 0s);
+          background: rgba(60,140,255,0.55);
+          animation-name: starTwinkle;
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
         }
 
         /* ── Feature grid ─────────────────────────────────────────────────── */
@@ -5833,18 +5831,18 @@ const App = () => {
 
             {/* Ambient cosmos decorations */}
             <div className="hero-cosmos" aria-hidden="true">
-              <div className="hero-orb hero-orb-1" />
-              <div className="hero-orb hero-orb-2" />
-              <div className="hero-orb hero-orb-3" />
+              <div className="hero-orb-1" />
+              <div className="hero-orb-2" />
+              <div className="hero-orb-3" />
               {/* Stars — tiny twinkling dots at the periphery */}
-              <span className="hero-star" style={{ top: '9%',  left: '7%',   width: 2, height: 2, '--star-opacity': 0.38, '--twinkle-dur': '2.8s', '--twinkle-delay': '0s'   }} />
-              <span className="hero-star" style={{ top: '14%', right: '11%', width: 3, height: 3, '--star-opacity': 0.42, '--twinkle-dur': '3.5s', '--twinkle-delay': '-1s'  }} />
-              <span className="hero-star" style={{ top: '34%', left: '4%',   width: 2, height: 2, '--star-opacity': 0.3,  '--twinkle-dur': '2.2s', '--twinkle-delay': '-0.5s'}} />
-              <span className="hero-star" style={{ top: '58%', left: '10%',  width: 3, height: 3, '--star-opacity': 0.35, '--twinkle-dur': '4.1s', '--twinkle-delay': '-2s'  }} />
-              <span className="hero-star" style={{ top: '72%', right: '7%',  width: 2, height: 2, '--star-opacity': 0.3,  '--twinkle-dur': '2.6s', '--twinkle-delay': '-1.5s'}} />
-              <span className="hero-star" style={{ top: '11%', right: '26%', width: 2, height: 2, '--star-opacity': 0.25, '--twinkle-dur': '3.2s', '--twinkle-delay': '-0.8s'}} />
-              <span className="hero-star" style={{ bottom:'18%',left: '24%', width: 3, height: 3, '--star-opacity': 0.28, '--twinkle-dur': '2.9s', '--twinkle-delay': '-1.3s'}} />
-              <span className="hero-star" style={{ top: '44%', right: '3%',  width: 2, height: 2, '--star-opacity': 0.33, '--twinkle-dur': '3.8s', '--twinkle-delay': '-2.4s'}} />
+              <span className="hero-star" style={{ top: '9%',  left: '7%',   width: 2, height: 2, opacity: 0.38, animationDuration: '2.8s', animationDelay: '0s'    }} />
+              <span className="hero-star" style={{ top: '14%', right: '11%', width: 3, height: 3, opacity: 0.42, animationDuration: '3.5s', animationDelay: '-1s'   }} />
+              <span className="hero-star" style={{ top: '34%', left: '4%',   width: 2, height: 2, opacity: 0.30, animationDuration: '2.2s', animationDelay: '-0.5s' }} />
+              <span className="hero-star" style={{ top: '58%', left: '10%',  width: 3, height: 3, opacity: 0.35, animationDuration: '4.1s', animationDelay: '-2s'   }} />
+              <span className="hero-star" style={{ top: '72%', right: '7%',  width: 2, height: 2, opacity: 0.30, animationDuration: '2.6s', animationDelay: '-1.5s' }} />
+              <span className="hero-star" style={{ top: '11%', right: '26%', width: 2, height: 2, opacity: 0.25, animationDuration: '3.2s', animationDelay: '-0.8s' }} />
+              <span className="hero-star" style={{ bottom:'18%',left: '24%', width: 3, height: 3, opacity: 0.28, animationDuration: '2.9s', animationDelay: '-1.3s' }} />
+              <span className="hero-star" style={{ top: '44%', right: '3%',  width: 2, height: 2, opacity: 0.33, animationDuration: '3.8s', animationDelay: '-2.4s' }} />
             </div>
 
             <div className="hero-inner" style={{
