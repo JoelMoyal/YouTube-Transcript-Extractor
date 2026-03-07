@@ -6431,12 +6431,57 @@ const App = () => {
               <div style={{
                 background: P.surface, border: `1px solid ${P.border}`,
                 borderRadius: isMobile ? 18 : 22, boxShadow: '0 12px 56px rgba(29,29,31,0.13)',
-                padding: isMobile ? 12 : 14,
+                padding: isMobile ? 14 : 16,
                 display: 'flex', flexDirection: 'column', gap: isMobile ? 10 : 12,
               }}>
 
+                {/* ── Pill segmented control ── */}
+                <div>
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center',
+                    background: P.paper, border: `1px solid ${P.border}`,
+                    borderRadius: 999, padding: 3, gap: 2,
+                  }}>
+                    {[
+                      {
+                        id: 'url',
+                        icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+                        label: 'Paste URL',
+                      },
+                      {
+                        id: 'upload',
+                        icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+                        label: isMobile ? 'Upload' : 'Upload File',
+                      },
+                    ].map(({ id, icon, label }) => {
+                      const active = inputMode === id;
+                      return (
+                        <button
+                          key={id}
+                          onClick={() => setInputMode(id)}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 6,
+                            padding: isMobile ? '6px 13px' : '7px 16px',
+                            borderRadius: 999, border: 'none',
+                            background: active ? 'white' : 'transparent',
+                            boxShadow: active ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+                            color: active ? P.ink : P.muted,
+                            fontSize: 13, fontWeight: active ? 600 : 500,
+                            cursor: 'pointer', transition: 'all 0.18s',
+                            whiteSpace: 'nowrap',
+                          }}
+                          onMouseEnter={e => { if (!active) e.currentTarget.style.color = P.ink; }}
+                          onMouseLeave={e => { if (!active) e.currentTarget.style.color = P.muted; }}
+                        >
+                          {icon}{label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* ── URL row ── */}
-                <div style={{ display: 'flex', gap: isMobile ? 8 : 10, flexDirection: isMobile ? 'column' : 'row' }}>
+                {inputMode === 'url' && <div style={{ display: 'flex', gap: isMobile ? 8 : 10, flexDirection: isMobile ? 'column' : 'row' }}>
                   <div style={{
                     flex: 1, display: 'flex', alignItems: 'center', gap: 10,
                     padding: isMobile ? '13px 14px' : '15px 18px',
@@ -6503,19 +6548,10 @@ const App = () => {
                       </button>
                     );
                   })()}
-                </div>
-
-                {/* ── Divider ── */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ flex: 1, height: 1, background: P.border }} />
-                  <span style={{ fontSize: 11, color: P.muted, fontWeight: 500, whiteSpace: 'nowrap', userSelect: 'none' }}>
-                    or upload a file
-                  </span>
-                  <div style={{ flex: 1, height: 1, background: P.border }} />
-                </div>
+                </div>}
 
                 {/* ── Upload zone ── */}
-                <div style={{ display: 'flex', gap: isMobile ? 8 : 10, flexDirection: isMobile ? 'column' : 'row' }}>
+                {inputMode === 'upload' && <div style={{ display: 'flex', gap: isMobile ? 8 : 10, flexDirection: isMobile ? 'column' : 'row' }}>
                   {/* Hidden native file input */}
                   <input
                     ref={fileInputRef}
@@ -6625,10 +6661,10 @@ const App = () => {
                       </button>
                     );
                   })()}
-                </div>
+                </div>}
 
                 {/* Mobile format hint */}
-                {isMobile && (
+                {inputMode === 'upload' && isMobile && (
                   <p style={{ margin: 0, fontSize: 11, color: P.muted, textAlign: 'center', opacity: 0.8 }}>
                     mp4 · mov · mp3 · wav · m4a · max 500 MB
                   </p>
