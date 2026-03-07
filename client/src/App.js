@@ -6396,13 +6396,6 @@ const App = () => {
               maxWidth: 700, margin: '0 auto', padding: isMobile ? '32px 16px 24px' : '72px 24px 40px',
               textAlign: 'center',
             }}>
-              {!isMobile && (
-                <div style={{ marginBottom: 28 }}>
-                  <AnimatedGradientText>
-                    YouTube, Vimeo, TikTok + more · Free · No account required
-                  </AnimatedGradientText>
-                </div>
-              )}
 
               <h1 style={{
                 fontSize: isMobile ? 'clamp(34px, 11vw, 46px)' : 'clamp(38px, 6.5vw, 62px)', fontWeight: 800, color: P.ink,
