@@ -6863,6 +6863,8 @@ const App = () => {
             {/* Features */}
             {/* Capability cards */}
             <div style={{
+              backgroundImage: `linear-gradient(rgba(60,80,160,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(60,80,160,0.045) 1px, transparent 1px)`,
+              backgroundSize: '40px 40px',
               maxWidth: 1500, margin: '0 auto', padding: isMobile ? '24px 16px 44px' : '64px 36px 68px',
             }}>
               <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 52 }}>
