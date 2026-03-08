@@ -1,4 +1,14 @@
-FROM node:18-alpine
+FROM node:20-alpine AS client-builder
+WORKDIR /app
+
+# Build frontend from source so Railway deployments always include latest UI changes.
+COPY client/package*.json ./client/
+RUN npm --prefix client ci
+
+COPY client ./client
+RUN npm --prefix client run build
+
+FROM node:20-alpine
 
 # Install yt-dlp dependencies and the binary itself
 RUN apk add --no-cache python3 ffmpeg curl && \
@@ -8,14 +18,14 @@ RUN apk add --no-cache python3 ffmpeg curl && \
 
 WORKDIR /app
 
-# Install Node dependencies
+# Install server dependencies only (smaller runtime image)
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
-# Copy server and pre-built React app
+# Copy server and static assets
 COPY server.js ./
 COPY client/public ./client/public
-COPY client/build ./client/build
+COPY --from=client-builder /app/client/build ./client/build
 
 EXPOSE 3000
 
