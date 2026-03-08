@@ -1227,7 +1227,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
   );
 };
 
-// ── PasswordResetModal ────────────────────────────────────────────────────────
+// ── PasswordResetModal ──────────────────────��─────��───────────────────────────
 const PasswordResetModal = ({ onClose }) => {
   const [password, setPassword] = React.useState('');
   const [confirm, setConfirm]   = React.useState('');
@@ -8529,22 +8529,30 @@ const App = () => {
                       </div>
                     </div>
                     {/* Suggestions */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {DEMO_CHIPS.map(chip => (
-                        <button key={chip} onClick={() => askQuestion(chip)} style={{
-                          display: 'flex', alignItems: 'center', gap: 10,
-                          padding: '10px 14px', borderRadius: 10, border: `1px solid ${P.border}`,
-                          background: '#fff', fontSize: 12.5, color: P.ink,
-                          cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left', width: '100%',
-                          boxShadow: '0 1px 3px rgba(29,29,31,0.04)',
-                        }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.boxShadow = '0 2px 8px rgba(60,140,255,0.1)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = P.ink; e.currentTarget.style.boxShadow = '0 1px 3px rgba(29,29,31,0.04)'; }}
-                        >
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.35 }}><polyline points="9 18 15 12 9 6"/></svg>
-                          {chip}
-                        </button>
-                      ))}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
+                      {DEMO_CHIPS.map((chip, i) => {
+                        const chipIcons = [
+                          <svg key="sum" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+                          <svg key="kp" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+                          <svg key="q" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+                          <svg key="arg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+                        ];
+                        return (
+                          <button key={chip} onClick={() => askQuestion(chip)} style={{
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                            gap: 7, padding: '13px 10px 12px', borderRadius: 11, border: `1px solid ${P.border}`,
+                            background: '#fff', fontSize: 11.5, color: P.ink, fontWeight: 500,
+                            cursor: 'pointer', transition: 'all 0.15s', textAlign: 'center', lineHeight: 1.4,
+                            boxShadow: '0 1px 3px rgba(29,29,31,0.04)',
+                          }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = P.accent; e.currentTarget.style.background = P.accentLight; e.currentTarget.style.color = P.accent; e.currentTarget.style.boxShadow = '0 2px 8px rgba(60,140,255,0.1)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = P.border; e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = P.ink; e.currentTarget.style.boxShadow = '0 1px 3px rgba(29,29,31,0.04)'; }}
+                          >
+                            <span style={{ opacity: 0.45 }}>{chipIcons[i]}</span>
+                            {chip}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -8621,7 +8629,7 @@ const App = () => {
                       onKeyDown={e => e.key === 'Enter' && !e.shiftKey && askQuestion()}
                       placeholder={qaMessages.length === 0 ? 'Ask anything about this video…' : 'Ask a follow-up…'}
                       disabled={qaLoading}
-                      style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, color: P.ink, padding: '4px 0' }}
+                      style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 13.5, color: P.ink, padding: '4px 0', marginLeft: 9 }}
                       onFocus={e => {
                         const w = e.currentTarget.closest('[data-composer]');
                         if (w) { w.style.borderColor = P.accent; w.style.boxShadow = '0 0 0 3px rgba(60,140,255,0.12)'; }
