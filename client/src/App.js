@@ -6442,6 +6442,15 @@ const App = () => {
               paddingBottom: 56,
             }}>
 
+            {/* Grain texture overlay */}
+            <svg aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.045, pointerEvents: 'none', zIndex: 1 }}>
+              <filter id="hero-grain">
+                <feTurbulence type="fractalNoise" baseFrequency="0.68" numOctaves="4" stitchTiles="stitch" />
+                <feColorMatrix type="saturate" values="0" />
+              </filter>
+              <rect width="100%" height="100%" filter="url(#hero-grain)" />
+            </svg>
+
             {/* Ambient cosmos decorations */}
             <div className="hero-cosmos" aria-hidden="true">
               <div className="hero-orb-1" />
