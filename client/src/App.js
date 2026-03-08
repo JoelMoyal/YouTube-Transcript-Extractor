@@ -5513,11 +5513,9 @@ const App = () => {
         .left-rail:hover .lr-expanded { opacity: 1; pointer-events: auto; }
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
-        .recent-row:hover { background: #F6F2EA !important; border-color: rgba(60,140,255,0.22) !important; }
-        .recent-row:hover .recent-row-actions { opacity: 1 !important; }
-        .recent-grid::-webkit-scrollbar { width: 4px; }
-        .recent-grid::-webkit-scrollbar-track { background: transparent; }
-        .recent-grid::-webkit-scrollbar-thumb { background: rgba(29,29,31,0.12); border-radius: 999px; }
+        .rc-card:hover { box-shadow: 0 6px 24px rgba(29,29,31,0.11); border-color: rgba(60,140,255,0.3) !important; transform: translateY(-2px); }
+        .rc-card:hover .rc-overlay { opacity: 1 !important; }
+        .rc-card:hover .rc-delete { opacity: 1 !important; }
         * { box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         body { margin: 0; background: ${P.paper}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
@@ -7372,9 +7370,9 @@ const App = () => {
 
             {/* Recent transcripts */}
             {history.length > 0 && (
-              <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 48px' }}>
-                {/* Section header */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px 56px' }}>
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 15, fontWeight: 700, color: P.ink, letterSpacing: '-0.01em' }}>Recent transcripts</span>
                     <span style={{ fontSize: 11, fontWeight: 700, color: P.muted, background: 'rgba(29,29,31,0.06)', padding: '2px 8px', borderRadius: 999, border: `1px solid ${P.border}` }}>{history.length}</span>
@@ -7388,39 +7386,50 @@ const App = () => {
                     Clear all
                   </button>
                 </div>
-                {/* 2-col grid */}
-                <div className="recent-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 6, maxHeight: 420, overflowY: 'auto' }}>
+                {/* Thumbnail-first card grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: isMobile ? 10 : 14 }}>
                   {history.map((h) => {
                     const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
                     const displayTitle = h.title || h.id;
                     const displayChannel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
+                    const platformTag = h.source === 'whisper' ? 'AI' : (h.platform || 'youtube').slice(0, 3).toUpperCase();
                     return (
-                      <div key={h.id} className="recent-row" onClick={() => loadFromHistory(h)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.surface, cursor: 'pointer', transition: 'all 0.12s', position: 'relative' }}>
-                        <div style={{ position: 'relative', flexShrink: 0 }}>
-                          <img src={h.thumbnail} alt="" style={{ width: 62, height: 35, objectFit: 'cover', borderRadius: 6, border: `1px solid ${P.border}`, display: 'block' }}
-                            onError={e => { e.target.style.display = 'none'; }} />
-                          <div style={{ position: 'absolute', bottom: 2, right: 2, background: 'rgba(29,29,31,0.78)', color: 'white', fontSize: 8, fontWeight: 700, fontFamily: 'monospace', padding: '1px 3px', borderRadius: 3 }}>
-                            {h.source === 'whisper' ? 'AI' : (h.platform || 'youtube').slice(0, 3).toUpperCase()}
+                      <div key={h.id} className="rc-card" onClick={() => loadFromHistory(h)} style={{ borderRadius: 12, border: `1px solid ${P.border}`, background: P.surface, cursor: 'pointer', overflow: 'hidden', transition: 'all 0.18s', position: 'relative' }}>
+                        {/* Thumbnail */}
+                        <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', background: 'rgba(29,29,31,0.06)', overflow: 'hidden' }}>
+                          {h.thumbnail && (
+                            <img src={h.thumbnail} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                              onError={e => { e.target.style.display = 'none'; }} />
+                          )}
+                          <div style={{ position: 'absolute', bottom: 6, left: 6, background: 'rgba(29,29,31,0.78)', color: 'white', fontSize: 8, fontWeight: 700, fontFamily: 'monospace', padding: '2px 5px', borderRadius: 4 }}>
+                            {platformTag}
+                          </div>
+                          <div className="rc-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(29,29,31,0.42)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.18s' }}>
+                            <div style={{ background: 'white', color: P.ink, fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 999 }}>Open</div>
                           </div>
                         </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 12, fontWeight: 600, color: P.ink, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {/* Info */}
+                        <div style={{ padding: '10px 12px 12px' }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: P.ink, lineHeight: 1.4, marginBottom: 5, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                             {displayTitle}
                           </div>
-                          <div style={{ fontSize: 10, color: P.muted }}>
-                            {displayChannel} · {wc.toLocaleString()} words · {timeAgo(h.date)}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div style={{ fontSize: 10, color: P.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                              {displayChannel} · {wc.toLocaleString()}w
+                            </div>
+                            <div style={{ fontSize: 10, color: P.muted, flexShrink: 0, marginLeft: 6 }}>{timeAgo(h.date)}</div>
                           </div>
                         </div>
-                        <div className="recent-row-actions" style={{ flexShrink: 0, opacity: 0, transition: 'opacity 0.12s' }}>
-                          <button
-                            onClick={(e) => deleteFromHistory(h.id, e)}
-                            style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${P.border}`, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.muted, transition: 'all 0.12s', fontFamily: 'inherit' }}
-                            onMouseEnter={e => { e.stopPropagation(); e.currentTarget.style.color = P.error; e.currentTarget.style.borderColor = 'rgba(180,35,24,0.3)'; e.currentTarget.style.background = 'rgba(180,35,24,0.06)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; e.currentTarget.style.background = 'transparent'; }}
-                          >
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                          </button>
-                        </div>
+                        {/* Delete — reveals on card hover */}
+                        <button
+                          className="rc-delete"
+                          onClick={(e) => deleteFromHistory(h.id, e)}
+                          style={{ position: 'absolute', top: 6, right: 6, width: 26, height: 26, borderRadius: 999, border: 'none', background: 'rgba(29,29,31,0.7)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', opacity: 0, transition: 'opacity 0.15s, background 0.12s', fontFamily: 'inherit' }}
+                          onMouseEnter={e => { e.stopPropagation(); e.currentTarget.style.background = 'rgba(180,35,24,0.9)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(29,29,31,0.7)'; }}
+                        >
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                        </button>
                       </div>
                     );
                   })}
