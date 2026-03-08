@@ -790,7 +790,7 @@ const CreditsWidget = ({ credits, onUpgrade, user, onShowReferralPromo }) => {
   );
 };
 
-// ── Shared helpers ────────────────────────────────────────────────────────────
+// ── Shared helpers ────────────────────────────────────────────────���───────────
 const AuthLogo = () => (
   <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
     <BrandLogo height={40} />
@@ -5513,6 +5513,11 @@ const App = () => {
         .left-rail:hover .lr-expanded { opacity: 1; pointer-events: auto; }
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
+        .recent-row:hover { background: #F6F2EA !important; border-color: rgba(60,140,255,0.22) !important; }
+        .recent-row:hover .recent-row-actions { opacity: 1 !important; }
+        .recent-grid::-webkit-scrollbar { width: 4px; }
+        .recent-grid::-webkit-scrollbar-track { background: transparent; }
+        .recent-grid::-webkit-scrollbar-thumb { background: rgba(29,29,31,0.12); border-radius: 999px; }
         * { box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         body { margin: 0; background: ${P.paper}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
@@ -7367,67 +7372,58 @@ const App = () => {
 
             {/* Recent transcripts */}
             {history.length > 0 && (
-              <div style={{ maxWidth: 780, margin: '0 auto', padding: '0 24px 48px' }}>
-                <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 16, overflow: 'hidden' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${P.border}` }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: P.ink }}>Recent transcripts</span>
-                    <button
-                      onClick={() => {
-                        setHistory([]);
-                        localStorage.removeItem('yte_history');
-                      }}
-                      style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 12, color: P.muted, fontWeight: 500 }}
-                    >
-                      Clear all
-                    </button>
+              <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 48px' }}>
+                {/* Section header */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: P.ink, letterSpacing: '-0.01em' }}>Recent transcripts</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: P.muted, background: 'rgba(29,29,31,0.06)', padding: '2px 8px', borderRadius: 999, border: `1px solid ${P.border}` }}>{history.length}</span>
                   </div>
-                  {history.map((h, i) => {
+                  <button
+                    onClick={() => { setHistory([]); localStorage.removeItem('yte_history'); }}
+                    style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 12, color: P.muted, fontWeight: 500, padding: '4px 8px', borderRadius: 6, transition: 'all 0.12s', fontFamily: 'inherit' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,35,24,0.07)'; e.currentTarget.style.color = P.error; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}
+                  >
+                    Clear all
+                  </button>
+                </div>
+                {/* 2-col grid */}
+                <div className="recent-grid" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 6, maxHeight: 420, overflowY: 'auto' }}>
+                  {history.map((h) => {
                     const wc = h.transcript ? h.transcript.trim().split(/\s+/).length : 0;
                     const displayTitle = h.title || h.id;
                     const displayChannel = h.channel || (h.platform === 'vimeo' ? 'Vimeo' : 'YouTube');
                     return (
-                    <div key={h.id}>
-                      {i > 0 && <div style={{ height: 1, background: P.border }} />}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: isMobile ? '12px 14px' : '14px 20px', transition: 'background 0.1s', flexWrap: isMobile ? 'wrap' : 'nowrap' }}
-                        onMouseEnter={e => e.currentTarget.style.background = P.paper}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                      >
+                      <div key={h.id} className="recent-row" onClick={() => loadFromHistory(h)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.surface, cursor: 'pointer', transition: 'all 0.12s', position: 'relative' }}>
                         <div style={{ position: 'relative', flexShrink: 0 }}>
-                          <img src={h.thumbnail} alt="" style={{ width: 72, height: 40, objectFit: 'cover', borderRadius: 7, border: `1px solid ${P.border}`, display: 'block' }}
+                          <img src={h.thumbnail} alt="" style={{ width: 62, height: 35, objectFit: 'cover', borderRadius: 6, border: `1px solid ${P.border}`, display: 'block' }}
                             onError={e => { e.target.style.display = 'none'; }} />
-                          <div style={{ position: 'absolute', bottom: 3, right: 3, background: 'rgba(29,29,31,0.75)', color: 'white', fontSize: 9, fontWeight: 700, fontFamily: 'monospace', padding: '1px 3px', borderRadius: 3 }}>
+                          <div style={{ position: 'absolute', bottom: 2, right: 2, background: 'rgba(29,29,31,0.78)', color: 'white', fontSize: 8, fontWeight: 700, fontFamily: 'monospace', padding: '1px 3px', borderRadius: 3 }}>
                             {h.source === 'whisper' ? 'AI' : (h.platform || 'youtube').slice(0, 3).toUpperCase()}
                           </div>
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: P.ink, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {displayTitle}
                           </div>
-                          <div style={{ fontSize: 11, color: P.muted }}>
+                          <div style={{ fontSize: 10, color: P.muted }}>
                             {displayChannel} · {wc.toLocaleString()} words · {timeAgo(h.date)}
                           </div>
                         </div>
-                        <div style={{ display: 'flex', gap: 6, flexShrink: 0, ...(isMobile ? { width: '100%' } : {}) }}>
-                          <button
-                            onClick={() => loadFromHistory(h)}
-                            style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${P.border}`, background: P.surface, fontSize: 12, fontWeight: 600, color: P.ink, cursor: 'pointer', transition: 'all 0.1s', ...(isMobile ? { flex: 1, textAlign: 'center' } : {}) }}
-                            onMouseEnter={e => { e.currentTarget.style.background = P.paper; }}
-                            onMouseLeave={e => { e.currentTarget.style.background = P.surface; }}
-                          >
-                            View
-                          </button>
+                        <div className="recent-row-actions" style={{ flexShrink: 0, opacity: 0, transition: 'opacity 0.12s' }}>
                           <button
                             onClick={(e) => deleteFromHistory(h.id, e)}
-                            style={{ padding: '6px 12px', borderRadius: 7, border: `1px solid ${P.border}`, background: P.surface, fontSize: 12, fontWeight: 600, color: P.muted, cursor: 'pointer', transition: 'all 0.1s', ...(isMobile ? { flex: 1, textAlign: 'center' } : {}) }}
-                            onMouseEnter={e => { e.currentTarget.style.color = P.error; e.currentTarget.style.borderColor = 'rgba(180,35,24,0.3)'; }}
-                            onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}
+                            style={{ width: 26, height: 26, borderRadius: 6, border: `1px solid ${P.border}`, background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.muted, transition: 'all 0.12s', fontFamily: 'inherit' }}
+                            onMouseEnter={e => { e.stopPropagation(); e.currentTarget.style.color = P.error; e.currentTarget.style.borderColor = 'rgba(180,35,24,0.3)'; e.currentTarget.style.background = 'rgba(180,35,24,0.06)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; e.currentTarget.style.background = 'transparent'; }}
                           >
-                            Delete
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                           </button>
                         </div>
                       </div>
-                    </div>
-                  )})}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -9053,7 +9049,7 @@ const App = () => {
             );
           })()}
 
-          {/* ── TABLET HISTORY DRAWER ─────────────────────────────────────────── */}
+          {/* ── TABLET HISTORY DRAWER ─────────────────────────��───────────────── */}
           {isTablet && historyDrawerOpen && (
             <>
               <div onClick={() => setHistoryDrawerOpen(false)} style={{
