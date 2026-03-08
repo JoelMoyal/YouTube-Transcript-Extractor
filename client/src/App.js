@@ -868,6 +868,19 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
+  // Poll for email confirmation so cross-device activation works
+  React.useEffect(() => {
+    if (screen !== 'pending' || !email || !password) return;
+    const id = setInterval(async () => {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error) {
+        clearInterval(id);
+        onClose();
+      }
+    }, 5000);
+    return () => clearInterval(id);
+  }, [screen, email, password, onClose]);
+
   const inputStyle = {
     width: '100%', padding: '11px 13px', borderRadius: 10,
     border: `1px solid ${P.border}`, background: P.paper,
@@ -975,7 +988,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
     <div style={{ padding: '9px 12px', borderRadius: 8, background: 'rgba(180,35,24,0.07)', border: `1px solid rgba(180,35,24,0.18)`, fontSize: 13, color: P.error, lineHeight: 1.5 }}>{msg}</div>
   ) : null;
 
-  // ── Email pending screen ───────────────────────────────────────────────────
+  // ── Email pending screen ────────────────────────��──────────────────────────
   if (screen === 'pending') return (
     <div ref={overlayRef} onClick={e => { if (e.target === overlayRef.current) onClose(); }} style={modalOverlay}>
       <div className="fade-up" style={modalCard}>
