@@ -428,27 +428,29 @@ const SpinnerIcon = ({ size = 16 }) => (
   </svg>
 );
 // ScribeSnap wave logo animated loading indicator
-const ScribeSnapWaveLoader = ({ width = 140 }) => (
+const ScribeSnapWaveLoader = ({ width = 140, color }) => (
   <svg viewBox="0 0 512 512" width={width} height={Math.round(width * 0.35)} style={{ display: 'block', overflow: 'visible' }}>
     <defs>
-      <linearGradient id="ss-wave-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stopColor="#7bd3ff" />
-        <stop offset="55%" stopColor="#3c8cff" />
-        <stop offset="100%" stopColor="#1f6bff" />
-      </linearGradient>
+      {!color && (
+        <linearGradient id="ss-wave-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#7bd3ff" />
+          <stop offset="55%" stopColor="#3c8cff" />
+          <stop offset="100%" stopColor="#1f6bff" />
+        </linearGradient>
+      )}
     </defs>
     <path
       d="M38.96,254.18c36.17,0,36.17-58.43,72.35-58.43s36.17,147.48,72.35,147.48,36.17-239.3,72.35-239.3,36.17,333.91,72.35,333.91,36.17-264.35,72.35-264.35,36.17,80.7,72.35,80.7"
       pathLength="1"
       fill="none"
-      stroke="url(#ss-wave-grad)"
+      stroke={color || 'url(#ss-wave-grad)'}
       strokeWidth="26"
       strokeLinecap="round"
       strokeLinejoin="round"
       style={{ animation: 'ss-wave-draw 2.4s cubic-bezier(0.5,0.1,0.5,1) infinite' }}
     />
-    <circle cx="13.91" cy="254.18" r="13.91" fill="#7bd3ff" />
-    <circle cx="498.09" cy="254.18" r="13.91" fill="#1f6bff" />
+    <circle cx="13.91" cy="254.18" r="13.91" fill={color || '#7bd3ff'} />
+    <circle cx="498.09" cy="254.18" r="13.91" fill={color || '#1f6bff'} />
   </svg>
 );
 const YouTubeIcon = ({ size = 18 }) => (
@@ -6974,35 +6976,81 @@ const App = () => {
 
               {/* Loading */}
               {loading && (
-                <div className="fade-up" style={{ marginTop: 16 }}>
-                  {/* ScribeSnap wave logo draw animation */}
-                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-                    <ScribeSnapWaveLoader width={isMobile ? 100 : 130} />
-                  </div>
-                  {/* Progress bar */}
-                  <div style={{ height: 3, borderRadius: 999, background: P.border, overflow: 'hidden', position: 'relative', marginBottom: 9 }}>
-                    {loadingPercent > 0 ? (
-                      <div style={{
-                        height: '100%', width: `${loadingPercent}%`,
-                        background: `linear-gradient(90deg, #7bd3ff, ${P.accent})`,
-                        borderRadius: 999, transition: 'width 0.5s ease',
-                      }} />
-                    ) : (
-                      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, transparent, rgba(60,140,255,0.35), transparent)`, animation: 'shimmer 1.4s infinite' }} />
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 12, color: P.muted }}>{loadingMsg || 'Fetching transcript'}</span>
-                      <span style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-                        {[0, 1, 2].map(i => (
-                          <span key={i} style={{ width: 3, height: 3, borderRadius: '50%', background: P.muted, display: 'inline-block', animation: `dot-flicker 1.2s ease-in-out ${i * 0.2}s infinite` }} />
-                        ))}
+                <div className="fade-up" style={{ marginTop: 18 }}>
+                  {/* Segmented pill progress bar */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 4 : 5 }}>
+
+                    {/* Left anchor pill — animated ScribeSnap wave */}
+                    <div style={{
+                      width: isMobile ? 48 : 58, height: 30, borderRadius: 999, flexShrink: 0,
+                      background: 'rgba(60,140,255,0.1)',
+                      border: '1px solid rgba(60,140,255,0.22)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      overflow: 'hidden',
+                    }}>
+                      <ScribeSnapWaveLoader width={isMobile ? 34 : 42} />
+                    </div>
+
+                    {/* 5 segment pills — filled by loadingPercent */}
+                    {Array.from({ length: 5 }).map((_, i) => {
+                      const segStart = i * 20;
+                      const segEnd   = (i + 1) * 20;
+                      const isComplete = loadingPercent >= segEnd;
+                      const isActive   = loadingPercent > segStart && !isComplete;
+                      const fillPct    = isActive ? ((loadingPercent - segStart) / 20) * 100 : 0;
+                      return (
+                        <div key={i} style={{
+                          flex: 1, height: 30, borderRadius: 999, overflow: 'hidden', position: 'relative',
+                          background: isComplete ? `linear-gradient(90deg, ${P.accent}, #1f6bff)` : 'rgba(29,29,31,0.08)',
+                          transition: 'background 0.3s ease',
+                        }}>
+                          {isActive && (
+                            <div style={{
+                              position: 'absolute', left: 0, top: 0, height: '100%',
+                              width: `${fillPct}%`,
+                              background: `linear-gradient(90deg, #7bd3ff, ${P.accent})`,
+                              borderRadius: 999,
+                              transition: 'width 0.55s cubic-bezier(0.4,0,0.2,1)',
+                            }} />
+                          )}
+                          {/* shimmer sweep on active segment */}
+                          {isActive && (
+                            <div style={{
+                              position: 'absolute', inset: 0,
+                              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)',
+                              animation: 'shimmer 1.6s infinite',
+                              pointerEvents: 'none',
+                            }} />
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Right anchor pill — percent */}
+                    <div style={{
+                      width: isMobile ? 42 : 50, height: 30, borderRadius: 999, flexShrink: 0,
+                      background: loadingPercent >= 100 ? `linear-gradient(90deg, ${P.accent}, #1f6bff)` : 'rgba(29,29,31,0.06)',
+                      border: loadingPercent >= 100 ? 'none' : `1px solid ${P.border}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'all 0.3s ease',
+                    }}>
+                      <span style={{
+                        fontSize: 11, fontWeight: 700, letterSpacing: '0.02em',
+                        color: loadingPercent >= 100 ? '#fff' : P.muted,
+                      }}>
+                        {loadingPercent > 0 ? `${loadingPercent}%` : '···'}
                       </span>
                     </div>
-                    {loadingPercent > 0 && (
-                      <span style={{ fontSize: 11, color: P.muted }}>{loadingPercent}%</span>
-                    )}
+                  </div>
+
+                  {/* Status message */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 9 }}>
+                    <span style={{ fontSize: 12, color: P.muted }}>{loadingMsg || 'Fetching transcript'}</span>
+                    <span style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+                      {[0, 1, 2].map(i => (
+                        <span key={i} style={{ width: 3, height: 3, borderRadius: '50%', background: P.muted, display: 'inline-block', animation: `dot-flicker 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+                      ))}
+                    </span>
                   </div>
                 </div>
               )}
