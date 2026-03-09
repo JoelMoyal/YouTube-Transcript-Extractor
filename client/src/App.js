@@ -4219,6 +4219,21 @@ const App = () => {
       : 'ScribeSnap | Free YouTube Transcript Extractor with AI Summaries';
   }, [currentTitle]);
 
+  useEffect(() => {
+    if (transcript) {
+      window.history.replaceState({}, '', '/studio');
+      // Noindex the studio so Google ignores it (no content for crawlers)
+      if (!document.querySelector('meta[data-studio-noindex]')) {
+        const m = document.createElement('meta');
+        m.name = 'robots'; m.content = 'noindex'; m.dataset.studioNoindex = '1';
+        document.head.appendChild(m);
+      }
+    } else {
+      window.history.replaceState({}, '', '/');
+      document.querySelector('meta[data-studio-noindex]')?.remove();
+    }
+  }, [transcript]);
+
   // Remove the SEO loading overlay once React has mounted
   useEffect(() => { document.getElementById('app-loader')?.remove(); }, []);
 

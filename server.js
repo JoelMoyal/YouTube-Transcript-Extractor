@@ -1244,6 +1244,12 @@ app.get('/transcribe-video', (_req, res) => {
   res.sendFile(path.join(__dirname, 'client/public', 'transcribe-video.html'));
 });
 
+// Studio route — serves the SPA (noindex handled client-side)
+app.get('/studio', (_req, res) => {
+  res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+});
+
 // Unknown web routes get branded 404 page
 app.get('*', (_req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'client/build', '404.html'));
