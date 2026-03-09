@@ -8088,14 +8088,9 @@ const App = () => {
                   <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px' }}>
                     {/* Top bar */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(245,158,11,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D97706' }}>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-                        </div>
-                        <div>
-                          <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Flashcards</div>
-                          <div style={{ fontSize: 11.5, color: P.muted }}>{flashcardKnown.size} / {flashcards.length} known</div>
-                        </div>
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Flashcards</div>
+                        <div style={{ fontSize: 11.5, color: P.muted }}>{flashcardKnown.size} / {flashcards.length} known</div>
                       </div>
                       <button
                         onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
@@ -8204,14 +8199,9 @@ const App = () => {
                     ) : summary ? (
                       <div style={{ maxWidth: 700, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <div style={{ width: 34, height: 34, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.accent }}>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            </div>
-                            <div>
-                              <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Summary</div>
-                              <div style={{ fontSize: 11.5, color: P.muted }}>AI-generated from transcript</div>
-                            </div>
+                          <div>
+                            <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Summary</div>
+                            <div style={{ fontSize: 11.5, color: P.muted }}>AI-generated from transcript</div>
                           </div>
                           <div style={{ display: 'flex', gap: 6 }}>
                             <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
@@ -8225,7 +8215,21 @@ const App = () => {
                             >Clear</button>
                           </div>
                         </div>
-                        <div style={{ padding: '18px 20px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)', fontSize: 14, lineHeight: 1.8, color: P.ink, whiteSpace: 'pre-wrap' }}>{summary}</div>
+                        <div style={{ padding: '20px 22px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
+                          {summary.split('\n').filter(l => l.trim()).map((line, i) => {
+                            const isBullet = /^[\s]*[•\-\*]/.test(line);
+                            const text = line.replace(/^[\s•\-\*]+/, '').trim();
+                            if (!text) return null;
+                            return isBullet ? (
+                              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
+                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, flexShrink: 0, marginTop: 8 }} />
+                                <div style={{ fontSize: 14, lineHeight: 1.7, color: P.ink }}>{text}</div>
+                              </div>
+                            ) : (
+                              <div key={i} style={{ fontSize: 14, lineHeight: 1.7, color: P.ink, marginBottom: 8 }}>{text}</div>
+                            );
+                          })}
+                        </div>
                       </div>
                     ) : null}
                   </div>
@@ -8243,14 +8247,9 @@ const App = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 700, margin: '0 auto' }}>
                           {/* Header */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.success }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                              </div>
-                              <div>
-                                <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Study Guide</div>
-                                <div style={{ fontSize: 11.5, color: P.muted }}>AI-generated from transcript</div>
-                              </div>
+                            <div>
+                              <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Study Guide</div>
+                              <div style={{ fontSize: 11.5, color: P.muted }}>AI-generated from transcript</div>
                             </div>
                             <div style={{ display: 'flex', gap: 6 }}>
                               <button onClick={() => setStudyGuideFull(true)}
@@ -8271,14 +8270,14 @@ const App = () => {
                           </div>
 
                           {/* Overview */}
-                          <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
-                            <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 8 }}>Overview</div>
-                            <div style={{ fontSize: 14, lineHeight: 1.7, color: P.ink }}>{studyGuide.overview}</div>
+                          <div style={{ paddingTop: 16, borderTop: `3px solid ${P.success}` }}>
+                            <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 10 }}>Overview</div>
+                            <div style={{ fontSize: 14.5, lineHeight: 1.75, color: P.ink }}>{studyGuide.overview}</div>
                           </div>
 
                           {/* Learning Objectives */}
                           {studyGuide.objectives?.length > 0 && (
-                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
+                            <div style={{ padding: '20px 22px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
                               <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Learning Objectives</div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {studyGuide.objectives.map((obj, i) => (
@@ -8295,23 +8294,22 @@ const App = () => {
 
                           {/* Key Concepts */}
                           {studyGuide.keyConcepts?.length > 0 && (
-                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
-                              <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Key Concepts</div>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                {studyGuide.keyConcepts.map((kc, i) => (
-                                  <div key={i} style={{ paddingBottom: i < studyGuide.keyConcepts.length - 1 ? 10 : 0, borderBottom: i < studyGuide.keyConcepts.length - 1 ? `1px solid ${P.border}` : 'none' }}>
-                                    <span style={{ fontSize: 13.5, fontWeight: 700, color: P.success }}>{kc.term}</span>
-                                    <span style={{ fontSize: 13.5, color: P.muted }}> — </span>
-                                    <span style={{ fontSize: 13.5, color: P.ink, lineHeight: 1.6 }}>{kc.definition}</span>
-                                  </div>
-                                ))}
+                            <div style={{ background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)', overflow: 'hidden' }}>
+                              <div style={{ padding: '14px 20px 12px', borderBottom: `1px solid ${P.border}` }}>
+                                <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Key Concepts</div>
                               </div>
+                              {studyGuide.keyConcepts.map((kc, i) => (
+                                <div key={i} style={{ display: 'flex', gap: 0, padding: '12px 20px', borderBottom: i < studyGuide.keyConcepts.length - 1 ? `1px solid ${P.border}` : 'none', alignItems: 'flex-start' }}>
+                                  <div style={{ minWidth: 140, flexShrink: 0, fontSize: 13, fontWeight: 700, color: P.success, paddingRight: 16, paddingTop: 1 }}>{kc.term}</div>
+                                  <div style={{ fontSize: 13.5, color: P.ink, lineHeight: 1.65 }}>{kc.definition}</div>
+                                </div>
+                              ))}
                             </div>
                           )}
 
                           {/* Sections */}
                           {studyGuide.sections?.length > 0 && (
-                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
+                            <div style={{ padding: '20px 22px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
                               <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Sections</div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                 {studyGuide.sections.map((sec, i) => (
@@ -8336,16 +8334,16 @@ const App = () => {
 
                           {/* Review Questions */}
                           {studyGuide.reviewQuestions?.length > 0 && (
-                            <div style={{ padding: '16px 18px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
-                              <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 12 }}>Review Questions</div>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                {studyGuide.reviewQuestions.map((q, i) => (
-                                  <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', background: P.paper, borderRadius: 8 }}>
-                                    <span style={{ fontSize: 12, fontWeight: 700, color: P.success, flexShrink: 0, marginTop: 1 }}>Q{i + 1}</span>
-                                    <span style={{ fontSize: 13.5, lineHeight: 1.6, color: P.ink }}>{q}</span>
-                                  </div>
-                                ))}
+                            <div style={{ background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)', overflow: 'hidden' }}>
+                              <div style={{ padding: '14px 20px 12px', borderBottom: `1px solid ${P.border}` }}>
+                                <div style={{ fontSize: 10.5, fontWeight: 700, color: P.success, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Review Questions</div>
                               </div>
+                              {studyGuide.reviewQuestions.map((q, i) => (
+                                <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '13px 20px', borderBottom: i < studyGuide.reviewQuestions.length - 1 ? `1px solid ${P.border}` : 'none', borderLeft: `3px solid rgba(15,118,110,0.3)` }}>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: P.success, flexShrink: 0, marginTop: 2, letterSpacing: '0.03em' }}>Q{i + 1}</span>
+                                  <span style={{ fontSize: 13.5, lineHeight: 1.65, color: P.ink }}>{q}</span>
+                                </div>
+                              ))}
                             </div>
                           )}
 
@@ -8432,13 +8430,13 @@ const App = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 720, margin: '0 auto' }}>
                           {/* Header */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                              <div style={{ width: 36, height: 36, borderRadius: 11, background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED' }}>
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                              </div>
-                              <div>
-                                <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Academic Insights</div>
-                                <div style={{ fontSize: 11.5, color: P.muted }}>AI-extracted from transcript</div>
+                            <div>
+                              <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Academic Insights</div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: 11.5, color: P.muted }}>AI-extracted from transcript</span>
+                                {ai.references?.length > 0 && <><span style={{ fontSize: 11.5, color: P.border }}>·</span><span style={{ fontSize: 11.5, color: '#7C3AED', fontWeight: 600 }}>{ai.references.length} refs</span></>}
+                                {ai.claims?.length > 0 && <><span style={{ fontSize: 11.5, color: P.border }}>·</span><span style={{ fontSize: 11.5, color: P.success, fontWeight: 600 }}>{supportedCount} supported</span>{unsupportedCount > 0 && <><span style={{ fontSize: 11.5, color: P.border }}>·</span><span style={{ fontSize: 11.5, color: P.error, fontWeight: 600 }}>{unsupportedCount} unsupported</span></>}</>}
+                                {ai.glossary?.length > 0 && <><span style={{ fontSize: 11.5, color: P.border }}>·</span><span style={{ fontSize: 11.5, color: '#7C3AED', fontWeight: 600 }}>{ai.glossary.length} terms</span></>}
                               </div>
                             </div>
                             <div style={{ display: 'flex', gap: 6 }}>
@@ -8454,33 +8452,6 @@ const App = () => {
                                 onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
                                 onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}>Clear</button>
                             </div>
-                          </div>
-
-                          {/* Stats bar */}
-                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                            {ai.references?.length > 0 && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', background: 'rgba(124,58,237,0.07)', borderRadius: 99, border: '1px solid rgba(124,58,237,0.15)' }}>
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED' }}>{ai.references.length} References</span>
-                              </div>
-                            )}
-                            {ai.claims?.length > 0 && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', background: 'rgba(29,29,31,0.04)', borderRadius: 99, border: `1px solid ${P.border}` }}>
-                                <span style={{ fontSize: 11.5, fontWeight: 600, color: P.success }}>{supportedCount} supported</span>
-                                <span style={{ width: 1, height: 10, background: P.border }} />
-                                <span style={{ fontSize: 11.5, fontWeight: 600, color: unsupportedCount > 0 ? P.error : P.muted }}>{unsupportedCount} unsupported</span>
-                              </div>
-                            )}
-                            {ai.glossary?.length > 0 && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', background: 'rgba(124,58,237,0.07)', borderRadius: 99, border: '1px solid rgba(124,58,237,0.15)' }}>
-                                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED' }}>{ai.glossary.length} Terms</span>
-                              </div>
-                            )}
-                            {ai.researchGaps?.length > 0 && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', background: 'rgba(124,58,237,0.07)', borderRadius: 99, border: '1px solid rgba(124,58,237,0.15)' }}>
-                                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED' }}>{ai.researchGaps.length} Open Questions</span>
-                              </div>
-                            )}
                           </div>
 
                           {/* References */}
