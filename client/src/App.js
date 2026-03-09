@@ -6563,8 +6563,9 @@ const App = () => {
               containerClassName="absolute inset-0 h-full"
               backgroundFill="#F6F2EA"
               colors={['rgba(60,140,255,0.55)', 'rgba(100,170,255,0.45)', 'rgba(120,90,255,0.35)', 'rgba(178,194,214,0.6)', 'rgba(60,140,255,0.45)']}
-              waveOpacity={0.4}
-              blur={18}
+              waveWidth={80}
+              waveOpacity={0.5}
+              blur={12}
               speed="slow"
             />
 
