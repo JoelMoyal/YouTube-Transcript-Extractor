@@ -189,22 +189,7 @@ const PLATFORM_BRAND = {
   wistia:      { icon: '#54ABCC', stat: '#54ABCC', bg: 'rgba(84,171,204,0.12)', bgSoft: 'rgba(84,171,204,0.09)' },
 };
 
-const HERO_TRUST_LOGO_COLUMNS = {
-  left: [
-    { platform: 'youtube', label: 'YouTube' },
-    { platform: 'vimeo', label: 'Vimeo' },
-    { platform: 'loom', label: 'Loom' },
-    { platform: 'dailymotion', label: 'Dailymotion' },
-    { platform: 'facebook', label: 'Facebook' },
-  ],
-  right: [
-    { platform: 'tiktok', label: 'TikTok' },
-    { platform: 'twitter', label: 'X' },
-    { platform: 'instagram', label: 'Instagram' },
-    { platform: 'wistia', label: 'Wistia' },
-    { platform: 'youtube', label: 'YouTube' },
-  ],
-};
+const HERO_TRUST_LOGOS = ['youtube', 'tiktok', 'instagram', 'twitter', 'vimeo', 'loom'];
 
 function getAuthRedirectUrl() {
   if (typeof window === 'undefined') return CANONICAL_APP_ORIGIN;
@@ -5638,46 +5623,41 @@ const App = () => {
           transform: translateY(-50%);
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 9px;
+          padding: 14px 0;
+          -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%);
         }
         .hero-trust-column.left {
-          left: max(10px, calc(50% - 760px));
+          left: max(8px, calc(50% - 748px));
         }
         .hero-trust-column.right {
-          right: max(10px, calc(50% - 760px));
+          right: max(8px, calc(50% - 748px));
         }
         .hero-trust-logo-chip {
-          display: inline-flex;
+          width: 30px;
+          height: 30px;
+          display: flex;
           align-items: center;
-          gap: 6px;
-          height: 27px;
-          min-width: 102px;
-          padding: 0 9px;
-          border-radius: 999px;
-          border: 1px solid rgba(73,112,182,0.12);
-          background: rgba(255,255,255,0.54);
-          box-shadow: 0 2px 10px rgba(29,29,31,0.05);
-          opacity: 0.45;
+          justify-content: center;
+          border-radius: 50%;
+          border: 1px solid rgba(73,112,182,0.1);
+          background: rgba(255,255,255,0.42);
+          box-shadow: 0 2px 8px rgba(29,29,31,0.04);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
         }
         .hero-trust-logo-icon {
           display: inline-flex;
-          width: 13px;
-          height: 13px;
+          width: 12px;
+          height: 12px;
           align-items: center;
           justify-content: center;
           filter: grayscale(1) saturate(0);
-          opacity: 0.72;
+          opacity: 0.58;
           flex-shrink: 0;
         }
-        .hero-trust-logo-label {
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
-          color: rgba(29,29,31,0.43);
-          white-space: nowrap;
-        }
-        @media (max-width: 1460px) {
+        @media (max-width: 1440px) {
           .hero-trust-columns {
             display: none;
           }
@@ -6558,22 +6538,28 @@ const App = () => {
 
             <div className="hero-trust-columns" aria-hidden="true">
               <div className="hero-trust-column left">
-                {HERO_TRUST_LOGO_COLUMNS.left.map((item) => (
-                  <div key={`hero-left-trust-${item.platform}-${item.label}`} className="hero-trust-logo-chip">
+                {HERO_TRUST_LOGOS.map((platform, idx) => (
+                  <div
+                    key={`hero-left-trust-${platform}-${idx}`}
+                    className="hero-trust-logo-chip"
+                    style={{ opacity: idx === 0 || idx === HERO_TRUST_LOGOS.length - 1 ? 0.3 : 0.44 }}
+                  >
                     <span className="hero-trust-logo-icon">
-                      <PlatformIcon platform={item.platform} size={13} />
+                      <PlatformIcon platform={platform} size={12} />
                     </span>
-                    <span className="hero-trust-logo-label">{item.label}</span>
                   </div>
                 ))}
               </div>
               <div className="hero-trust-column right">
-                {HERO_TRUST_LOGO_COLUMNS.right.map((item) => (
-                  <div key={`hero-right-trust-${item.platform}-${item.label}`} className="hero-trust-logo-chip">
+                {[...HERO_TRUST_LOGOS].reverse().map((platform, idx) => (
+                  <div
+                    key={`hero-right-trust-${platform}-${idx}`}
+                    className="hero-trust-logo-chip"
+                    style={{ opacity: idx === 0 || idx === HERO_TRUST_LOGOS.length - 1 ? 0.3 : 0.44 }}
+                  >
                     <span className="hero-trust-logo-icon">
-                      <PlatformIcon platform={item.platform} size={13} />
+                      <PlatformIcon platform={platform} size={12} />
                     </span>
-                    <span className="hero-trust-logo-label">{item.label}</span>
                   </div>
                 ))}
               </div>
