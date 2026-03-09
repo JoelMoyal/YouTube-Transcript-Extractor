@@ -7270,6 +7270,7 @@ const App = () => {
             {/* Features */}
             {/* Capability cards */}
             <div style={{
+              background: '#FAFBFF',
               backgroundImage: `linear-gradient(rgba(60,80,160,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(60,80,160,0.045) 1px, transparent 1px)`,
               backgroundSize: '40px 40px',
             }}><div style={{
@@ -7700,8 +7701,9 @@ const App = () => {
             </div>
             </div>
             {/* Testimonials */}
+            <div style={{ background: '#EDE8DF' }}>
             <BlurFade delay={0.15} yOffset={20}>
-            <div style={{ maxWidth: 820, margin: '0 auto', padding: isMobile ? '0 16px 48px' : '0 24px 64px' }}>
+            <div style={{ maxWidth: 820, margin: '0 auto', padding: isMobile ? '48px 16px 56px' : '72px 24px 80px' }}>
               <div style={{ textAlign: 'center', marginBottom: 28 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>What people say</div>
                 <h2 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em', margin: 0 }}>Loved by Researchers &amp; Builders</h2>
@@ -7746,6 +7748,7 @@ const App = () => {
               </div>
             </div>
             </BlurFade>
+            </div>{/* end testimonials bg */}
 
             {/* Recent transcripts */}
             {history.length > 0 && (
