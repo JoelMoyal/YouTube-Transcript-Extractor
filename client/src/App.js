@@ -6,6 +6,7 @@ import { BorderBeam } from './components/BorderBeam';
 import { AnimatedGradientText } from './components/AnimatedGradientText';
 import { ShimmerButton } from './components/ShimmerButton';
 import { BlurFade } from './components/BlurFade';
+import { WavyBackground } from './components/ui/wavy-background';
 
 ReactGA.initialize('G-34EYP3ZVZQ');
 ReactGA.send({ hitType: 'pageview', page: window.location.pathname });
@@ -6556,6 +6557,16 @@ const App = () => {
             <div className="hero-grad" style={{
               paddingBottom: 56,
             }}>
+
+            {/* Wavy animated background canvas */}
+            <WavyBackground
+              containerClassName="absolute inset-0 h-full"
+              backgroundFill="#F6F2EA"
+              colors={['rgba(60,140,255,0.55)', 'rgba(100,170,255,0.45)', 'rgba(120,90,255,0.35)', 'rgba(178,194,214,0.6)', 'rgba(60,140,255,0.45)']}
+              waveOpacity={0.4}
+              blur={18}
+              speed="slow"
+            />
 
             {/* Grain texture overlay */}
             <svg aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.045, pointerEvents: 'none', zIndex: 1 }}>

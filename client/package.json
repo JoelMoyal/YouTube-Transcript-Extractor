@@ -5,13 +5,16 @@
   "proxy": "http://localhost:4999",
   "dependencies": {
     "@supabase/supabase-js": "^2.97.0",
+    "clsx": "^2.1.1",
     "framer-motion": "^12.35.0",
     "indexes-of": "^1.0.1",
     "jspdf": "^4.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-ga4": "^2.1.0",
-    "react-scripts": "^5.0.1"
+    "react-scripts": "^5.0.1",
+    "simplex-noise": "^4.0.3",
+    "tailwind-merge": "^3.5.0"
   },
   "scripts": {
     "start": "react-scripts start",
