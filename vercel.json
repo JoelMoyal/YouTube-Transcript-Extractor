@@ -7,6 +7,28 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "server.js" },
+    { "src": "/youtube-transcript.html", "status": 301, "headers": { "Location": "/youtube-transcript" } },
+    { "src": "/youtube-summarizer.html", "status": 301, "headers": { "Location": "/youtube-summarizer" } },
+    { "src": "/vimeo-transcript.html", "status": 301, "headers": { "Location": "/vimeo-transcript" } },
+    { "src": "/tiktok-transcript.html", "status": 301, "headers": { "Location": "/tiktok-transcript" } },
+    { "src": "/loom-transcript.html", "status": 301, "headers": { "Location": "/loom-transcript" } },
+    { "src": "/instagram-transcript.html", "status": 301, "headers": { "Location": "/instagram-transcript" } },
+    { "src": "/facebook-transcript.html", "status": 301, "headers": { "Location": "/facebook-transcript" } },
+    { "src": "/twitter-transcript.html", "status": 301, "headers": { "Location": "/twitter-transcript" } },
+    { "src": "/transcribe-audio.html", "status": 301, "headers": { "Location": "/transcribe-audio" } },
+    { "src": "/transcribe-video.html", "status": 301, "headers": { "Location": "/transcribe-video" } },
+    { "src": "/privacy.html", "status": 301, "headers": { "Location": "/privacy" } },
+    { "src": "/youtube-transcript", "dest": "client/build/youtube-transcript.html" },
+    { "src": "/youtube-summarizer", "dest": "client/build/youtube-summarizer.html" },
+    { "src": "/vimeo-transcript", "dest": "client/build/vimeo-transcript.html" },
+    { "src": "/tiktok-transcript", "dest": "client/build/tiktok-transcript.html" },
+    { "src": "/loom-transcript", "dest": "client/build/loom-transcript.html" },
+    { "src": "/instagram-transcript", "dest": "client/build/instagram-transcript.html" },
+    { "src": "/facebook-transcript", "dest": "client/build/facebook-transcript.html" },
+    { "src": "/twitter-transcript", "dest": "client/build/twitter-transcript.html" },
+    { "src": "/transcribe-audio", "dest": "client/build/transcribe-audio.html" },
+    { "src": "/transcribe-video", "dest": "client/build/transcribe-video.html" },
+    { "src": "/privacy", "dest": "client/build/privacy.html" },
     { "src": "/(.*)", "dest": "client/build/$1" }
   ]
 }
