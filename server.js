@@ -1196,6 +1196,17 @@ app.all('/api/*', (_req, res) => {
   res.status(404).json({ error: 'API route not found' });
 });
 
+// Redirect .html URLs to clean URLs (prevents duplicate content)
+const htmlRedirects = [
+  'youtube-transcript', 'youtube-summarizer', 'vimeo-transcript',
+  'tiktok-transcript', 'loom-transcript', 'instagram-transcript',
+  'facebook-transcript', 'twitter-transcript', 'transcribe-audio',
+  'transcribe-video', 'privacy',
+];
+htmlRedirects.forEach(slug => {
+  app.get(`/${slug}.html`, (_req, res) => res.redirect(301, `/${slug}`));
+});
+
 // Privacy policy static route
 app.get('/privacy', (_req, res) => {
   res.sendFile(path.join(__dirname, 'client/build', 'privacy.html'));
