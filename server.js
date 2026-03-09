@@ -838,7 +838,7 @@ app.post('/api/summarize', async (req, res) => {
   const source = `${platformLabels[platform] || 'video'} video`;
   try {
     const text = await aiComplete(
-      `Summarize the following ${source} transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 15000)}`
+      `Summarize the following ${source} transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 8000)}`
     );
     res.json({ summary: text });
   } catch (err) {
