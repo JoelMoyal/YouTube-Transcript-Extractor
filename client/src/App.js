@@ -4158,7 +4158,7 @@ const App = () => {
   const [dragTabKey, setDragTabKey]           = useState(null);
   const [dragOverKey, setDragOverKey]         = useState(null);
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
-  const [recentOpen, setRecentOpen]               = useState(false);
+  const [recentOpen, setRecentOpen]               = useState(true);
   const [hideMobileNavForFooter, setHideMobileNavForFooter] = useState(false);
   const isMobile  = windowWidth < MOBILE_BREAKPOINT;
   const isTablet  = windowWidth >= MOBILE_BREAKPOINT && windowWidth < TABLET_BREAKPOINT;
