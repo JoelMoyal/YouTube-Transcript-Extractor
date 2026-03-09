@@ -838,7 +838,7 @@ app.post('/api/summarize', async (req, res) => {
   const source = `${platformLabels[platform] || 'video'} video`;
   try {
     const text = await aiComplete(
-      `Summarize the following ${source} transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 8000)}`
+      `Summarize the following ${source} transcript into clear bullet points. Focus on the key topics, main arguments, and important takeaways. Be concise.\n\nTranscript:\n${transcript.slice(0, 15000)}`
     );
     res.json({ summary: text });
   } catch (err) {
@@ -890,7 +890,7 @@ app.post('/api/flashcards', async (req, res) => {
       prompt = `You are creating high-quality study flashcards from a YouTube video transcript.\n\nFirst, assess the content:\n- Is this educational content (tutorial, lecture, explainer, documentary, interview with learnable information)? If yes, generate flashcards.\n- Is this non-educational content (music, entertainment, vlog, comedy, fiction, etc.) with no meaningful concepts to study? If yes, return: {"noMore":true,"reason":"<one sentence explaining why — e.g. this is a music video with no educational concepts>"}\n\nIf generating cards:\n- Generate one card per distinct learnable concept the transcript contains — however many that is\n- A 2-minute explainer may warrant 2-3 cards. A 1-hour lecture may warrant 20+. Let the content decide.\n- Each card covers a DIFFERENT concept — no duplicates or rephrasing\n- Only create cards for concepts clearly explained in the transcript — do not invent\n- Skip trivial or obvious questions\n- "answer" should be concise but complete (1-3 sentences)\n- "topic" is a short 1-3 word category label\n\nTranscript:\n${transcript.slice(0, 12000)}\n\nReturn ONLY a JSON array OR the noMore object — no markdown, no explanation.\nFormat: [{"question":"...","answer":"...","topic":"..."},...]`;
     }
 
-    const raw = await aiComplete(prompt, 1800);
+    const raw = await aiComplete(prompt, 3000);
 
     // Check for noMore signal first
     const noMoreMatch = raw.match(/\{\s*"noMore"\s*:\s*true[\s\S]*?\}/);
@@ -942,8 +942,8 @@ app.post('/api/academic-insights', async (req, res) => {
 
   try {
     const raw = await aiComplete(
-      `You extract academic information from video transcripts. Return ONLY a valid JSON object with exactly these fields — no markdown, no explanation:\n- "references": array of objects with "author" (string, e.g. "Vaswani et al." or "John Smith"), "year" (string or null), "title" (string or null), "type" ("paper"|"book"|"article"|"other"). Include every academic work, author, or publication mentioned. Empty array if none.\n- "claims": array of objects with "claim" (string — the specific claim made), "supported" (boolean — true if evidence or data is cited alongside it, false if stated without support), "evidence" (string or null — what evidence was provided). Include 3-8 notable claims only.\n- "glossary": array of objects with "term" (string) and "definition" (string, 1-2 sentences derived from the transcript context). Include 4-10 domain-specific terms that are defined or explained. Empty array if none.\n- "researchGaps": array of strings — paraphrases of places where the speaker mentions open problems, future work, unsolved questions, or limitations. Empty array if none.\n\nTranscript:\n${transcript.slice(0, 8000)}\n\nReturn JSON object only.`,
-      2000
+      `You extract academic information from video transcripts. Return ONLY a valid JSON object with exactly these fields — no markdown, no explanation:\n- "references": array of objects with "author" (string, e.g. "Vaswani et al." or "John Smith"), "year" (string or null), "title" (string or null), "type" ("paper"|"book"|"article"|"other"). Include every academic work, author, or publication mentioned. Empty array if none.\n- "claims": array of objects with "claim" (string — the specific claim made), "supported" (boolean — true if evidence or data is cited alongside it, false if stated without support), "evidence" (string or null — what evidence was provided). Include 3-8 notable claims only.\n- "glossary": array of objects with "term" (string) and "definition" (string, 1-2 sentences derived from the transcript context). Include 4-10 domain-specific terms that are defined or explained. Empty array if none.\n- "researchGaps": array of strings — paraphrases of places where the speaker mentions open problems, future work, unsolved questions, or limitations. Empty array if none.\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nReturn JSON object only.`,
+      3000
     );
     const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
     const match = stripped.match(/\{[\s\S]*\}/);

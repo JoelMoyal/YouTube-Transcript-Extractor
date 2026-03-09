@@ -8199,9 +8199,14 @@ const App = () => {
                     ) : summary ? (
                       <div style={{ maxWidth: 700, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <div>
-                            <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Summary</div>
-                            <div style={{ fontSize: 11.5, color: P.muted }}>AI-generated from transcript</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ width: 34, height: 34, borderRadius: 10, background: P.accentLight, display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.accent }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Summary</div>
+                              <div style={{ fontSize: 11.5, color: P.muted }}>AI-generated from transcript</div>
+                            </div>
                           </div>
                           <div style={{ display: 'flex', gap: 6 }}>
                             <button onClick={() => { navigator.clipboard.writeText(summary).then(() => { setSummaryCopied(true); setTimeout(() => setSummaryCopied(false), 2000); }); }}
@@ -8215,21 +8220,7 @@ const App = () => {
                             >Clear</button>
                           </div>
                         </div>
-                        <div style={{ padding: '20px 22px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)' }}>
-                          {summary.split('\n').filter(l => l.trim()).map((line, i) => {
-                            const isBullet = /^[\s]*[•\-\*]/.test(line);
-                            const text = line.replace(/^[\s•\-\*]+/, '').trim();
-                            if (!text) return null;
-                            return isBullet ? (
-                              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
-                                <div style={{ width: 6, height: 6, borderRadius: '50%', background: P.accent, flexShrink: 0, marginTop: 8 }} />
-                                <div style={{ fontSize: 14, lineHeight: 1.7, color: P.ink }}>{text}</div>
-                              </div>
-                            ) : (
-                              <div key={i} style={{ fontSize: 14, lineHeight: 1.7, color: P.ink, marginBottom: 8 }}>{text}</div>
-                            );
-                          })}
-                        </div>
+                        <div style={{ padding: '18px 20px', background: '#fff', borderRadius: 12, border: `1px solid ${P.border}`, boxShadow: '0 1px 4px rgba(29,29,31,0.04)', fontSize: 14, lineHeight: 1.8, color: P.ink, whiteSpace: 'pre-wrap' }}>{summary}</div>
                       </div>
                     ) : null}
                   </div>
@@ -8430,13 +8421,13 @@ const App = () => {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 720, margin: '0 auto' }}>
                           {/* Header */}
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <div>
-                              <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Academic Insights</div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: 11.5, color: P.muted }}>AI-extracted from transcript</span>
-                                {ai.references?.length > 0 && <><span style={{ fontSize: 11.5, color: P.border }}>·</span><span style={{ fontSize: 11.5, color: '#7C3AED', fontWeight: 600 }}>{ai.references.length} refs</span></>}
-                                {ai.claims?.length > 0 && <><span style={{ fontSize: 11.5, color: P.border }}>·</span><span style={{ fontSize: 11.5, color: P.success, fontWeight: 600 }}>{supportedCount} supported</span>{unsupportedCount > 0 && <><span style={{ fontSize: 11.5, color: P.border }}>·</span><span style={{ fontSize: 11.5, color: P.error, fontWeight: 600 }}>{unsupportedCount} unsupported</span></>}</>}
-                                {ai.glossary?.length > 0 && <><span style={{ fontSize: 11.5, color: P.border }}>·</span><span style={{ fontSize: 11.5, color: '#7C3AED', fontWeight: 600 }}>{ai.glossary.length} terms</span></>}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div style={{ width: 36, height: 36, borderRadius: 11, background: 'rgba(124,58,237,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7C3AED' }}>
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                              </div>
+                              <div>
+                                <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Academic Insights</div>
+                                <div style={{ fontSize: 11.5, color: P.muted }}>AI-extracted from transcript</div>
                               </div>
                             </div>
                             <div style={{ display: 'flex', gap: 6 }}>
@@ -8452,6 +8443,33 @@ const App = () => {
                                 onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
                                 onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; }}>Clear</button>
                             </div>
+                          </div>
+
+                          {/* Stats bar */}
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            {ai.references?.length > 0 && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', background: 'rgba(124,58,237,0.07)', borderRadius: 99, border: '1px solid rgba(124,58,237,0.15)' }}>
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED' }}>{ai.references.length} References</span>
+                              </div>
+                            )}
+                            {ai.claims?.length > 0 && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 11px', background: 'rgba(29,29,31,0.04)', borderRadius: 99, border: `1px solid ${P.border}` }}>
+                                <span style={{ fontSize: 11.5, fontWeight: 600, color: P.success }}>{supportedCount} supported</span>
+                                <span style={{ width: 1, height: 10, background: P.border }} />
+                                <span style={{ fontSize: 11.5, fontWeight: 600, color: unsupportedCount > 0 ? P.error : P.muted }}>{unsupportedCount} unsupported</span>
+                              </div>
+                            )}
+                            {ai.glossary?.length > 0 && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', background: 'rgba(124,58,237,0.07)', borderRadius: 99, border: '1px solid rgba(124,58,237,0.15)' }}>
+                                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED' }}>{ai.glossary.length} Terms</span>
+                              </div>
+                            )}
+                            {ai.researchGaps?.length > 0 && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', background: 'rgba(124,58,237,0.07)', borderRadius: 99, border: '1px solid rgba(124,58,237,0.15)' }}>
+                                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED' }}>{ai.researchGaps.length} Open Questions</span>
+                              </div>
+                            )}
                           </div>
 
                           {/* References */}
