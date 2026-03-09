@@ -6661,140 +6661,8 @@ const App = () => {
               }}>
                 <BorderBeam size={280} duration={10} colorFrom="rgba(60,140,255,0.7)" colorTo="rgba(123,211,255,0)" borderWidth={1.5} />
 
-                {/* ── Source mode selector ── */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '0 2px' }}>
-                    <span style={{
-                      fontSize: 11.5,
-                      letterSpacing: '0.09em',
-                      textTransform: 'uppercase',
-                      fontWeight: 700,
-                      color: 'rgba(29,29,31,0.54)',
-                    }}>
-                      Input method
-                    </span>
-                    <span style={{ fontSize: 11.5, color: P.muted, whiteSpace: 'nowrap' }}>
-                      {inputMode === 'url' ? 'For public video links' : 'For local media files'}
-                    </span>
-                  </div>
-                  <div
-                    role="tablist"
-                    aria-label="Select input method"
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-                      width: '100%',
-                      background: 'linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(246,242,234,0.9) 100%)',
-                      border: '1px solid rgba(136,142,151,0.25)',
-                      borderRadius: isMobile ? 14 : 16,
-                      padding: isMobile ? 4 : 5,
-                      gap: isMobile ? 4 : 6,
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.88)',
-                    }}
-                  >
-                    {[
-                      {
-                        id: 'url',
-                        icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
-                        label: 'Paste URL',
-                        sub: 'YouTube, Vimeo, TikTok, X',
-                      },
-                      {
-                        id: 'upload',
-                        icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
-                        label: isMobile ? 'Upload' : 'Upload File',
-                        sub: 'MP4, MP3, MOV, WAV',
-                      },
-                    ].map(({ id, icon, label, sub }) => {
-                      const active = inputMode === id;
-                      return (
-                        <button
-                          key={id}
-                          type="button"
-                          role="tab"
-                          aria-selected={active}
-                          aria-controls={`input-panel-${id}`}
-                          onClick={() => setInputMode(id)}
-                          onKeyDown={e => {
-                            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-                            e.preventDefault();
-                            const order = ['url', 'upload'];
-                            const nextIdx = (order.indexOf(id) + (e.key === 'ArrowRight' ? 1 : -1) + order.length) % order.length;
-                            setInputMode(order[nextIdx]);
-                          }}
-                          style={{
-                            width: '100%',
-                            border: active ? '1px solid rgba(60,140,255,0.42)' : '1px solid transparent',
-                            borderRadius: isMobile ? 11 : 12,
-                            background: active
-                              ? 'linear-gradient(145deg, rgba(255,255,255,0.96) 0%, rgba(240,247,255,0.94) 100%)'
-                              : 'transparent',
-                            boxShadow: active ? '0 8px 16px rgba(60,140,255,0.16), inset 0 1px 0 rgba(255,255,255,0.92)' : 'none',
-                            color: active ? P.accentHover : '#636973',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: isMobile ? 8 : 10,
-                            padding: isMobile ? '10px 10px' : '11px 12px',
-                            textAlign: 'left',
-                            cursor: 'pointer',
-                            transition: 'all 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)',
-                            transform: active ? 'translateY(-1px)' : 'translateY(0)',
-                            animation: active ? 'tabHighlight 0.45s ease-out' : 'none',
-                          }}
-                          onMouseEnter={e => {
-                            if (active) return;
-                            e.currentTarget.style.background = 'rgba(255,255,255,0.56)';
-                            e.currentTarget.style.color = '#48505C';
-                          }}
-                          onMouseLeave={e => {
-                            if (active) return;
-                            e.currentTarget.style.background = 'transparent';
-                            e.currentTarget.style.color = '#636973';
-                          }}
-                        >
-                          <span style={{
-                            width: isMobile ? 28 : 30,
-                            height: isMobile ? 28 : 30,
-                            borderRadius: 9,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                            background: active ? 'rgba(60,140,255,0.18)' : 'rgba(29,29,31,0.06)',
-                            color: active ? P.accentHover : P.muted,
-                            transition: 'all 0.18s',
-                          }}>
-                            {icon}
-                          </span>
-                          <span style={{ minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1 }}>
-                            <span style={{ fontSize: isMobile ? 13.5 : 14, fontWeight: active ? 700 : 600, lineHeight: 1.1, whiteSpace: 'nowrap' }}>
-                              {label}
-                            </span>
-                            {!isMobile && (
-                              <span style={{ fontSize: 11, color: active ? 'rgba(31,107,255,0.84)' : 'rgba(99,105,114,0.86)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
-                                {sub}
-                              </span>
-                            )}
-                          </span>
-                          {active && (
-                            <span style={{
-                              marginLeft: 'auto',
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              background: P.accent,
-                              boxShadow: '0 0 0 4px rgba(60,140,255,0.14)',
-                              flexShrink: 0,
-                            }} />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
                 {/* ── URL row ── */}
-                {inputMode === 'url' && <div id="input-panel-url" style={{ display: 'flex', gap: isMobile ? 10 : 12, flexDirection: isMobile ? 'column' : 'row' }}>
+                {inputMode === 'url' && <div style={{ display: 'flex', gap: isMobile ? 10 : 12, flexDirection: isMobile ? 'column' : 'row' }}>
                   <div style={{
                     flex: 1, display: 'flex', alignItems: 'center', gap: 12,
                     padding: isMobile ? '16px 18px' : '20px 22px',
@@ -6865,7 +6733,7 @@ const App = () => {
                 </div>}
 
                 {/* ── Upload zone ── */}
-                {inputMode === 'upload' && <div id="input-panel-upload" style={{ display: 'flex', gap: isMobile ? 10 : 12, flexDirection: isMobile ? 'column' : 'row' }}>
+                {inputMode === 'upload' && <div style={{ display: 'flex', gap: isMobile ? 10 : 12, flexDirection: isMobile ? 'column' : 'row' }}>
                   {/* Hidden native file input */}
                   <input
                     ref={fileInputRef}
@@ -6984,6 +6852,49 @@ const App = () => {
                     mp4 · mov · mp3 · wav · m4a · max 500 MB
                   </p>
                 )}
+
+                {/* ── Segmented toggle ── */}
+                <div style={{
+                  display: 'flex', width: '100%',
+                  background: P.paper, border: `1px solid ${P.border}`,
+                  borderRadius: 10, padding: 3, gap: 3,
+                }}>
+                  {[
+                    {
+                      id: 'url',
+                      icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+                      label: 'Paste URL',
+                    },
+                    {
+                      id: 'upload',
+                      icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+                      label: isMobile ? 'Upload' : 'Upload File',
+                    },
+                  ].map(({ id, icon, label }) => {
+                    const active = inputMode === id;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => setInputMode(id)}
+                        style={{
+                          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          gap: 6, padding: '8px 12px',
+                          borderRadius: 8, border: 'none',
+                          background: active ? P.surface : 'transparent',
+                          boxShadow: active ? '0 1px 3px rgba(29,29,31,0.08)' : 'none',
+                          color: active ? P.accent : P.muted,
+                          fontSize: 13.5, fontWeight: active ? 600 : 500,
+                          cursor: 'pointer', transition: 'all 0.15s',
+                          whiteSpace: 'nowrap',
+                        }}
+                        onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(29,29,31,0.04)'; }}
+                        onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        {icon}{label}
+                      </button>
+                    );
+                  })}
+                </div>
 
               </div>
 
