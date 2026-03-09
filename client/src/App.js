@@ -5543,6 +5543,7 @@ const App = () => {
     <>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes waveFlow { from { stroke-dashoffset: 320; } to { stroke-dashoffset: 0; } }
         @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
         @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity:0.4; } 40% { transform: scale(1); opacity:1; } }
         @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
@@ -6562,7 +6563,7 @@ const App = () => {
             <WavyBackground
               containerClassName="absolute inset-0 h-full"
               backgroundFill="#F6F2EA"
-              colors={['rgba(60,140,255,0.55)', 'rgba(100,170,255,0.45)', 'rgba(120,90,255,0.35)', 'rgba(178,194,214,0.6)', 'rgba(60,140,255,0.45)']}
+              colors={['rgba(60,140,255,0.45)', 'rgba(178,194,214,0.7)', 'rgba(200,185,165,0.5)', 'rgba(100,160,240,0.4)', 'rgba(210,200,185,0.6)']}
               waveWidth={80}
               waveOpacity={0.5}
               blur={12}
@@ -6608,8 +6609,8 @@ const App = () => {
                 <span style={{ position: 'relative', display: 'inline-block', color: P.accent }}>
                   Know more.
                   <svg aria-hidden="true" viewBox="0 0 310 18" preserveAspectRatio="none" style={{ position: 'absolute', left: '-5%', bottom: '-10px', width: '110%', height: '14px', pointerEvents: 'none', overflow: 'visible' }}>
-                    <path d="M 4 13 C 55 4, 115 17, 175 10 C 235 3, 278 16, 306 11" stroke={P.accent} strokeWidth="4.5" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
-                    <path d="M 4 13 C 55 5, 115 16, 175 10 C 235 4, 278 15, 306 11" stroke={P.accent} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
+                    <path d="M 4 13 C 55 4, 115 17, 175 10 C 235 3, 278 16, 306 11" stroke={P.accent} strokeWidth="4.5" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.9" strokeDasharray="320" style={{ animation: 'waveFlow 2.4s linear infinite' }} />
+                    <path d="M 4 13 C 55 5, 115 16, 175 10 C 235 4, 278 15, 306 11" stroke={P.accent} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" strokeDasharray="320" style={{ animation: 'waveFlow 2.4s linear infinite 0.4s' }} />
                   </svg>
                 </span>
               </h1>
