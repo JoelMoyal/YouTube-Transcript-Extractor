@@ -4685,6 +4685,7 @@ const App = () => {
         summary, timeline, showQA, qaMessages,
         flashcards, flashcardsExhausted, flashcardsExhaustedReason, expandedCards,
         studyGuide, sgMessages, activeTab,
+        academicInsights,
       };
     }
 
@@ -4700,6 +4701,12 @@ const App = () => {
     setCurrentChannel(entry.channel || '');
     setError(''); setSearch('');
 
+    // Reset all loading states
+    setSummarizing(false);
+    setFlashcardsLoading(false);
+    setStudyGuideLoading(false);
+    setAcademicInsightsLoading(false);
+
     // Restore cached AI state for this video, or clear if none
     const cached = aiCacheRef.current[entry.id];
     setSummary(cached?.summary ?? '');
@@ -4712,8 +4719,13 @@ const App = () => {
     setExpandedCards(cached?.expandedCards ?? new Set());
     setStudyGuide(cached?.studyGuide ?? null);
     setSgMessages(cached?.sgMessages ?? []);
+    setAcademicInsights(cached?.academicInsights ?? null);
+    setAcademicInsightsFull(false);
     setStudyGuideFull(false);
     setShowFlashcardModal(false);
+    setFlashcardIndex(0);
+    setFlashcardFlipped(false);
+    setFlashcardKnown(new Set());
     setActiveTab(target === 'transcript' ? (cached?.activeTab ?? 'transcript') : 'transcript');
     setSidebarTab('ai');
     setMobilePanel('transcript'); setHistoryDrawerOpen(false);
