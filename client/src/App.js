@@ -427,6 +427,30 @@ const SpinnerIcon = ({ size = 16 }) => (
     <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
   </svg>
 );
+// ScribeSnap wave logo animated loading indicator
+const ScribeSnapWaveLoader = ({ width = 140 }) => (
+  <svg viewBox="0 0 512 512" width={width} height={Math.round(width * 0.35)} style={{ display: 'block', overflow: 'visible' }}>
+    <defs>
+      <linearGradient id="ss-wave-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#7bd3ff" />
+        <stop offset="55%" stopColor="#3c8cff" />
+        <stop offset="100%" stopColor="#1f6bff" />
+      </linearGradient>
+    </defs>
+    <path
+      d="M38.96,254.18c36.17,0,36.17-58.43,72.35-58.43s36.17,147.48,72.35,147.48,36.17-239.3,72.35-239.3,36.17,333.91,72.35,333.91,36.17-264.35,72.35-264.35,36.17,80.7,72.35,80.7"
+      pathLength="1"
+      fill="none"
+      stroke="url(#ss-wave-grad)"
+      strokeWidth="26"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ animation: 'ss-wave-draw 2.4s cubic-bezier(0.5,0.1,0.5,1) infinite' }}
+    />
+    <circle cx="13.91" cy="254.18" r="13.91" fill="#7bd3ff" />
+    <circle cx="498.09" cy="254.18" r="13.91" fill="#1f6bff" />
+  </svg>
+);
 const YouTubeIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={PLATFORM_BRAND.youtube.icon}>
     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
@@ -5574,6 +5598,7 @@ const App = () => {
         @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
         @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
         @keyframes dot-flicker { 0%,80%,100% { opacity:0.2; transform:scale(0.8); } 40% { opacity:1; transform:scale(1); } }
+        @keyframes ss-wave-draw { 0%,2% { stroke-dasharray:0 1; } 88%,100% { stroke-dasharray:1 0; } }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         @keyframes logoFlipOut { 0% { transform: perspective(300px) rotateX(0deg); opacity:1; } 100% { transform: perspective(300px) rotateX(-80deg); opacity:0; } }
         @keyframes logoFlipIn  { 0% { transform: perspective(300px) rotateX(80deg);  opacity:0; } 100% { transform: perspective(300px) rotateX(0deg);   opacity:1; } }
@@ -6950,15 +6975,20 @@ const App = () => {
               {/* Loading */}
               {loading && (
                 <div className="fade-up" style={{ marginTop: 16 }}>
+                  {/* ScribeSnap wave logo draw animation */}
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+                    <ScribeSnapWaveLoader width={isMobile ? 100 : 130} />
+                  </div>
+                  {/* Progress bar */}
                   <div style={{ height: 3, borderRadius: 999, background: P.border, overflow: 'hidden', position: 'relative', marginBottom: 9 }}>
                     {loadingPercent > 0 ? (
                       <div style={{
                         height: '100%', width: `${loadingPercent}%`,
-                        background: `linear-gradient(90deg, ${P.accent}, #5B9BD5)`,
+                        background: `linear-gradient(90deg, #7bd3ff, ${P.accent})`,
                         borderRadius: 999, transition: 'width 0.5s ease',
                       }} />
                     ) : (
-                      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, transparent, rgba(45,108,223,0.4), transparent)`, animation: 'shimmer 1.4s infinite' }} />
+                      <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, transparent, rgba(60,140,255,0.35), transparent)`, animation: 'shimmer 1.4s infinite' }} />
                     )}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
