@@ -5615,7 +5615,7 @@ const App = () => {
           position: absolute;
           inset: 0;
           pointer-events: none;
-          z-index: 0;
+          z-index: 1;
         }
         .hero-trust-column {
           position: absolute;
@@ -5635,29 +5635,29 @@ const App = () => {
           right: max(8px, calc(50% - 748px));
         }
         .hero-trust-logo-chip {
-          width: 30px;
-          height: 30px;
+          width: 34px;
+          height: 34px;
           display: flex;
           align-items: center;
           justify-content: center;
           border-radius: 50%;
-          border: 1px solid rgba(73,112,182,0.1);
-          background: rgba(255,255,255,0.42);
-          box-shadow: 0 2px 8px rgba(29,29,31,0.04);
+          border: 1px solid rgba(73,112,182,0.14);
+          background: rgba(255,255,255,0.56);
+          box-shadow: 0 3px 10px rgba(29,29,31,0.06);
           backdrop-filter: blur(4px);
           -webkit-backdrop-filter: blur(4px);
         }
         .hero-trust-logo-icon {
           display: inline-flex;
-          width: 12px;
-          height: 12px;
+          width: 14px;
+          height: 14px;
           align-items: center;
           justify-content: center;
-          filter: grayscale(1) saturate(0);
-          opacity: 0.58;
+          filter: grayscale(0.35) saturate(0.7);
+          opacity: 0.8;
           flex-shrink: 0;
         }
-        @media (max-width: 1280px) {
+        @media (max-width: 1100px) {
           .hero-trust-columns {
             display: none;
           }
@@ -6542,7 +6542,7 @@ const App = () => {
                   <div
                     key={`hero-left-trust-${platform}-${idx}`}
                     className="hero-trust-logo-chip"
-                    style={{ opacity: idx === 0 || idx === HERO_TRUST_LOGOS.length - 1 ? 0.3 : 0.44 }}
+                    style={{ opacity: idx === 0 || idx === HERO_TRUST_LOGOS.length - 1 ? 0.42 : 0.62 }}
                   >
                     <span className="hero-trust-logo-icon">
                       <PlatformIcon platform={platform} size={12} />
@@ -6555,7 +6555,7 @@ const App = () => {
                   <div
                     key={`hero-right-trust-${platform}-${idx}`}
                     className="hero-trust-logo-chip"
-                    style={{ opacity: idx === 0 || idx === HERO_TRUST_LOGOS.length - 1 ? 0.3 : 0.44 }}
+                    style={{ opacity: idx === 0 || idx === HERO_TRUST_LOGOS.length - 1 ? 0.42 : 0.62 }}
                   >
                     <span className="hero-trust-logo-icon">
                       <PlatformIcon platform={platform} size={12} />
