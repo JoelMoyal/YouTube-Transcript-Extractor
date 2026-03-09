@@ -1002,7 +1002,7 @@ app.post('/api/discover', async (req, res) => {
       ? ssResult.value.data.slice(0, 6).map(p => ({
           paperId: p.paperId,
           title: p.title,
-          authors: p.authors?.slice(0, 3).map(a => a.name).join(', ') || '',
+          authors: p.authors?.map(a => a.name) || [],
           year: p.year || null,
           abstract: p.abstract ? p.abstract.slice(0, 220) + (p.abstract.length > 220 ? '…' : '') : null,
           doi: p.externalIds?.DOI || null,
