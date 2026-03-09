@@ -6591,18 +6591,18 @@ const App = () => {
               <div style={{
                 position: 'relative', overflow: 'hidden',
                 background: P.surface, border: `1px solid ${P.border}`,
-                borderRadius: isMobile ? 18 : 22, boxShadow: '0 12px 56px rgba(29,29,31,0.13)',
-                padding: isMobile ? 14 : 16,
-                display: 'flex', flexDirection: 'column', gap: isMobile ? 10 : 12,
+                borderRadius: isMobile ? 20 : 26, boxShadow: '0 16px 64px rgba(29,29,31,0.15)',
+                padding: isMobile ? 20 : 28,
+                display: 'flex', flexDirection: 'column', gap: isMobile ? 14 : 18,
               }}>
                 <BorderBeam size={280} duration={10} colorFrom="rgba(60,140,255,0.7)" colorTo="rgba(123,211,255,0)" borderWidth={1.5} />
 
                 {/* ── URL row ── */}
-                {inputMode === 'url' && <div style={{ display: 'flex', gap: isMobile ? 8 : 10, flexDirection: isMobile ? 'column' : 'row' }}>
+                {inputMode === 'url' && <div style={{ display: 'flex', gap: isMobile ? 10 : 12, flexDirection: isMobile ? 'column' : 'row' }}>
                   <div style={{
-                    flex: 1, display: 'flex', alignItems: 'center', gap: 10,
-                    padding: isMobile ? '13px 14px' : '15px 18px',
-                    background: P.paper, borderRadius: isMobile ? 12 : 14,
+                    flex: 1, display: 'flex', alignItems: 'center', gap: 12,
+                    padding: isMobile ? '16px 18px' : '20px 22px',
+                    background: P.paper, borderRadius: isMobile ? 14 : 16,
                     border: `1px solid ${P.border}`,
                   }}>
                     {(() => {
@@ -6628,8 +6628,8 @@ const App = () => {
                       placeholder="Paste a YouTube, TikTok, Loom, Vimeo, Dailymotion URL…"
                       style={{
                         flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                        fontSize: isMobile ? 15 : 16, color: P.ink,
-                        minHeight: isMobile ? 24 : undefined,
+                        fontSize: isMobile ? 16 : 17, color: P.ink,
+                        minHeight: isMobile ? 26 : undefined,
                       }}
                     />
                   </div>
@@ -6646,15 +6646,15 @@ const App = () => {
                         hoverBackground={outOfCredits ? 'rgba(220,38,38,0.15)' : P.accentHover}
                         style={{
                           flexShrink: 0,
-                          padding: isMobile ? '13px 20px' : '0 28px',
-                          borderRadius: isMobile ? 12 : 14,
+                          padding: isMobile ? '17px 24px' : '0 34px',
+                          borderRadius: isMobile ? 14 : 16,
                           color: outOfCredits ? P.error : 'white',
-                          fontSize: isMobile ? 15 : 16, fontWeight: 700,
+                          fontSize: isMobile ? 16 : 17, fontWeight: 700,
                           cursor: btnDisabled ? 'not-allowed' : 'pointer',
-                          gap: 7, whiteSpace: 'nowrap',
+                          gap: 8, whiteSpace: 'nowrap',
                           width: isMobile ? '100%' : undefined,
-                          minWidth: isMobile ? undefined : 148,
-                          height: isMobile ? undefined : 52,
+                          minWidth: isMobile ? undefined : 164,
+                          height: isMobile ? undefined : 62,
                         }}
                       >
                         {loading && inputMode === 'url' ? <SpinnerIcon /> : (
@@ -6669,7 +6669,7 @@ const App = () => {
                 </div>}
 
                 {/* ── Upload zone ── */}
-                {inputMode === 'upload' && <div style={{ display: 'flex', gap: isMobile ? 8 : 10, flexDirection: isMobile ? 'column' : 'row' }}>
+                {inputMode === 'upload' && <div style={{ display: 'flex', gap: isMobile ? 10 : 12, flexDirection: isMobile ? 'column' : 'row' }}>
                   {/* Hidden native file input */}
                   <input
                     ref={fileInputRef}
@@ -6694,11 +6694,11 @@ const App = () => {
                       if (f) setUploadFile(f);
                     }}
                     style={{
-                      flex: 1, display: 'flex', alignItems: 'center', gap: 10,
-                      padding: isMobile ? '13px 14px' : '13px 18px',
+                      flex: 1, display: 'flex', alignItems: 'center', gap: 12,
+                      padding: isMobile ? '18px 18px' : '22px 22px',
                       background: uploadDragOver ? 'rgba(60,140,255,0.05)' : P.paper,
                       border: `1.5px dashed ${uploadDragOver ? P.accent : uploadFile ? P.accent : P.border}`,
-                      borderRadius: isMobile ? 12 : 14,
+                      borderRadius: isMobile ? 14 : 16,
                       cursor: loading ? 'default' : 'pointer',
                       transition: 'border-color 0.15s, background 0.15s',
                     }}
@@ -6755,14 +6755,15 @@ const App = () => {
                         onClick={() => { setInputMode('upload'); getTranscriptFromUpload(uploadFile); }}
                         disabled={btnDisabled}
                         style={{
-                          flexShrink: 0, padding: isMobile ? '13px 20px' : '0 24px',
-                          borderRadius: isMobile ? 12 : 14, border: 'none',
+                          flexShrink: 0, padding: isMobile ? '17px 24px' : '0 30px',
+                          borderRadius: isMobile ? 14 : 16, border: 'none',
                           background: btnBg, color: outOfCredits ? P.error : 'white',
-                          fontSize: isMobile ? 15 : 15, fontWeight: 700,
+                          fontSize: isMobile ? 16 : 17, fontWeight: 700,
                           cursor: btnDisabled ? 'default' : 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                           whiteSpace: 'nowrap', transition: 'background 0.15s',
-                          width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 148,
+                          width: isMobile ? '100%' : undefined, minWidth: isMobile ? undefined : 164,
+                          height: isMobile ? undefined : 62,
                         }}
                         onMouseEnter={e => { if (!btnDisabled) e.currentTarget.style.background = P.accentHover; }}
                         onMouseLeave={e => { e.currentTarget.style.background = btnBg; }}
