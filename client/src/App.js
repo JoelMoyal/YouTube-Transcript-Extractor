@@ -5657,7 +5657,7 @@ const App = () => {
           opacity: 0.58;
           flex-shrink: 0;
         }
-        @media (max-width: 1440px) {
+        @media (max-width: 1280px) {
           .hero-trust-columns {
             display: none;
           }
