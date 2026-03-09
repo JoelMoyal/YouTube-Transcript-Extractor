@@ -6593,34 +6593,6 @@ const App = () => {
               <span className="hero-star" style={{ top: '44%', right: '3%',  width: 2, height: 2, opacity: 0.33, animationDuration: '3.8s', animationDelay: '-2.4s' }} />
             </div>
 
-            <div className="hero-trust-columns" aria-hidden="true">
-              <div className="hero-trust-column left">
-                {HERO_TRUST_LOGOS.map((platform, idx) => (
-                  <div
-                    key={`hero-left-trust-${platform}-${idx}`}
-                    className="hero-trust-logo-chip"
-                    style={{ opacity: idx === 0 || idx === HERO_TRUST_LOGOS.length - 1 ? 0.42 : 0.62 }}
-                  >
-                    <span className="hero-trust-logo-icon">
-                      <PlatformIcon platform={platform} size={12} />
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="hero-trust-column right">
-                {[...HERO_TRUST_LOGOS].reverse().map((platform, idx) => (
-                  <div
-                    key={`hero-right-trust-${platform}-${idx}`}
-                    className="hero-trust-logo-chip"
-                    style={{ opacity: idx === 0 || idx === HERO_TRUST_LOGOS.length - 1 ? 0.42 : 0.62 }}
-                  >
-                    <span className="hero-trust-logo-icon">
-                      <PlatformIcon platform={platform} size={12} />
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
 
             <div className="hero-inner" style={{
               maxWidth: 700, margin: '0 auto', padding: isMobile ? '32px 16px 24px' : '72px 24px 40px',
