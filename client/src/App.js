@@ -5294,7 +5294,7 @@ const App = () => {
     try {
       const res = await fetch('/api/discover', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript, videoId: currentVideoId }),
+        body: JSON.stringify({ transcript, videoId: currentVideoId, title: currentTitle }),
       });
       const text = await res.text();
       let data;

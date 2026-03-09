@@ -957,30 +957,41 @@ app.post('/api/academic-insights', async (req, res) => {
 
 // ── Discover endpoint ─────────────────────────────────────────────────────────
 app.post('/api/discover', async (req, res) => {
-  const { transcript, videoId } = req.body;
+  const { transcript, videoId, title } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
 
   try {
-    // Step 1: Extract search keywords via AI
+    // Step 1: Extract separate optimised queries for video search and academic papers
     const kwRaw = await aiComplete(
-      `Extract 3-5 specific search keywords or phrases from this transcript that would find related videos and academic papers. Return ONLY a valid JSON array of strings — no markdown, no explanation.\n\nTranscript:\n${transcript.slice(0, 6000)}\n\nExample: ["machine learning transformers", "attention mechanism NLP", "BERT language model"]`,
-      256
-    );
-    const kwMatch = kwRaw.match(/\[[\s\S]*\]/);
-    const keywords = kwMatch ? JSON.parse(kwMatch[0]).filter(k => typeof k === 'string') : [];
-    const query = keywords.slice(0, 3).join(' ');
-    if (!query) return res.json({ keywords: [], videos: [], papers: [] });
+      `Analyse this transcript${title ? ` titled "${title}"` : ''} and return a JSON object with three fields — no markdown, no explanation:
+{
+  "videoQuery": "2-5 word YouTube search phrase that would find highly relevant videos on the exact same topic",
+  "paperQuery": "specific academic search query (topic + field) for finding research papers on the core subject",
+  "keywords": ["topic tag 1", "topic tag 2", "topic tag 3"]
+}
 
-    // Step 2: Parallel search — YouTube + Semantic Scholar
+Transcript:\n${transcript.slice(0, 6000)}`,
+      300
+    );
+    const kwMatch = kwRaw.match(/\{[\s\S]*\}/);
+    const parsed = kwMatch ? JSON.parse(kwMatch[0]) : {};
+    const videoQuery = (parsed.videoQuery || title || '').trim();
+    const paperQuery = (parsed.paperQuery || parsed.videoQuery || '').trim();
+    const keywords = Array.isArray(parsed.keywords) ? parsed.keywords.filter(k => typeof k === 'string') : [];
+    if (!videoQuery && !paperQuery) return res.json({ keywords: [], videos: [], papers: [] });
+
+    // Step 2: Parallel search — YouTube + Semantic Scholar (different queries per platform)
     const [ytResult, ssResult] = await Promise.allSettled([
-      process.env.YOUTUBE_API_KEY
-        ? fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=8&key=${process.env.YOUTUBE_API_KEY}`)
+      process.env.YOUTUBE_API_KEY && videoQuery
+        ? fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(videoQuery)}&type=video&maxResults=8&key=${process.env.YOUTUBE_API_KEY}`)
             .then(r => r.json())
         : Promise.resolve(null),
-      fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=6&fields=title,authors,year,abstract,externalIds,openAccessPdf`, {
-        headers: { 'User-Agent': 'ScribeSnap/1.0' }
-      }).then(r => r.json()),
+      paperQuery
+        ? fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(paperQuery)}&limit=6&fields=title,authors,year,abstract,externalIds,openAccessPdf`, {
+            headers: { 'User-Agent': 'ScribeSnap/1.0' }
+          }).then(r => r.json())
+        : Promise.resolve(null),
     ]);
 
     // Parse YouTube results — exclude current video
