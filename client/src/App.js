@@ -8714,7 +8714,7 @@ const App = () => {
 
                 {/* ── DISCOVER TAB ── */}
                 {activeTab === 'discover' && (
-                  <div style={{ padding: isMobile ? '16px' : '20px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <div style={{ padding: isMobile ? '16px 16px 40px' : '20px 24px 40px', display: 'flex', flexDirection: 'column', gap: 20 }}>
                     {discoverLoading ? (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 24px', gap: 14 }}>
                         <div style={{ width: 36, height: 36, border: `3px solid ${P.border}`, borderTopColor: P.accent, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
