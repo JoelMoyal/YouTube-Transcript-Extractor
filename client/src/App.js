@@ -4026,13 +4026,15 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, on
         alt={BRAND_NAME}
         style={{ height: 40, width: 'auto', display: 'block' }}
       />
-      <span style={{
-        display: 'inline-flex', alignItems: 'center',
-        padding: '2px 8px', borderRadius: 999,
-        background: P.accentLight, color: P.accent,
-        fontSize: 10, fontWeight: 700,
-        letterSpacing: '0.06em', textTransform: 'uppercase',
-      }}>Studio</span>
+      {hasTranscript && (
+        <span style={{
+          display: 'inline-flex', alignItems: 'center',
+          padding: '2px 8px', borderRadius: 999,
+          background: P.accentLight, color: P.accent,
+          fontSize: 10, fontWeight: 700,
+          letterSpacing: '0.06em', textTransform: 'uppercase',
+        }}>Studio</span>
+      )}
     </a>
 
     <div style={{ flex: 1 }} />
