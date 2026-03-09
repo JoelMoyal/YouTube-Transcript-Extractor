@@ -6583,8 +6583,8 @@ const App = () => {
                   </svg>
                 </span>
               </h1>
-              <p style={{ fontSize: 16, color: P.muted, margin: '0 0 40px', lineHeight: 1.75, maxWidth: 440, marginLeft: 'auto', marginRight: 'auto' }}>
-                Paste any video URL and get the full transcript in seconds. Then let AI summarize, quiz, and teach it to you.
+              <p style={{ fontSize: 16, color: P.muted, margin: '0 0 40px', lineHeight: 1.75, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>
+                Paste any video URL or upload your own video/audio file to get a full transcript in seconds, then use AI summaries, flashcards, study guides, and chat.
               </p>
 
               {/* Input card */}
@@ -6927,7 +6927,7 @@ const App = () => {
 
               {/* Supported formats hint */}
               <div style={{ marginTop: 14, display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', alignItems: 'center' }}>
-                {['Instant extraction', 'AI summaries', 'Flashcards', 'Study guides', 'Export'].map((item, i) => (
+                {['Instant extraction', 'Your own uploads', 'AI summaries', 'Flashcards', 'Study guides', 'AI chat', 'Export'].map((item, i) => (
                   <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: P.muted }}>
                     {i > 0 && <span style={{ opacity: 0.3, marginRight: 2 }}>·</span>}
                     <span style={{ width: 5, height: 5, borderRadius: '50%', background: P.border, display: 'inline-block', flexShrink: 0 }} />
