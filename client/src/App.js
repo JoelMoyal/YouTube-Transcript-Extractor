@@ -8692,6 +8692,7 @@ const App = () => {
                             {discover.keywords.map((kw, i) => (
                               <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 9px', borderRadius: 999, background: 'rgba(194,65,12,0.08)', color: '#C2410C', fontSize: 12, fontWeight: 600, letterSpacing: '0.02em' }}>{kw}</span>
                             ))}
+                            <span style={{ fontSize: 11, color: P.muted, marginLeft: 4 }}>· {discover.videos?.length ?? 0} videos · {discover.papers?.length ?? 0} papers</span>
                           </div>
                         )}
 
