@@ -981,15 +981,20 @@ Transcript:\n${transcript.slice(0, 6000)}`,
     const keywords = Array.isArray(parsed.keywords) ? parsed.keywords.filter(k => typeof k === 'string') : [];
     if (!videoQuery && !paperQuery) return res.json({ keywords: [], videos: [], papers: [] });
 
-    // Step 2: Parallel search — YouTube + Semantic Scholar (different queries per platform)
-    const [ytResult, ssResult] = await Promise.allSettled([
+    // Step 2: Parallel search — YouTube + Semantic Scholar + CrossRef
+    const [ytResult, ssResult, crResult] = await Promise.allSettled([
       process.env.YOUTUBE_API_KEY && videoQuery
         ? fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(videoQuery)}&type=video&maxResults=8&key=${process.env.YOUTUBE_API_KEY}`)
             .then(r => r.json())
         : Promise.resolve(null),
       paperQuery
-        ? fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(paperQuery)}&limit=6&fields=title,authors,year,abstract,externalIds,openAccessPdf`, {
+        ? fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(paperQuery)}&limit=5&fields=title,authors,year,abstract,externalIds,openAccessPdf`, {
             headers: { 'User-Agent': 'ScribeSnap/1.0' }
+          }).then(r => r.json())
+        : Promise.resolve(null),
+      paperQuery
+        ? fetch(`https://api.crossref.org/works?query=${encodeURIComponent(paperQuery)}&rows=5&select=DOI,title,author,published,abstract`, {
+            headers: { 'User-Agent': 'ScribeSnap/1.0 (mailto:hello@scribesnap.io)' }
           }).then(r => r.json())
         : Promise.resolve(null),
     ]);
@@ -1009,8 +1014,8 @@ Transcript:\n${transcript.slice(0, 6000)}`,
       : [];
 
     // Parse Semantic Scholar results
-    const papers = (ssResult.status === 'fulfilled' && ssResult.value?.data)
-      ? ssResult.value.data.slice(0, 6).map(p => ({
+    const ssPapers = (ssResult.status === 'fulfilled' && ssResult.value?.data)
+      ? ssResult.value.data.map(p => ({
           paperId: p.paperId,
           title: p.title,
           authors: p.authors?.map(a => a.name) || [],
@@ -1018,8 +1023,36 @@ Transcript:\n${transcript.slice(0, 6000)}`,
           abstract: p.abstract ? p.abstract.slice(0, 220) + (p.abstract.length > 220 ? '…' : '') : null,
           doi: p.externalIds?.DOI || null,
           pdfUrl: p.openAccessPdf?.url || null,
+          source: 'ss',
         }))
       : [];
+
+    // Parse CrossRef results
+    const crPapers = (crResult.status === 'fulfilled' && crResult.value?.message?.items)
+      ? crResult.value.message.items
+          .filter(item => item.title?.length)
+          .map(item => ({
+            paperId: item.DOI,
+            title: Array.isArray(item.title) ? item.title[0] : item.title,
+            authors: (item.author || []).slice(0, 5).map(a => [a.given, a.family].filter(Boolean).join(' ')),
+            year: item.published?.['date-parts']?.[0]?.[0] || null,
+            abstract: item.abstract ? item.abstract.replace(/<[^>]*>/g, '').slice(0, 220) + '…' : null,
+            doi: item.DOI || null,
+            pdfUrl: null,
+            source: 'cr',
+          }))
+      : [];
+
+    // Merge: prefer SS papers, fill remainder from CrossRef, dedupe by title prefix
+    const seenTitles = new Set();
+    const papers = [];
+    for (const p of [...ssPapers, ...crPapers]) {
+      const key = p.title?.slice(0, 40).toLowerCase();
+      if (key && !seenTitles.has(key) && papers.length < 6) {
+        seenTitles.add(key);
+        papers.push(p);
+      }
+    }
 
     res.json({ keywords, videos, papers });
   } catch (err) {
