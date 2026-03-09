@@ -4026,6 +4026,13 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, on
         alt={BRAND_NAME}
         style={{ height: 40, width: 'auto', display: 'block' }}
       />
+      <span style={{
+        display: 'inline-flex', alignItems: 'center',
+        padding: '2px 8px', borderRadius: 999,
+        background: P.accentLight, color: P.accent,
+        fontSize: 10, fontWeight: 700,
+        letterSpacing: '0.06em', textTransform: 'uppercase',
+      }}>Studio</span>
     </a>
 
     <div style={{ flex: 1 }} />
@@ -4203,6 +4210,12 @@ const App = () => {
     const target = `${CANONICAL_APP_ORIGIN}${window.location.pathname}${window.location.search}${window.location.hash}`;
     window.location.replace(target);
   }, []);
+
+  useEffect(() => {
+    document.title = currentTitle
+      ? `ScribeSnap Studio — ${currentTitle}`
+      : 'ScribeSnap | Free YouTube Transcript Extractor with AI Summaries';
+  }, [currentTitle]);
 
   // Remove the SEO loading overlay once React has mounted
   useEffect(() => { document.getElementById('app-loader')?.remove(); }, []);
