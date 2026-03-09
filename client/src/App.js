@@ -4153,6 +4153,7 @@ const App = () => {
   const [mobilePanel, setMobilePanel]         = useState('transcript'); // 'transcript'|'ai'|'insights'|'history'
   const [sidebarTab, setSidebarTab]           = useState('ai'); // 'ai'|'insights'|'summary'|'flashcards'|'study-guide'
   const [sidebarTabOrder, setSidebarTabOrder] = useState(['ai', 'insights', 'summary', 'flashcards', 'study-guide', 'academic']);
+  const [activeTabOrder, setActiveTabOrder]   = useState(['transcript', 'editor', 'flashcards', 'summary', 'study-guide', 'academic']);
   const [dragTabKey, setDragTabKey]           = useState(null);
   const [dragOverKey, setDragOverKey]         = useState(null);
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
@@ -7866,31 +7867,68 @@ const App = () => {
                   </button>
                 )}
                 {[
-                  { key: 'transcript', label: 'Transcript', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> },
-                  ...(!isMobile ? [{ key: 'editor', label: 'Editor', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> }] : []),
-                  ...(!isMobile && (flashcards.length > 0 || flashcardsExhausted) ? [{ key: 'flashcards', label: 'Flashcards', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
-                  ...(!isMobile && summary ? [{ key: 'summary', label: 'Summary', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
-                  ...(!isMobile && studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
-                  ...(!isMobile && academicInsights && !academicInsights._error ? [{ key: 'academic', label: 'Academic', icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }] : []),
-                ].map(tab => {
+                  { key: 'transcript', label: 'Transcript', closeable: false, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> },
+                  ...(!isMobile ? [{ key: 'editor', label: 'Editor', closeable: false, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> }] : []),
+                  ...(!isMobile && (flashcards.length > 0 || flashcardsExhausted) ? [{ key: 'flashcards', label: 'Flashcards', closeable: true, onClose: () => { setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); if (activeTab === 'flashcards') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
+                  ...(!isMobile && summary ? [{ key: 'summary', label: 'Summary', closeable: true, onClose: () => { setSummary(''); setSummarizing(false); if (activeTab === 'summary') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
+                  ...(!isMobile && studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', closeable: true, onClose: () => { setStudyGuide(null); if (activeTab === 'study-guide') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
+                  ...(!isMobile && academicInsights && !academicInsights._error ? [{ key: 'academic', label: 'Academic', closeable: true, onClose: () => { setAcademicInsights(null); if (activeTab === 'academic') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }] : []),
+                ].sort((a, b) => {
+                  const ai = activeTabOrder.indexOf(a.key);
+                  const bi = activeTabOrder.indexOf(b.key);
+                  return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+                }).map(tab => {
                   const isActive = activeTab === tab.key;
+                  const isOver = dragOverKey === tab.key && dragTabKey !== tab.key;
                   return (
-                    <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
-                      display: 'flex', alignItems: 'center', gap: 5, padding: isMobile ? '8px 12px' : '5px 12px', minHeight: isMobile ? 44 : undefined, fontSize: 12,
-                      fontWeight: isActive ? 600 : 500,
-                      border: isActive ? `1px solid ${P.border}` : '1px solid transparent',
-                      borderBottom: isActive ? '1px solid #FFFFFF' : '1px solid transparent',
-                      borderRadius: '7px 7px 0 0', marginBottom: '-1px',
-                      background: isActive ? '#FFFFFF' : 'transparent',
-                      color: isActive ? P.ink : P.muted, cursor: 'pointer', transition: 'all 0.15s',
-                      whiteSpace: 'nowrap',
-                      animation: tab.key === 'flashcards' && flashcardsTabPulse ? 'tabHighlight 1.2s ease-out forwards' : undefined,
-                    }}
+                    <button
+                      key={tab.key}
+                      draggable
+                      onDragStart={() => setDragTabKey(tab.key)}
+                      onDragOver={e => { e.preventDefault(); setDragOverKey(tab.key); }}
+                      onDrop={e => {
+                        e.preventDefault();
+                        if (dragTabKey && dragTabKey !== tab.key) {
+                          setActiveTabOrder(prev => {
+                            const arr = [...prev];
+                            const fi = arr.indexOf(dragTabKey), ti = arr.indexOf(tab.key);
+                            if (fi !== -1 && ti !== -1) { arr.splice(fi, 1); arr.splice(ti, 0, dragTabKey); }
+                            return arr;
+                          });
+                        }
+                        setDragTabKey(null); setDragOverKey(null);
+                      }}
+                      onDragEnd={() => { setDragTabKey(null); setDragOverKey(null); }}
+                      onClick={() => setActiveTab(tab.key)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 5,
+                        padding: tab.closeable ? (isMobile ? '8px 8px 8px 12px' : '5px 6px 5px 12px') : (isMobile ? '8px 12px' : '5px 12px'),
+                        minHeight: isMobile ? 44 : undefined, fontSize: 12,
+                        fontWeight: isActive ? 600 : 500,
+                        border: isActive ? '1px solid rgba(60,140,255,0.25)' : isOver ? `1px solid ${P.accent}` : '1px solid transparent',
+                        borderBottom: isActive ? '1px solid #FFFFFF' : '1px solid transparent',
+                        borderRadius: '7px 7px 0 0', marginBottom: '-1px',
+                        background: isActive ? P.accentLight : isOver ? 'rgba(60,140,255,0.06)' : 'transparent',
+                        color: isActive ? P.accent : P.muted,
+                        cursor: 'grab', transition: 'all 0.15s', whiteSpace: 'nowrap',
+                        opacity: dragTabKey === tab.key ? 0.4 : 1,
+                        animation: tab.key === 'flashcards' && flashcardsTabPulse ? 'tabHighlight 1.2s ease-out forwards' : undefined,
+                      }}
                       onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(29,29,31,0.05)'; e.currentTarget.style.color = P.ink; }}}
-                      onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; }}}
+                      onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = isOver ? 'rgba(60,140,255,0.06)' : 'transparent'; e.currentTarget.style.color = P.muted; }}}
                     >
                       {tab.icon}
                       {tab.label}
+                      {tab.closeable && (
+                        <span
+                          onClick={e => { e.stopPropagation(); tab.onClose(); }}
+                          style={{ marginLeft: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: 3, flexShrink: 0, opacity: 0.5 }}
+                          onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = P.error; e.currentTarget.style.background = 'rgba(180,35,24,0.1)'; }}
+                          onMouseLeave={e => { e.currentTarget.style.opacity = '0.5'; e.currentTarget.style.color = ''; e.currentTarget.style.background = 'transparent'; }}
+                        >
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </span>
+                      )}
                     </button>
                   );
                 })}
