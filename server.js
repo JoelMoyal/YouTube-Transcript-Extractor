@@ -955,6 +955,67 @@ app.post('/api/academic-insights', async (req, res) => {
   }
 });
 
+// ── Discover endpoint ─────────────────────────────────────────────────────────
+app.post('/api/discover', async (req, res) => {
+  const { transcript, videoId } = req.body;
+  if (!transcript || typeof transcript !== 'string')
+    return res.status(400).json({ error: 'Missing transcript' });
+
+  try {
+    // Step 1: Extract search keywords via AI
+    const kwRaw = await aiComplete(
+      `Extract 3-5 specific search keywords or phrases from this transcript that would find related videos and academic papers. Return ONLY a valid JSON array of strings — no markdown, no explanation.\n\nTranscript:\n${transcript.slice(0, 6000)}\n\nExample: ["machine learning transformers", "attention mechanism NLP", "BERT language model"]`,
+      256
+    );
+    const kwMatch = kwRaw.match(/\[[\s\S]*\]/);
+    const keywords = kwMatch ? JSON.parse(kwMatch[0]).filter(k => typeof k === 'string') : [];
+    const query = keywords.slice(0, 3).join(' ');
+    if (!query) return res.json({ keywords: [], videos: [], papers: [] });
+
+    // Step 2: Parallel search — YouTube + Semantic Scholar
+    const [ytResult, ssResult] = await Promise.allSettled([
+      process.env.YOUTUBE_API_KEY
+        ? fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=8&key=${process.env.YOUTUBE_API_KEY}`)
+            .then(r => r.json())
+        : Promise.resolve(null),
+      fetch(`https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=6&fields=title,authors,year,abstract,externalIds,openAccessPdf`, {
+        headers: { 'User-Agent': 'ScribeSnap/1.0' }
+      }).then(r => r.json()),
+    ]);
+
+    // Parse YouTube results — exclude current video
+    const videos = (ytResult.status === 'fulfilled' && ytResult.value?.items)
+      ? ytResult.value.items
+          .filter(item => item.id?.videoId && item.id.videoId !== videoId)
+          .slice(0, 6)
+          .map(item => ({
+            id: item.id.videoId,
+            title: item.snippet.title,
+            channel: item.snippet.channelTitle,
+            thumbnail: item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url,
+            description: item.snippet.description?.slice(0, 120),
+          }))
+      : [];
+
+    // Parse Semantic Scholar results
+    const papers = (ssResult.status === 'fulfilled' && ssResult.value?.data)
+      ? ssResult.value.data.slice(0, 6).map(p => ({
+          paperId: p.paperId,
+          title: p.title,
+          authors: p.authors?.slice(0, 3).map(a => a.name).join(', ') || '',
+          year: p.year || null,
+          abstract: p.abstract ? p.abstract.slice(0, 220) + (p.abstract.length > 220 ? '…' : '') : null,
+          doi: p.externalIds?.DOI || null,
+          pdfUrl: p.openAccessPdf?.url || null,
+        }))
+      : [];
+
+    res.json({ keywords, videos, papers });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to discover related content', details: err.message });
+  }
+});
+
 // ── Q&A endpoint ─────────────────────────────────────────────────────────────
 app.post('/api/ask', async (req, res) => {
   const { transcript, question, platform, segments, history } = req.body;

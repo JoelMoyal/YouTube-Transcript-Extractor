@@ -8733,6 +8733,132 @@ const App = () => {
                     ) : null}
                   </div>
                 )}
+
+                {/* ── DISCOVER TAB ── */}
+                {activeTab === 'discover' && (
+                  <div style={{ padding: isMobile ? '16px' : '20px 24px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+                    {discoverLoading ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 24px', gap: 14 }}>
+                        <div style={{ width: 36, height: 36, border: `3px solid ${P.border}`, borderTopColor: P.accent, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                        <div style={{ fontSize: 13, color: P.muted, fontWeight: 500 }}>Finding related content…</div>
+                      </div>
+                    ) : discover && !discover._error ? (
+                      <>
+                        {/* Header */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 36, height: 36, borderRadius: 11, background: 'rgba(194,65,12,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#C2410C', flexShrink: 0 }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Discover</div>
+                            <div style={{ fontSize: 11.5, color: P.muted }}>Related videos &amp; academic papers</div>
+                          </div>
+                          <button
+                            onClick={() => { setDiscover(null); setActiveTab('transcript'); }}
+                            style={{ padding: '5px 10px', borderRadius: 8, border: `1px solid ${P.border}`, background: 'transparent', color: P.muted, fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all 0.15s' }}
+                            onMouseEnter={e => e.currentTarget.style.color = P.ink}
+                            onMouseLeave={e => e.currentTarget.style.color = P.muted}
+                          >Clear</button>
+                        </div>
+
+                        {/* Keywords */}
+                        {discover.keywords?.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                            <span style={{ fontSize: 11.5, color: P.muted, fontWeight: 500, marginRight: 2 }}>Searched for:</span>
+                            {discover.keywords.map((kw, i) => (
+                              <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 9px', borderRadius: 999, background: 'rgba(194,65,12,0.08)', color: '#C2410C', fontSize: 12, fontWeight: 600, letterSpacing: '0.02em' }}>{kw}</span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Related Videos */}
+                        {discover.videos?.length > 0 && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: P.muted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Related Videos</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {discover.videos.map((v, i) => (
+                                <a key={i} href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer"
+                                  style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '12px 14px', borderRadius: 12, border: `1px solid ${P.border}`, background: P.surface, textDecoration: 'none', transition: 'all 0.15s' }}
+                                  onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.borderColor = P.accent; }}
+                                  onMouseLeave={e => { e.currentTarget.style.background = P.surface; e.currentTarget.style.borderColor = P.border; }}
+                                >
+                                  {v.thumbnail && (
+                                    <img src={v.thumbnail} alt="" style={{ width: 80, height: 45, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
+                                  )}
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontSize: 13, fontWeight: 600, color: P.ink, lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{v.title}</div>
+                                    <div style={{ fontSize: 11.5, color: P.muted, marginTop: 3 }}>{v.channel}</div>
+                                  </div>
+                                  <div style={{ flexShrink: 0, marginTop: 2 }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={P.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                  </div>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Academic Papers */}
+                        {discover.papers?.length > 0 && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: P.muted, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Academic Papers</div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                              {discover.papers.map((p, i) => (
+                                <div key={i} style={{ padding: '14px 16px', borderRadius: 12, border: `1px solid ${P.border}`, background: P.surface, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                  <div style={{ fontSize: 13.5, fontWeight: 700, color: P.ink, lineHeight: 1.4 }}>{p.title}</div>
+                                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                    {p.authors?.length > 0 && (
+                                      <span style={{ fontSize: 11.5, color: P.muted }}>{p.authors.slice(0, 3).join(', ')}{p.authors.length > 3 ? ' et al.' : ''}</span>
+                                    )}
+                                    {p.year && (
+                                      <span style={{ fontSize: 11, fontWeight: 600, color: P.accent, background: P.accentLight, padding: '1px 7px', borderRadius: 99 }}>{p.year}</span>
+                                    )}
+                                  </div>
+                                  {p.abstract && (
+                                    <div style={{ fontSize: 12.5, color: P.muted, lineHeight: 1.6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{p.abstract}</div>
+                                  )}
+                                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
+                                    {p.pdfUrl && (
+                                      <a href={p.pdfUrl} target="_blank" rel="noopener noreferrer"
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 7, border: `1px solid ${P.border}`, background: P.paper, color: P.ink, fontSize: 12, fontWeight: 600, textDecoration: 'none', transition: 'all 0.15s' }}
+                                        onMouseEnter={e => { e.currentTarget.style.background = P.accent; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = P.accent; }}
+                                        onMouseLeave={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.border; }}
+                                      >
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                        PDF
+                                      </a>
+                                    )}
+                                    {p.doi && (
+                                      <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener noreferrer"
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 7, border: `1px solid ${P.border}`, background: 'transparent', color: P.muted, fontSize: 12, fontWeight: 500, textDecoration: 'none', transition: 'all 0.15s' }}
+                                        onMouseEnter={e => { e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.ink; }}
+                                        onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}
+                                      >DOI ↗</a>
+                                    )}
+                                    {!p.pdfUrl && !p.doi && p.paperId && (
+                                      <a href={`https://www.semanticscholar.org/paper/${p.paperId}`} target="_blank" rel="noopener noreferrer"
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 7, border: `1px solid ${P.border}`, background: 'transparent', color: P.muted, fontSize: 12, fontWeight: 500, textDecoration: 'none', transition: 'all 0.15s' }}
+                                        onMouseEnter={e => { e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.ink; }}
+                                        onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}
+                                      >View Paper ↗</a>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Empty state */}
+                        {!discover.videos?.length && !discover.papers?.length && (
+                          <div style={{ padding: '48px 0', textAlign: 'center', color: P.muted, fontSize: 13 }}>No related content found for this transcript.</div>
+                        )}
+                      </>
+                    ) : discover?._error ? (
+                      <div style={{ padding: '32px 24px', color: P.error, fontSize: 13 }}>Failed to discover: {discover._error}</div>
+                    ) : null}
+                  </div>
+                )}
               </div>
             </div>
 
