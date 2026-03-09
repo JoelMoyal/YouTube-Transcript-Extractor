@@ -919,8 +919,8 @@ app.post('/api/study-guide', async (req, res) => {
 
   try {
     const raw = await aiComplete(
-      `You create structured study guides from YouTube video transcripts. Return ONLY a valid JSON object with exactly these fields — no markdown, no explanation:\n- "overview": 1-2 sentence description of what this video teaches\n- "objectives": array of 3-5 learning objectives starting with action verbs (Understand, Identify, Apply, Analyze, Explain)\n- "keyConcepts": array of 4-8 objects with "term" (string) and "definition" (string, 1-2 sentences)\n- "sections": array of 3-5 objects with "title" (string), "summary" (2-3 sentences), and "keyPoints" (array of 2-4 strings)\n- "reviewQuestions": array of 4-6 thoughtful questions to test understanding\n\nTranscript:\n${transcript.slice(0, 15000)}\n\nReturn JSON object only.`,
-      4096
+      `You create structured study guides from YouTube video transcripts. Return ONLY a valid JSON object with exactly these fields — no markdown, no explanation:\n- "overview": 1-2 sentence description of what this video teaches\n- "objectives": array of 3-5 learning objectives starting with action verbs (Understand, Identify, Apply, Analyze, Explain)\n- "keyConcepts": array of 4-8 objects with "term" (string) and "definition" (string, 1-2 sentences)\n- "sections": array of 3-5 objects with "title" (string), "summary" (2-3 sentences), and "keyPoints" (array of 2-4 strings)\n- "reviewQuestions": array of 4-6 thoughtful questions to test understanding\n\nTranscript:\n${transcript.slice(0, 8000)}\n\nReturn JSON object only.`,
+      2000
     );
     const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
     const match = stripped.match(/\{[\s\S]*\}/);
