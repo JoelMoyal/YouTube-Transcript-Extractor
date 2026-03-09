@@ -189,29 +189,20 @@ const PLATFORM_BRAND = {
   wistia:      { icon: '#54ABCC', stat: '#54ABCC', bg: 'rgba(84,171,204,0.12)', bgSoft: 'rgba(84,171,204,0.09)' },
 };
 
-const HERO_SIDE_CARDS = {
+const HERO_TRUST_LOGO_COLUMNS = {
   left: [
-    { title: 'Input sources', badge: 'IN', items: ['YouTube', 'TikTok', 'Loom'] },
-    { title: 'Capture flow', badge: 'URL', items: ['Paste URL', 'Upload file', 'Auto-detect'] },
+    { platform: 'youtube', label: 'YouTube' },
+    { platform: 'vimeo', label: 'Vimeo' },
+    { platform: 'loom', label: 'Loom' },
+    { platform: 'dailymotion', label: 'Dailymotion' },
+    { platform: 'facebook', label: 'Facebook' },
   ],
   right: [
-    { title: 'Output cards', badge: 'OUT', items: ['Summary', 'Flashcards', 'Study guide'] },
-    { title: 'Share-ready', badge: 'XPT', items: ['Copy text', 'PDF export', 'Timestamp links'] },
-  ],
-};
-
-const HERO_TRANSCRIPT_RIBBONS = {
-  left: [
-    '00:12 core thesis extracted',
-    '03:41 key argument clustered',
-    '08:05 source context aligned',
-    '12:33 next action generated',
-  ],
-  right: [
-    'summary draft ready in 24s',
-    'flashcard deck: 12 items',
-    'study guide synced to timeline',
-    'export package prepared',
+    { platform: 'tiktok', label: 'TikTok' },
+    { platform: 'twitter', label: 'X' },
+    { platform: 'instagram', label: 'Instagram' },
+    { platform: 'wistia', label: 'Wistia' },
+    { platform: 'youtube', label: 'YouTube' },
   ],
 };
 
@@ -5635,160 +5626,60 @@ const App = () => {
           animation-timing-function: ease-in-out;
           animation-iteration-count: infinite;
         }
-        @keyframes heroSideCardFloat {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
-        }
-        @keyframes heroRibbonDriftLeft {
-          0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.3; }
-          50% { transform: translate3d(10px, -2px, 0); opacity: 0.56; }
-        }
-        @keyframes heroRibbonDriftRight {
-          0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.3; }
-          50% { transform: translate3d(-10px, -2px, 0); opacity: 0.56; }
-        }
-        .hero-side-stage {
+        .hero-trust-columns {
           position: absolute;
           inset: 0;
           pointer-events: none;
           z-index: 0;
-          overflow: hidden;
         }
-        .hero-side-cluster {
+        .hero-trust-column {
           position: absolute;
-          top: 51%;
+          top: 50%;
+          transform: translateY(-50%);
           display: flex;
           flex-direction: column;
-          gap: 12px;
-          transform-style: preserve-3d;
+          gap: 8px;
         }
-        .hero-side-cluster.left {
-          left: max(16px, calc(50% - 660px));
-          transform: translate3d(0, -50%, 0) perspective(1200px) rotateY(19deg) rotateX(2deg);
+        .hero-trust-column.left {
+          left: max(10px, calc(50% - 760px));
         }
-        .hero-side-cluster.right {
-          right: max(16px, calc(50% - 660px));
-          transform: translate3d(0, -48%, 0) perspective(1200px) rotateY(-19deg) rotateX(2deg);
+        .hero-trust-column.right {
+          right: max(10px, calc(50% - 760px));
         }
-        .hero-side-card {
-          width: 196px;
-          border-radius: 14px;
-          border: 1px solid rgba(73, 112, 182, 0.2);
-          background: linear-gradient(165deg, rgba(255,255,255,0.86) 0%, rgba(240,245,255,0.62) 100%);
-          box-shadow: 0 10px 30px rgba(29,29,31,0.1);
-          padding: 11px 12px;
-          backdrop-filter: blur(7px);
-          -webkit-backdrop-filter: blur(7px);
-          opacity: 0.8;
-          animation: heroSideCardFloat 10s ease-in-out infinite;
-        }
-        .hero-side-card.offset {
-          margin-left: 20px;
-        }
-        .hero-side-cluster.right .hero-side-card.offset {
-          margin-left: -20px;
-        }
-        .hero-side-card:nth-child(2) {
-          animation-delay: -4.7s;
-        }
-        .hero-side-card-head {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 9px;
-        }
-        .hero-side-card-title {
-          font-size: 10.5px;
-          font-weight: 700;
-          letter-spacing: 0.03em;
-          text-transform: uppercase;
-          color: rgba(29,29,31,0.56);
-        }
-        .hero-side-card-badge {
+        .hero-trust-logo-chip {
           display: inline-flex;
           align-items: center;
-          justify-content: center;
-          min-width: 30px;
-          height: 18px;
-          padding: 0 6px;
-          border-radius: 999px;
-          border: 1px solid rgba(60,140,255,0.22);
-          background: rgba(60,140,255,0.1);
-          color: #2D71D9;
-          font-size: 9px;
-          font-weight: 700;
-          letter-spacing: 0.06em;
-        }
-        .hero-side-card-list {
-          display: flex;
-          flex-direction: column;
           gap: 6px;
-        }
-        .hero-side-card-row {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          font-size: 11px;
-          font-weight: 600;
-          color: rgba(29,29,31,0.72);
-        }
-        .hero-side-card-dot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, rgba(60,140,255,0.95) 0%, rgba(123,211,255,0.7) 100%);
-          box-shadow: 0 0 0 2px rgba(60,140,255,0.12);
-          flex-shrink: 0;
-        }
-        .hero-ribbon-stack {
-          position: absolute;
-          top: 51%;
-          display: flex;
-          flex-direction: column;
-          gap: 9px;
-          pointer-events: none;
-        }
-        .hero-ribbon-stack.left {
-          left: max(-60px, calc(50% - 870px));
-          align-items: flex-end;
-          transform: translate3d(0, -52%, 0) perspective(900px) rotateY(58deg) rotateX(6deg);
-        }
-        .hero-ribbon-stack.right {
-          right: max(-60px, calc(50% - 870px));
-          align-items: flex-start;
-          transform: translate3d(0, -49%, 0) perspective(900px) rotateY(-58deg) rotateX(6deg);
-        }
-        .hero-ribbon {
-          height: 17px;
+          height: 27px;
+          min-width: 102px;
           padding: 0 9px;
           border-radius: 999px;
-          border: 1px solid rgba(60,140,255,0.16);
-          background: linear-gradient(90deg, rgba(252,254,255,0.7) 0%, rgba(235,243,255,0.58) 52%, rgba(248,252,255,0.7) 100%);
-          color: rgba(45,78,139,0.62);
-          font-size: 9.2px;
+          border: 1px solid rgba(73,112,182,0.12);
+          background: rgba(255,255,255,0.54);
+          box-shadow: 0 2px 10px rgba(29,29,31,0.05);
+          opacity: 0.45;
+        }
+        .hero-trust-logo-icon {
+          display: inline-flex;
+          width: 13px;
+          height: 13px;
+          align-items: center;
+          justify-content: center;
+          filter: grayscale(1) saturate(0);
+          opacity: 0.72;
+          flex-shrink: 0;
+        }
+        .hero-trust-logo-label {
+          font-size: 10px;
           font-weight: 700;
-          letter-spacing: 0.06em;
+          letter-spacing: 0.04em;
           text-transform: uppercase;
+          color: rgba(29,29,31,0.43);
           white-space: nowrap;
-          overflow: hidden;
-          box-shadow: 0 5px 20px rgba(60,140,255,0.08);
         }
-        .hero-ribbon.left {
-          animation: heroRibbonDriftLeft 8.8s ease-in-out infinite;
-        }
-        .hero-ribbon.right {
-          animation: heroRibbonDriftRight 8.8s ease-in-out infinite;
-        }
-        @media (max-width: 1280px) {
-          .hero-side-stage {
+        @media (max-width: 1460px) {
+          .hero-trust-columns {
             display: none;
-          }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .hero-side-card,
-          .hero-ribbon.left,
-          .hero-ribbon.right {
-            animation: none;
           }
         }
 
@@ -6665,74 +6556,24 @@ const App = () => {
               <span className="hero-star" style={{ top: '44%', right: '3%',  width: 2, height: 2, opacity: 0.33, animationDuration: '3.8s', animationDelay: '-2.4s' }} />
             </div>
 
-            <div className="hero-side-stage" aria-hidden="true">
-              <div className="hero-ribbon-stack left">
-                {HERO_TRANSCRIPT_RIBBONS.left.map((line, idx) => (
-                  <div
-                    key={`hero-left-ribbon-${line}`}
-                    className="hero-ribbon left"
-                    style={{
-                      width: `${198 - idx * 16}px`,
-                      animationDelay: `${idx * 0.75}s`,
-                    }}
-                  >
-                    {line}
+            <div className="hero-trust-columns" aria-hidden="true">
+              <div className="hero-trust-column left">
+                {HERO_TRUST_LOGO_COLUMNS.left.map((item) => (
+                  <div key={`hero-left-trust-${item.platform}-${item.label}`} className="hero-trust-logo-chip">
+                    <span className="hero-trust-logo-icon">
+                      <PlatformIcon platform={item.platform} size={13} />
+                    </span>
+                    <span className="hero-trust-logo-label">{item.label}</span>
                   </div>
                 ))}
               </div>
-              <div className="hero-ribbon-stack right">
-                {HERO_TRANSCRIPT_RIBBONS.right.map((line, idx) => (
-                  <div
-                    key={`hero-right-ribbon-${line}`}
-                    className="hero-ribbon right"
-                    style={{
-                      width: `${190 - idx * 14}px`,
-                      animationDelay: `${idx * 0.75}s`,
-                    }}
-                  >
-                    {line}
-                  </div>
-                ))}
-              </div>
-              <div className="hero-side-cluster left">
-                {HERO_SIDE_CARDS.left.map((card, idx) => (
-                  <div
-                    key={`hero-left-card-${card.title}`}
-                    className={`hero-side-card ${idx > 0 ? 'offset' : ''}`}
-                  >
-                    <div className="hero-side-card-head">
-                      <span className="hero-side-card-title">{card.title}</span>
-                      <span className="hero-side-card-badge">{card.badge}</span>
-                    </div>
-                    <div className="hero-side-card-list">
-                      {card.items.map((item) => (
-                        <div key={item} className="hero-side-card-row">
-                          <span className="hero-side-card-dot" />
-                          <span>{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="hero-side-cluster right">
-                {HERO_SIDE_CARDS.right.map((card, idx) => (
-                  <div
-                    key={`hero-right-card-${card.title}`}
-                    className={`hero-side-card ${idx > 0 ? 'offset' : ''}`}
-                  >
-                    <div className="hero-side-card-head">
-                      <span className="hero-side-card-title">{card.title}</span>
-                      <span className="hero-side-card-badge">{card.badge}</span>
-                    </div>
-                    <div className="hero-side-card-list">
-                      {card.items.map((item) => (
-                        <div key={item} className="hero-side-card-row">
-                          <span className="hero-side-card-dot" />
-                          <span>{item}</span>
-                        </div>
-                      ))}
-                    </div>
+              <div className="hero-trust-column right">
+                {HERO_TRUST_LOGO_COLUMNS.right.map((item) => (
+                  <div key={`hero-right-trust-${item.platform}-${item.label}`} className="hero-trust-logo-chip">
+                    <span className="hero-trust-logo-icon">
+                      <PlatformIcon platform={item.platform} size={13} />
+                    </span>
+                    <span className="hero-trust-logo-label">{item.label}</span>
                   </div>
                 ))}
               </div>
