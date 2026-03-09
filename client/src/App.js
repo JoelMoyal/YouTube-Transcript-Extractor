@@ -6591,7 +6591,7 @@ const App = () => {
               <div style={{
                 position: 'relative', overflow: 'hidden',
                 background: P.surface, border: `1px solid ${P.border}`,
-                borderRadius: isMobile ? 20 : 26, boxShadow: '0 16px 64px rgba(29,29,31,0.15)',
+                borderRadius: isMobile ? 20 : 26, boxShadow: '0 12px 56px rgba(29,29,31,0.13)',
                 padding: isMobile ? 20 : 28,
                 display: 'flex', flexDirection: 'column', gap: isMobile ? 14 : 18,
               }}>
