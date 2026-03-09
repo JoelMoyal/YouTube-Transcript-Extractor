@@ -5290,6 +5290,7 @@ const App = () => {
   const generateDiscover = async () => {
     if (discoverLoading) return;
     setDiscoverLoading(true); setDiscover(null);
+    setActiveTab('discover'); setSidebarTab('discover'); setMobilePanel('transcript');
     try {
       const res = await fetch('/api/discover', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -5300,9 +5301,6 @@ const App = () => {
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
       if (!res.ok) throw new Error(data.error || 'Failed to discover related content');
       setDiscover(data);
-      setActiveTab('discover');
-      setSidebarTab('discover');
-      setMobilePanel('discover');
     } catch (err) { setDiscover({ _error: err.message }); }
     finally { setDiscoverLoading(false); }
   };
@@ -7766,7 +7764,7 @@ const App = () => {
             <div style={{
               gridColumn: isDesktop ? 2 : 1,
               gridRow: 1,
-              display: isMobile ? (mobilePanel === 'transcript' ? 'flex' : 'none') : 'flex',
+              display: isMobile ? ((mobilePanel === 'transcript' || mobilePanel === 'discover') ? 'flex' : 'none') : 'flex',
               flexDirection: 'column', overflow: 'hidden', background: P.paper,
               borderRight: !isMobile ? `1px solid ${P.border}` : 'none',
             }}>
