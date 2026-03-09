@@ -29,6 +29,44 @@ const P = {
 const MOBILE_BREAKPOINT = 640;
 const TABLET_BREAKPOINT = 1024;
 
+const PROGRESS_PROFILE_KEY = 'yte_progress_profile_v1';
+const DEFAULT_PROGRESS_PROFILE = Object.freeze({
+  url: { avgMs: 60000, samples: 0 },
+  upload: { avgMs: 140000, samples: 0 },
+});
+
+const clampNumber = (value, min, max) => Math.max(min, Math.min(max, value));
+
+const cloneDefaultProgressProfile = () => ({
+  url: { ...DEFAULT_PROGRESS_PROFILE.url },
+  upload: { ...DEFAULT_PROGRESS_PROFILE.upload },
+});
+
+function readProgressProfile() {
+  const fallback = cloneDefaultProgressProfile();
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const raw = JSON.parse(localStorage.getItem(PROGRESS_PROFILE_KEY) || '{}');
+    const next = cloneDefaultProgressProfile();
+    ['url', 'upload'].forEach((mode) => {
+      const avgMs = Number(raw?.[mode]?.avgMs);
+      const samples = Number(raw?.[mode]?.samples);
+      if (Number.isFinite(avgMs) && avgMs > 0) next[mode].avgMs = Math.round(avgMs);
+      if (Number.isFinite(samples) && samples >= 0) next[mode].samples = Math.round(samples);
+    });
+    return next;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeProgressProfile(profile) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(PROGRESS_PROFILE_KEY, JSON.stringify(profile));
+  } catch {}
+}
+
 const LANGUAGES = [
   { code: 'en',      label: 'English' },
   { code: 'es',      label: 'Spanish' },
@@ -4210,6 +4248,11 @@ const App = () => {
   const qaRef           = useRef(null);
   const chatMessagesRef = useRef(null);
   const recoveryIntentRef = useRef(false);
+  const progressTickerRef = useRef(null);
+  const progressRunRef = useRef(null); // { mode, startedAt, estimateMs }
+  const serverProgressRef = useRef(0);
+  const progressProfileRef = useRef(null);
+  if (!progressProfileRef.current) progressProfileRef.current = readProgressProfile();
 
   useEffect(() => {
     let raf;
@@ -4219,6 +4262,10 @@ const App = () => {
     };
     window.addEventListener('resize', onResize);
     return () => { window.removeEventListener('resize', onResize); cancelAnimationFrame(raf); };
+  }, []);
+
+  useEffect(() => () => {
+    if (progressTickerRef.current) clearInterval(progressTickerRef.current);
   }, []);
 
   useEffect(() => {
@@ -4678,6 +4725,98 @@ const App = () => {
     });
   };
 
+  const getEstimatedProgressMs = (mode) => {
+    const fallback = mode === 'upload'
+      ? DEFAULT_PROGRESS_PROFILE.upload.avgMs
+      : DEFAULT_PROGRESS_PROFILE.url.avgMs;
+    const min = mode === 'upload' ? 60000 : 25000;
+    const max = mode === 'upload' ? 420000 : 240000;
+    const avgMs = Number(progressProfileRef.current?.[mode]?.avgMs);
+    return clampNumber(Number.isFinite(avgMs) ? avgMs : fallback, min, max);
+  };
+
+  const learnProgressDuration = (mode, durationMs) => {
+    if (!Number.isFinite(durationMs) || durationMs <= 0) return;
+    const boundedDuration = clampNumber(durationMs, 5000, 600000);
+    const currentProfile = progressProfileRef.current || cloneDefaultProgressProfile();
+    const prev = currentProfile[mode] || {
+      avgMs: mode === 'upload' ? DEFAULT_PROGRESS_PROFILE.upload.avgMs : DEFAULT_PROGRESS_PROFILE.url.avgMs,
+      samples: 0,
+    };
+    const alpha = prev.samples < 5 ? 0.35 : 0.22;
+    const nextProfile = {
+      ...currentProfile,
+      [mode]: {
+        avgMs: Math.round((prev.avgMs * (1 - alpha)) + (boundedDuration * alpha)),
+        samples: clampNumber((prev.samples || 0) + 1, 1, 50),
+      },
+    };
+    progressProfileRef.current = nextProfile;
+    writeProgressProfile(nextProfile);
+  };
+
+  const stopProgressTicker = () => {
+    if (progressTickerRef.current) {
+      clearInterval(progressTickerRef.current);
+      progressTickerRef.current = null;
+    }
+  };
+
+  const beginSmoothLoading = (mode, message, stage) => {
+    stopProgressTicker();
+    const estimateMs = getEstimatedProgressMs(mode);
+    progressRunRef.current = { mode, startedAt: Date.now(), estimateMs };
+    serverProgressRef.current = 5;
+    setLoading(true);
+    setLoadingMsg(message);
+    setLoadingPercent(5);
+    setLoadingStage(stage);
+
+    progressTickerRef.current = setInterval(() => {
+      const run = progressRunRef.current;
+      if (!run) return;
+      const elapsed = Date.now() - run.startedAt;
+      const ratio = clampNumber(elapsed / run.estimateMs, 0, 1);
+      const eased = 1 - Math.pow(1 - ratio, 0.9);
+      const baseProgress = 5 + (eased * 89); // 5% -> ~94% over estimated duration
+      const overtimePct = Math.min(4, Math.max(0, elapsed - run.estimateMs) / 15000);
+      const syntheticProgress = Math.min(98, baseProgress + overtimePct);
+      const floor = serverProgressRef.current || 0;
+      const next = Math.max(floor, syntheticProgress);
+      setLoadingPercent(prev => Math.min(98, Math.max(prev, Math.round(next))));
+    }, 250);
+  };
+
+  const applyServerProgress = (payload) => {
+    if (!payload || typeof payload !== 'object') return;
+    const { message, percent, stage } = payload;
+    if (message) setLoadingMsg(message);
+    if (stage) {
+      setLoadingStage(stage);
+      const run = progressRunRef.current;
+      if (run && stage === 'whisper') {
+        run.estimateMs = Math.max(run.estimateMs, run.mode === 'upload' ? 160000 : 90000);
+      } else if (run && stage === 'audio') {
+        run.estimateMs = Math.max(run.estimateMs, run.mode === 'upload' ? 140000 : 70000);
+      }
+    }
+    if (Number.isFinite(percent)) {
+      const bounded = clampNumber(percent, 0, 99);
+      serverProgressRef.current = Math.max(serverProgressRef.current, bounded);
+      setLoadingPercent(prev => Math.max(prev, Math.round(serverProgressRef.current)));
+    }
+  };
+
+  const finishSmoothLoading = (wasSuccessful) => {
+    const run = progressRunRef.current;
+    stopProgressTicker();
+    if (wasSuccessful && run) {
+      learnProgressDuration(run.mode, Date.now() - run.startedAt);
+    }
+    progressRunRef.current = null;
+    serverProgressRef.current = 0;
+  };
+
   const handleInputFocus = async () => {
     if (videoUrl) return;
     try {
@@ -4844,8 +4983,7 @@ const App = () => {
     setAcademicInsights(null); setAcademicInsightsLoading(false); setAcademicInsightsFull(false);
     setMobilePanel('transcript'); setHistoryDrawerOpen(false);
     setPendingHistoryAction(null);
-    setLoading(true); setLoadingMsg('Looking for subtitles…');
-    setLoadingPercent(5); setLoadingStage('subtitles');
+    beginSmoothLoading('url', 'Looking for subtitles…', 'subtitles');
 
     const apiUrl = platform === 'youtube'
       ? `/api/transcript?videoId=${videoId}&lang=${langToUse}`
@@ -4854,12 +4992,14 @@ const App = () => {
     const killTimer = setTimeout(() => {
       es.close();
       setError(funnyTranscriptError('timed out'));
+      finishSmoothLoading(false);
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     }, 180000);
 
     es.addEventListener('progress', (e) => {
-      const { message, percent, stage } = JSON.parse(e.data);
-      setLoadingMsg(message); setLoadingPercent(percent || 0); setLoadingStage(stage || '');
+      try {
+        applyServerProgress(JSON.parse(e.data));
+      } catch {}
     });
 
     es.addEventListener('done', async (e) => {
@@ -4880,6 +5020,7 @@ const App = () => {
         setCurrentThumbnail(thumb);
         setCurrentTitle(title);
         setCurrentChannel(channel);
+        finishSmoothLoading(true);
         setLoadingPercent(100);
         incrementCredits();
         // After 3rd extraction, nudge signed-in users without referrals to share
@@ -4895,6 +5036,7 @@ const App = () => {
         setError(funnyTranscriptError('failed to process'));
       } finally {
         setTimeout(() => {
+          finishSmoothLoading(false);
           setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
         }, 600);
       }
@@ -4906,6 +5048,7 @@ const App = () => {
         const data = JSON.parse(e.data);
         setError(funnyTranscriptError(data.details ? `${data.error}: ${data.details}` : (data.error || 'failed to fetch')));
       } catch { setError(funnyTranscriptError('connection')); }
+      finishSmoothLoading(false);
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     });
 
@@ -4913,6 +5056,7 @@ const App = () => {
       if (es.readyState === EventSource.CLOSED) return;
       clearTimeout(killTimer); es.close();
       setError(funnyTranscriptError('connection'));
+      finishSmoothLoading(false);
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     };
   };
@@ -4936,8 +5080,7 @@ const App = () => {
     setAcademicInsights(null); setAcademicInsightsLoading(false); setAcademicInsightsFull(false);
     setMobilePanel('transcript'); setHistoryDrawerOpen(false);
     setPendingHistoryAction(null);
-    setLoading(true); setLoadingMsg('Uploading file…');
-    setLoadingPercent(5); setLoadingStage('upload');
+    beginSmoothLoading('upload', 'Uploading file…', 'upload');
 
     const formData = new FormData();
     formData.append('file', file);
@@ -4953,6 +5096,7 @@ const App = () => {
       const killTimer = setTimeout(() => {
         reader.cancel();
         setError('Transcription timed out. Try a shorter file.');
+        finishSmoothLoading(false);
         setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
       }, 180000);
 
@@ -4973,7 +5117,7 @@ const App = () => {
           try { data = JSON.parse(dataLine.slice(5).trim()); } catch { continue; }
 
           if (event === 'progress') {
-            setLoadingMsg(data.message || ''); setLoadingPercent(data.percent || 0); setLoadingStage(data.stage || '');
+            applyServerProgress(data);
           } else if (event === 'done') {
             clearTimeout(killTimer);
             const fileName = file.name.replace(/\.[^/.]+$/, '');
@@ -4986,6 +5130,7 @@ const App = () => {
             setCurrentThumbnail(null);
             setCurrentTitle(fileName);
             setCurrentChannel('Local file');
+            finishSmoothLoading(true);
             setLoadingPercent(100);
             incrementCredits();
             saveToHistory({
@@ -4995,17 +5140,20 @@ const App = () => {
               thumbnail: null, title: fileName, channel: 'Local file', url: null,
             });
             setTimeout(() => {
+              finishSmoothLoading(false);
               setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
             }, 600);
           } else if (event === 'transcript_error') {
             clearTimeout(killTimer);
             setError(data.error || 'Transcription failed.');
+            finishSmoothLoading(false);
             setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
           }
         }
       }
     } catch (err) {
       setError('Upload failed — ' + (err.message || 'please try again.'));
+      finishSmoothLoading(false);
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     }
   };
