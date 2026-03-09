@@ -30,12 +30,14 @@ const MOBILE_BREAKPOINT = 640;
 const TABLET_BREAKPOINT = 1024;
 
 const PROGRESS_PROFILE_KEY = 'yte_progress_profile_v1';
+const PROGRESS_SPEED_MULTIPLIER = 0.25; // 4x faster visual progress
 const DEFAULT_PROGRESS_PROFILE = Object.freeze({
   url: { avgMs: 60000, samples: 0 },
   upload: { avgMs: 140000, samples: 0 },
 });
 
 const clampNumber = (value, min, max) => Math.max(min, Math.min(max, value));
+const scaleProgressMs = (ms) => Math.round(ms * PROGRESS_SPEED_MULTIPLIER);
 
 const cloneDefaultProgressProfile = () => ({
   url: { ...DEFAULT_PROGRESS_PROFILE.url },
@@ -4729,10 +4731,11 @@ const App = () => {
     const fallback = mode === 'upload'
       ? DEFAULT_PROGRESS_PROFILE.upload.avgMs
       : DEFAULT_PROGRESS_PROFILE.url.avgMs;
-    const min = mode === 'upload' ? 60000 : 25000;
-    const max = mode === 'upload' ? 420000 : 240000;
+    const min = mode === 'upload' ? 15000 : 6000;
+    const max = mode === 'upload' ? 105000 : 60000;
     const avgMs = Number(progressProfileRef.current?.[mode]?.avgMs);
-    return clampNumber(Number.isFinite(avgMs) ? avgMs : fallback, min, max);
+    const baseMs = Number.isFinite(avgMs) ? avgMs : fallback;
+    return clampNumber(scaleProgressMs(baseMs), min, max);
   };
 
   const learnProgressDuration = (mode, durationMs) => {
@@ -4795,9 +4798,9 @@ const App = () => {
       setLoadingStage(stage);
       const run = progressRunRef.current;
       if (run && stage === 'whisper') {
-        run.estimateMs = Math.max(run.estimateMs, run.mode === 'upload' ? 160000 : 90000);
+        run.estimateMs = Math.max(run.estimateMs, scaleProgressMs(run.mode === 'upload' ? 160000 : 90000));
       } else if (run && stage === 'audio') {
-        run.estimateMs = Math.max(run.estimateMs, run.mode === 'upload' ? 140000 : 70000);
+        run.estimateMs = Math.max(run.estimateMs, scaleProgressMs(run.mode === 'upload' ? 140000 : 70000));
       }
     }
     if (Number.isFinite(percent)) {
