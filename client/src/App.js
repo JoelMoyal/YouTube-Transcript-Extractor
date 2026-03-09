@@ -7623,6 +7623,9 @@ const App = () => {
                       { title: 'Academic', color: '#7C3AED',
                         icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
                         onClick: academicInsights && !academicInsights._error ? () => setActiveTab('academic') : generateAcademicInsights, active: !!academicInsights && !academicInsights._error, loading: academicInsightsLoading },
+                      { title: 'Discover', color: '#C2410C',
+                        icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>,
+                        onClick: discover && !discover._error ? () => setActiveTab('discover') : generateDiscover, active: !!discover && !discover._error, loading: discoverLoading },
                     ].map(item => (
                       <button key={item.title} onClick={item.loading ? undefined : item.onClick} title={item.title} style={{
                         width: 40, height: 40, borderRadius: 11, border: 'none', cursor: item.loading ? 'default' : 'pointer',
@@ -7667,9 +7670,12 @@ const App = () => {
                         { title: 'Study Guide', sub: 'Objectives & review', color: P.success, bg: 'rgba(15,118,110,0.1)',
                           icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
                           onClick: studyGuide && !studyGuide._error ? () => setActiveTab('study-guide') : generateStudyGuide, active: !!studyGuide && !studyGuide._error, loading: studyGuideLoading },
-                        { title: 'Academic', sub: 'References & glossary', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
+                          { title: 'Academic', sub: 'References & glossary', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
                           icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
                           onClick: academicInsights && !academicInsights._error ? () => setActiveTab('academic') : generateAcademicInsights, active: !!academicInsights && !academicInsights._error, loading: academicInsightsLoading },
+                        { title: 'Discover', sub: 'Related videos & papers', color: '#C2410C', bg: 'rgba(194,65,12,0.1)',
+                          icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>,
+                          onClick: discover && !discover._error ? () => setActiveTab('discover') : generateDiscover, active: !!discover && !discover._error, loading: discoverLoading },
                       ].map(item => (
                         <div key={item.title} onClick={item.loading ? undefined : item.onClick}
                           style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 10px', borderRadius: 12, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 2 }}
