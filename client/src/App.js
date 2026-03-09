@@ -6673,7 +6673,13 @@ const App = () => {
                     }}>
                       Input method
                     </span>
-                    <span style={{ fontSize: 11.5, color: P.muted, whiteSpace: 'nowrap' }}>
+                    <span style={{
+                      fontSize: 11.5,
+                      color: P.muted,
+                      whiteSpace: isMobile ? 'normal' : 'nowrap',
+                      textAlign: 'right',
+                      lineHeight: 1.2,
+                    }}>
                       {inputMode === 'url' ? 'For public video links' : 'For local media files'}
                     </span>
                   </div>
@@ -6681,17 +6687,32 @@ const App = () => {
                     role="tablist"
                     aria-label="Select input method"
                     style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                      position: 'relative',
+                      display: 'flex',
                       width: '100%',
                       background: 'linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(246,242,234,0.9) 100%)',
                       border: '1px solid rgba(136,142,151,0.25)',
                       borderRadius: isMobile ? 14 : 16,
                       padding: isMobile ? 4 : 5,
-                      gap: isMobile ? 4 : 6,
                       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.88)',
+                      overflow: 'hidden',
                     }}
                   >
+                    <span aria-hidden="true" style={{
+                      position: 'absolute',
+                      top: isMobile ? 4 : 5,
+                      left: isMobile ? 4 : 5,
+                      width: `calc(50% - ${isMobile ? 4 : 5}px)`,
+                      bottom: isMobile ? 4 : 5,
+                      borderRadius: isMobile ? 11 : 12,
+                      border: '1px solid rgba(60,140,255,0.42)',
+                      background: 'linear-gradient(145deg, rgba(255,255,255,0.96) 0%, rgba(240,247,255,0.94) 100%)',
+                      boxShadow: '0 8px 16px rgba(60,140,255,0.16), inset 0 1px 0 rgba(255,255,255,0.92)',
+                      transform: inputMode === 'upload' ? 'translateX(100%)' : 'translateX(0)',
+                      transition: 'transform 0.25s cubic-bezier(0.22, 0.8, 0.2, 1)',
+                      pointerEvents: 'none',
+                      zIndex: 0,
+                    }} />
                     {[
                       {
                         id: 'url',
@@ -6723,13 +6744,11 @@ const App = () => {
                             setInputMode(order[nextIdx]);
                           }}
                           style={{
-                            width: '100%',
-                            border: active ? '1px solid rgba(60,140,255,0.42)' : '1px solid transparent',
+                            width: '50%',
+                            zIndex: 1,
+                            border: '1px solid transparent',
                             borderRadius: isMobile ? 11 : 12,
-                            background: active
-                              ? 'linear-gradient(145deg, rgba(255,255,255,0.96) 0%, rgba(240,247,255,0.94) 100%)'
-                              : 'transparent',
-                            boxShadow: active ? '0 8px 16px rgba(60,140,255,0.16), inset 0 1px 0 rgba(255,255,255,0.92)' : 'none',
+                            background: 'transparent',
                             color: active ? P.accentHover : '#636973',
                             display: 'flex',
                             alignItems: 'center',
@@ -6738,7 +6757,6 @@ const App = () => {
                             textAlign: 'left',
                             cursor: 'pointer',
                             transition: 'all 0.18s cubic-bezier(0.2, 0.7, 0.2, 1)',
-                            transform: active ? 'translateY(-1px)' : 'translateY(0)',
                             animation: active ? 'tabHighlight 0.45s ease-out' : 'none',
                           }}
                           onMouseEnter={e => {
@@ -7761,6 +7779,9 @@ const App = () => {
                         { title: 'Academic', sub: 'References & glossary', color: '#7C3AED', bg: 'rgba(124,58,237,0.1)',
                           icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
                           onClick: academicInsights && !academicInsights._error ? () => setActiveTab('academic') : generateAcademicInsights, active: !!academicInsights && !academicInsights._error, loading: academicInsightsLoading },
+                        { title: 'Discover', sub: 'Related videos & papers', color: '#C2410C', bg: 'rgba(194,65,12,0.1)',
+                          icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>,
+                          onClick: discover && !discover._error ? () => setActiveTab('discover') : generateDiscover, active: !!discover && !discover._error, loading: discoverLoading },
                       ].map(item => (
                         <div key={item.title} onClick={item.loading ? undefined : item.onClick}
                           style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 10px', borderRadius: 12, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 2 }}
@@ -7993,6 +8014,7 @@ const App = () => {
                   ...(!isMobile && summary ? [{ key: 'summary', label: 'Summary', closeable: true, onClose: () => { setSummary(''); setSummarizing(false); if (activeTab === 'summary') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
                   ...(!isMobile && studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', closeable: true, onClose: () => { setStudyGuide(null); if (activeTab === 'study-guide') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
                   ...(!isMobile && academicInsights && !academicInsights._error ? [{ key: 'academic', label: 'Academic', closeable: true, onClose: () => { setAcademicInsights(null); if (activeTab === 'academic') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }] : []),
+                  ...(!isMobile && discover && !discover._error ? [{ key: 'discover', label: 'Discover', closeable: true, onClose: () => { setDiscover(null); if (activeTab === 'discover') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> }] : []),
                 ].sort((a, b) => {
                   const ai = activeTabOrder.indexOf(a.key);
                   const bi = activeTabOrder.indexOf(b.key);
@@ -8730,6 +8752,7 @@ const App = () => {
                   ...(flashcards.length > 0 || flashcardsExhausted || flashcardsLoading ? [{ key: 'flashcards', label: 'Flashcards', closeable: true, onClose: () => { setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason(''); if (sidebarTab === 'flashcards') setSidebarTab('ai'); }, icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> }] : []),
                   ...(studyGuide || studyGuideLoading ? [{ key: 'study-guide', label: 'Study Guide', closeable: true, onClose: () => { setStudyGuide(null); setStudyGuideLoading(false); if (sidebarTab === 'study-guide') setSidebarTab('ai'); }, icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
                   ...(academicInsights || academicInsightsLoading ? [{ key: 'academic', label: 'Academic', closeable: true, onClose: () => { setAcademicInsights(null); setAcademicInsightsLoading(false); if (sidebarTab === 'academic') setSidebarTab('ai'); }, icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }] : []),
+                  ...(discover && !discover._error || discoverLoading ? [{ key: 'discover', label: 'Discover', closeable: true, onClose: () => { setDiscover(null); setDiscoverLoading(false); if (sidebarTab === 'discover') setSidebarTab('ai'); }, icon: <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> }] : []),
                 ].sort((a, b) => {
                   const ai = sidebarTabOrder.indexOf(a.key);
                   const bi = sidebarTabOrder.indexOf(b.key);
