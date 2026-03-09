@@ -7922,11 +7922,11 @@ const App = () => {
                       {tab.closeable && (
                         <span
                           onClick={e => { e.stopPropagation(); tab.onClose(); }}
-                          style={{ marginLeft: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: 3, flexShrink: 0, opacity: 0.5 }}
+                          style={{ marginLeft: 2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, borderRadius: 3, flexShrink: 0, opacity: 0.5 }}
                           onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = P.error; e.currentTarget.style.background = 'rgba(180,35,24,0.1)'; }}
                           onMouseLeave={e => { e.currentTarget.style.opacity = '0.5'; e.currentTarget.style.color = ''; e.currentTarget.style.background = 'transparent'; }}
                         >
-                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         </span>
                       )}
                     </button>
@@ -8667,11 +8667,11 @@ const App = () => {
                       {tab.closeable && (
                         <span
                           onClick={e => { e.stopPropagation(); tab.onClose(); }}
-                          style={{ marginLeft: 3, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: 3, flexShrink: 0, opacity: 0.5 }}
+                          style={{ marginLeft: 3, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, borderRadius: 3, flexShrink: 0, opacity: 0.5 }}
                           onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = P.error; e.currentTarget.style.background = 'rgba(180,35,24,0.1)'; }}
                           onMouseLeave={e => { e.currentTarget.style.opacity = '0.5'; e.currentTarget.style.color = ''; e.currentTarget.style.background = 'transparent'; }}
                         >
-                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         </span>
                       )}
                     </button>

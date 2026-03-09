@@ -890,7 +890,7 @@ app.post('/api/flashcards', async (req, res) => {
       prompt = `You are creating high-quality study flashcards from a YouTube video transcript.\n\nFirst, assess the content:\n- Is this educational content (tutorial, lecture, explainer, documentary, interview with learnable information)? If yes, generate flashcards.\n- Is this non-educational content (music, entertainment, vlog, comedy, fiction, etc.) with no meaningful concepts to study? If yes, return: {"noMore":true,"reason":"<one sentence explaining why — e.g. this is a music video with no educational concepts>"}\n\nIf generating cards:\n- Generate one card per distinct learnable concept the transcript contains — however many that is\n- A 2-minute explainer may warrant 2-3 cards. A 1-hour lecture may warrant 20+. Let the content decide.\n- Each card covers a DIFFERENT concept — no duplicates or rephrasing\n- Only create cards for concepts clearly explained in the transcript — do not invent\n- Skip trivial or obvious questions\n- "answer" should be concise but complete (1-3 sentences)\n- "topic" is a short 1-3 word category label\n\nTranscript:\n${transcript.slice(0, 12000)}\n\nReturn ONLY a JSON array OR the noMore object — no markdown, no explanation.\nFormat: [{"question":"...","answer":"...","topic":"..."},...]`;
     }
 
-    const raw = await aiComplete(prompt, 3000);
+    const raw = await aiComplete(prompt, 1800);
 
     // Check for noMore signal first
     const noMoreMatch = raw.match(/\{\s*"noMore"\s*:\s*true[\s\S]*?\}/);
