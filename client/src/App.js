@@ -10001,7 +10001,7 @@ const App = () => {
             return (
               <div ref={mobileNavRef} className="no-scrollbar" style={{
                 position: 'fixed', bottom: MOBILE_BOTTOM_NAV_LIFT, left: 0, right: 0, zIndex: 100,
-                height: `calc(${MOBILE_BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px))`,
+                height: MOBILE_BOTTOM_NAV_HEIGHT,
                 background: '#FFFFFF',
                 borderTop: '1px solid rgba(29,29,31,0.12)',
                 borderRadius: '22px 22px 0 0',
