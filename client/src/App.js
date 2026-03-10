@@ -4819,6 +4819,31 @@ const App = () => {
     });
   };
 
+  // Sync local credit state from the server's authoritative response.
+  // Called when the server includes a `credits` object in the SSE done event.
+  const syncCreditsFromServer = (serverCredits) => {
+    if (!serverCredits || !user) return;
+    setCredits(prev => {
+      const next = {
+        ...prev,
+        used: serverCredits.used,
+        tierMax: serverCredits.tier_max,
+        resetAt: new Date(serverCredits.reset_at).getTime(),
+        userId: user.id,
+      };
+      localStorage.setItem(`yte_credits_${user.id}`, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  // Returns the current Supabase session access token, or null if not signed in.
+  const getAuthToken = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.access_token ?? null;
+    } catch { return null; }
+  };
+
   const getEstimatedProgressMs = (mode) => {
     const fallback = mode === 'upload'
       ? DEFAULT_PROGRESS_PROFILE.upload.avgMs
@@ -5080,9 +5105,13 @@ const App = () => {
     setPendingHistoryAction(null);
     beginSmoothLoading('url', 'Looking for subtitles…', 'subtitles');
 
+    // Attach auth token so the server can check/deduct server-side credits.
+    // EventSource doesn't support custom headers, so the token goes in ?_t=.
+    const token = await getAuthToken();
+    const tokenParam = token ? `&_t=${encodeURIComponent(token)}` : '';
     const apiUrl = platform === 'youtube'
-      ? `/api/transcript?videoId=${videoId}&lang=${langToUse}`
-      : `/api/transcript?platform=${encodeURIComponent(platform)}&url=${encodeURIComponent(videoCanonical)}&lang=${langToUse}`;
+      ? `/api/transcript?videoId=${videoId}&lang=${langToUse}${tokenParam}`
+      : `/api/transcript?platform=${encodeURIComponent(platform)}&url=${encodeURIComponent(videoCanonical)}&lang=${langToUse}${tokenParam}`;
     const es = new EventSource(apiUrl);
     const killTimer = setTimeout(() => {
       es.close();
@@ -5117,7 +5146,9 @@ const App = () => {
         setCurrentChannel(channel);
         finishSmoothLoading(true);
         setLoadingPercent(100);
-        incrementCredits();
+        // Prefer server-authoritative credit count; fall back to local increment.
+        if (data.credits) syncCreditsFromServer(data.credits);
+        else incrementCredits();
         // After 3rd extraction, nudge signed-in users without referrals to share
         if (user && (credits.used + 1) === 3 && !(user.user_metadata?.referral_count)) {
           setTimeout(() => setShowReferralPromo(true), 1500);
@@ -5135,6 +5166,18 @@ const App = () => {
           setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
         }, 600);
       }
+    });
+
+    // Server fires this when the user's credit balance is exhausted.
+    es.addEventListener('out_of_credits', (e) => {
+      clearTimeout(killTimer); es.close();
+      try {
+        const data = JSON.parse(e.data);
+        if (data.used !== undefined) syncCreditsFromServer(data);
+      } catch {}
+      setError('You\'ve used all your credits for this period. Sign in or wait for your credits to reset.');
+      finishSmoothLoading(false);
+      setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     });
 
     es.addEventListener('transcript_error', (e) => {
@@ -5181,7 +5224,18 @@ const App = () => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('/api/transcript/upload', { method: 'POST', body: formData });
+      const token = await getAuthToken();
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const response = await fetch('/api/transcript/upload', { method: 'POST', headers, body: formData });
+      if (response.status === 402) {
+        // Out of credits — server returned JSON 402 before SSE started
+        const body = await response.json().catch(() => ({}));
+        if (body.used !== undefined) syncCreditsFromServer(body);
+        setError('You\'ve used all your credits for this period. Sign in or wait for your credits to reset.');
+        finishSmoothLoading(false);
+        setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+        return;
+      }
       if (!response.ok || !response.body) throw new Error(`Server error ${response.status}`);
 
       const reader  = response.body.getReader();
@@ -5227,7 +5281,8 @@ const App = () => {
             setCurrentChannel('Local file');
             finishSmoothLoading(true);
             setLoadingPercent(100);
-            incrementCredits();
+            if (data.credits) syncCreditsFromServer(data.credits);
+            else incrementCredits();
             saveToHistory({
               id: syntheticId, platform: 'upload',
               transcript: data.transcript, segments: data.segments || [],

@@ -97,6 +97,112 @@ async function requireAuth(req, res, next) {
   next();
 }
 
+// ── Server-side credit system ─────────────────────────────────────────────────
+// Reads the JWT token from either the Authorization header or the ?_t= query
+// param (needed for EventSource / SSE which cannot send custom headers).
+// For authenticated users: checks and atomically deducts 1 credit from the
+// user_credits table (see supabase/user_credits.sql).
+// For anonymous / unauthenticated users: passes through — the rate limiter is
+// the protection for those requests.
+//
+// Returns: { ok, user, creditInfo }
+//   ok         — true if the request may proceed
+//   user       — Supabase user object (null for anon)
+//   creditInfo — { used, tierMax, resetAt } after deduction (null for anon)
+//   response already sent if ok === false (402)
+async function checkAndDeductCredit(req, res) {
+  // No Supabase admin client → skip (dev environment without credentials)
+  if (!supabaseAdmin) return { ok: true, user: null, creditInfo: null };
+
+  // Read token from Authorization header OR ?_t= query param (for SSE)
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ')
+    ? authHeader.slice(7)
+    : (req.query._t || null);
+
+  // Anonymous request — pass through, rate limiter handles protection
+  if (!token) return { ok: true, user: null, creditInfo: null };
+
+  // Validate JWT
+  const { data: { user }, error: authErr } = await supabaseAdmin.auth.getUser(token);
+  if (authErr || !user) return { ok: true, user: null, creditInfo: null }; // treat invalid token as anon
+
+  const referralBonus = user.user_metadata?.referral_bonus || 0;
+  const tierMax = 20 + referralBonus;
+  const now = new Date();
+  const resetAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  // Ensure a credits row exists for this user (insert only if missing)
+  await supabaseAdmin
+    .from('user_credits')
+    .insert({ user_id: user.id, used: 0, reset_at: resetAt, tier_max: tierMax })
+    .select()
+    .maybeSingle() // ignore conflict (row already exists)
+    .catch(() => {}); // never block on DB error
+
+  // Read current credits row
+  const { data: row, error: rowErr } = await supabaseAdmin
+    .from('user_credits')
+    .select('used, reset_at, tier_max')
+    .eq('user_id', user.id)
+    .single();
+
+  if (rowErr || !row) {
+    // DB error — fail open (don't block the user)
+    console.error('[credits] read error:', rowErr?.message);
+    return { ok: true, user, creditInfo: null };
+  }
+
+  // Reset window if expired
+  let currentUsed = row.used;
+  if (new Date(row.reset_at) < now) {
+    await supabaseAdmin
+      .from('user_credits')
+      .update({ used: 0, reset_at: resetAt, updated_at: now.toISOString() })
+      .eq('user_id', user.id)
+      .catch(() => {});
+    currentUsed = 0;
+  }
+
+  const effectiveTierMax = Math.max(row.tier_max, tierMax);
+
+  // Out of credits — return 402
+  if (currentUsed >= effectiveTierMax) {
+    const body = { error: 'Out of credits', used: currentUsed, tier_max: effectiveTierMax, reset_at: row.reset_at };
+    // SSE connections: headers already sent after flushHeaders(), use close event instead
+    if (res.headersSent) {
+      res.write(`event: out_of_credits\ndata: ${JSON.stringify(body)}\n\n`);
+      res.end();
+    } else {
+      res.status(402).json(body);
+    }
+    return { ok: false, user, creditInfo: null };
+  }
+
+  // Deduct 1 credit (optimistic: only updates if `used` hasn't changed since we read it)
+  const { data: updated, error: updateErr } = await supabaseAdmin
+    .from('user_credits')
+    .update({ used: currentUsed + 1, updated_at: now.toISOString() })
+    .eq('user_id', user.id)
+    .eq('used', currentUsed) // prevents double-spend in concurrent requests
+    .select()
+    .maybeSingle();
+
+  if (updateErr) {
+    console.error('[credits] deduct error:', updateErr.message);
+    return { ok: true, user, creditInfo: null }; // fail open
+  }
+
+  const creditInfo = {
+    used: updated?.used ?? currentUsed + 1,
+    tier_max: effectiveTierMax,
+    reset_at: row.reset_at,
+  };
+
+  console.log(`[credits] deducted 1 credit for ${user.id}: ${creditInfo.used}/${creditInfo.tier_max}`);
+  return { ok: true, user, creditInfo };
+}
+
 async function aiComplete(prompt, maxTokens = 1024) {
   // Try Groq first
   if (process.env.GROQ_API_KEY) {
@@ -537,14 +643,21 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
       return res.status(400).json({ error: 'Invalid videoId format' });
   }
 
+  // ── Server-side credit check (must run before flushHeaders) ─────────────────
+  const { ok: creditOk, creditInfo } = await checkAndDeductCredit(req, res);
+  if (!creditOk) return; // 402 already sent by checkAndDeductCredit
+
   // Set up SSE
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
+  // Inject updated credit counts into every 'done' event so the client can
+  // sync without an extra round-trip.
   const send = (event, data) => {
-    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    const payload = (event === 'done' && creditInfo) ? { ...data, credits: creditInfo } : data;
+    res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
   };
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -1307,14 +1420,24 @@ app.post('/api/restore-account', requireAuth, async (req, res) => {
 // ── Local file upload transcription ───────────────────────────────────────────
 app.post('/api/transcript/upload', uploadRateLimit, (req, res) => {
   uploadMiddleware(req, res, async (multerErr) => {
+    // Credit check BEFORE SSE headers so we can still send a JSON 402 response.
+    // Authorization header is available here (regular POST, not SSE).
+    const { ok: creditOk, creditInfo } = await checkAndDeductCredit(req, res);
+    if (!creditOk) {
+      if (req.file) await fsPromises.unlink(req.file.path).catch(() => {});
+      return;
+    }
+
     // SSE headers must be sent before any write
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
-    const send = (event, data) =>
-      res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+    const send = (event, data) => {
+      const payload = (event === 'done' && creditInfo) ? { ...data, credits: creditInfo } : data;
+      res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
+    };
 
     if (multerErr) {
       const isSize = multerErr.code === 'LIMIT_FILE_SIZE';
