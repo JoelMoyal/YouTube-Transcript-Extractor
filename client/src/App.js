@@ -5841,7 +5841,7 @@ const App = () => {
             onClick: academicInsights && !academicInsights._error ? () => setActiveTab('academic') : generateAcademicInsights, active: !!academicInsights && !academicInsights._error, loading: academicInsightsLoading },
           { title: 'Discover', sub: 'Related videos & papers', color: '#C2410C', bg: 'rgba(194,65,12,0.1)',
             icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>,
-            onClick: discover && !discover._error ? () => setActiveTab('discover') : generateDiscover, active: !!discover && !discover._error, loading: discoverLoading },
+            onClick: discover && !discover._error ? () => setDiscover(null) : generateDiscover, active: !!discover && !discover._error, loading: discoverLoading },
         ].map(item => (
           <div key={item.title} onClick={item.loading ? undefined : item.onClick}
             style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 10px', borderRadius: 11, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 3 }}
@@ -8070,7 +8070,7 @@ const App = () => {
                           onClick: academicInsights && !academicInsights._error ? () => setActiveTab('academic') : generateAcademicInsights, active: !!academicInsights && !academicInsights._error, loading: academicInsightsLoading },
                         { title: 'Discover', sub: 'Related videos & papers', color: '#C2410C', bg: 'rgba(194,65,12,0.1)',
                           icon: <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>,
-                          onClick: discover && !discover._error ? () => setActiveTab('discover') : generateDiscover, active: !!discover && !discover._error, loading: discoverLoading },
+                          onClick: discover && !discover._error ? () => setDiscover(null) : generateDiscover, active: !!discover && !discover._error, loading: discoverLoading },
                       ].map(item => (
                         <div key={item.title} onClick={item.loading ? undefined : item.onClick}
                           style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 10px', borderRadius: 12, cursor: 'pointer', transition: 'background 0.12s', marginBottom: 2 }}
@@ -8096,6 +8096,71 @@ const App = () => {
                         </div>
                       )}
                     </div>
+
+                    {/* ── Discover results — above Recent ── */}
+                    {(discover && !discover._error || discoverLoading) && (
+                      <div style={{ borderTop: `1px solid ${P.border}`, flexShrink: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 14px 7px' }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C2410C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: P.ink }}>Related</span>
+                          {discoverLoading && <SpinnerIcon size={10} />}
+                          {discover && !discover._error && (
+                            <button onClick={() => setDiscover(null)} style={{ marginLeft: 'auto', border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 18, lineHeight: 1, padding: '0 2px', fontFamily: 'inherit' }}
+                              onMouseEnter={e => e.currentTarget.style.color = P.ink}
+                              onMouseLeave={e => e.currentTarget.style.color = P.muted}
+                            >×</button>
+                          )}
+                        </div>
+                        {discoverLoading ? (
+                          <div style={{ padding: '6px 14px 14px', fontSize: 12, color: P.muted }}>Finding related content…</div>
+                        ) : discover && !discover._error ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', paddingBottom: 8 }}>
+                            {discover.videos?.length > 0 && (
+                              <>
+                                <div style={{ padding: '2px 14px 5px', fontSize: 11.5, fontWeight: 500, color: P.muted }}>Videos</div>
+                                {discover.videos.map((v, i) => (
+                                  <a key={i} href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer"
+                                    style={{ display: 'flex', gap: 9, alignItems: 'center', padding: '6px 14px', textDecoration: 'none', transition: 'background 0.12s', borderRadius: 8 }}
+                                    onMouseEnter={e => e.currentTarget.style.background = P.paper}
+                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                                  >
+                                    {v.thumbnail
+                                      ? <img src={v.thumbnail} alt="" style={{ width: 52, height: 30, borderRadius: 5, objectFit: 'cover', flexShrink: 0 }} />
+                                      : <div style={{ width: 52, height: 30, borderRadius: 5, background: P.border, flexShrink: 0 }} />
+                                    }
+                                    <div style={{ minWidth: 0, flex: 1 }}>
+                                      <div style={{ fontSize: 12, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.35 }}>{v.title}</div>
+                                      <div style={{ fontSize: 11, color: P.muted, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.channel}</div>
+                                    </div>
+                                  </a>
+                                ))}
+                              </>
+                            )}
+                            {discover.papers?.length > 0 && (
+                              <>
+                                <div style={{ padding: '10px 14px 5px', fontSize: 11.5, fontWeight: 500, color: P.muted }}>Papers</div>
+                                {discover.papers.map((p, i) => (
+                                  <div key={i} style={{ padding: '6px 14px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                    <div style={{ fontSize: 12, fontWeight: 600, color: P.ink, lineHeight: 1.4 }}>{p.title}</div>
+                                    <div style={{ fontSize: 11, color: P.muted }}>
+                                      {p.authors?.[0]}{p.authors?.length > 1 ? ' et al.' : ''}{p.year ? ` · ${p.year}` : ''}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 8, marginTop: 1 }}>
+                                      {p.pdfUrl && <a href={p.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, fontWeight: 600, color: P.accent, textDecoration: 'none' }}>PDF ↗</a>}
+                                      {p.doi && <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, fontWeight: 500, color: P.muted, textDecoration: 'none' }}>DOI ↗</a>}
+                                      {!p.pdfUrl && !p.doi && p.paperId && <a href={`https://www.semanticscholar.org/paper/${p.paperId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, fontWeight: 500, color: P.muted, textDecoration: 'none' }}>View ↗</a>}
+                                    </div>
+                                  </div>
+                                ))}
+                              </>
+                            )}
+                            {!discover.videos?.length && !discover.papers?.length && (
+                              <div style={{ padding: '6px 14px 10px', fontSize: 12, color: P.muted }}>No related content found.</div>
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
 
                     {/* Recent — collapsible */}
                     <div style={{ margin: '8px 10px 0', borderTop: `1px solid ${P.border}`, flexShrink: 0 }}>
@@ -8140,79 +8205,6 @@ const App = () => {
                         </div>
                       )}
                     </div>
-
-                    {/* ── Discover results — inline below Recent ── */}
-                    {(discover && !discover._error || discoverLoading) && (
-                      <div style={{ borderTop: `1px solid ${P.border}`, flexShrink: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px 6px' }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C2410C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-                          <span style={{ fontSize: 10.5, fontWeight: 700, color: P.muted, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Discover</span>
-                          {discoverLoading && <SpinnerIcon size={10} />}
-                          {discover && !discover._error && (
-                            <button onClick={() => setDiscover(null)} style={{ marginLeft: 'auto', border: 'none', background: 'none', cursor: 'pointer', color: P.muted, fontSize: 16, lineHeight: 1, padding: '0 2px', fontFamily: 'inherit' }}
-                              onMouseEnter={e => e.currentTarget.style.color = P.ink}
-                              onMouseLeave={e => e.currentTarget.style.color = P.muted}
-                            >×</button>
-                          )}
-                        </div>
-                        {discoverLoading ? (
-                          <div style={{ padding: '8px 18px 14px', fontSize: 12, color: P.muted }}>Finding related content…</div>
-                        ) : discover && !discover._error ? (
-                          <div style={{ display: 'flex', flexDirection: 'column', paddingBottom: 10 }}>
-                            {discover.keywords?.length > 0 && (
-                              <div style={{ padding: '0 18px 8px', display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                                {discover.keywords.map((kw, i) => (
-                                  <span key={i} style={{ fontSize: 10.5, fontWeight: 600, color: '#C2410C', background: 'rgba(194,65,12,0.08)', padding: '2px 7px', borderRadius: 99 }}>{kw}</span>
-                                ))}
-                              </div>
-                            )}
-                            {discover.videos?.length > 0 && (
-                              <>
-                                <div style={{ padding: '2px 18px 5px', fontSize: 10, fontWeight: 700, color: P.muted, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Videos · {discover.videos.length}</div>
-                                {discover.videos.map((v, i) => (
-                                  <a key={i} href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer"
-                                    style={{ display: 'flex', gap: 9, alignItems: 'center', padding: '6px 18px', textDecoration: 'none', transition: 'background 0.12s' }}
-                                    onMouseEnter={e => e.currentTarget.style.background = P.paper}
-                                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                  >
-                                    {v.thumbnail
-                                      ? <img src={v.thumbnail} alt="" style={{ width: 46, height: 26, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }} />
-                                      : <div style={{ width: 46, height: 26, borderRadius: 4, background: P.border, flexShrink: 0 }} />
-                                    }
-                                    <div style={{ minWidth: 0, flex: 1 }}>
-                                      <div style={{ fontSize: 11.5, fontWeight: 600, color: P.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.35 }}>{v.title}</div>
-                                      <div style={{ fontSize: 10.5, color: P.muted, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.channel}</div>
-                                    </div>
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={P.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                                  </a>
-                                ))}
-                              </>
-                            )}
-                            {discover.papers?.length > 0 && (
-                              <>
-                                <div style={{ padding: '8px 18px 5px', fontSize: 10, fontWeight: 700, color: P.muted, letterSpacing: '0.07em', textTransform: 'uppercase' }}>Papers · {discover.papers.length}</div>
-                                {discover.papers.map((p, i) => (
-                                  <div key={i} style={{ padding: '6px 18px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                                    <div style={{ fontSize: 11.5, fontWeight: 600, color: P.ink, lineHeight: 1.4 }}>{p.title}</div>
-                                    <div style={{ fontSize: 10.5, color: P.muted }}>
-                                      {p.authors?.[0]}{p.authors?.length > 1 ? ' et al.' : ''}{p.year ? ` · ${p.year}` : ''}
-                                    </div>
-                                    <div style={{ display: 'flex', gap: 6, marginTop: 1 }}>
-                                      {p.pdfUrl && <a href={p.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10.5, fontWeight: 600, color: P.accent, textDecoration: 'none', background: P.accentLight, padding: '2px 7px', borderRadius: 5 }}>PDF</a>}
-                                      {p.doi && <a href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10.5, fontWeight: 500, color: P.muted, textDecoration: 'none' }}>DOI ↗</a>}
-                                      {!p.pdfUrl && !p.doi && p.paperId && <a href={`https://www.semanticscholar.org/paper/${p.paperId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10.5, fontWeight: 500, color: P.muted, textDecoration: 'none' }}>View ↗</a>}
-                                    </div>
-                                  </div>
-                                ))}
-                              </>
-                            )}
-                            {!discover.videos?.length && !discover.papers?.length && (
-                              <div style={{ padding: '6px 18px 10px', fontSize: 12, color: P.muted }}>No related content found.</div>
-                            )}
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
 
                     {/* New search pinned at bottom */}
                     <div style={{ marginTop: 'auto', padding: '12px 12px', borderTop: `1px solid ${P.border}`, flexShrink: 0 }}>
@@ -8376,7 +8368,6 @@ const App = () => {
                   ...(!isMobile && summary ? [{ key: 'summary', label: 'Summary', closeable: true, onClose: () => { setSummary(''); setSummarizing(false); if (activeTab === 'summary') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> }] : []),
                   ...(!isMobile && studyGuide && !studyGuide._error ? [{ key: 'study-guide', label: 'Study Guide', closeable: true, onClose: () => { setStudyGuide(null); if (activeTab === 'study-guide') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> }] : []),
                   ...(!isMobile && academicInsights && !academicInsights._error ? [{ key: 'academic', label: 'Academic', closeable: true, onClose: () => { setAcademicInsights(null); if (activeTab === 'academic') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }] : []),
-                  ...(!isMobile && (discover && !discover._error || discoverLoading) ? [{ key: 'discover', label: 'Discover', closeable: true, onClose: () => { setDiscover(null); setDiscoverLoading(false); if (activeTab === 'discover') setActiveTab('transcript'); }, icon: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg> }] : []),
                 ].sort((a, b) => {
                   const ai = activeTabOrder.indexOf(a.key);
                   const bi = activeTabOrder.indexOf(b.key);
@@ -9096,8 +9087,8 @@ const App = () => {
                   </div>
                 )}
 
-                {/* ── DISCOVER TAB ── */}
-                {activeTab === 'discover' && (
+                {/* ── DISCOVER TAB — removed, discover lives in sidebar only ── */}
+                {false && (
                   <div style={{ padding: isMobile ? '16px 16px 40px' : '20px 24px 40px', display: 'flex', flexDirection: 'column', gap: 20 }}>
                     {discoverLoading ? (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 24px', gap: 14 }}>
