@@ -5888,7 +5888,11 @@ const App = () => {
 
   const showTopNavbar = !isMobile || !transcript;
   const topChromeOffset = showTopNavbar ? ((showBookmarkBanner && !isMobile) ? 97 : 56) : 0;
-  const mobileBottomNavHeight = isMobile && transcript && !hideMobileNavForFooter ? (60 + MOBILE_BOTTOM_NAV_LIFT) : 0;
+  const hasMobileBottomNav = isMobile && transcript && !hideMobileNavForFooter;
+  const mobileBottomNavHeight = hasMobileBottomNav ? (60 + MOBILE_BOTTOM_NAV_LIFT) : 0;
+  const mobileBottomNavCssHeight = hasMobileBottomNav
+    ? `calc(${mobileBottomNavHeight}px + env(safe-area-inset-bottom, 0px))`
+    : '0px';
 
   return (
     <>
@@ -8012,8 +8016,8 @@ const App = () => {
             display: 'grid',
             gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 300px' : '64px 1fr 360px',
             gridTemplateRows: '1fr',
-            height: isMobile ? `calc(100dvh - ${mobileBottomNavHeight}px)` : 'calc(100dvh - 56px)',
-            minHeight: isMobile ? `calc(100vh - ${mobileBottomNavHeight}px)` : 'calc(100vh - 56px)',
+            height: isMobile ? `calc(100dvh - ${mobileBottomNavCssHeight})` : 'calc(100dvh - 56px)',
+            minHeight: isMobile ? `calc(100vh - ${mobileBottomNavCssHeight})` : 'calc(100vh - 56px)',
             overflow: 'hidden',
           }}>
 
@@ -9991,7 +9995,7 @@ const App = () => {
 
           {/* ── MOBILE SUMMARY PANEL ──────────────────────────────────────────── */}
           {isMobile && mobilePanel === 'summary' && (
-            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavCssHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
@@ -10024,7 +10028,7 @@ const App = () => {
 
           {/* ── MOBILE FLASHCARDS PANEL ───────────────────────────────────────── */}
           {isMobile && mobilePanel === 'flashcards' && (
-            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavCssHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
@@ -10105,7 +10109,7 @@ const App = () => {
 
           {/* ── MOBILE ACADEMIC INSIGHTS PANEL ───────────────────────────────── */}
           {isMobile && mobilePanel === 'academic' && (
-            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavCssHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
@@ -10187,7 +10191,7 @@ const App = () => {
 
           {/* ── MOBILE STUDY GUIDE PANEL ──────────────────────────────────────── */}
           {isMobile && mobilePanel === 'study-guide' && (
-            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavCssHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
@@ -10275,7 +10279,7 @@ const App = () => {
       <footer ref={footerRef} style={{
         background: P.surface, borderTop: `1px solid ${P.border}`,
         padding: isMobile
-          ? `34px 20px ${mobileBottomNavHeight > 0 ? mobileBottomNavHeight + 30 : 28}px`
+          ? `34px 20px ${hasMobileBottomNav ? `calc(${mobileBottomNavHeight + 30}px + env(safe-area-inset-bottom, 0px))` : '28px'}`
           : '40px 24px 32px',
         marginTop: 24,
       }}>
