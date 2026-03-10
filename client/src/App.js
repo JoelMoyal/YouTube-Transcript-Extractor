@@ -6911,7 +6911,7 @@ const App = () => {
             {/* Hero */}
             <div className="hero-grad" style={{
               minHeight: '100vh',
-              paddingBottom: isMobile ? 46 : 56,
+              paddingBottom: isMobile ? 42 : 56,
             }}>
 
             {/* Wavy animated background canvas */}
@@ -7447,7 +7447,7 @@ const App = () => {
             }} />
             <div style={{
               position: 'relative', zIndex: 2,
-              maxWidth: 1500, margin: '0 auto', padding: isMobile ? '56px 16px 44px' : '160px 36px 68px',
+              maxWidth: 1500, margin: '0 auto', padding: isMobile ? '52px 16px 44px' : '160px 36px 68px',
             }}>
               <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 52 }}>
                 <div style={{
