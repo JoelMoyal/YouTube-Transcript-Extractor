@@ -5160,102 +5160,156 @@ const App = () => {
     setPendingHistoryAction(null);
     beginSmoothLoading('url', 'Looking for subtitles…', 'subtitles');
 
-    // Attach auth token so the server can check/deduct server-side credits.
-    // EventSource doesn't support custom headers, so the token goes in ?_t=.
-    const token = await getAuthToken();
-    const tokenParam = token ? `&_t=${encodeURIComponent(token)}` : '';
+    // Use fetch-streaming so we can send auth headers and inspect non-2xx statuses.
     const apiUrl = platform === 'youtube'
-      ? `/api/transcript?videoId=${videoId}&lang=${langToUse}${tokenParam}`
-      : `/api/transcript?platform=${encodeURIComponent(platform)}&url=${encodeURIComponent(videoCanonical)}&lang=${langToUse}${tokenParam}`;
-    const es = new EventSource(apiUrl);
-    let esSettled = false; // true once any terminal event (done/error/timeout) has been handled
+      ? `/api/transcript?videoId=${videoId}&lang=${langToUse}`
+      : `/api/transcript?platform=${encodeURIComponent(platform)}&url=${encodeURIComponent(videoCanonical)}&lang=${langToUse}`;
+
     const clearLoading = () => {
       finishSmoothLoading(false);
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
     };
+
+    const controller = new AbortController();
+    let streamSettled = false; // true once any terminal event (done/error/timeout) has been handled
     const killTimer = setTimeout(() => {
-      if (esSettled) return; esSettled = true;
-      es.close();
+      if (streamSettled) return; streamSettled = true;
+      controller.abort();
       setError(funnyTranscriptError('timed out'));
       clearLoading();
     }, 180000);
 
-    es.addEventListener('progress', (e) => {
-      try {
-        applyServerProgress(JSON.parse(e.data));
-      } catch {}
-    });
+    try {
+      const token = await getAuthToken();
+      const headers = token
+        ? { 'Authorization': `Bearer ${token}`, 'Accept': 'text/event-stream' }
+        : { 'Accept': 'text/event-stream' };
 
-    es.addEventListener('done', async (e) => {
-      if (esSettled) return; esSettled = true;
-      clearTimeout(killTimer); es.close();
-      try {
-        const data = JSON.parse(e.data);
-        const meta = await fetchVideoMeta(platform, videoCanonical);
-        const title = meta.title || data.title || videoId;
-        const platformLabel = platform.charAt(0).toUpperCase() + platform.slice(1);
-        const channel = meta.channel || data.channel || platformLabel;
-        const thumb = data.thumbnail || meta.thumbnail || (platform === 'youtube' ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers,
+        signal: controller.signal,
+      });
 
-        setTranscript(data.transcript);
-        setSegments(data.segments || []);
-        setIsTranslated(false); // never show banner on initial load
-        setTranscriptSource(data.source || '');
-        setCurrentVideoId(videoId);
-        setCurrentThumbnail(thumb);
-        setCurrentTitle(title);
-        setCurrentChannel(channel);
-        finishSmoothLoading(true);
-        setLoadingPercent(100);
-        // Prefer server-authoritative credit count; fall back to local increment.
-        if (data.credits) syncCreditsFromServer(data.credits);
-        else incrementCredits();
-        // After 3rd extraction, nudge signed-in users without referrals to share
-        if (user && (credits.used + 1) === 3 && !(user.user_metadata?.referral_count)) {
-          setTimeout(() => setShowReferralPromo(true), 1500);
-        }
-        saveToHistory({
-          id: videoId, platform, transcript: data.transcript, segments: data.segments || [],
-          source: data.source || '', date: new Date().toISOString(),
-          thumbnail: thumb, title, channel, url: videoCanonical,
-        });
-      } catch {
-        setError(funnyTranscriptError('failed to process'));
-      } finally {
-        setTimeout(clearLoading, 600);
+      if (response.status === 402) {
+        const body = await response.json().catch(() => ({}));
+        if (body.used !== undefined) syncCreditsFromServer(body);
+        streamSettled = true;
+        setError('You\'ve used all your credits for this period. Sign in or wait for your credits to reset.');
+        clearLoading();
+        return;
       }
-    });
 
-    // Server fires this when the user's credit balance is exhausted.
-    es.addEventListener('out_of_credits', (e) => {
-      if (esSettled) return; esSettled = true;
-      clearTimeout(killTimer); es.close();
-      try {
-        const data = JSON.parse(e.data);
-        if (data.used !== undefined) syncCreditsFromServer(data);
-      } catch {}
-      setError('You\'ve used all your credits for this period. Sign in or wait for your credits to reset.');
-      clearLoading();
-    });
+      if (!response.ok || !response.body) {
+        let msg = `Server error ${response.status}`;
+        const body = await response.json().catch(() => null);
+        if (body?.error) msg = body.details ? `${body.error}: ${body.details}` : body.error;
+        streamSettled = true;
+        setError(funnyTranscriptError(msg));
+        clearLoading();
+        return;
+      }
 
-    es.addEventListener('transcript_error', (e) => {
-      if (esSettled) return; esSettled = true;
-      clearTimeout(killTimer); es.close();
-      try {
-        const data = JSON.parse(e.data);
-        setError(funnyTranscriptError(data.details ? `${data.error}: ${data.details}` : (data.error || 'failed to fetch')));
-      } catch { setError(funnyTranscriptError('connection')); }
-      clearLoading();
-    });
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
 
-    // Fires when server returns non-SSE response (e.g. 402, 429) or connection drops.
-    // esSettled guards against double-handling when we intentionally close the connection.
-    es.onerror = () => {
-      if (esSettled) return; esSettled = true;
-      clearTimeout(killTimer); es.close();
+      streamLoop:
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const messages = buffer.split('\n\n');
+        buffer = messages.pop() || '';
+
+        for (const raw of messages) {
+          if (!raw.trim()) continue;
+          const lines = raw.split('\n');
+          let event = 'message';
+          const dataLines = [];
+          for (const line of lines) {
+            if (line.startsWith('event:')) event = line.slice(6).trim();
+            else if (line.startsWith('data:')) dataLines.push(line.slice(5).trim());
+          }
+          if (!dataLines.length) continue;
+
+          let data;
+          try { data = JSON.parse(dataLines.join('\n')); } catch { continue; }
+
+          if (event === 'progress') {
+            applyServerProgress(data);
+            continue;
+          }
+
+          if (event === 'done') {
+            streamSettled = true;
+            try {
+              const meta = await fetchVideoMeta(platform, videoCanonical);
+              const title = meta.title || data.title || videoId;
+              const platformLabel = platform.charAt(0).toUpperCase() + platform.slice(1);
+              const channel = meta.channel || data.channel || platformLabel;
+              const thumb = data.thumbnail || meta.thumbnail || (platform === 'youtube' ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
+
+              setTranscript(data.transcript);
+              setSegments(data.segments || []);
+              setIsTranslated(false); // never show banner on initial load
+              setTranscriptSource(data.source || '');
+              setCurrentVideoId(videoId);
+              setCurrentThumbnail(thumb);
+              setCurrentTitle(title);
+              setCurrentChannel(channel);
+              finishSmoothLoading(true);
+              setLoadingPercent(100);
+              // Prefer server-authoritative credit count; fall back to local increment.
+              if (data.credits) syncCreditsFromServer(data.credits);
+              else incrementCredits();
+              // After 3rd extraction, nudge signed-in users without referrals to share
+              if (user && (credits.used + 1) === 3 && !(user.user_metadata?.referral_count)) {
+                setTimeout(() => setShowReferralPromo(true), 1500);
+              }
+              saveToHistory({
+                id: videoId, platform, transcript: data.transcript, segments: data.segments || [],
+                source: data.source || '', date: new Date().toISOString(),
+                thumbnail: thumb, title, channel, url: videoCanonical,
+              });
+            } catch {
+              setError(funnyTranscriptError('failed to process'));
+            } finally {
+              setTimeout(clearLoading, 600);
+            }
+            break streamLoop;
+          }
+
+          if (event === 'out_of_credits') {
+            streamSettled = true;
+            if (data.used !== undefined) syncCreditsFromServer(data);
+            setError('You\'ve used all your credits for this period. Sign in or wait for your credits to reset.');
+            clearLoading();
+            break streamLoop;
+          }
+
+          if (event === 'transcript_error') {
+            streamSettled = true;
+            setError(funnyTranscriptError(data.details ? `${data.error}: ${data.details}` : (data.error || 'failed to fetch')));
+            clearLoading();
+            break streamLoop;
+          }
+        }
+      }
+
+      if (!streamSettled) {
+        streamSettled = true;
+        setError(funnyTranscriptError('connection'));
+        clearLoading();
+      }
+    } catch (err) {
+      if (streamSettled || err?.name === 'AbortError') return;
+      streamSettled = true;
       setError(funnyTranscriptError('connection'));
       clearLoading();
-    };
+    } finally {
+      clearTimeout(killTimer);
+    }
   };
 
   const getTranscriptFromUpload = async (file) => {
