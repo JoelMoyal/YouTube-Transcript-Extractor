@@ -391,17 +391,31 @@ function isSafeExternalUrl(rawUrl) {
   try { parsed = new URL(rawUrl); } catch { return false; }
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
   const host = parsed.hostname.toLowerCase();
-  if (host === 'localhost' || host === '::1') return false;
+
+  // Block all loopback / localhost forms
+  if (host === 'localhost') return false;
+
+  // Block IPv6 — covers ::1, ::ffff:127.x, fc00::/7, fe80::/10, and all bracketed forms
+  if (host.startsWith('[') || host.includes(':')) return false;
+
+  // Block IPv4 private/reserved ranges
   const ipv4 = host.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
   if (ipv4) {
     const [a, b] = ipv4.slice(1).map(Number);
-    if (a === 10) return false;                         // 10.0.0.0/8
-    if (a === 127) return false;                        // 127.0.0.0/8
-    if (a === 169 && b === 254) return false;           // 169.254.0.0/16 (link-local + AWS metadata)
-    if (a === 172 && b >= 16 && b <= 31) return false;  // 172.16.0.0/12
-    if (a === 192 && b === 168) return false;           // 192.168.0.0/16
-    if (a === 0) return false;                          // 0.0.0.0/8
+    if (a === 10) return false;                          // 10.0.0.0/8
+    if (a === 127) return false;                         // 127.0.0.0/8
+    if (a === 169 && b === 254) return false;            // 169.254.0.0/16 (link-local + AWS metadata)
+    if (a === 172 && b >= 16 && b <= 31) return false;   // 172.16.0.0/12
+    if (a === 192 && b === 168) return false;            // 192.168.0.0/16
+    if (a === 0) return false;                           // 0.0.0.0/8
+    if (a === 100 && b >= 64 && b <= 127) return false;  // 100.64.0.0/10 (CGNAT)
+    if (a === 198 && (b === 18 || b === 19)) return false; // 198.18.0.0/15 (benchmarking)
+    if (a === 240) return false;                         // 240.0.0.0/4 (reserved)
   }
+
+  // Block hostnames that are just decimal/octal/hex IP encodings (e.g. http://2130706433 = 127.0.0.1)
+  if (/^\d+$/.test(host) || /^0x[\da-f]+$/i.test(host)) return false;
+
   return true;
 }
 
@@ -435,6 +449,7 @@ if (process.env.WEBSHARE_PROXY_URL) console.log('Webshare proxy loaded');
 else console.log('No proxy configured — running without proxy');
 
 app.disable('x-powered-by');
+app.set('trust proxy', 1); // Trust Railway/Cloudflare's X-Forwarded-For so req.ip is the real client IP
 app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
@@ -1248,7 +1263,7 @@ Transcript:\n${transcript.slice(0, 6000)}`,
 });
 
 // ── Q&A endpoint ─────────────────────────────────────────────────────────────
-app.post('/api/ask', async (req, res) => {
+app.post('/api/ask', aiRateLimit, async (req, res) => {
   const { transcript, question, platform, segments, history } = req.body;
   if (!transcript || typeof transcript !== 'string' || !question || typeof question !== 'string')
     return res.status(400).json({ error: 'Missing transcript or question' });
@@ -1429,11 +1444,22 @@ app.post('/api/restore-account', requireAuth, async (req, res) => {
 // ── Local file upload transcription ───────────────────────────────────────────
 app.post('/api/transcript/upload', uploadRateLimit, (req, res) => {
   uploadMiddleware(req, res, async (multerErr) => {
+    // Reject invalid uploads BEFORE touching credits or SSE headers so we
+    // can still return plain JSON errors and no credit is wasted.
+    if (multerErr) {
+      const isSize = multerErr.code === 'LIMIT_FILE_SIZE';
+      return res.status(400).json({
+        error: isSize
+          ? 'File exceeds 500 MB. Please trim or compress the video first.'
+          : multerErr.message || 'Upload failed',
+      });
+    }
+    if (!req.file) return res.status(400).json({ error: 'No file received.' });
+
     // Credit check BEFORE SSE headers so we can still send a JSON 402 response.
-    // Authorization header is available here (regular POST, not SSE).
     const { ok: creditOk, creditInfo } = await checkAndDeductCredit(req, res);
     if (!creditOk) {
-      if (req.file) await fsPromises.unlink(req.file.path).catch(() => {});
+      await fsPromises.unlink(req.file.path).catch(() => {});
       return;
     }
 
@@ -1447,21 +1473,6 @@ app.post('/api/transcript/upload', uploadRateLimit, (req, res) => {
       const payload = (event === 'done' && creditInfo) ? { ...data, credits: creditInfo } : data;
       res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
     };
-
-    if (multerErr) {
-      const isSize = multerErr.code === 'LIMIT_FILE_SIZE';
-      send('transcript_error', {
-        error: isSize
-          ? 'File exceeds 500 MB. Please trim or compress the video first.'
-          : multerErr.message || 'Upload failed',
-      });
-      return res.end();
-    }
-
-    if (!req.file) {
-      send('transcript_error', { error: 'No file received.' });
-      return res.end();
-    }
 
     const uploadedFile = req.file.path;
 

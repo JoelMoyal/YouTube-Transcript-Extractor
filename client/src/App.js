@@ -5087,7 +5087,7 @@ const App = () => {
     if (el) el.scrollTop = el.scrollHeight;
   }, [qaMessages, qaLoading]);
 
-  const getTranscript = (langOverride) => {
+  const getTranscript = async (langOverride) => {
     const _used = credits?.used ?? 0;
     const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
     if (_used >= _max) return;
