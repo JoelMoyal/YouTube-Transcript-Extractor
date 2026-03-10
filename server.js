@@ -430,12 +430,10 @@ if (process.env.YT_COOKIES) {
   console.log('YouTube cookies loaded from YT_COOKIES env var');
 }
 
-// Build cookie args: file (Railway) → browser (local dev) → none
-const cookieArgs = cookiesPath
-  ? ['--cookies', cookiesPath]
-  : process.env.RAILWAY_ENVIRONMENT
-    ? []
-    : ['--cookies-from-browser', 'chrome'];
+// Build cookie args: use file if YT_COOKIES env var is set, otherwise no cookies.
+// --cookies-from-browser was removed: it causes yt-dlp to abort on systems where
+// Chrome's keychain is inaccessible (e.g. headless servers, macOS without UI).
+const cookieArgs = cookiesPath ? ['--cookies', cookiesPath] : [];
 
 // Resolve Node.js path for yt-dlp JS runtime (avoids "no runtime found" warning)
 const { execFileSync } = require('child_process');
@@ -868,47 +866,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
   const outputTemplate = path.join(tmpDir, videoId);
 
   try {
-    // ── Stage 1a: youtube-transcript npm (fastest, no API key, YT timedtext) ──
-    try {
-      send('progress', { stage: 'subtitles', message: 'Fetching transcript…', percent: 15 });
-      const { YoutubeTranscript } = require('youtube-transcript');
-
-      let raw = null;
-      let gotTargetLang = false;
-
-      // Always try target language first — YouTube provides auto-translated captions
-      // for most languages. This handles both directions: en→de AND de→en instantly.
-      try {
-        const attempt = await withTimeout(YoutubeTranscript.fetchTranscript(videoId, { lang: safeLang }), 3000);
-        if (attempt && attempt.length > 0) { raw = attempt; gotTargetLang = true; }
-      } catch {}
-
-      // Fall back to any available captions (video's native language)
-      if (!gotTargetLang) {
-        try { raw = await withTimeout(YoutubeTranscript.fetchTranscript(videoId), 3000); } catch {}
-      }
-
-      if (raw && raw.length > 0) {
-        const seen = new Set();
-        let segments = raw
-          .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
-          .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
-
-        let didTranslate = false;
-        if (!gotTargetLang) {
-          // YouTube didn't have target-language captions — use AI to translate
-          segments = await translateSegments(segments, safeLang, send);
-          didTranslate = true;
-        }
-
-        const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-        send('done', { transcript, segments, source: 'subtitles', translated: didTranslate });
-        res.end();
-        return;
-      }
-    } catch {
-      // Fall through to Supadata
-    }
+    // ── Stage 1a: (reserved for future fast-path — currently falls through to yt-dlp) ──
 
     // ── Stage 1b: Supadata API (fallback for edge cases / missing captions) ───
     if (process.env.SUPADATA_API_KEY) {
