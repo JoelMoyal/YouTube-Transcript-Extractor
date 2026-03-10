@@ -31,7 +31,7 @@ const TABLET_BREAKPOINT = 1024;
 
 const PROGRESS_PROFILE_KEY = 'yte_progress_profile_v1';
 const PROGRESS_SPEED_MULTIPLIER = 0.25; // 4x faster visual progress
-const MOBILE_BOTTOM_NAV_LIFT = 14;
+const MOBILE_BOTTOM_NAV_LIFT = 24;
 const DEFAULT_PROGRESS_PROFILE = Object.freeze({
   url: { avgMs: 60000, samples: 0 },
   upload: { avgMs: 140000, samples: 0 },
@@ -9437,8 +9437,8 @@ const App = () => {
                   paddingTop: 11,
                   paddingLeft: isMobile ? 14 : 16,
                   paddingRight: isMobile ? 14 : 16,
-                  paddingBottom: isMobile ? 'calc(44px + env(safe-area-inset-bottom))' : 12,
-                  marginBottom: isMobile ? 30 : 0,
+                  paddingBottom: isMobile ? 'calc(56px + env(safe-area-inset-bottom))' : 12,
+                  marginBottom: isMobile ? 40 : 0,
                   borderTop: `1px solid ${P.border}`,
                   background: 'linear-gradient(0deg, rgba(60,140,255,0.04) 0%, transparent 100%)',
                 }}>
