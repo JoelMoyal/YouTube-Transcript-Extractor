@@ -361,6 +361,11 @@ const safeErr = (err) => isProd ? undefined : (err?.message || String(err));
 
 // ── Simple in-memory rate limiter (no extra dep) ──────────────────────────────
 const _rlMap = new Map();
+// Purge expired entries every minute to prevent unbounded memory growth
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, e] of _rlMap) if (now > e.resetAt) _rlMap.delete(key);
+}, 60_000).unref(); // .unref() so this timer doesn't keep the process alive alone
 function makeRateLimit({ windowMs, max }) {
   return function rateLimitMw(req, res, next) {
     const key = (req.ip || req.socket?.remoteAddress || 'unknown');
@@ -1550,6 +1555,15 @@ app.get('/studio', (_req, res) => {
 // Unknown web routes get branded 404 page
 app.get('*', (_req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'client/build', '404.html'));
+});
+
+// ── Global error guards ───────────────────────────────────────────────────────
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection]', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[uncaughtException]', err);
+  process.exit(1); // Let the process manager (Railway / nodemon) restart
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
