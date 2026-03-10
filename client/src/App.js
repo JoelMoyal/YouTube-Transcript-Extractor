@@ -5890,8 +5890,11 @@ const App = () => {
   const topChromeOffset = showTopNavbar ? ((showBookmarkBanner && !isMobile) ? 97 : 56) : 0;
   const hasMobileBottomNav = isMobile && transcript && !hideMobileNavForFooter;
   const mobileBottomNavHeight = hasMobileBottomNav ? (60 + MOBILE_BOTTOM_NAV_LIFT) : 0;
+  const mobileBottomNavInsetExpr = hasMobileBottomNav
+    ? `${mobileBottomNavHeight}px + env(safe-area-inset-bottom, 0px)`
+    : '0px';
   const mobileBottomNavCssHeight = hasMobileBottomNav
-    ? `calc(${mobileBottomNavHeight}px + env(safe-area-inset-bottom, 0px))`
+    ? `calc(${mobileBottomNavInsetExpr})`
     : '0px';
 
   return (
@@ -8019,8 +8022,8 @@ const App = () => {
             display: 'grid',
             gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 300px' : '64px 1fr 360px',
             gridTemplateRows: '1fr',
-            height: isMobile ? `calc(100dvh - ${mobileBottomNavCssHeight})` : 'calc(100dvh - 56px)',
-            minHeight: isMobile ? `calc(100vh - ${mobileBottomNavCssHeight})` : 'calc(100vh - 56px)',
+            height: isMobile ? `calc(100dvh - (${mobileBottomNavInsetExpr}))` : 'calc(100dvh - 56px)',
+            minHeight: isMobile ? `calc(100vh - (${mobileBottomNavInsetExpr}))` : 'calc(100vh - 56px)',
             overflow: 'hidden',
           }}>
 
@@ -9246,6 +9249,12 @@ const App = () => {
             <div style={{
               gridColumn: isDesktop ? 3 : isTablet ? 2 : 1,
               gridRow: 1,
+              position: isMobile ? 'fixed' : 'relative',
+              top: isMobile ? topChromeOffset : undefined,
+              left: isMobile ? 0 : undefined,
+              right: isMobile ? 0 : undefined,
+              bottom: isMobile ? mobileBottomNavCssHeight : undefined,
+              zIndex: isMobile ? 50 : undefined,
               display: isMobile ? ((mobilePanel === 'ai' || mobilePanel === 'insights') ? 'flex' : 'none') : 'flex',
               flexDirection: 'column', overflowY: isDesktop ? 'auto' : 'hidden', background: '#FFFFFF',
             }}>
@@ -9440,8 +9449,8 @@ const App = () => {
                   paddingTop: 11,
                   paddingLeft: isMobile ? 14 : 16,
                   paddingRight: isMobile ? 14 : 16,
-                  paddingBottom: isMobile ? 'calc(56px + env(safe-area-inset-bottom))' : 12,
-                  marginBottom: isMobile ? 40 : 0,
+                  paddingBottom: isMobile ? 18 : 12,
+                  marginBottom: isMobile ? 12 : 0,
                   borderTop: `1px solid ${P.border}`,
                   background: 'linear-gradient(0deg, rgba(60,140,255,0.04) 0%, transparent 100%)',
                 }}>
