@@ -32,6 +32,8 @@ const TABLET_BREAKPOINT = 1024;
 const PROGRESS_PROFILE_KEY = 'yte_progress_profile_v1';
 const PROGRESS_SPEED_MULTIPLIER = 0.25; // 4x faster visual progress
 const MOBILE_BOTTOM_NAV_HEIGHT = 64;
+const MOBILE_KEYBOARD_NAV_HEIGHT = 42;
+const MOBILE_KEYBOARD_NAV_GAP = 8;
 const MOBILE_BOTTOM_NAV_LIFT = 0;
 const DEFAULT_PROGRESS_PROFILE = Object.freeze({
   url: { avgMs: 60000, samples: 0 },
@@ -6018,20 +6020,24 @@ const App = () => {
 
   const showTopNavbar = !isMobile || !transcript;
   const topChromeOffset = showTopNavbar ? ((showBookmarkBanner && !isMobile) ? 97 : 56) : 0;
-  const hasMobileBottomNav = isMobile && transcript && !hideMobileNavForFooter && !isMobileKeyboardOpen;
-  const mobileBottomNavHeight = hasMobileBottomNav ? (MOBILE_BOTTOM_NAV_HEIGHT + MOBILE_BOTTOM_NAV_LIFT) : 0;
+  const hasMobileBottomNav = isMobile && transcript && !hideMobileNavForFooter;
+  const mobileKeyboardNavActive = hasMobileBottomNav && isMobileKeyboardOpen;
+  const mobileNavHeightPx = mobileKeyboardNavActive ? MOBILE_KEYBOARD_NAV_HEIGHT : MOBILE_BOTTOM_NAV_HEIGHT;
+  const mobileNavBottomOffsetPx = mobileKeyboardNavActive
+    ? Math.max(0, mobileKeyboardInset + MOBILE_KEYBOARD_NAV_GAP)
+    : MOBILE_BOTTOM_NAV_LIFT;
   const mobileBottomNavInsetExpr = hasMobileBottomNav
-    ? `${mobileBottomNavHeight}px + env(safe-area-inset-bottom, 0px)`
+    ? (mobileKeyboardNavActive
+      ? `${mobileNavBottomOffsetPx + mobileNavHeightPx}px`
+      : `${MOBILE_BOTTOM_NAV_HEIGHT + MOBILE_BOTTOM_NAV_LIFT}px + env(safe-area-inset-bottom, 0px)`)
     : '0px';
   const mobileBottomNavCssHeight = hasMobileBottomNav
     ? `calc(${mobileBottomNavInsetExpr})`
     : '0px';
-  const mobileKeyboardInsetCss = (isMobileKeyboardOpen && mobileKeyboardInset > 0)
-    ? `${mobileKeyboardInset}px`
-    : '0px';
-  const mobilePanelBottomInsetCss = (isMobile && isMobileKeyboardOpen)
-    ? mobileKeyboardInsetCss
-    : mobileBottomNavCssHeight;
+  const mobilePanelBottomInsetCss = mobileBottomNavCssHeight;
+  const mobileFooterBottomPadding = hasMobileBottomNav
+    ? `calc((${mobileBottomNavInsetExpr}) + 30px)`
+    : '28px';
 
   return (
     <>
@@ -7548,15 +7554,17 @@ const App = () => {
                 flexDirection: isMobile ? 'column' : 'row',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: isMobile ? 8 : 12,
+                gap: isMobile ? 9 : 14,
               }}>
                 {/* Avatar stack — real photos */}
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   {['/avatar1.jpg','/avatar2.jpg','/avatar3.jpg','/avatar4.jpg','/avatar5.jpg'].map((src, i) => (
                     <img key={i} src={src} alt="" style={{
-                      width: isMobile ? 28 : 32, height: isMobile ? 28 : 32, borderRadius: '50%',
+                      width: isMobile ? 30 : 'clamp(34px, 2.5vw, 38px)',
+                      height: isMobile ? 30 : 'clamp(34px, 2.5vw, 38px)',
+                      borderRadius: '50%',
                       border: `2.5px solid ${P.paper}`,
-                      marginLeft: i === 0 ? 0 : -9,
+                      marginLeft: i === 0 ? 0 : (isMobile ? -8 : -10),
                       flexShrink: 0, position: 'relative', zIndex: 5 - i,
                       boxShadow: '0 1px 5px rgba(0,0,0,0.13)',
                       objectFit: 'cover', display: 'block',
@@ -7564,10 +7572,21 @@ const App = () => {
                   ))}
                 </div>
                 <div style={{ textAlign: isMobile ? 'center' : 'left' }}>
-                  <div style={{ fontSize: isMobile ? 12 : 13, fontWeight: 700, color: P.ink, letterSpacing: '-0.01em' }}>
+                  <div style={{
+                    fontSize: isMobile ? 13 : 'clamp(14px, 1.15vw, 16px)',
+                    fontWeight: 700,
+                    color: P.ink,
+                    letterSpacing: '-0.01em',
+                    lineHeight: 1.3,
+                  }}>
                     Trusted by Silicon Valley teams
                   </div>
-                  <div style={{ fontSize: 11, color: P.muted, marginTop: 2 }}>
+                  <div style={{
+                    fontSize: isMobile ? 12 : 'clamp(12px, 1vw, 14px)',
+                    color: P.muted,
+                    marginTop: isMobile ? 2 : 3,
+                    lineHeight: 1.35,
+                  }}>
                     10,000+ researchers, founders &amp; creators
                   </div>
                 </div>
@@ -10122,7 +10141,7 @@ const App = () => {
           {isMobile && (() => {
             const mobileTabs = [
               { key: 'transcript', label: 'Transcript', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/></svg> },
-              { key: 'ai', label: 'AI Chat', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l2 2h6l2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2l-2-2H9l-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10v6a2 2 0 0 0 2 2h2l2-2h6l2 2h2a2 2 0 0 0 2-2v-6"/></svg> },
+              { key: 'ai', label: 'AI Chat', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 6h8a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-4l-3.5 2.5V17H7a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3z"/><path d="M17.8 4.6v2.2"/><path d="M16.7 5.7h2.2"/><circle cx="9.5" cy="11.7" r="0.8" fill="currentColor" stroke="none"/><circle cx="12" cy="11.7" r="0.8" fill="currentColor" stroke="none"/><circle cx="14.5" cy="11.7" r="0.8" fill="currentColor" stroke="none"/></svg> },
               { key: 'insights', label: 'Insights', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.8 8.6a5.1 5.1 0 0 0-8.8-3.5 5.1 5.1 0 0 0-8.8 3.5c0 5.1 8.8 10.6 8.8 10.6s8.8-5.5 8.8-10.6z"/></svg> },
               { key: 'new-search', label: 'New Search', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> },
             ];
@@ -10130,20 +10149,27 @@ const App = () => {
             const insightPanels = new Set(['insights', 'summary', 'flashcards', 'study-guide', 'academic']);
             return (
               <div ref={mobileNavRef} className="no-scrollbar" style={{
-                position: 'fixed', bottom: MOBILE_BOTTOM_NAV_LIFT, left: 0, right: 0, zIndex: 100,
-                height: MOBILE_BOTTOM_NAV_HEIGHT,
-                background: isMobileKeyboardOpen ? 'transparent' : '#FFFFFF',
-                borderTop: isMobileKeyboardOpen ? '1px solid transparent' : '1px solid rgba(29,29,31,0.12)',
-                borderRadius: '22px 22px 0 0',
-                boxShadow: isMobileKeyboardOpen ? 'none' : '0 -6px 18px rgba(29,29,31,0.08)',
-                display: showFlashcardModal || studyGuideFull || academicInsightsFull || hideMobileNavForFooter || isMobileKeyboardOpen ? 'none' : 'flex',
+                position: 'fixed',
+                bottom: mobileNavBottomOffsetPx,
+                left: mobileKeyboardNavActive ? 10 : 0,
+                right: mobileKeyboardNavActive ? 10 : 0,
+                zIndex: 100,
+                height: mobileNavHeightPx,
+                background: mobileKeyboardNavActive ? 'rgba(255,255,255,0.94)' : '#FFFFFF',
+                border: mobileKeyboardNavActive ? '1px solid rgba(29,29,31,0.1)' : undefined,
+                borderTop: mobileKeyboardNavActive ? undefined : '1px solid rgba(29,29,31,0.12)',
+                borderRadius: mobileKeyboardNavActive ? 14 : '22px 22px 0 0',
+                boxShadow: mobileKeyboardNavActive ? '0 6px 16px rgba(29,29,31,0.16)' : '0 -6px 18px rgba(29,29,31,0.08)',
+                display: showFlashcardModal || studyGuideFull || academicInsightsFull || hideMobileNavForFooter ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: hasDynamic ? 'flex-start' : 'center',
                 overflowX: hasDynamic ? 'auto' : 'visible',
                 scrollbarWidth: 'none', msOverflowStyle: 'none',
-                padding: '0 10px env(safe-area-inset-bottom, 0px)',
+                padding: mobileKeyboardNavActive ? '0 8px' : '0 10px env(safe-area-inset-bottom, 0px)',
                 gap: 4,
-                transition: 'opacity 0.12s linear, background 0.12s linear, box-shadow 0.12s linear',
+                backdropFilter: mobileKeyboardNavActive ? 'blur(8px)' : undefined,
+                WebkitBackdropFilter: mobileKeyboardNavActive ? 'blur(8px)' : undefined,
+                transition: 'bottom 0.12s linear, left 0.12s linear, right 0.12s linear, height 0.12s linear, border-radius 0.12s linear, background 0.12s linear, box-shadow 0.12s linear',
               }}>
                 {mobileTabs.map(tab => {
                   const isNewSearch = tab.key === 'new-search';
@@ -10161,14 +10187,14 @@ const App = () => {
                       el?.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
                     }} style={{
                       flex: hasDynamic ? '0 0 auto' : '1',
-                      minWidth: hasDynamic ? 56 : 0,
-                      maxWidth: hasDynamic ? 70 : undefined,
+                      minWidth: hasDynamic ? (mobileKeyboardNavActive ? 48 : 56) : 0,
+                      maxWidth: hasDynamic ? (mobileKeyboardNavActive ? 62 : 70) : undefined,
                       position: 'relative',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       border: 'none', cursor: 'pointer',
                       padding: 0,
-                      height: 48,
-                      borderRadius: 14,
+                      height: mobileKeyboardNavActive ? 36 : 48,
+                      borderRadius: mobileKeyboardNavActive ? 10 : 14,
                       background: isAct ? 'rgba(29,29,31,0.06)' : 'transparent',
                       color: isAct ? '#1D1D1F' : '#B4B7BE',
                       transition: 'background 0.1s, color 0.1s',
@@ -10494,7 +10520,7 @@ const App = () => {
       <footer ref={footerRef} style={{
         background: P.surface, borderTop: `1px solid ${P.border}`,
         padding: isMobile
-          ? `34px 20px ${hasMobileBottomNav ? `calc(${mobileBottomNavHeight + 30}px + env(safe-area-inset-bottom, 0px))` : '28px'}`
+          ? `34px 20px ${mobileFooterBottomPadding}`
           : '40px 24px 32px',
         marginTop: 24,
       }}>
