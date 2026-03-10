@@ -5903,7 +5903,9 @@ const App = () => {
         @keyframes logoFlipOut { 0% { transform: perspective(300px) rotateX(0deg); opacity:1; } 100% { transform: perspective(300px) rotateX(-80deg); opacity:0; } }
         @keyframes logoFlipIn  { 0% { transform: perspective(300px) rotateX(80deg);  opacity:0; } 100% { transform: perspective(300px) rotateX(0deg);   opacity:1; } }
         @keyframes tabHighlight { 0% { box-shadow: 0 0 0 0 rgba(60,140,255,0); } 30% { box-shadow: 0 0 0 3px rgba(60,140,255,0.34), 0 0 12px rgba(60,140,255,0.22); } 100% { box-shadow: 0 0 0 0 rgba(60,140,255,0); } }
+        @keyframes modeSwapIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .fade-up { animation: fadeUp 0.3s ease forwards; }
+        .mode-panel { animation: modeSwapIn 0.18s ease; }
         .left-rail { position: relative; width: 64px; flex-shrink: 0; z-index: 15; overflow: visible; }
         .left-rail-inner { position: absolute; top: 0; left: 0; bottom: 0; width: 64px; overflow: hidden; display: flex; flex-direction: column; transition: width 0.22s cubic-bezier(0.4,0,0.2,1), box-shadow 0.22s; }
         .left-rail:hover .left-rail-inner { width: 284px; box-shadow: 4px 0 24px rgba(29,29,31,0.09); }
@@ -6290,6 +6292,7 @@ const App = () => {
         }
         .feature-card-visual {
           position: relative;
+          overflow: hidden;
           z-index: 1;
           margin: 0 0 6px;
           padding: 11px;
@@ -6908,7 +6911,7 @@ const App = () => {
             {/* Hero */}
             <div className="hero-grad" style={{
               minHeight: '100vh',
-              paddingBottom: 56,
+              paddingBottom: isMobile ? 46 : 56,
             }}>
 
             {/* Wavy animated background canvas */}
@@ -6917,7 +6920,7 @@ const App = () => {
               backgroundFill="#F6F2EA"
               colors={['rgba(60,140,255,0.55)', 'rgba(100,170,255,0.45)', 'rgba(120,90,255,0.35)', 'rgba(178,194,214,0.6)', 'rgba(60,140,255,0.45)']}
               waveWidth={80}
-              waveOpacity={0.35}
+              waveOpacity={isMobile ? 0.2 : 0.35}
               blur={14}
               speed="slow"
             />
@@ -6925,11 +6928,13 @@ const App = () => {
             {/* Force-field gradient mask — fades waves toward center where input card sits */}
             <div aria-hidden="true" style={{
               position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-              background: 'radial-gradient(ellipse 55% 45% at 50% 58%, rgba(246,242,234,0.96) 0%, rgba(246,242,234,0.72) 38%, rgba(246,242,234,0.18) 62%, transparent 78%)',
+              background: isMobile
+                ? 'radial-gradient(ellipse 86% 62% at 50% 56%, rgba(246,242,234,0.995) 0%, rgba(246,242,234,0.94) 44%, rgba(246,242,234,0.62) 70%, rgba(246,242,234,0.14) 90%, transparent 100%)'
+                : 'radial-gradient(ellipse 55% 45% at 50% 58%, rgba(246,242,234,0.96) 0%, rgba(246,242,234,0.72) 38%, rgba(246,242,234,0.18) 62%, transparent 78%)',
             }} />
 
             {/* Grain texture overlay */}
-            <svg aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.045, pointerEvents: 'none', zIndex: 1 }}>
+            <svg aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: isMobile ? 0.02 : 0.045, pointerEvents: 'none', zIndex: 1 }}>
               <filter id="hero-grain">
                 <feTurbulence type="fractalNoise" baseFrequency="0.68" numOctaves="4" stitchTiles="stitch" />
                 <feColorMatrix type="saturate" values="0" />
@@ -6962,6 +6967,7 @@ const App = () => {
               <h1 style={{
                 fontSize: isMobile ? 'clamp(34px, 11vw, 46px)' : 'clamp(38px, 6.5vw, 62px)', fontWeight: 800, color: P.ink,
                 letterSpacing: '-0.045em', lineHeight: 1.06, margin: isMobile ? '0 0 14px' : '0 0 22px',
+                textShadow: isMobile ? '0 1px 0 rgba(246,242,234,0.95)' : 'none',
               }}>
                 Watch less.<br />
                 <span style={{ position: 'relative', display: 'inline-block', color: P.accent }}>
@@ -6972,7 +6978,15 @@ const App = () => {
                   </svg>
                 </span>
               </h1>
-              <p style={{ fontSize: 16, color: P.muted, margin: '0 0 40px', lineHeight: 1.75, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>
+              <p style={{
+                fontSize: isMobile ? 15.5 : 16,
+                color: isMobile ? 'rgba(29,29,31,0.78)' : P.muted,
+                margin: isMobile ? '0 0 32px' : '0 0 40px',
+                lineHeight: isMobile ? 1.68 : 1.75,
+                maxWidth: 500,
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}>
                 Paste any video URL or upload your own video/audio file to get a full transcript in seconds, then use AI summaries, flashcards, study guides, and chat.
               </p>
 
@@ -6987,7 +7001,7 @@ const App = () => {
                 <BorderBeam size={280} duration={10} colorFrom="rgba(60,140,255,0.7)" colorTo="rgba(123,211,255,0)" borderWidth={1.5} />
 
                 {/* ── URL row ── */}
-                {inputMode === 'url' && <div style={{ display: 'flex', gap: isMobile ? 10 : 12, flexDirection: isMobile ? 'column' : 'row' }}>
+                {inputMode === 'url' && <div className="mode-panel" style={{ display: 'flex', gap: isMobile ? 10 : 12, flexDirection: isMobile ? 'column' : 'row' }}>
                   <div style={{
                     flex: 1, display: 'flex', alignItems: 'center', gap: 12,
                     padding: isMobile ? '16px 18px' : '20px 22px',
@@ -7058,7 +7072,7 @@ const App = () => {
                 </div>}
 
                 {/* ── Upload zone ── */}
-                {inputMode === 'upload' && <div style={{ display: 'flex', gap: isMobile ? 10 : 12, flexDirection: isMobile ? 'column' : 'row' }}>
+                {inputMode === 'upload' && <div className="mode-panel" style={{ display: 'flex', gap: isMobile ? 10 : 12, flexDirection: isMobile ? 'column' : 'row' }}>
                   {/* Hidden native file input */}
                   <input
                     ref={fileInputRef}
@@ -7205,11 +7219,12 @@ const App = () => {
                           flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
                           gap: 6, padding: '8px 12px',
                           borderRadius: 8, border: 'none',
-                          background: active ? P.surface : 'transparent',
-                          boxShadow: active ? '0 1px 3px rgba(29,29,31,0.08)' : 'none',
-                          color: active ? P.accent : P.muted,
-                          fontSize: 13.5, fontWeight: active ? 600 : 500,
-                          cursor: 'pointer', transition: 'all 0.15s',
+                          background: active ? P.accent : 'transparent',
+                          boxShadow: active ? '0 4px 12px rgba(60,140,255,0.28), inset 0 0 0 1px rgba(255,255,255,0.28)' : 'none',
+                          color: active ? 'white' : P.muted,
+                          fontSize: isMobile ? 13 : 13.5, fontWeight: active ? 700 : 600,
+                          cursor: 'pointer', transition: 'background 0.16s, color 0.16s, box-shadow 0.16s, transform 0.16s',
+                          transform: active ? 'translateY(-1px)' : 'none',
                           whiteSpace: 'nowrap',
                         }}
                         onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(29,29,31,0.04)'; }}
@@ -7384,7 +7399,7 @@ const App = () => {
 
               {/* Trusted by Silicon Valley — styled social proof */}
               <div style={{
-                marginTop: isMobile ? 24 : 42,
+                marginTop: isMobile ? 20 : 42,
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
                 alignItems: 'center',
@@ -7432,7 +7447,7 @@ const App = () => {
             }} />
             <div style={{
               position: 'relative', zIndex: 2,
-              maxWidth: 1500, margin: '0 auto', padding: isMobile ? '64px 16px 44px' : '160px 36px 68px',
+              maxWidth: 1500, margin: '0 auto', padding: isMobile ? '56px 16px 44px' : '160px 36px 68px',
             }}>
               <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 52 }}>
                 <div style={{
@@ -7621,6 +7636,7 @@ const App = () => {
                     </div>
                     <h3 className="feature-card-label">{card.label}</h3>
                     <div className="feature-card-visual">
+                      <BorderBeam size={220} duration={10} delay={cardIndex * 1.5} colorFrom="rgba(60,140,255,0.5)" colorTo="rgba(123,211,255,0)" borderWidth={1.2} />
                       {card.type === 'transcript' && (
                         <div className="feature-mock-shell">
                           <div className="feature-mock-topbar">
@@ -7874,7 +7890,8 @@ const App = () => {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
                 {/* Founder */}
-                <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 18, padding: '26px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ position: 'relative', overflow: 'hidden', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 18, padding: '26px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <BorderBeam size={300} duration={12} colorFrom="rgba(60,140,255,0.45)" colorTo="rgba(123,211,255,0)" borderWidth={1.2} />
                   <div style={{ display: 'flex', gap: 3 }}>
                     {[0,1,2,3,4].map(i => (
                       <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={P.accent} stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -7892,7 +7909,8 @@ const App = () => {
                   </div>
                 </div>
                 {/* PhD Student */}
-                <div style={{ background: P.surface, border: `1px solid ${P.border}`, borderRadius: 18, padding: '26px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ position: 'relative', overflow: 'hidden', background: P.surface, border: `1px solid ${P.border}`, borderRadius: 18, padding: '26px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <BorderBeam size={300} duration={12} delay={4} colorFrom="rgba(60,140,255,0.45)" colorTo="rgba(123,211,255,0)" borderWidth={1.2} />
                   <div style={{ display: 'flex', gap: 3 }}>
                     {[0,1,2,3,4].map(i => (
                       <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={P.accent} stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
@@ -7986,7 +8004,7 @@ const App = () => {
 
         {/* ═══════════════════════════════════════════════════════════════════ */}
         {/* TRANSCRIPT VIEW — app shell 3-column layout                     */}
-        {/* ═══════════════════════════════════════════════════════════════════ */}
+        {/* ══════════════════════════════════════════���════════════════════════ */}
         {transcript && (
           <>
           <div className="fade-up" style={{
