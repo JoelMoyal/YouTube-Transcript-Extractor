@@ -1962,18 +1962,23 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-credit-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg,#5B9BD5 0%,#3C8CFF 60%,#1F6BFF 100%); transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
         .ds-credit-meta { display: flex; justify-content: space-between; align-items: center; padding: 10px 22px 18px; font-size: 13px; color: #8B8F97; }
         /* ── Transcript rows ── */
-        .ds-hist-row { display: flex; align-items: center; gap: 12px; padding: 12px 22px; border-top: 1px solid #E6E0D6; transition: background 0.12s ease; cursor: pointer; }
+        .ds-hist-row { display: flex; align-items: center; gap: 12px; padding: 11px 20px; border-bottom: 1px solid rgba(230,224,214,0.6); transition: background 0.12s ease; cursor: pointer; position: relative; animation: ds-row-in 0.3s ease both; }
         .ds-hist-row:first-of-type { border-top: none; }
-        .ds-hist-row:hover { background: rgba(60,140,255,0.025); }
-        .ds-hist-thumb { width: 88px; height: 50px; border-radius: 9px; overflow: hidden; flex-shrink: 0; background: rgba(60,140,255,0.06); border: 1px solid rgba(60,140,255,0.1); display: flex; align-items: center; justify-content: center; }
-        .ds-hist-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .ds-hist-row:last-of-type { border-bottom: none; }
+        .ds-hist-row::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 0 2px 2px 0; background: #3C8CFF; transform: scaleY(0); transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1); transform-origin: center; }
+        .ds-hist-row:hover::before { transform: scaleY(1); }
+        .ds-hist-row:hover { background: rgba(60,140,255,0.035); }
+        .ds-hist-thumb { width: 88px; height: 50px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: rgba(60,140,255,0.06); border: 1px solid rgba(60,140,255,0.1); display: flex; align-items: center; justify-content: center; position: relative; transition: box-shadow 0.15s ease; }
+        .ds-hist-row:hover .ds-hist-thumb { box-shadow: 0 3px 10px rgba(60,140,255,0.18); border-color: rgba(60,140,255,0.25); }
+        .ds-hist-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.25s ease; }
+        .ds-hist-row:hover .ds-hist-thumb img { transform: scale(1.05); }
         .ds-hist-info { flex: 1; min-width: 0; }
         .ds-hist-title { font-size: 13px; font-weight: 600; color: #1D1D1F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 3px; }
-        .ds-hist-meta { font-size: 12px; color: #8B8F97; display: flex; align-items: center; gap: 5px; }
-        .ds-open-btn { flex-shrink: 0; border: none; border-radius: 8px; padding: 6px 14px; background: rgba(60,140,255,0.09); color: #3C8CFF; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; }
-        .ds-open-btn:hover { background: #3C8CFF; color: white; }
-        .ds-view-all-btn { display: block; width: 100%; padding: 12px 22px; border: none; border-top: 1px solid #E6E0D6; background: transparent; color: #3C8CFF; font-size: 13px; font-weight: 600; cursor: pointer; text-align: left; transition: background 0.12s ease; }
-        .ds-view-all-btn:hover { background: rgba(60,140,255,0.03); }
+        .ds-hist-meta { font-size: 11.5px; color: #8B8F97; display: flex; align-items: center; gap: 4px; }
+        .ds-open-btn { flex-shrink: 0; border: none; border-radius: 8px; padding: 5px 12px; background: #3C8CFF; color: white; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 8px rgba(60,140,255,0.22); font-family: inherit; }
+        .ds-open-btn:hover { background: #1F6BFF; box-shadow: 0 4px 12px rgba(60,140,255,0.32); }
+        .ds-view-all-btn { display: block; width: 100%; padding: 10px 20px; border: none; border-top: 1px solid rgba(230,224,214,0.7); background: rgba(246,242,234,0.3); color: #8B8F97; font-size: 12px; font-weight: 600; cursor: pointer; text-align: left; transition: color 0.12s ease; font-family: inherit; }
+        .ds-view-all-btn:hover { color: #3C8CFF; }
         /* ── Overview 2-col grid ── */
         .ds-overview-mobile { display: none; }
         .ds-overview-desktop { display: block; }
@@ -2392,13 +2397,19 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           font-size: 12px;
           color: #8B8F97;
         }
-        .ds-list-card { padding: 12px 0 4px; overflow: hidden; }
+        @keyframes ds-row-in {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .ds-list-card { padding: 0; overflow: hidden; position: relative; }
         .ds-list-head {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 10px;
-          padding: 0 16px 8px;
+          padding: 14px 18px 13px;
+          border-bottom: 1px solid rgba(230,224,214,0.8);
+          background: linear-gradient(to bottom, rgba(246,242,234,0.6), transparent);
         }
         .ds-list-title {
           margin: 0;
@@ -2406,20 +2417,56 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           color: #1D1D1F;
           font-weight: 700;
           letter-spacing: -0.01em;
+          display: flex;
+          align-items: center;
+          gap: 7px;
+        }
+        .ds-list-title-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 26px;
+          height: 26px;
+          border-radius: 7px;
+          background: rgba(60,140,255,0.10);
+          color: #3C8CFF;
+          flex-shrink: 0;
+        }
+        .ds-list-count {
+          font-size: 11px;
+          font-weight: 700;
+          color: #3C8CFF;
+          background: rgba(60,140,255,0.10);
+          border: 1px solid rgba(60,140,255,0.18);
+          padding: 2px 9px;
+          border-radius: 999px;
+          letter-spacing: 0.02em;
         }
         .ds-row {
           display: flex;
           align-items: center;
-          gap: 10px;
-          padding: 10px 16px;
-          border-top: 1px solid #E6E0D6;
+          gap: 12px;
+          padding: 11px 18px;
+          border-bottom: 1px solid rgba(230,224,214,0.5);
           transition: background 0.15s ease;
+          cursor: pointer;
+          position: relative;
+          animation: ds-row-in 0.3s ease both;
         }
-        .ds-row:first-of-type {
-          border-top: 1px solid rgba(138,102,64,0.15);
-          box-shadow: inset 2px 0 0 rgba(138,102,64,0.22);
+        .ds-row:last-of-type { border-bottom: none; }
+        .ds-row::before {
+          content: '';
+          position: absolute;
+          left: 0; top: 8px; bottom: 8px;
+          width: 3px;
+          border-radius: 0 2px 2px 0;
+          background: #3C8CFF;
+          transform: scaleY(0);
+          transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+          transform-origin: center;
         }
-        .ds-row:hover { background: rgba(200,190,170,0.09); }
+        .ds-row:hover { background: rgba(60,140,255,0.035); }
+        .ds-row:hover::before { transform: scaleY(1); }
         .ds-thumb {
           width: 96px;
           height: 54px;
@@ -2431,18 +2478,36 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           display: flex;
           align-items: center;
           justify-content: center;
+          position: relative;
+          transition: box-shadow 0.15s ease;
         }
+        .ds-row:hover .ds-thumb {
+          box-shadow: 0 4px 14px rgba(60,140,255,0.18);
+          border-color: rgba(60,140,255,0.25);
+        }
+        .ds-thumb::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: rgba(60,140,255,0.0);
+          transition: background 0.15s ease;
+          pointer-events: none;
+          z-index: 1;
+        }
+        .ds-row:hover .ds-thumb::after { background: rgba(60,140,255,0.1); }
         .ds-thumb img {
           width: 100%;
           height: 100%;
           object-fit: cover;
           display: block;
+          transition: transform 0.25s ease;
         }
+        .ds-row:hover .ds-thumb img { transform: scale(1.05); }
         .ds-row-title {
           margin: 0 0 3px;
-          font-size: 14px;
+          font-size: 13px;
           color: #1D1D1F;
-          font-weight: 700;
+          font-weight: 600;
           letter-spacing: -0.01em;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -2450,12 +2515,20 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         }
         .ds-row-meta {
           margin: 0;
-          font-size: 12px;
-          color: #6F7480;
+          font-size: 11.5px;
+          color: #8B8F97;
           display: flex;
           align-items: center;
-          gap: 5px;
+          gap: 4px;
           flex-wrap: wrap;
+        }
+        .ds-row-meta-dot {
+          display: inline-block;
+          width: 3px;
+          height: 3px;
+          border-radius: 50%;
+          background: #C8C4BC;
+          flex-shrink: 0;
         }
         .ds-row-actions {
           margin-left: auto;
@@ -2466,19 +2539,24 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
         .ds-row-btn {
           border: 1px solid #E6E0D6;
           border-radius: 8px;
-          padding: 6px 13px;
-          min-width: 60px;
+          padding: 5px 12px;
+          min-width: 56px;
           font-size: 12px;
-          font-weight: 700;
+          font-weight: 600;
           cursor: pointer;
           transition: all 0.15s ease;
+          font-family: inherit;
         }
         .ds-row-btn.primary {
-          background: #2A2A2A;
+          background: #3C8CFF;
           color: white;
-          border-color: rgba(29,29,31,0.18);
+          border-color: transparent;
+          box-shadow: 0 2px 8px rgba(60,140,255,0.25);
         }
-        .ds-row-btn.primary:hover { background: #1D1D1F; }
+        .ds-row-btn.primary:hover {
+          background: #1F6BFF;
+          box-shadow: 0 4px 12px rgba(60,140,255,0.35);
+        }
         .ds-row-btn.ghost {
           background: rgba(255,255,255,0.7);
           color: #1D1D1F;
@@ -2489,22 +2567,25 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
           background: rgba(255,255,255,0.95);
         }
         .ds-list-footer {
-          border-top: 1px solid #E6E0D6;
-          padding: 10px 16px 8px;
+          border-top: 1px solid rgba(230,224,214,0.7);
+          padding: 10px 18px 10px;
+          background: rgba(246,242,234,0.3);
         }
         .ds-link-btn {
           border: none;
           background: none;
           color: #8B8F97;
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 600;
           cursor: pointer;
           display: inline-flex;
           align-items: center;
           gap: 5px;
           padding: 0;
+          font-family: inherit;
+          transition: color 0.15s ease;
         }
-        .ds-link-btn:hover { color: #1D1D1F; }
+        .ds-link-btn:hover { color: #3C8CFF; }
         .ds-side {
           display: flex;
           flex-direction: column;
@@ -3044,9 +3125,14 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
 
                   <div className="ds-section">
                     <div className="ds-section-head">
-                      <h2 className="ds-section-title">Recent transcripts</h2>
+                      <h2 className="ds-section-title" style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, borderRadius: 6, background: 'rgba(60,140,255,0.10)', color: '#3C8CFF', flexShrink: 0 }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </span>
+                        Recent transcripts
+                      </h2>
                       {history.length > 0 && (
-                        <span style={{ fontSize: 11, fontWeight: 700, color: '#8B8F97', background: 'rgba(29,29,31,0.05)', padding: '3px 9px', borderRadius: 999, border: '1px solid rgba(29,29,31,0.08)' }}>{history.length}</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: '#3C8CFF', background: 'rgba(60,140,255,0.10)', padding: '2px 9px', borderRadius: 999, border: '1px solid rgba(60,140,255,0.18)' }}>{history.length}</span>
                       )}
                     </div>
                     {history.length === 0 ? (
@@ -3061,10 +3147,10 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                           const title = h.title || h.id;
                           const channel = h.channel || (h.platform ? h.platform.charAt(0).toUpperCase() + h.platform.slice(1) : 'YouTube');
                           return (
-                            <div key={`${h.id}-${idx}`} className="ds-hist-row" onClick={() => openTranscript(h)}>
+                            <div key={`${h.id}-${idx}`} className="ds-hist-row" style={{ animationDelay: `${idx * 0.06}s` }} onClick={() => openTranscript(h)}>
                               <div className="ds-hist-thumb">
                                 {h.thumbnail ? (
-                                  <img src={h.thumbnail} alt={title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none'; }} />
+                                  <img src={h.thumbnail} alt={title} loading="lazy" onError={e => { e.target.style.display = 'none'; }} />
                                 ) : (
                                   <PlatformIcon platform={h.platform || 'youtube'} size={22} />
                                 )}
@@ -3073,7 +3159,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                                 <p className="ds-hist-title">{title}</p>
                                 <p className="ds-hist-meta">
                                   <PlatformIcon platform={h.platform || 'youtube'} size={11} />
-                                  {channel}{wc > 0 ? ` · ${wc.toLocaleString()} words` : ''} · {timeAgo(h.date)}
+                                  {channel}
+                                  {wc > 0 && <><span className="ds-row-meta-dot" />{wc.toLocaleString()} words</>}
+                                  <span className="ds-row-meta-dot" />{timeAgo(h.date)}
                                 </p>
                               </div>
                               <button className="ds-open-btn" onClick={e => { e.stopPropagation(); openTranscript(h); }}>Open</button>
@@ -3081,11 +3169,9 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                           );
                         })}
                         {history.length > 4 && (
-                          <div style={{ padding: '12px 22px', borderTop: '1px solid #E6E0D6' }}>
-                            <button className="ds-view-all-btn" onClick={() => setShowAllHistory(v => !v)}>
-                              {showAllHistory ? 'Show less' : `+ View all ${history.length} transcripts`}
-                            </button>
-                          </div>
+                          <button className="ds-view-all-btn" onClick={() => setShowAllHistory(v => !v)}>
+                            {showAllHistory ? 'Show less' : `+ View all ${history.length} transcripts`}
+                          </button>
                         )}
                       </>
                     )}
@@ -3601,13 +3687,19 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                   </div>
                 </section>
 
-                <section className="ds-card ds-list-card">
+                <section className="ds-card ds-list-card" style={{ position: 'relative' }}>
+                  <BorderBeam size={340} duration={14} delay={2} colorFrom="rgba(60,140,255,0.55)" colorTo="rgba(123,211,255,0)" borderWidth={1.5} />
                   <div className="ds-list-head">
-                    <h2 className="ds-list-title">Recent Transcripts</h2>
-                    {history.length > 0 && (
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#8B8F97', letterSpacing: '0.04em', background: 'rgba(29,29,31,0.05)', padding: '3px 9px', borderRadius: 999, border: '1px solid rgba(29,29,31,0.08)' }}>
-                        {history.length}
+                    <h2 className="ds-list-title">
+                      <span className="ds-list-title-icon">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
                       </span>
+                      Recent Transcripts
+                    </h2>
+                    {history.length > 0 && (
+                      <span className="ds-list-count">{history.length}</span>
                     )}
                   </div>
 
@@ -3624,25 +3716,25 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
                         const title = h.title || h.id;
                         const channel = h.channel || (h.platform ? h.platform.charAt(0).toUpperCase() + h.platform.slice(1) : 'YouTube');
                         return (
-                          <div key={`${h.id}-${idx}`} className="ds-row">
+                          <div key={`${h.id}-${idx}`} className="ds-row" style={{ animationDelay: `${idx * 0.06}s` }} onClick={() => openTranscript(h)}>
                             <div className="ds-thumb">
                               {h.thumbnail ? (
                                 <img src={h.thumbnail} alt={title} loading="lazy" />
                               ) : (
-                                <PlatformIcon platform={h.platform || 'youtube'} size={30} />
+                                <PlatformIcon platform={h.platform || 'youtube'} size={28} />
                               )}
                             </div>
-                            <div className="ds-row-main" style={{ minWidth: 0 }}>
+                            <div className="ds-row-main" style={{ minWidth: 0, flex: 1 }}>
                               <p className="ds-row-title">{title}</p>
                               <p className="ds-row-meta">
-                                <PlatformIcon platform={h.platform || 'youtube'} size={13} />
+                                <PlatformIcon platform={h.platform || 'youtube'} size={11} />
                                 {channel}
-                                {wc > 0 ? `${wc.toLocaleString()} words` : null}
-                                {timeAgo(h.date)}
+                                {wc > 0 && <><span className="ds-row-meta-dot" />{wc.toLocaleString()} words</>}
+                                <span className="ds-row-meta-dot" />{timeAgo(h.date)}
                               </p>
                             </div>
                             <div className="ds-row-actions">
-                              <button className="ds-row-btn primary" onClick={() => openTranscript(h)}>Open</button>
+                              <button className="ds-row-btn primary" onClick={e => { e.stopPropagation(); openTranscript(h); }}>Open</button>
                             </div>
                           </div>
                         );
