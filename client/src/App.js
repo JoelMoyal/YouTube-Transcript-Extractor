@@ -5219,12 +5219,12 @@ const App = () => {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
-        const messages = buffer.split('\n\n');
+        const messages = buffer.split(/\r?\n\r?\n/);
         buffer = messages.pop() || '';
 
         for (const raw of messages) {
           if (!raw.trim()) continue;
-          const lines = raw.split('\n');
+          const lines = raw.split(/\r?\n/);
           let event = 'message';
           const dataLines = [];
           for (const line of lines) {
@@ -5366,11 +5366,11 @@ const App = () => {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
-        const messages = buffer.split('\n\n');
+        const messages = buffer.split(/\r?\n\r?\n/);
         buffer = messages.pop();
         for (const raw of messages) {
           if (!raw.trim()) continue;
-          const lines     = raw.split('\n');
+          const lines     = raw.split(/\r?\n/);
           const eventLine = lines.find(l => l.startsWith('event:'));
           const dataLine  = lines.find(l => l.startsWith('data:'));
           if (!dataLine) continue;
