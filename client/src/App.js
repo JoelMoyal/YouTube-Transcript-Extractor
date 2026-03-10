@@ -4323,6 +4323,7 @@ const App = () => {
   const [recentOpen, setRecentOpen]               = useState(true);
   const [hideMobileNavForFooter, setHideMobileNavForFooter] = useState(false);
   const [isMobileKeyboardOpen, setIsMobileKeyboardOpen] = useState(false);
+  const [mobileKeyboardInset, setMobileKeyboardInset] = useState(0);
   const isMobile  = windowWidth < MOBILE_BREAKPOINT;
   const isTablet  = windowWidth >= MOBILE_BREAKPOINT && windowWidth < TABLET_BREAKPOINT;
   const isDesktop = windowWidth >= TABLET_BREAKPOINT;
@@ -4385,6 +4386,7 @@ const App = () => {
   useEffect(() => {
     if (!isMobile || typeof window === 'undefined') {
       setIsMobileKeyboardOpen(false);
+      setMobileKeyboardInset(0);
       return;
     }
 
@@ -4402,9 +4404,14 @@ const App = () => {
       const activeEl = document.activeElement;
       const hasInputFocus = isTextEntryElement(activeEl);
       const viewportHeight = vv?.height || window.innerHeight;
+      const viewportTop = vv?.offsetTop || 0;
       if (viewportHeight > maxViewportHeight) maxViewportHeight = viewportHeight;
-      const keyboardLikelyOpen = vv ? ((maxViewportHeight - viewportHeight) > 120) : hasInputFocus;
-      setIsMobileKeyboardOpen(hasInputFocus && keyboardLikelyOpen);
+      const shrinkAmount = Math.max(0, maxViewportHeight - viewportHeight);
+      const occludedByKeyboard = Math.max(0, window.innerHeight - (viewportTop + viewportHeight));
+      const focusedInComposer = activeEl === qaInputRef.current || activeEl?.closest?.('[data-composer="true"]');
+      const keyboardLikelyOpen = hasInputFocus && (vv ? (shrinkAmount > 70 || occludedByKeyboard > 70 || focusedInComposer) : true);
+      setIsMobileKeyboardOpen(keyboardLikelyOpen);
+      setMobileKeyboardInset(keyboardLikelyOpen ? Math.round(Math.max(shrinkAmount, occludedByKeyboard)) : 0);
     };
 
     const handleFocusIn = () => updateKeyboardState();
@@ -6019,6 +6026,12 @@ const App = () => {
   const mobileBottomNavCssHeight = hasMobileBottomNav
     ? `calc(${mobileBottomNavInsetExpr})`
     : '0px';
+  const mobileKeyboardInsetCss = (isMobileKeyboardOpen && mobileKeyboardInset > 0)
+    ? `${mobileKeyboardInset}px`
+    : '0px';
+  const mobilePanelBottomInsetCss = (isMobile && isMobileKeyboardOpen)
+    ? mobileKeyboardInsetCss
+    : mobileBottomNavCssHeight;
 
   return (
     <>
@@ -9445,7 +9458,7 @@ const App = () => {
               top: isMobile ? topChromeOffset : undefined,
               left: isMobile ? 0 : undefined,
               right: isMobile ? 0 : undefined,
-              bottom: isMobile ? mobileBottomNavCssHeight : undefined,
+              bottom: isMobile ? mobilePanelBottomInsetCss : undefined,
               zIndex: isMobile ? 50 : undefined,
               display: isMobile ? ((mobilePanel === 'ai' || mobilePanel === 'insights') ? 'flex' : 'none') : 'flex',
               flexDirection: 'column', overflowY: isDesktop ? 'auto' : 'hidden', background: '#FFFFFF',
@@ -10123,15 +10136,13 @@ const App = () => {
                 borderTop: isMobileKeyboardOpen ? '1px solid transparent' : '1px solid rgba(29,29,31,0.12)',
                 borderRadius: '22px 22px 0 0',
                 boxShadow: isMobileKeyboardOpen ? 'none' : '0 -6px 18px rgba(29,29,31,0.08)',
-                display: showFlashcardModal || studyGuideFull || academicInsightsFull || hideMobileNavForFooter ? 'none' : 'flex',
+                display: showFlashcardModal || studyGuideFull || academicInsightsFull || hideMobileNavForFooter || isMobileKeyboardOpen ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: hasDynamic ? 'flex-start' : 'center',
                 overflowX: hasDynamic ? 'auto' : 'visible',
                 scrollbarWidth: 'none', msOverflowStyle: 'none',
                 padding: '0 10px env(safe-area-inset-bottom, 0px)',
                 gap: 4,
-                opacity: isMobileKeyboardOpen ? 0 : 1,
-                pointerEvents: isMobileKeyboardOpen ? 'none' : 'auto',
                 transition: 'opacity 0.12s linear, background 0.12s linear, box-shadow 0.12s linear',
               }}>
                 {mobileTabs.map(tab => {
@@ -10199,7 +10210,7 @@ const App = () => {
 
           {/* ── MOBILE SUMMARY PANEL ──────────────────────────────────────────── */}
           {isMobile && mobilePanel === 'summary' && (
-            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavCssHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobilePanelBottomInsetCss, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
@@ -10232,7 +10243,7 @@ const App = () => {
 
           {/* ── MOBILE FLASHCARDS PANEL ───────────────────────────────────────── */}
           {isMobile && mobilePanel === 'flashcards' && (
-            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavCssHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobilePanelBottomInsetCss, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
@@ -10313,7 +10324,7 @@ const App = () => {
 
           {/* ── MOBILE ACADEMIC INSIGHTS PANEL ───────────────────────────────── */}
           {isMobile && mobilePanel === 'academic' && (
-            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavCssHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobilePanelBottomInsetCss, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
@@ -10395,7 +10406,7 @@ const App = () => {
 
           {/* ── MOBILE STUDY GUIDE PANEL ──────────────────────────────────────── */}
           {isMobile && mobilePanel === 'study-guide' && (
-            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobileBottomNavCssHeight, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobilePanelBottomInsetCss, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
