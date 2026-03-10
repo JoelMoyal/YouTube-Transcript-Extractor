@@ -6760,6 +6760,7 @@ const App = () => {
 
             {/* Hero */}
             <div className="hero-grad" style={{
+              minHeight: '100vh',
               paddingBottom: 56,
             }}>
 
