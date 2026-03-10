@@ -7938,6 +7938,7 @@ const App = () => {
 
             {/* Recent transcripts */}
             {history.length > 0 && (
+            <BlurFade delay={0.2} yOffset={20}>
               <div style={{ maxWidth: 960, margin: '0 auto', padding: '0 24px 56px' }}>
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -7963,6 +7964,7 @@ const App = () => {
                     const platformTag = h.source === 'whisper' ? 'AI' : (h.platform || 'youtube').slice(0, 3).toUpperCase();
                     return (
                       <div key={h.id} className="rc-card" onClick={() => loadFromHistory(h)} style={{ borderRadius: 12, border: `1px solid ${P.border}`, background: P.surface, cursor: 'pointer', overflow: 'hidden', transition: 'all 0.18s', position: 'relative' }}>
+                        <BorderBeam size={180} duration={8} colorFrom="rgba(60,140,255,0.45)" colorTo="rgba(123,211,255,0)" borderWidth={1} />
                         {/* Thumbnail */}
                         <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', background: 'rgba(29,29,31,0.06)', overflow: 'hidden' }}>
                           {h.thumbnail && (
@@ -8003,6 +8005,7 @@ const App = () => {
                   })}
                 </div>
               </div>
+            </BlurFade>
             )}
           </div>
         )}
