@@ -5918,7 +5918,7 @@ const App = () => {
           background: radial-gradient(circle at 38% 38%, rgba(60,140,255,0.45), rgba(100,170,255,0.15) 55%, transparent 80%);
           filter: blur(32px);
           opacity: 0.18;
-          animation: planetFloat 20s ease-in-out infinite;
+          animation: planetFloat 26s ease-in-out infinite;
         }
         .hero-orb-2 {
           position: absolute;
@@ -5930,7 +5930,7 @@ const App = () => {
           background: radial-gradient(circle at 42% 42%, rgba(123,211,255,0.5), rgba(178,194,214,0.15) 58%, transparent 80%);
           filter: blur(24px);
           opacity: 0.15;
-          animation: orbitFloat 15s ease-in-out infinite;
+          animation: orbitFloat 20s ease-in-out infinite;
           animation-delay: -5s;
         }
         .hero-orb-3 {
@@ -5943,7 +5943,7 @@ const App = () => {
           background: radial-gradient(circle at 40% 40%, rgba(60,140,255,0.3), transparent 70%);
           filter: blur(20px);
           opacity: 0.1;
-          animation: orbitFloat 12s ease-in-out infinite;
+          animation: orbitFloat 16s ease-in-out infinite;
           animation-delay: -8s;
         }
         .hero-star {
@@ -6888,14 +6888,14 @@ const App = () => {
               <div className="hero-orb-2" />
               <div className="hero-orb-3" />
               {/* Stars — tiny twinkling dots at the periphery */}
-              <span className="hero-star" style={{ top: '9%',  left: '7%',   width: 2, height: 2, opacity: 0.38, animationDuration: '2.8s', animationDelay: '0s'    }} />
-              <span className="hero-star" style={{ top: '14%', right: '11%', width: 3, height: 3, opacity: 0.42, animationDuration: '3.5s', animationDelay: '-1s'   }} />
-              <span className="hero-star" style={{ top: '34%', left: '4%',   width: 2, height: 2, opacity: 0.30, animationDuration: '2.2s', animationDelay: '-0.5s' }} />
-              <span className="hero-star" style={{ top: '58%', left: '10%',  width: 3, height: 3, opacity: 0.35, animationDuration: '4.1s', animationDelay: '-2s'   }} />
-              <span className="hero-star" style={{ top: '72%', right: '7%',  width: 2, height: 2, opacity: 0.30, animationDuration: '2.6s', animationDelay: '-1.5s' }} />
-              <span className="hero-star" style={{ top: '11%', right: '26%', width: 2, height: 2, opacity: 0.25, animationDuration: '3.2s', animationDelay: '-0.8s' }} />
-              <span className="hero-star" style={{ bottom:'18%',left: '24%', width: 3, height: 3, opacity: 0.28, animationDuration: '2.9s', animationDelay: '-1.3s' }} />
-              <span className="hero-star" style={{ top: '44%', right: '3%',  width: 2, height: 2, opacity: 0.33, animationDuration: '3.8s', animationDelay: '-2.4s' }} />
+              <span className="hero-star" style={{ top: '9%',  left: '7%',   width: 2, height: 2, opacity: 0.38, animationDuration: '3.8s', animationDelay: '0s'    }} />
+              <span className="hero-star" style={{ top: '14%', right: '11%', width: 3, height: 3, opacity: 0.42, animationDuration: '4.8s', animationDelay: '-1s'   }} />
+              <span className="hero-star" style={{ top: '34%', left: '4%',   width: 2, height: 2, opacity: 0.30, animationDuration: '3.2s', animationDelay: '-0.5s' }} />
+              <span className="hero-star" style={{ top: '58%', left: '10%',  width: 3, height: 3, opacity: 0.35, animationDuration: '5.5s', animationDelay: '-2s'   }} />
+              <span className="hero-star" style={{ top: '72%', right: '7%',  width: 2, height: 2, opacity: 0.30, animationDuration: '3.6s', animationDelay: '-1.5s' }} />
+              <span className="hero-star" style={{ top: '11%', right: '26%', width: 2, height: 2, opacity: 0.25, animationDuration: '4.4s', animationDelay: '-0.8s' }} />
+              <span className="hero-star" style={{ bottom:'18%',left: '24%', width: 3, height: 3, opacity: 0.28, animationDuration: '4.0s', animationDelay: '-1.3s' }} />
+              <span className="hero-star" style={{ top: '44%', right: '3%',  width: 2, height: 2, opacity: 0.33, animationDuration: '5.2s', animationDelay: '-2.4s' }} />
             </div>
 
 
@@ -7363,10 +7363,20 @@ const App = () => {
 
             {/* Features */}
             {/* Capability cards */}
+            <BlurFade delay={0.05} yOffset={32}>
             <div style={{
+              position: 'relative',
               backgroundImage: `linear-gradient(rgba(60,80,160,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(60,80,160,0.045) 1px, transparent 1px)`,
               backgroundSize: '40px 40px',
-            }}><div style={{
+            }}>
+            {/* Fade from hero into section */}
+            <div aria-hidden="true" style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: 100,
+              background: `linear-gradient(to bottom, ${P.paper}, transparent)`,
+              pointerEvents: 'none', zIndex: 1,
+            }} />
+            <div style={{
+              position: 'relative', zIndex: 2,
               maxWidth: 1500, margin: '0 auto', padding: isMobile ? '64px 16px 44px' : '160px 36px 68px',
             }}>
               <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 52 }}>
@@ -7793,6 +7803,7 @@ const App = () => {
             </div>
             </div>
             </div>
+            </BlurFade>
             {/* Testimonials */}
             <BlurFade delay={0.15} yOffset={20}>
             <div style={{ maxWidth: 820, margin: '0 auto', padding: isMobile ? '0 16px 48px' : '0 24px 64px' }}>
