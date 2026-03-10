@@ -5115,11 +5115,16 @@ const App = () => {
       ? `/api/transcript?videoId=${videoId}&lang=${langToUse}${tokenParam}`
       : `/api/transcript?platform=${encodeURIComponent(platform)}&url=${encodeURIComponent(videoCanonical)}&lang=${langToUse}${tokenParam}`;
     const es = new EventSource(apiUrl);
-    const killTimer = setTimeout(() => {
-      es.close();
-      setError(funnyTranscriptError('timed out'));
+    let esSettled = false; // true once any terminal event (done/error/timeout) has been handled
+    const clearLoading = () => {
       finishSmoothLoading(false);
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+    };
+    const killTimer = setTimeout(() => {
+      if (esSettled) return; esSettled = true;
+      es.close();
+      setError(funnyTranscriptError('timed out'));
+      clearLoading();
     }, 180000);
 
     es.addEventListener('progress', (e) => {
@@ -5129,6 +5134,7 @@ const App = () => {
     });
 
     es.addEventListener('done', async (e) => {
+      if (esSettled) return; esSettled = true;
       clearTimeout(killTimer); es.close();
       try {
         const data = JSON.parse(e.data);
@@ -5163,41 +5169,39 @@ const App = () => {
       } catch {
         setError(funnyTranscriptError('failed to process'));
       } finally {
-        setTimeout(() => {
-          finishSmoothLoading(false);
-          setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
-        }, 600);
+        setTimeout(clearLoading, 600);
       }
     });
 
     // Server fires this when the user's credit balance is exhausted.
     es.addEventListener('out_of_credits', (e) => {
+      if (esSettled) return; esSettled = true;
       clearTimeout(killTimer); es.close();
       try {
         const data = JSON.parse(e.data);
         if (data.used !== undefined) syncCreditsFromServer(data);
       } catch {}
       setError('You\'ve used all your credits for this period. Sign in or wait for your credits to reset.');
-      finishSmoothLoading(false);
-      setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+      clearLoading();
     });
 
     es.addEventListener('transcript_error', (e) => {
+      if (esSettled) return; esSettled = true;
       clearTimeout(killTimer); es.close();
       try {
         const data = JSON.parse(e.data);
         setError(funnyTranscriptError(data.details ? `${data.error}: ${data.details}` : (data.error || 'failed to fetch')));
       } catch { setError(funnyTranscriptError('connection')); }
-      finishSmoothLoading(false);
-      setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+      clearLoading();
     });
 
+    // Fires when server returns non-SSE response (e.g. 402, 429) or connection drops.
+    // esSettled guards against double-handling when we intentionally close the connection.
     es.onerror = () => {
-      if (es.readyState === EventSource.CLOSED) return;
+      if (esSettled) return; esSettled = true;
       clearTimeout(killTimer); es.close();
       setError(funnyTranscriptError('connection'));
-      finishSmoothLoading(false);
-      setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+      clearLoading();
     };
   };
 

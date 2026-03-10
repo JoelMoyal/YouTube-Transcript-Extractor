@@ -673,6 +673,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no'); // Disable Nginx/Railway proxy buffering so events stream in real-time
   res.flushHeaders();
 
   // Inject updated credit counts into every 'done' event so the client can
