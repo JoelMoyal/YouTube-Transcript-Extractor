@@ -964,7 +964,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
       try {
         send('progress', { stage: 'subtitles', message: 'Trying backup caption source…', percent: 35 });
         const supadata = new Supadata({ apiKey: process.env.SUPADATA_API_KEY });
-        let result = await supadata.transcript({ url: `https://www.youtube.com/watch?v=${videoId}`, lang: safeLang, mode: 'auto' });
+        let result = await supadata.transcript({ url: `https://www.youtube.com/watch?v=${videoId}`, lang: safeLang, mode: 'native' });
         if (result && 'jobId' in result) {
           const maxPolls = Math.max(1, parseInt(process.env.SUPADATA_MAX_POLLS || '6', 10));
           const pollMs = Math.max(1000, parseInt(process.env.SUPADATA_POLL_MS || '2500', 10));
