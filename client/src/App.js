@@ -4322,6 +4322,7 @@ const App = () => {
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
   const [recentOpen, setRecentOpen]               = useState(true);
   const [hideMobileNavForFooter, setHideMobileNavForFooter] = useState(false);
+  const [isMobileKeyboardOpen, setIsMobileKeyboardOpen] = useState(false);
   const isMobile  = windowWidth < MOBILE_BREAKPOINT;
   const isTablet  = windowWidth >= MOBILE_BREAKPOINT && windowWidth < TABLET_BREAKPOINT;
   const isDesktop = windowWidth >= TABLET_BREAKPOINT;
@@ -4380,6 +4381,58 @@ const App = () => {
     observer.observe(footerEl);
     return () => observer.disconnect();
   }, [isMobile, transcript]);
+
+  useEffect(() => {
+    if (!isMobile || typeof window === 'undefined') {
+      setIsMobileKeyboardOpen(false);
+      return;
+    }
+
+    const isTextEntryElement = (el) => {
+      if (!el || !(el instanceof HTMLElement)) return false;
+      const tag = el.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || el.isContentEditable;
+    };
+
+    const vv = window.visualViewport;
+    let maxViewportHeight = vv?.height || window.innerHeight;
+    let blurRaf = 0;
+
+    const updateKeyboardState = () => {
+      const activeEl = document.activeElement;
+      const hasInputFocus = isTextEntryElement(activeEl);
+      const viewportHeight = vv?.height || window.innerHeight;
+      if (viewportHeight > maxViewportHeight) maxViewportHeight = viewportHeight;
+      const keyboardLikelyOpen = vv ? ((maxViewportHeight - viewportHeight) > 120) : hasInputFocus;
+      setIsMobileKeyboardOpen(hasInputFocus && keyboardLikelyOpen);
+    };
+
+    const handleFocusIn = () => updateKeyboardState();
+    const handleFocusOut = () => {
+      cancelAnimationFrame(blurRaf);
+      blurRaf = requestAnimationFrame(updateKeyboardState);
+    };
+    const handleOrientationChange = () => {
+      maxViewportHeight = vv?.height || window.innerHeight;
+      updateKeyboardState();
+    };
+
+    vv?.addEventListener('resize', updateKeyboardState);
+    vv?.addEventListener('scroll', updateKeyboardState);
+    window.addEventListener('focusin', handleFocusIn);
+    window.addEventListener('focusout', handleFocusOut);
+    window.addEventListener('orientationchange', handleOrientationChange);
+    updateKeyboardState();
+
+    return () => {
+      vv?.removeEventListener('resize', updateKeyboardState);
+      vv?.removeEventListener('scroll', updateKeyboardState);
+      window.removeEventListener('focusin', handleFocusIn);
+      window.removeEventListener('focusout', handleFocusOut);
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      cancelAnimationFrame(blurRaf);
+    };
+  }, [isMobile]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -5894,7 +5947,7 @@ const App = () => {
 
   const showTopNavbar = !isMobile || !transcript;
   const topChromeOffset = showTopNavbar ? ((showBookmarkBanner && !isMobile) ? 97 : 56) : 0;
-  const hasMobileBottomNav = isMobile && transcript && !hideMobileNavForFooter;
+  const hasMobileBottomNav = isMobile && transcript && !hideMobileNavForFooter && !isMobileKeyboardOpen;
   const mobileBottomNavHeight = hasMobileBottomNav ? (MOBILE_BOTTOM_NAV_HEIGHT + MOBILE_BOTTOM_NAV_LIFT) : 0;
   const mobileBottomNavInsetExpr = hasMobileBottomNav
     ? `${mobileBottomNavHeight}px + env(safe-area-inset-bottom, 0px)`
@@ -10002,10 +10055,10 @@ const App = () => {
               <div ref={mobileNavRef} className="no-scrollbar" style={{
                 position: 'fixed', bottom: MOBILE_BOTTOM_NAV_LIFT, left: 0, right: 0, zIndex: 100,
                 height: MOBILE_BOTTOM_NAV_HEIGHT,
-                background: '#FFFFFF',
-                borderTop: '1px solid rgba(29,29,31,0.12)',
+                background: isMobileKeyboardOpen ? 'transparent' : '#FFFFFF',
+                borderTop: isMobileKeyboardOpen ? '1px solid transparent' : '1px solid rgba(29,29,31,0.12)',
                 borderRadius: '22px 22px 0 0',
-                boxShadow: '0 -6px 18px rgba(29,29,31,0.08)',
+                boxShadow: isMobileKeyboardOpen ? 'none' : '0 -6px 18px rgba(29,29,31,0.08)',
                 display: showFlashcardModal || studyGuideFull || academicInsightsFull || hideMobileNavForFooter ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: hasDynamic ? 'flex-start' : 'center',
@@ -10013,6 +10066,9 @@ const App = () => {
                 scrollbarWidth: 'none', msOverflowStyle: 'none',
                 padding: '0 10px env(safe-area-inset-bottom, 0px)',
                 gap: 4,
+                opacity: isMobileKeyboardOpen ? 0 : 1,
+                pointerEvents: isMobileKeyboardOpen ? 'none' : 'auto',
+                transition: 'opacity 0.12s linear, background 0.12s linear, box-shadow 0.12s linear',
               }}>
                 {mobileTabs.map(tab => {
                   const isNewSearch = tab.key === 'new-search';
