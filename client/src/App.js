@@ -7531,9 +7531,23 @@ const App = () => {
               )}
 
               {/* Supported formats hint */}
-              <div style={{ marginTop: 14, display: 'flex', flexWrap: 'nowrap', gap: 8, justifyContent: 'center', alignItems: 'center', whiteSpace: 'nowrap', overflowX: 'auto' }}>
-                {['Instant extraction', 'Your own uploads', 'AI summaries', 'Flashcards', 'Study guides', 'AI chat'].map((item, i) => (
-                  <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: P.muted, flexShrink: 0 }}>
+              <div style={{
+                marginTop: 14,
+                display: 'flex',
+                flexWrap: 'nowrap',
+                gap: isMobile ? 6 : 8,
+                justifyContent: 'center',
+                alignItems: 'center',
+                whiteSpace: 'nowrap',
+                overflowX: isMobile ? 'hidden' : 'auto',
+              }}>
+                {(isMobile
+                  ? (windowWidth < 390
+                    ? ['Your own uploads', 'AI chat']
+                    : ['Your own uploads', 'AI chat', 'Flashcards'])
+                  : ['Instant extraction', 'Your own uploads', 'AI summaries', 'Flashcards', 'Study guides', 'AI chat']
+                ).map((item, i) => (
+                  <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: isMobile ? 11 : 12, color: P.muted, flexShrink: 0 }}>
                     {i > 0 && <span style={{ opacity: 0.3, marginRight: 2 }}>·</span>}
                     <span style={{ width: 5, height: 5, borderRadius: '50%', background: P.border, display: 'inline-block', flexShrink: 0 }} />
                     {item}
