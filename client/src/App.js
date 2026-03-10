@@ -32,7 +32,7 @@ const TABLET_BREAKPOINT = 1024;
 const PROGRESS_PROFILE_KEY = 'yte_progress_profile_v1';
 const PROGRESS_SPEED_MULTIPLIER = 0.25; // 4x faster visual progress
 const MOBILE_BOTTOM_NAV_HEIGHT = 64;
-const MOBILE_BOTTOM_NAV_LIFT = 24;
+const MOBILE_BOTTOM_NAV_LIFT = 0;
 const DEFAULT_PROGRESS_PROFILE = Object.freeze({
   url: { avgMs: 60000, samples: 0 },
   upload: { avgMs: 140000, samples: 0 },
@@ -9996,21 +9996,19 @@ const App = () => {
             const insightPanels = new Set(['insights', 'summary', 'flashcards', 'study-guide', 'academic']);
             return (
               <div ref={mobileNavRef} className="no-scrollbar" style={{
-                position: 'fixed', bottom: MOBILE_BOTTOM_NAV_LIFT, left: 12, right: 12, zIndex: 100,
-                height: MOBILE_BOTTOM_NAV_HEIGHT,
+                position: 'fixed', bottom: MOBILE_BOTTOM_NAV_LIFT, left: 0, right: 0, zIndex: 100,
+                height: `calc(${MOBILE_BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px))`,
                 background: '#FFFFFF',
-                border: '1px solid rgba(29,29,31,0.1)',
-                borderRadius: 24,
-                boxShadow: '0 12px 28px rgba(29,29,31,0.14), 0 3px 10px rgba(29,29,31,0.08)',
+                borderTop: '1px solid rgba(29,29,31,0.12)',
+                borderRadius: '22px 22px 0 0',
+                boxShadow: '0 -6px 18px rgba(29,29,31,0.08)',
                 display: showFlashcardModal || studyGuideFull || academicInsightsFull || hideMobileNavForFooter ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: hasDynamic ? 'flex-start' : 'center',
                 overflowX: hasDynamic ? 'auto' : 'visible',
                 scrollbarWidth: 'none', msOverflowStyle: 'none',
-                padding: '0 10px',
+                padding: '0 10px env(safe-area-inset-bottom, 0px)',
                 gap: 4,
-                backdropFilter: 'saturate(140%) blur(6px)',
-                WebkitBackdropFilter: 'saturate(140%) blur(6px)',
               }}>
                 {mobileTabs.map(tab => {
                   const isNewSearch = tab.key === 'new-search';
@@ -10024,11 +10022,8 @@ const App = () => {
                       setMobilePanel(tab.key);
                       if (tab.key === 'ai') setSidebarTab('ai');
                       if (tab.key === 'insights') setSidebarTab('insights');
-                      // scroll this tab into view
-                      setTimeout(() => {
-                        const el = mobileNavRef.current?.querySelector(`[data-nav-key="${tab.key}"]`);
-                        el?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                      }, 40);
+                      const el = mobileNavRef.current?.querySelector(`[data-nav-key="${tab.key}"]`);
+                      el?.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
                     }} style={{
                       flex: hasDynamic ? '0 0 auto' : '1',
                       minWidth: hasDynamic ? 56 : 0,
@@ -10041,7 +10036,7 @@ const App = () => {
                       borderRadius: 14,
                       background: isAct ? 'rgba(29,29,31,0.06)' : 'transparent',
                       color: isAct ? '#1D1D1F' : '#B4B7BE',
-                      transition: 'background 0.18s, color 0.18s, transform 0.18s',
+                      transition: 'background 0.1s, color 0.1s',
                     }}>
                       <div style={{ color: isAct ? '#1D1D1F' : '#B4B7BE', transition: 'color 0.18s' }}>{tab.icon}</div>
                     </button>
