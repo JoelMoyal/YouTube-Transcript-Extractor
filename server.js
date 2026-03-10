@@ -182,7 +182,7 @@ async function checkAndDeductCredit(req, res) {
   // Deduct 1 credit (optimistic: only updates if `used` hasn't changed since we read it)
   const { data: updated, error: updateErr } = await supabaseAdmin
     .from('user_credits')
-    .update({ used: currentUsed + 1, updated_at: now.toISOString() })
+    .update({ used: currentUsed + 1, tier_max: effectiveTierMax, updated_at: now.toISOString() })
     .eq('user_id', user.id)
     .eq('used', currentUsed) // prevents double-spend in concurrent requests
     .select()
