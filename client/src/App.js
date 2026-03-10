@@ -7806,9 +7806,25 @@ const App = () => {
             </BlurFade>
             {/* Testimonials */}
             <BlurFade delay={0.15} yOffset={20}>
-            <div style={{ maxWidth: 820, margin: '0 auto', padding: isMobile ? '0 16px 48px' : '0 24px 64px' }}>
+            <div style={{
+              position: 'relative',
+              backgroundImage: `linear-gradient(rgba(60,80,160,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(60,80,160,0.045) 1px, transparent 1px)`,
+              backgroundSize: '40px 40px',
+            }}>
+            <div aria-hidden="true" style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: 100,
+              background: `linear-gradient(to bottom, ${P.paper}, transparent)`,
+              pointerEvents: 'none', zIndex: 1,
+            }} />
+            <div style={{ position: 'relative', zIndex: 2, maxWidth: 820, margin: '0 auto', padding: isMobile ? '64px 16px 48px' : '80px 24px 64px' }}>
               <div style={{ textAlign: 'center', marginBottom: 28 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: P.accent, marginBottom: 8 }}>What people say</div>
+                <div style={{
+                  display: 'inline-block',
+                  fontSize: 11, fontWeight: 700, letterSpacing: '0.11em', textTransform: 'uppercase',
+                  color: P.accent, marginBottom: 18,
+                  padding: '5px 14px', borderRadius: 999,
+                  background: 'rgba(60,140,255,0.07)', border: '1px solid rgba(60,140,255,0.15)',
+                }}>What people say</div>
                 <h2 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: P.ink, letterSpacing: '-0.03em', margin: 0 }}>Loved by Researchers &amp; Builders</h2>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
@@ -7849,6 +7865,7 @@ const App = () => {
                   </div>
                 </div>
               </div>
+            </div>
             </div>
             </BlurFade>
 
