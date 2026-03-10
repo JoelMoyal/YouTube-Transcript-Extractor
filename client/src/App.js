@@ -31,6 +31,7 @@ const TABLET_BREAKPOINT = 1024;
 
 const PROGRESS_PROFILE_KEY = 'yte_progress_profile_v1';
 const PROGRESS_SPEED_MULTIPLIER = 0.25; // 4x faster visual progress
+const MOBILE_BOTTOM_NAV_LIFT = 8;
 const DEFAULT_PROGRESS_PROFILE = Object.freeze({
   url: { avgMs: 60000, samples: 0 },
   upload: { avgMs: 140000, samples: 0 },
@@ -5887,7 +5888,7 @@ const App = () => {
 
   const showTopNavbar = !isMobile || !transcript;
   const topChromeOffset = showTopNavbar ? ((showBookmarkBanner && !isMobile) ? 97 : 56) : 0;
-  const mobileBottomNavHeight = isMobile && transcript && !hideMobileNavForFooter ? 60 : 0;
+  const mobileBottomNavHeight = isMobile && transcript && !hideMobileNavForFooter ? (60 + MOBILE_BOTTOM_NAV_LIFT) : 0;
 
   return (
     <>
@@ -9908,7 +9909,7 @@ const App = () => {
             const insightPanels = new Set(['insights', 'summary', 'flashcards', 'study-guide', 'academic']);
             return (
               <div ref={mobileNavRef} className="no-scrollbar" style={{
-                position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+                position: 'fixed', bottom: MOBILE_BOTTOM_NAV_LIFT, left: 0, right: 0, zIndex: 100,
                 height: 60,
                 background: 'linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%)',
                 borderTop: `1.5px solid rgba(60,140,255,0.18)`,
