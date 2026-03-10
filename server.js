@@ -473,9 +473,10 @@ const proxyArgs = process.env.WEBSHARE_PROXY_URL ? ['--proxy', process.env.WEBSH
 if (process.env.WEBSHARE_PROXY_URL) console.log('Webshare proxy loaded');
 else console.log('No proxy configured — running without proxy');
 
-// Faster AI fallback downloads: prefer smaller audio when we must transcribe.
-const ytdlpAudioQuality = process.env.YTDLP_AUDIO_QUALITY || '9'; // 0 best, 9 smallest
-const ytdlpAudioFormat = process.env.YTDLP_AUDIO_FORMAT || 'bestaudio[abr<=64]/bestaudio';
+// AI fallback download quality (Whisper source audio).
+// Higher quality by default; can be tuned via env vars.
+const ytdlpAudioQuality = process.env.YTDLP_AUDIO_QUALITY || '0'; // 0 best, 9 smallest
+const ytdlpAudioFormat = process.env.YTDLP_AUDIO_FORMAT || 'bestaudio';
 
 app.disable('x-powered-by');
 app.set('trust proxy', 1); // Trust Railway/Cloudflare's X-Forwarded-For so req.ip is the real client IP
