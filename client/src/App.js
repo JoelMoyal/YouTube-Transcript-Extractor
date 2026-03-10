@@ -32,8 +32,6 @@ const TABLET_BREAKPOINT = 1024;
 const PROGRESS_PROFILE_KEY = 'yte_progress_profile_v1';
 const PROGRESS_SPEED_MULTIPLIER = 0.25; // 4x faster visual progress
 const MOBILE_BOTTOM_NAV_HEIGHT = 64;
-const MOBILE_KEYBOARD_NAV_HEIGHT = 42;
-const MOBILE_KEYBOARD_NAV_GAP = 8;
 const MOBILE_BOTTOM_NAV_LIFT = 0;
 const DEFAULT_PROGRESS_PROFILE = Object.freeze({
   url: { avgMs: 60000, samples: 0 },
@@ -6020,24 +6018,20 @@ const App = () => {
 
   const showTopNavbar = !isMobile || !transcript;
   const topChromeOffset = showTopNavbar ? ((showBookmarkBanner && !isMobile) ? 97 : 56) : 0;
-  const hasMobileBottomNav = isMobile && transcript && !hideMobileNavForFooter;
-  const mobileKeyboardNavActive = hasMobileBottomNav && isMobileKeyboardOpen;
-  const mobileNavHeightPx = mobileKeyboardNavActive ? MOBILE_KEYBOARD_NAV_HEIGHT : MOBILE_BOTTOM_NAV_HEIGHT;
-  const mobileNavBottomOffsetPx = mobileKeyboardNavActive
-    ? Math.max(0, mobileKeyboardInset + MOBILE_KEYBOARD_NAV_GAP)
-    : MOBILE_BOTTOM_NAV_LIFT;
+  const hasMobileBottomNav = isMobile && transcript && !hideMobileNavForFooter && !isMobileKeyboardOpen;
+  const mobileBottomNavHeight = hasMobileBottomNav ? (MOBILE_BOTTOM_NAV_HEIGHT + MOBILE_BOTTOM_NAV_LIFT) : 0;
   const mobileBottomNavInsetExpr = hasMobileBottomNav
-    ? (mobileKeyboardNavActive
-      ? `${mobileNavBottomOffsetPx + mobileNavHeightPx}px`
-      : `${MOBILE_BOTTOM_NAV_HEIGHT + MOBILE_BOTTOM_NAV_LIFT}px + env(safe-area-inset-bottom, 0px)`)
+    ? `${mobileBottomNavHeight}px + env(safe-area-inset-bottom, 0px)`
     : '0px';
   const mobileBottomNavCssHeight = hasMobileBottomNav
     ? `calc(${mobileBottomNavInsetExpr})`
     : '0px';
-  const mobilePanelBottomInsetCss = mobileBottomNavCssHeight;
-  const mobileFooterBottomPadding = hasMobileBottomNav
-    ? `calc((${mobileBottomNavInsetExpr}) + 30px)`
-    : '28px';
+  const mobileKeyboardInsetCss = (isMobileKeyboardOpen && mobileKeyboardInset > 0)
+    ? `${mobileKeyboardInset}px`
+    : '0px';
+  const mobilePanelBottomInsetCss = (isMobile && isMobileKeyboardOpen)
+    ? mobileKeyboardInsetCss
+    : mobileBottomNavCssHeight;
 
   return (
     <>
@@ -10149,27 +10143,20 @@ const App = () => {
             const insightPanels = new Set(['insights', 'summary', 'flashcards', 'study-guide', 'academic']);
             return (
               <div ref={mobileNavRef} className="no-scrollbar" style={{
-                position: 'fixed',
-                bottom: mobileNavBottomOffsetPx,
-                left: mobileKeyboardNavActive ? 10 : 0,
-                right: mobileKeyboardNavActive ? 10 : 0,
-                zIndex: 100,
-                height: mobileNavHeightPx,
-                background: mobileKeyboardNavActive ? 'rgba(255,255,255,0.94)' : '#FFFFFF',
-                border: mobileKeyboardNavActive ? '1px solid rgba(29,29,31,0.1)' : undefined,
-                borderTop: mobileKeyboardNavActive ? undefined : '1px solid rgba(29,29,31,0.12)',
-                borderRadius: mobileKeyboardNavActive ? 14 : '22px 22px 0 0',
-                boxShadow: mobileKeyboardNavActive ? '0 6px 16px rgba(29,29,31,0.16)' : '0 -6px 18px rgba(29,29,31,0.08)',
-                display: showFlashcardModal || studyGuideFull || academicInsightsFull || hideMobileNavForFooter ? 'none' : 'flex',
+                position: 'fixed', bottom: MOBILE_BOTTOM_NAV_LIFT, left: 0, right: 0, zIndex: 100,
+                height: MOBILE_BOTTOM_NAV_HEIGHT,
+                background: isMobileKeyboardOpen ? 'transparent' : '#FFFFFF',
+                borderTop: isMobileKeyboardOpen ? '1px solid transparent' : '1px solid rgba(29,29,31,0.12)',
+                borderRadius: '22px 22px 0 0',
+                boxShadow: isMobileKeyboardOpen ? 'none' : '0 -6px 18px rgba(29,29,31,0.08)',
+                display: showFlashcardModal || studyGuideFull || academicInsightsFull || hideMobileNavForFooter || isMobileKeyboardOpen ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: hasDynamic ? 'flex-start' : 'center',
                 overflowX: hasDynamic ? 'auto' : 'visible',
                 scrollbarWidth: 'none', msOverflowStyle: 'none',
-                padding: mobileKeyboardNavActive ? '0 8px' : '0 10px env(safe-area-inset-bottom, 0px)',
+                padding: '0 10px env(safe-area-inset-bottom, 0px)',
                 gap: 4,
-                backdropFilter: mobileKeyboardNavActive ? 'blur(8px)' : undefined,
-                WebkitBackdropFilter: mobileKeyboardNavActive ? 'blur(8px)' : undefined,
-                transition: 'bottom 0.12s linear, left 0.12s linear, right 0.12s linear, height 0.12s linear, border-radius 0.12s linear, background 0.12s linear, box-shadow 0.12s linear',
+                transition: 'opacity 0.12s linear, background 0.12s linear, box-shadow 0.12s linear',
               }}>
                 {mobileTabs.map(tab => {
                   const isNewSearch = tab.key === 'new-search';
@@ -10187,14 +10174,14 @@ const App = () => {
                       el?.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
                     }} style={{
                       flex: hasDynamic ? '0 0 auto' : '1',
-                      minWidth: hasDynamic ? (mobileKeyboardNavActive ? 48 : 56) : 0,
-                      maxWidth: hasDynamic ? (mobileKeyboardNavActive ? 62 : 70) : undefined,
+                      minWidth: hasDynamic ? 56 : 0,
+                      maxWidth: hasDynamic ? 70 : undefined,
                       position: 'relative',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       border: 'none', cursor: 'pointer',
                       padding: 0,
-                      height: mobileKeyboardNavActive ? 36 : 48,
-                      borderRadius: mobileKeyboardNavActive ? 10 : 14,
+                      height: 48,
+                      borderRadius: 14,
                       background: isAct ? 'rgba(29,29,31,0.06)' : 'transparent',
                       color: isAct ? '#1D1D1F' : '#B4B7BE',
                       transition: 'background 0.1s, color 0.1s',
@@ -10520,7 +10507,7 @@ const App = () => {
       <footer ref={footerRef} style={{
         background: P.surface, borderTop: `1px solid ${P.border}`,
         padding: isMobile
-          ? `34px 20px ${mobileFooterBottomPadding}`
+          ? `34px 20px ${hasMobileBottomNav ? `calc(${mobileBottomNavHeight + 30}px + env(safe-area-inset-bottom, 0px))` : '28px'}`
           : '40px 24px 32px',
         marginTop: 24,
       }}>
