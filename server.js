@@ -115,96 +115,102 @@ async function requireAuth(req, res, next) {
 //   creditInfo — { used, tierMax, resetAt } after deduction (null for anon)
 //   response already sent if ok === false (402)
 async function checkAndDeductCredit(req, res) {
-  // No Supabase admin client → skip (dev environment without credentials)
-  if (!supabaseAdmin) return { ok: true, user: null, creditInfo: null };
+  try {
+    // No Supabase admin client → skip (dev environment without credentials)
+    if (!supabaseAdmin) return { ok: true, user: null, creditInfo: null };
 
-  // Read token from Authorization header OR ?_t= query param (for SSE)
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader.startsWith('Bearer ')
-    ? authHeader.slice(7)
-    : (req.query._t || null);
+    // Read token from Authorization header OR ?_t= query param (for SSE)
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : (req.query._t || null);
 
-  // Anonymous request — pass through, rate limiter handles protection
-  if (!token) return { ok: true, user: null, creditInfo: null };
+    // Anonymous request — pass through, rate limiter handles protection
+    if (!token) return { ok: true, user: null, creditInfo: null };
 
-  // Validate JWT
-  const { data: { user }, error: authErr } = await supabaseAdmin.auth.getUser(token);
-  if (authErr || !user) return { ok: true, user: null, creditInfo: null }; // treat invalid token as anon
+    // Validate JWT
+    const { data: { user }, error: authErr } = await supabaseAdmin.auth.getUser(token);
+    if (authErr || !user) return { ok: true, user: null, creditInfo: null }; // treat invalid token as anon
 
-  const referralBonus = user.user_metadata?.referral_bonus || 0;
-  const tierMax = 20 + referralBonus;
-  const now = new Date();
-  const resetAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const referralBonus = user.user_metadata?.referral_bonus || 0;
+    const tierMax = 20 + referralBonus;
+    const now = new Date();
+    const resetAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  // Ensure a credits row exists for this user (insert only if missing)
-  await supabaseAdmin
-    .from('user_credits')
-    .insert({ user_id: user.id, used: 0, reset_at: resetAt, tier_max: tierMax })
-    .select()
-    .maybeSingle() // ignore conflict (row already exists)
-    .catch(() => {}); // never block on DB error
-
-  // Read current credits row
-  const { data: row, error: rowErr } = await supabaseAdmin
-    .from('user_credits')
-    .select('used, reset_at, tier_max')
-    .eq('user_id', user.id)
-    .single();
-
-  if (rowErr || !row) {
-    // DB error — fail open (don't block the user)
-    console.error('[credits] read error:', rowErr?.message);
-    return { ok: true, user, creditInfo: null };
-  }
-
-  // Reset window if expired
-  let currentUsed = row.used;
-  if (new Date(row.reset_at) < now) {
+    // Ensure a credits row exists for this user (insert only if missing)
     await supabaseAdmin
       .from('user_credits')
-      .update({ used: 0, reset_at: resetAt, updated_at: now.toISOString() })
+      .insert({ user_id: user.id, used: 0, reset_at: resetAt, tier_max: tierMax })
+      .select()
+      .maybeSingle() // ignore conflict (row already exists)
+      .catch(() => {}); // never block on DB error
+
+    // Read current credits row
+    const { data: row, error: rowErr } = await supabaseAdmin
+      .from('user_credits')
+      .select('used, reset_at, tier_max')
       .eq('user_id', user.id)
-      .catch(() => {});
-    currentUsed = 0;
-  }
+      .single();
 
-  const effectiveTierMax = Math.max(row.tier_max, tierMax);
-
-  // Out of credits — return 402
-  if (currentUsed >= effectiveTierMax) {
-    const body = { error: 'Out of credits', used: currentUsed, tier_max: effectiveTierMax, reset_at: row.reset_at };
-    // SSE connections: headers already sent after flushHeaders(), use close event instead
-    if (res.headersSent) {
-      res.write(`event: out_of_credits\ndata: ${JSON.stringify(body)}\n\n`);
-      res.end();
-    } else {
-      res.status(402).json(body);
+    if (rowErr || !row) {
+      // DB error — fail open (don't block the user)
+      console.error('[credits] read error:', rowErr?.message);
+      return { ok: true, user, creditInfo: null };
     }
-    return { ok: false, user, creditInfo: null };
+
+    // Reset window if expired
+    let currentUsed = row.used;
+    if (new Date(row.reset_at) < now) {
+      await supabaseAdmin
+        .from('user_credits')
+        .update({ used: 0, reset_at: resetAt, updated_at: now.toISOString() })
+        .eq('user_id', user.id)
+        .catch(() => {});
+      currentUsed = 0;
+    }
+
+    const effectiveTierMax = Math.max(row.tier_max, tierMax);
+
+    // Out of credits — return 402
+    if (currentUsed >= effectiveTierMax) {
+      const body = { error: 'Out of credits', used: currentUsed, tier_max: effectiveTierMax, reset_at: row.reset_at };
+      // SSE connections: headers already sent after flushHeaders(), use close event instead
+      if (res.headersSent) {
+        res.write(`event: out_of_credits\ndata: ${JSON.stringify(body)}\n\n`);
+        res.end();
+      } else {
+        res.status(402).json(body);
+      }
+      return { ok: false, user, creditInfo: null };
+    }
+
+    // Deduct 1 credit (optimistic: only updates if `used` hasn't changed since we read it)
+    const { data: updated, error: updateErr } = await supabaseAdmin
+      .from('user_credits')
+      .update({ used: currentUsed + 1, tier_max: effectiveTierMax, updated_at: now.toISOString() })
+      .eq('user_id', user.id)
+      .eq('used', currentUsed) // prevents double-spend in concurrent requests
+      .select()
+      .maybeSingle();
+
+    if (updateErr) {
+      console.error('[credits] deduct error:', updateErr.message);
+      return { ok: true, user, creditInfo: null }; // fail open
+    }
+
+    const creditInfo = {
+      used: updated?.used ?? currentUsed + 1,
+      tier_max: effectiveTierMax,
+      reset_at: row.reset_at,
+    };
+
+    console.log(`[credits] deducted 1 credit for ${user.id}: ${creditInfo.used}/${creditInfo.tier_max}`);
+    return { ok: true, user, creditInfo };
+  } catch (err) {
+    // Never allow credit plumbing failures to break transcript streaming.
+    console.error('[credits] unexpected error (fail-open):', err?.message || err);
+    return { ok: true, user: null, creditInfo: null };
   }
-
-  // Deduct 1 credit (optimistic: only updates if `used` hasn't changed since we read it)
-  const { data: updated, error: updateErr } = await supabaseAdmin
-    .from('user_credits')
-    .update({ used: currentUsed + 1, tier_max: effectiveTierMax, updated_at: now.toISOString() })
-    .eq('user_id', user.id)
-    .eq('used', currentUsed) // prevents double-spend in concurrent requests
-    .select()
-    .maybeSingle();
-
-  if (updateErr) {
-    console.error('[credits] deduct error:', updateErr.message);
-    return { ok: true, user, creditInfo: null }; // fail open
-  }
-
-  const creditInfo = {
-    used: updated?.used ?? currentUsed + 1,
-    tier_max: effectiveTierMax,
-    reset_at: row.reset_at,
-  };
-
-  console.log(`[credits] deducted 1 credit for ${user.id}: ${creditInfo.used}/${creditInfo.tier_max}`);
-  return { ok: true, user, creditInfo };
 }
 
 async function aiComplete(prompt, maxTokens = 1024) {
@@ -622,7 +628,11 @@ function toWhisperLang(lang) {
 function classifyYtdlpError(err) {
   if (err?.code === 'ENOENT') return 'Transcript extraction tool (yt-dlp) is not installed on this server.';
   const msg = (err?.stderr || err?.message || '').toLowerCase();
-  if (msg.includes('enoent') || msg.includes('not found') && msg.includes('yt-dlp'))
+  const missingBinary =
+    (msg.includes('spawn yt-dlp') && msg.includes('enoent')) ||
+    (msg.includes('yt-dlp') && msg.includes(': not found')) ||
+    (msg.includes('yt-dlp') && msg.includes('no such file or directory') && msg.includes('spawn'));
+  if (missingBinary)
     return 'Transcript extraction tool (yt-dlp) is not installed on this server.';
   if (msg.includes('429') || msg.includes('too many requests'))
     return 'YouTube is rate-limiting this IP. Please wait a minute and try again.';
