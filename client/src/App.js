@@ -581,9 +581,9 @@ const ReferralPromoModal = ({ user, onClose }) => {
   const tweetText = `I use ScribeSnap to get YouTube transcripts instantly 🎬 Try it free — use my invite link and we both get bonus credits 👉 ${refLink}`;
   const emailSubject = 'Try ScribeSnap — free YouTube transcript tool';
   const copyLink = () => { navigator.clipboard.writeText(refLink).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }); };
-  const shareWA    = () => window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
-  const shareX     = () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank');
-  const shareEmail = () => window.open(`mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(shareText)}`, '_blank');
+  const shareWA    = () => window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
+  const shareX     = () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank', 'noopener,noreferrer');
+  const shareEmail = () => window.open(`mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
 
   const shareBtn = (onClick, border, bg, hoverBg, color, icon, label) => (
     <button onClick={onClick} style={{
@@ -697,9 +697,9 @@ const CreditsWidget = ({ credits, onUpgrade, user, onShowReferralPromo }) => {
       setTimeout(() => setRefCopied(false), 2000);
     });
   };
-  const shareWA    = () => window.open(`https://wa.me/?text=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank');
-  const shareX     = () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I use ScribeSnap to get YouTube transcripts instantly 🎬 Try it free — use my invite link and we both get bonus credits 👉 ${refLink}`)}`, '_blank');
-  const shareEmail = () => window.open(`mailto:?subject=${encodeURIComponent('Try ScribeSnap — free YouTube transcript tool')}&body=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank');
+  const shareWA    = () => window.open(`https://wa.me/?text=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank', 'noopener,noreferrer');
+  const shareX     = () => window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I use ScribeSnap to get YouTube transcripts instantly 🎬 Try it free — use my invite link and we both get bonus credits 👉 ${refLink}`)}`, '_blank', 'noopener,noreferrer');
+  const shareEmail = () => window.open(`mailto:?subject=${encodeURIComponent('Try ScribeSnap — free YouTube transcript tool')}&body=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank', 'noopener,noreferrer');
   const used = credits?.used ?? 0;
   const resetAt = credits?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS);
   const tierMax = credits?.tierMax || (credits?.userId ? CREDITS_MAX : CREDITS_FREE);
@@ -1509,18 +1509,18 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   const onShareReferralWhatsApp = () => {
     window.open(
       `https://wa.me/?text=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`,
-      '_blank'
+      '_blank', 'noopener,noreferrer'
     );
   };
   const onShareReferralX = () => {
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent('I use ScribeSnap to get YouTube transcripts instantly 🎬 Try it free — use my invite link and we both get +3 bonus credits 👉')}&url=${encodeURIComponent(refLink)}`,
-      '_blank'
+      '_blank', 'noopener,noreferrer'
     );
   };
   const onShareReferralInstagram = () => {
     navigator.clipboard.writeText(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`);
-    window.open('https://www.instagram.com/', '_blank');
+    window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
   };
   const onShareReferralEmail = () => {
     window.location.href = `mailto:?subject=${encodeURIComponent('Try ScribeSnap — free YouTube transcript tool')}&body=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`;
@@ -7806,17 +7806,7 @@ const App = () => {
             </BlurFade>
             {/* Testimonials */}
             <BlurFade delay={0.15} yOffset={20}>
-            <div style={{
-              position: 'relative',
-              backgroundImage: `linear-gradient(rgba(60,80,160,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(60,80,160,0.045) 1px, transparent 1px)`,
-              backgroundSize: '40px 40px',
-            }}>
-            <div aria-hidden="true" style={{
-              position: 'absolute', top: 0, left: 0, right: 0, height: 100,
-              background: `linear-gradient(to bottom, ${P.paper}, transparent)`,
-              pointerEvents: 'none', zIndex: 1,
-            }} />
-            <div style={{ position: 'relative', zIndex: 2, maxWidth: 820, margin: '0 auto', padding: isMobile ? '64px 16px 48px' : '80px 24px 64px' }}>
+            <div style={{ maxWidth: 820, margin: '0 auto', padding: isMobile ? '0 16px 48px' : '0 24px 64px' }}>
               <div style={{ textAlign: 'center', marginBottom: 28 }}>
                 <div style={{
                   display: 'inline-block',
@@ -7865,7 +7855,6 @@ const App = () => {
                   </div>
                 </div>
               </div>
-            </div>
             </div>
             </BlurFade>
 

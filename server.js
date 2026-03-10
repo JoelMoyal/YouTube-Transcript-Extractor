@@ -248,6 +248,52 @@ const withTimeout = (promise, ms) => Promise.race([
 ]);
 
 const execFileAsync = promisify(execFile);
+
+// ── Production flag ───────────────────────────────────────────────────────────
+const isProd = !!(process.env.RAILWAY_ENVIRONMENT || process.env.NODE_ENV === 'production');
+const safeErr = (err) => isProd ? undefined : (err?.message || String(err));
+
+// ── Simple in-memory rate limiter (no extra dep) ──────────────────────────────
+const _rlMap = new Map();
+function makeRateLimit({ windowMs, max }) {
+  return function rateLimitMw(req, res, next) {
+    const key = (req.ip || req.socket?.remoteAddress || 'unknown');
+    const now = Date.now();
+    let e = _rlMap.get(key);
+    if (!e || now > e.resetAt) e = { count: 0, resetAt: now + windowMs };
+    e.count++;
+    _rlMap.set(key, e);
+    if (e.count > max) {
+      res.setHeader('Retry-After', Math.ceil((e.resetAt - now) / 1000));
+      return res.status(429).json({ error: 'Too many requests. Please slow down and try again shortly.' });
+    }
+    next();
+  };
+}
+const aiRateLimit       = makeRateLimit({ windowMs: 60_000, max: 20 });  // 20 AI calls/min per IP
+const uploadRateLimit   = makeRateLimit({ windowMs: 60_000, max: 3  });  // 3 uploads/min per IP
+const transcriptRateLimit = makeRateLimit({ windowMs: 60_000, max: 30 }); // 30 fetches/min per IP
+
+// ── SSRF guard: only allow safe external http/https URLs ──────────────────────
+function isSafeExternalUrl(rawUrl) {
+  let parsed;
+  try { parsed = new URL(rawUrl); } catch { return false; }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+  const host = parsed.hostname.toLowerCase();
+  if (host === 'localhost' || host === '::1') return false;
+  const ipv4 = host.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (ipv4) {
+    const [a, b] = ipv4.slice(1).map(Number);
+    if (a === 10) return false;                         // 10.0.0.0/8
+    if (a === 127) return false;                        // 127.0.0.0/8
+    if (a === 169 && b === 254) return false;           // 169.254.0.0/16 (link-local + AWS metadata)
+    if (a === 172 && b >= 16 && b <= 31) return false;  // 172.16.0.0/12
+    if (a === 192 && b === 168) return false;           // 192.168.0.0/16
+    if (a === 0) return false;                          // 0.0.0.0/8
+  }
+  return true;
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -287,6 +333,24 @@ app.use((req, res, next) => {
   if (req.hostname && req.hostname.startsWith('www.')) {
     const nonWww = req.hostname.slice(4);
     return res.redirect(301, `${req.protocol}://${nonWww}${req.originalUrl}`);
+  }
+  next();
+});
+
+// ── Security headers ──────────────────────────────────────────────────────────
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  next();
+});
+
+// ── Redirect .html → clean canonical URL (must run before static middleware) ──
+app.use((req, res, next) => {
+  if (req.path.endsWith('.html')) {
+    const clean = req.path.slice(0, -5) || '/';
+    return res.redirect(301, clean);
   }
   next();
 });
@@ -450,7 +514,7 @@ async function whisperTranscribe(audioFile, safeLang) {
 }
 
 // ── SSE transcript endpoint ───────────────────────────────────────────────────
-app.get('/api/transcript', async (req, res) => {
+app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
   const { videoId, url, platform = 'youtube' } = req.query; // lang param ignored while translation is on ice
   console.log(`[transcript] platform=${platform} videoId=${videoId || url} proxy=${!!process.env.WEBSHARE_PROXY_URL}`);
   // LANGUAGE TRANSLATION ON ICE — force English until the feature is stable
@@ -466,6 +530,7 @@ app.get('/api/transcript', async (req, res) => {
     if (!vimeoMatch) return res.status(400).json({ error: 'Invalid Vimeo URL' });
   } else if (isGeneric) {
     if (!url) return res.status(400).json({ error: 'Missing url parameter' });
+    if (!isSafeExternalUrl(url)) return res.status(400).json({ error: 'Invalid or disallowed URL' });
   } else {
     if (!videoId) return res.status(400).json({ error: 'Missing videoId parameter' });
     if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId))
@@ -827,7 +892,7 @@ app.get('/api/transcript', async (req, res) => {
 });
 
 // ── AI summary endpoint ───────────────────────────────────────────────────────
-app.post('/api/summarize', async (req, res) => {
+app.post('/api/summarize', aiRateLimit, async (req, res) => {
   const { transcript, platform } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -842,12 +907,12 @@ app.post('/api/summarize', async (req, res) => {
     );
     res.json({ summary: text });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to summarize', details: err.message });
+    res.status(500).json({ error: 'Failed to summarize', details: safeErr(err) });
   }
 });
 
 // ── Chapters endpoint ─────────────────────────────────────────────────────────
-app.post('/api/timeline', async (req, res) => {
+app.post('/api/timeline', aiRateLimit, async (req, res) => {
   const { transcript, segments } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -867,12 +932,12 @@ app.post('/api/timeline', async (req, res) => {
     const sections = match ? JSON.parse(match[0]) : [];
     res.json({ sections });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to generate timeline', details: err.message });
+    res.status(500).json({ error: 'Failed to generate timeline', details: safeErr(err) });
   }
 });
 
 // ── Flashcards endpoint ───────────────────────────────────────────────────────
-app.post('/api/flashcards', async (req, res) => {
+app.post('/api/flashcards', aiRateLimit, async (req, res) => {
   const { transcript, existingQuestions } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -905,12 +970,12 @@ app.post('/api/flashcards', async (req, res) => {
     const flashcards = match ? JSON.parse(match[0]).filter(c => c && c.question && c.answer) : [];
     res.json({ flashcards });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to generate flashcards', details: err.message });
+    res.status(500).json({ error: 'Failed to generate flashcards', details: safeErr(err) });
   }
 });
 
 // ── Study guide endpoint ──────────────────────────────────────────────────────
-app.post('/api/study-guide', async (req, res) => {
+app.post('/api/study-guide', aiRateLimit, async (req, res) => {
   const { transcript } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -928,12 +993,12 @@ app.post('/api/study-guide', async (req, res) => {
     const studyGuide = JSON.parse(match[0]);
     res.json(studyGuide);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to generate study guide', details: err.message });
+    res.status(500).json({ error: 'Failed to generate study guide', details: safeErr(err) });
   }
 });
 
 // ── Academic Insights endpoint ────────────────────────────────────────────────
-app.post('/api/academic-insights', async (req, res) => {
+app.post('/api/academic-insights', aiRateLimit, async (req, res) => {
   const { transcript } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -951,12 +1016,12 @@ app.post('/api/academic-insights', async (req, res) => {
     const insights = JSON.parse(match[0]);
     res.json(insights);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to generate academic insights', details: err.message });
+    res.status(500).json({ error: 'Failed to generate academic insights', details: safeErr(err) });
   }
 });
 
 // ── Discover endpoint ─────────────────────────────────────────────────────────
-app.post('/api/discover', async (req, res) => {
+app.post('/api/discover', aiRateLimit, async (req, res) => {
   const { transcript, videoId, title } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -1056,7 +1121,7 @@ Transcript:\n${transcript.slice(0, 6000)}`,
 
     res.json({ keywords, videos, papers });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to discover related content', details: err.message });
+    res.status(500).json({ error: 'Failed to discover related content', details: safeErr(err) });
   }
 });
 
@@ -1106,7 +1171,7 @@ app.post('/api/ask', async (req, res) => {
     const text = await aiChat(messages);
     res.json({ answer: text });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to answer', details: err.message });
+    res.status(500).json({ error: 'Failed to answer', details: safeErr(err) });
   }
 });
 
@@ -1240,7 +1305,7 @@ app.post('/api/restore-account', requireAuth, async (req, res) => {
 });
 
 // ── Local file upload transcription ───────────────────────────────────────────
-app.post('/api/transcript/upload', (req, res) => {
+app.post('/api/transcript/upload', uploadRateLimit, (req, res) => {
   uploadMiddleware(req, res, async (multerErr) => {
     // SSE headers must be sent before any write
     res.setHeader('Content-Type', 'text/event-stream');
@@ -1290,7 +1355,7 @@ app.post('/api/transcript/upload', (req, res) => {
     } catch (err) {
       await fsPromises.unlink(uploadedFile).catch(() => {});
       if (compressedFile) await fsPromises.unlink(compressedFile).catch(() => {});
-      send('transcript_error', { error: 'Transcription failed', details: err.message });
+      send('transcript_error', { error: 'Transcription failed', details: safeErr(err) });
       res.end();
     }
   });
