@@ -473,6 +473,10 @@ const proxyArgs = process.env.WEBSHARE_PROXY_URL ? ['--proxy', process.env.WEBSH
 if (process.env.WEBSHARE_PROXY_URL) console.log('Webshare proxy loaded');
 else console.log('No proxy configured — running without proxy');
 
+// Faster AI fallback downloads: prefer smaller audio when we must transcribe.
+const ytdlpAudioQuality = process.env.YTDLP_AUDIO_QUALITY || '9'; // 0 best, 9 smallest
+const ytdlpAudioFormat = process.env.YTDLP_AUDIO_FORMAT || 'bestaudio[abr<=64]/bestaudio';
+
 app.disable('x-powered-by');
 app.set('trust proxy', 1); // Trust Railway/Cloudflare's X-Forwarded-For so req.ip is the real client IP
 app.use(compression());
@@ -773,7 +777,8 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 
       try {
         await execFileAsync('yt-dlp', [
-          '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '5',
+          '--extract-audio', '--audio-format', 'mp3', '--audio-quality', ytdlpAudioQuality,
+          '--format', ytdlpAudioFormat,
           ...jsRuntimeArgs, ...proxyArgs,
           '-o', audioBase,
           vimeoUrl,
@@ -862,7 +867,8 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 
       try {
         await execFileAsync('yt-dlp', [
-          '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '5',
+          '--extract-audio', '--audio-format', 'mp3', '--audio-quality', ytdlpAudioQuality,
+          '--format', ytdlpAudioFormat,
           ...jsRuntimeArgs, ...proxyArgs,
           '-o', audioBase,
           url,
@@ -994,7 +1000,8 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
     send('progress', { stage: 'audio', message: 'No captions found — downloading audio for AI transcription…', percent: 30 });
     const audioBase = path.join(tmpDir, `${videoId}_audio`);
     await execFileAsync('yt-dlp', [
-      '--extract-audio', '--audio-format', 'mp3', '--audio-quality', '5',
+      '--extract-audio', '--audio-format', 'mp3', '--audio-quality', ytdlpAudioQuality,
+      '--format', ytdlpAudioFormat,
       ...jsRuntimeArgs, ...proxyArgs, ...cookieArgs,
       '-o', audioBase,
       `https://www.youtube.com/watch?v=${videoId}`

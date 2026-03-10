@@ -5244,20 +5244,19 @@ const App = () => {
           if (event === 'done') {
             streamSettled = true;
             try {
-              const meta = await fetchVideoMeta(platform, videoCanonical);
-              const title = meta.title || data.title || videoId;
               const platformLabel = platform.charAt(0).toUpperCase() + platform.slice(1);
-              const channel = meta.channel || data.channel || platformLabel;
-              const thumb = data.thumbnail || meta.thumbnail || (platform === 'youtube' ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
+              const fallbackTitle = data.title || videoId;
+              const fallbackChannel = data.channel || platformLabel;
+              const fallbackThumb = data.thumbnail || (platform === 'youtube' ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
 
               setTranscript(data.transcript);
               setSegments(data.segments || []);
               setIsTranslated(false); // never show banner on initial load
               setTranscriptSource(data.source || '');
               setCurrentVideoId(videoId);
-              setCurrentThumbnail(thumb);
-              setCurrentTitle(title);
-              setCurrentChannel(channel);
+              setCurrentThumbnail(fallbackThumb);
+              setCurrentTitle(fallbackTitle);
+              setCurrentChannel(fallbackChannel);
               finishSmoothLoading(true);
               setLoadingPercent(100);
               // Prefer server-authoritative credit count; fall back to local increment.
@@ -5270,8 +5269,19 @@ const App = () => {
               saveToHistory({
                 id: videoId, platform, transcript: data.transcript, segments: data.segments || [],
                 source: data.source || '', date: new Date().toISOString(),
-                thumbnail: thumb, title, channel, url: videoCanonical,
+                thumbnail: fallbackThumb, title: fallbackTitle, channel: fallbackChannel, url: videoCanonical,
               });
+
+              // Metadata can be slow; load it in the background so transcript renders immediately.
+              fetchVideoMeta(platform, videoCanonical).then((meta) => {
+                if (!meta) return;
+                const nextTitle = meta.title || fallbackTitle;
+                const nextChannel = meta.channel || fallbackChannel;
+                const nextThumb = meta.thumbnail || fallbackThumb;
+                setCurrentTitle(nextTitle);
+                setCurrentChannel(nextChannel);
+                setCurrentThumbnail(nextThumb);
+              }).catch(() => {});
             } catch {
               setError(funnyTranscriptError('failed to process'));
             } finally {
