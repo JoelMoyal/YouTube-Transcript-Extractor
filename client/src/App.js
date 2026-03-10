@@ -6018,7 +6018,8 @@ const App = () => {
 
   const showTopNavbar = !isMobile || !transcript;
   const topChromeOffset = showTopNavbar ? ((showBookmarkBanner && !isMobile) ? 97 : 56) : 0;
-  const hasMobileBottomNav = isMobile && transcript && !hideMobileNavForFooter && !isMobileKeyboardOpen;
+  const mobileInsightsPanels = new Set(['insights', 'summary', 'flashcards', 'study-guide', 'academic']);
+  const hasMobileBottomNav = isMobile && transcript && !hideMobileNavForFooter && !isMobileKeyboardOpen && mobilePanel !== 'ai';
   const mobileBottomNavHeight = hasMobileBottomNav ? (MOBILE_BOTTOM_NAV_HEIGHT + MOBILE_BOTTOM_NAV_LIFT) : 0;
   const mobileBottomNavInsetExpr = hasMobileBottomNav
     ? `${mobileBottomNavHeight}px + env(safe-area-inset-bottom, 0px)`
@@ -9548,28 +9549,64 @@ const App = () => {
               {(isDesktop || sidebarTab === 'ai') && <div ref={qaRef} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
 
                 {/* Header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '13px 18px 11px', borderBottom: `1px solid ${P.border}` }}>
-                  <div style={{
-                    width: 32, height: 32, borderRadius: 9, flexShrink: 0,
-                    background: 'linear-gradient(135deg, rgba(60,140,255,0.13) 0%, rgba(60,140,255,0.05) 100%)',
-                    border: `1.5px solid rgba(60,140,255,0.2)`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <img src="/scribesnap_icon_wave.svg" alt="ScribeSnap AI" style={{ width: 19, height: 19 }} />
+                <div style={{
+                  position: isMobile ? 'sticky' : 'static',
+                  top: 0,
+                  zIndex: isMobile ? 2 : undefined,
+                  background: '#fff',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: isMobile ? 8 : 0,
+                  padding: isMobile ? '13px 14px 11px' : '13px 18px 11px',
+                  borderBottom: `1px solid ${P.border}`,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 9, flexShrink: 0,
+                      background: 'linear-gradient(135deg, rgba(60,140,255,0.13) 0%, rgba(60,140,255,0.05) 100%)',
+                      border: `1.5px solid rgba(60,140,255,0.2)`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <img src="/scribesnap_icon_wave.svg" alt="ScribeSnap AI" style={{ width: 19, height: 19 }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 13.5, fontWeight: 700, color: P.ink, lineHeight: 1.25 }}>ScribeSnap AI</div>
+                      <div style={{ fontSize: 10.5, color: P.muted, lineHeight: 1 }}>Ask anything about this video</div>
+                    </div>
+                    {qaMessages.length > 0 && (
+                      <button onClick={() => setQaMessages([])} style={{
+                        marginLeft: 'auto', border: `1px solid ${P.border}`, background: 'none',
+                        cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600,
+                        padding: '3px 9px', borderRadius: 6, transition: 'all 0.15s',
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.ink; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}
+                      >Clear</button>
+                    )}
                   </div>
-                  <div>
-                    <div style={{ fontSize: 13.5, fontWeight: 700, color: P.ink, lineHeight: 1.25 }}>ScribeSnap AI</div>
-                    <div style={{ fontSize: 10.5, color: P.muted, lineHeight: 1 }}>Ask anything about this video</div>
-                  </div>
-                  {qaMessages.length > 0 && (
-                    <button onClick={() => setQaMessages([])} style={{
-                      marginLeft: 'auto', border: `1px solid ${P.border}`, background: 'none',
-                      cursor: 'pointer', color: P.muted, fontSize: 11, fontWeight: 600,
-                      padding: '3px 9px', borderRadius: 6, transition: 'all 0.15s',
-                    }}
-                      onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; e.currentTarget.style.borderColor = P.ink; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}
-                    >Clear</button>
+
+                  {isMobile && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 6 }}>
+                      {[
+                        { key: 'transcript', label: 'Transcript', onClick: () => setMobilePanel('transcript'), active: mobilePanel === 'transcript' || mobilePanel === 'discover' },
+                        { key: 'ai', label: 'AI Chat', onClick: () => { setSidebarTab('ai'); setMobilePanel('ai'); }, active: mobilePanel === 'ai' },
+                        { key: 'insights', label: 'Insights', onClick: () => { setSidebarTab('insights'); setMobilePanel('insights'); }, active: mobileInsightsPanels.has(mobilePanel) },
+                      ].map(item => (
+                        <button key={item.key} onClick={item.onClick} style={{
+                          border: `1px solid ${item.active ? 'rgba(60,140,255,0.35)' : P.border}`,
+                          borderRadius: 9,
+                          background: item.active ? 'rgba(60,140,255,0.1)' : '#fff',
+                          color: item.active ? P.accent : P.muted,
+                          fontSize: 11.5,
+                          fontWeight: item.active ? 700 : 600,
+                          padding: '7px 8px',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s',
+                        }}>
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
 
@@ -10140,7 +10177,6 @@ const App = () => {
               { key: 'new-search', label: 'New Search', icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> },
             ];
             const hasDynamic = mobileTabs.length > 4;
-            const insightPanels = new Set(['insights', 'summary', 'flashcards', 'study-guide', 'academic']);
             return (
               <div ref={mobileNavRef} className="no-scrollbar" style={{
                 position: 'fixed', bottom: MOBILE_BOTTOM_NAV_LIFT, left: 0, right: 0, zIndex: 100,
@@ -10149,7 +10185,7 @@ const App = () => {
                 borderTop: isMobileKeyboardOpen ? '1px solid transparent' : '1px solid rgba(29,29,31,0.12)',
                 borderRadius: '22px 22px 0 0',
                 boxShadow: isMobileKeyboardOpen ? 'none' : '0 -6px 18px rgba(29,29,31,0.08)',
-                display: showFlashcardModal || studyGuideFull || academicInsightsFull || hideMobileNavForFooter || isMobileKeyboardOpen ? 'none' : 'flex',
+                display: showFlashcardModal || studyGuideFull || academicInsightsFull || hideMobileNavForFooter || isMobileKeyboardOpen || mobilePanel === 'ai' ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: hasDynamic ? 'flex-start' : 'center',
                 overflowX: hasDynamic ? 'auto' : 'visible',
@@ -10160,7 +10196,7 @@ const App = () => {
               }}>
                 {mobileTabs.map(tab => {
                   const isNewSearch = tab.key === 'new-search';
-                  const isAct = !isNewSearch && (mobilePanel === tab.key || (tab.key === 'insights' && insightPanels.has(mobilePanel)));
+                  const isAct = !isNewSearch && (mobilePanel === tab.key || (tab.key === 'insights' && mobileInsightsPanels.has(mobilePanel)));
                   return (
                     <button key={tab.key} data-nav-key={tab.key} title={tab.label} aria-label={tab.label} onClick={() => {
                       if (isNewSearch) {
