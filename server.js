@@ -599,7 +599,10 @@ function toWhisperLang(lang) {
 }
 
 function classifyYtdlpError(err) {
+  if (err?.code === 'ENOENT') return 'Transcript extraction tool (yt-dlp) is not installed on this server.';
   const msg = (err?.stderr || err?.message || '').toLowerCase();
+  if (msg.includes('enoent') || msg.includes('not found') && msg.includes('yt-dlp'))
+    return 'Transcript extraction tool (yt-dlp) is not installed on this server.';
   if (msg.includes('429') || msg.includes('too many requests'))
     return 'YouTube is rate-limiting this IP. Please wait a minute and try again.';
   if (msg.includes('private') || msg.includes('members only'))
