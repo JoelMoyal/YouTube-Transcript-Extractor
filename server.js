@@ -12,6 +12,10 @@ const { Supadata } = require('@supadata/js');
 const { createClient } = require('@supabase/supabase-js');
 const multer = require('multer');
 
+// Load local .env values for `npm start`/local development.
+// In production, platform environment variables still take precedence.
+require('dotenv').config();
+
 const hashEmail = (email) => crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
 
 // ── Multer config for local file uploads ──────────────────────────────────────
@@ -375,8 +379,25 @@ function makeRateLimit({ windowMs, max }) {
     e.count++;
     _rlMap.set(key, e);
     if (e.count > max) {
-      res.setHeader('Retry-After', Math.ceil((e.resetAt - now) / 1000));
-      return res.status(429).json({ error: 'Too many requests. Please slow down and try again shortly.' });
+      const retryAfter = Math.ceil((e.resetAt - now) / 1000);
+      const body = { error: 'Too many requests. Please slow down and try again shortly.' };
+      res.setHeader('Retry-After', retryAfter);
+
+      // EventSource clients cannot read non-2xx JSON bodies. Return an SSE error
+      // event so the UI can show the real reason instead of a generic connection error.
+      const accept = String(req.headers.accept || '').toLowerCase();
+      if (accept.includes('text/event-stream')) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no');
+        if (typeof res.flushHeaders === 'function') res.flushHeaders();
+        res.write(`event: transcript_error\ndata: ${JSON.stringify(body)}\n\n`);
+        res.end();
+        return;
+      }
+
+      return res.status(429).json(body);
     }
     next();
   };
@@ -668,16 +689,18 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
       return res.status(400).json({ error: 'Invalid videoId format' });
   }
 
-  // ── Server-side credit check (must run before flushHeaders) ─────────────────
-  const { ok: creditOk, creditInfo } = await checkAndDeductCredit(req, res);
-  if (!creditOk) return; // 402 already sent by checkAndDeductCredit
-
   // Set up SSE
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.setHeader('X-Accel-Buffering', 'no'); // Disable Nginx/Railway proxy buffering so events stream in real-time
   res.flushHeaders();
+
+  // ── Server-side credit check ────────────────────────────────────────────────
+  // Run this after SSE headers so "out of credits" can be emitted as an SSE
+  // event (instead of an opaque EventSource network error on the client).
+  const { ok: creditOk, creditInfo } = await checkAndDeductCredit(req, res);
+  if (!creditOk) return; // checkAndDeductCredit already wrote out_of_credits + ended
 
   // Inject updated credit counts into every 'done' event so the client can
   // sync without an extra round-trip.
