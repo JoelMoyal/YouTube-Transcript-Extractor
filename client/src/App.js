@@ -7271,7 +7271,6 @@ const App = () => {
             {/* Features */}
             {/* Capability cards */}
             <div style={{
-              background: '#FFFFFF',
               backgroundImage: `linear-gradient(rgba(60,80,160,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(60,80,160,0.045) 1px, transparent 1px)`,
               backgroundSize: '40px 40px',
             }}><div style={{
