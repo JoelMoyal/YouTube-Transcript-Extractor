@@ -17,6 +17,66 @@ const multer = require('multer');
 require('dotenv').config();
 
 const hashEmail = (email) => crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
+const ANON_CREDITS_MAX = Math.max(0, Number.parseInt(process.env.ANON_CREDITS_MAX || '2', 10) || 2);
+const ANON_CREDITS_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
+const _anonCreditsMap = new Map();
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const getClientKey = (req) => String(req.ip || req.socket?.remoteAddress || 'unknown');
+
+function sendSseEventAndClose(res, event, body) {
+  res.write(`event: ${event}\ndata: ${JSON.stringify(body)}\n\n`);
+  res.end();
+}
+
+function denyCreditRequest(req, res, { status, body, sseEvent = 'transcript_error', user = null }) {
+  if (res.headersSent) {
+    sendSseEventAndClose(res, sseEvent, body);
+  } else {
+    res.status(status).json(body);
+  }
+  return { ok: false, user, creditInfo: null };
+}
+
+function consumeAnonCredit(req, res) {
+  if (ANON_CREDITS_MAX <= 0) {
+    return denyCreditRequest(req, res, {
+      status: 402,
+      body: { error: 'Guest credits are currently unavailable. Please sign in.' },
+      sseEvent: 'out_of_credits',
+    });
+  }
+
+  const key = getClientKey(req);
+  const now = Date.now();
+  let e = _anonCreditsMap.get(key);
+  if (!e || now > e.resetAt) e = { used: 0, resetAt: now + ANON_CREDITS_PERIOD_MS };
+
+  if (e.used >= ANON_CREDITS_MAX) {
+    return denyCreditRequest(req, res, {
+      status: 402,
+      body: {
+        error: 'Out of credits',
+        used: e.used,
+        tier_max: ANON_CREDITS_MAX,
+        reset_at: new Date(e.resetAt).toISOString(),
+      },
+      sseEvent: 'out_of_credits',
+    });
+  }
+
+  e.used += 1;
+  _anonCreditsMap.set(key, e);
+  return {
+    ok: true,
+    user: null,
+    creditInfo: {
+      used: e.used,
+      tier_max: ANON_CREDITS_MAX,
+      reset_at: new Date(e.resetAt).toISOString(),
+    },
+  };
+}
 
 // ── Multer config for local file uploads ──────────────────────────────────────
 const uploadStorage = multer.diskStorage({
@@ -106,36 +166,42 @@ async function requireAuth(req, res, next) {
 // param (needed for EventSource / SSE which cannot send custom headers).
 // For authenticated users: checks and atomically deducts 1 credit from the
 // user_credits table (see supabase/user_credits.sql).
-// For anonymous / unauthenticated users: passes through — the rate limiter is
-// the protection for those requests.
+// For anonymous / unauthenticated users: enforces server-side free credits per
+// client IP (default 2 per 7 days, configurable via ANON_CREDITS_MAX).
 //
 // Returns: { ok, user, creditInfo }
 //   ok         — true if the request may proceed
 //   user       — Supabase user object (null for anon)
-//   creditInfo — { used, tierMax, resetAt } after deduction (null for anon)
-//   response already sent if ok === false (402)
+//   creditInfo — { used, tier_max, reset_at } after deduction
+//   response already sent if ok === false (402/503)
 async function checkAndDeductCredit(req, res) {
   try {
-    // No Supabase admin client → skip (dev environment without credentials)
-    if (!supabaseAdmin) return { ok: true, user: null, creditInfo: null };
-
     // Read token from Authorization header OR ?_t= query param (for SSE)
     const authHeader = req.headers.authorization || '';
+    const tokenFromQuery = typeof req.query?._t === 'string' ? req.query._t : null;
     const token = authHeader.startsWith('Bearer ')
       ? authHeader.slice(7)
-      : (req.query._t || null);
+      : tokenFromQuery;
 
-    // Anonymous request — pass through, rate limiter handles protection
-    if (!token) return { ok: true, user: null, creditInfo: null };
+    // Anonymous request — enforce guest credits server-side
+    if (!token) return consumeAnonCredit(req, res);
+
+    // No Supabase admin client in a token-authenticated request.
+    // Fall back to anonymous quota instead of allowing unlimited usage.
+    if (!supabaseAdmin) return consumeAnonCredit(req, res);
 
     // Validate JWT
     const { data: { user }, error: authErr } = await supabaseAdmin.auth.getUser(token);
-    if (authErr || !user) return { ok: true, user: null, creditInfo: null }; // treat invalid token as anon
+    if (authErr || !user) {
+      console.warn('[credits] invalid token; applying anonymous quota:', authErr?.message || 'no user');
+      return consumeAnonCredit(req, res);
+    }
 
     const referralBonus = user.user_metadata?.referral_bonus || 0;
     const tierMax = 20 + referralBonus;
     const now = new Date();
-    const resetAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const nowIso = now.toISOString();
+    const resetAt = new Date(now.getTime() + ANON_CREDITS_PERIOD_MS).toISOString();
 
     // Ensure a credits row exists for this user (insert only if missing)
     await supabaseAdmin
@@ -145,71 +211,102 @@ async function checkAndDeductCredit(req, res) {
       .maybeSingle() // ignore conflict (row already exists)
       .catch(() => {}); // never block on DB error
 
-    // Read current credits row
-    const { data: row, error: rowErr } = await supabaseAdmin
-      .from('user_credits')
-      .select('used, reset_at, tier_max')
-      .eq('user_id', user.id)
-      .single();
-
-    if (rowErr || !row) {
-      // DB error — fail open (don't block the user)
-      console.error('[credits] read error:', rowErr?.message);
-      return { ok: true, user, creditInfo: null };
-    }
-
-    // Reset window if expired
-    let currentUsed = row.used;
-    if (new Date(row.reset_at) < now) {
-      await supabaseAdmin
+    // Retry loop handles concurrent requests racing on the same user.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const { data: row, error: rowErr } = await supabaseAdmin
         .from('user_credits')
-        .update({ used: 0, reset_at: resetAt, updated_at: now.toISOString() })
+        .select('used, reset_at, tier_max')
         .eq('user_id', user.id)
-        .catch(() => {});
-      currentUsed = 0;
-    }
+        .single();
 
-    const effectiveTierMax = Math.max(row.tier_max, tierMax);
-
-    // Out of credits — return 402
-    if (currentUsed >= effectiveTierMax) {
-      const body = { error: 'Out of credits', used: currentUsed, tier_max: effectiveTierMax, reset_at: row.reset_at };
-      // SSE connections: headers already sent after flushHeaders(), use close event instead
-      if (res.headersSent) {
-        res.write(`event: out_of_credits\ndata: ${JSON.stringify(body)}\n\n`);
-        res.end();
-      } else {
-        res.status(402).json(body);
+      if (rowErr || !row) {
+        console.error('[credits] read error:', rowErr?.message);
+        return denyCreditRequest(req, res, {
+          status: 503,
+          body: { error: 'Credit check unavailable. Please try again.' },
+          user,
+        });
       }
-      return { ok: false, user, creditInfo: null };
+
+      let currentUsed = row.used;
+      let currentResetAt = row.reset_at;
+      const effectiveTierMax = Math.max(row.tier_max || 0, tierMax);
+
+      if (new Date(row.reset_at) < now) {
+        // Best-effort reset (guarded by reset_at < now so only stale windows are reset).
+        await supabaseAdmin
+          .from('user_credits')
+          .update({ used: 0, reset_at: resetAt, tier_max: effectiveTierMax, updated_at: nowIso })
+          .eq('user_id', user.id)
+          .lt('reset_at', nowIso)
+          .catch(() => {});
+        currentUsed = 0;
+        currentResetAt = resetAt;
+      }
+
+      if (currentUsed >= effectiveTierMax) {
+        return denyCreditRequest(req, res, {
+          status: 402,
+          body: { error: 'Out of credits', used: currentUsed, tier_max: effectiveTierMax, reset_at: currentResetAt },
+          sseEvent: 'out_of_credits',
+          user,
+        });
+      }
+
+      const { data: updated, error: updateErr } = await supabaseAdmin
+        .from('user_credits')
+        .update({ used: currentUsed + 1, tier_max: effectiveTierMax, updated_at: nowIso })
+        .eq('user_id', user.id)
+        .eq('used', currentUsed)
+        .select('used, tier_max, reset_at')
+        .maybeSingle();
+
+      if (updateErr) {
+        console.error(`[credits] deduct error (attempt ${attempt + 1}/3):`, updateErr.message);
+        if (attempt < 2) {
+          await delay(20 + attempt * 20);
+          continue;
+        }
+        return denyCreditRequest(req, res, {
+          status: 503,
+          body: { error: 'Credit update unavailable. Please retry.' },
+          user,
+        });
+      }
+
+      // No row updated means a concurrent request won the race; retry with fresh row.
+      if (!updated) {
+        if (attempt < 2) {
+          await delay(20 + attempt * 20);
+          continue;
+        }
+        return denyCreditRequest(req, res, {
+          status: 503,
+          body: { error: 'Too many concurrent requests. Please retry.' },
+          user,
+        });
+      }
+
+      const creditInfo = {
+        used: updated.used,
+        tier_max: updated.tier_max || effectiveTierMax,
+        reset_at: updated.reset_at || currentResetAt,
+      };
+      console.log(`[credits] deducted 1 credit for ${user.id}: ${creditInfo.used}/${creditInfo.tier_max}`);
+      return { ok: true, user, creditInfo };
     }
 
-    // Deduct 1 credit (optimistic: only updates if `used` hasn't changed since we read it)
-    const { data: updated, error: updateErr } = await supabaseAdmin
-      .from('user_credits')
-      .update({ used: currentUsed + 1, tier_max: effectiveTierMax, updated_at: now.toISOString() })
-      .eq('user_id', user.id)
-      .eq('used', currentUsed) // prevents double-spend in concurrent requests
-      .select()
-      .maybeSingle();
-
-    if (updateErr) {
-      console.error('[credits] deduct error:', updateErr.message);
-      return { ok: true, user, creditInfo: null }; // fail open
-    }
-
-    const creditInfo = {
-      used: updated?.used ?? currentUsed + 1,
-      tier_max: effectiveTierMax,
-      reset_at: row.reset_at,
-    };
-
-    console.log(`[credits] deducted 1 credit for ${user.id}: ${creditInfo.used}/${creditInfo.tier_max}`);
-    return { ok: true, user, creditInfo };
+    return denyCreditRequest(req, res, {
+      status: 503,
+      body: { error: 'Credit check unavailable. Please try again.' },
+      user,
+    });
   } catch (err) {
-    // Never allow credit plumbing failures to break transcript streaming.
-    console.error('[credits] unexpected error (fail-open):', err?.message || err);
-    return { ok: true, user: null, creditInfo: null };
+    console.error('[credits] unexpected error:', err?.message || err);
+    return denyCreditRequest(req, res, {
+      status: 503,
+      body: { error: 'Credit check failed. Please retry.' },
+    });
   }
 }
 
@@ -375,10 +472,11 @@ const _rlMap = new Map();
 setInterval(() => {
   const now = Date.now();
   for (const [key, e] of _rlMap) if (now > e.resetAt) _rlMap.delete(key);
+  for (const [key, e] of _anonCreditsMap) if (now > e.resetAt) _anonCreditsMap.delete(key);
 }, 60_000).unref(); // .unref() so this timer doesn't keep the process alive alone
-function makeRateLimit({ windowMs, max }) {
+function makeRateLimit({ windowMs, max, scope }) {
   return function rateLimitMw(req, res, next) {
-    const key = (req.ip || req.socket?.remoteAddress || 'unknown');
+    const key = `${scope}:${getClientKey(req)}`;
     const now = Date.now();
     let e = _rlMap.get(key);
     if (!e || now > e.resetAt) e = { count: 0, resetAt: now + windowMs };
@@ -408,9 +506,9 @@ function makeRateLimit({ windowMs, max }) {
     next();
   };
 }
-const aiRateLimit       = makeRateLimit({ windowMs: 60_000, max: 20 });  // 20 AI calls/min per IP
-const uploadRateLimit   = makeRateLimit({ windowMs: 60_000, max: 3  });  // 3 uploads/min per IP
-const transcriptRateLimit = makeRateLimit({ windowMs: 60_000, max: 30 }); // 30 fetches/min per IP
+const aiRateLimit         = makeRateLimit({ scope: 'ai',         windowMs: 60_000, max: 20 }); // 20 AI calls/min per IP
+const uploadRateLimit     = makeRateLimit({ scope: 'upload',     windowMs: 60_000, max: 3  }); // 3 uploads/min per IP
+const transcriptRateLimit = makeRateLimit({ scope: 'transcript', windowMs: 60_000, max: 30 }); // 30 fetches/min per IP
 
 // ── SSRF guard: only allow safe external http/https URLs ──────────────────────
 function isSafeExternalUrl(rawUrl) {
