@@ -671,6 +671,20 @@ const CREDITS_FREE = 2;   // not signed in
 const CREDITS_MAX  = 20;  // signed in
 const CREDITS_PERIOD_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+const getReferralBonus = (user) => {
+  const parsed = Number(user?.user_metadata?.referral_bonus);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
+};
+
+const getBaselineTierMax = (user) => (user ? CREDITS_MAX + getReferralBonus(user) : CREDITS_FREE);
+
+const resolveTierMax = (credits, user) => {
+  const baseline = getBaselineTierMax(user);
+  const raw = Number(credits?.tierMax);
+  if (!Number.isFinite(raw) || raw <= 0) return baseline;
+  return user ? Math.max(raw, baseline) : raw;
+};
+
 function initCredits() {
   try {
     const max = CREDITS_FREE;
@@ -704,11 +718,11 @@ const CreditsWidget = ({ credits, onUpgrade, user, onShowReferralPromo }) => {
   const shareEmail = () => window.open(`mailto:?subject=${encodeURIComponent('Try ScribeSnap — free YouTube transcript tool')}&body=${encodeURIComponent(`Check out ScribeSnap — it extracts YouTube transcripts in seconds! Sign up with my link and we both get +3 free credits: ${refLink}`)}`, '_blank', 'noopener,noreferrer');
   const used = credits?.used ?? 0;
   const resetAt = credits?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS);
-  const tierMax = credits?.tierMax || (credits?.userId ? CREDITS_MAX : CREDITS_FREE);
+  const tierMax = resolveTierMax(credits, user);
   const daysLeft = Math.max(0, Math.ceil((resetAt - Date.now()) / 86400000));
   const pct = Math.min(100, (used / tierMax) * 100);
   const nearLimit = used >= tierMax * 0.8;
-  const isGuest = !credits?.userId;
+  const isGuest = !user;
 
   React.useEffect(() => {
     if (!open) return;
@@ -1459,7 +1473,7 @@ const Dashboard = ({ user, credits, history, setHistory, onBack, onSignOut, onLo
   // };
 
   const used = credits?.used ?? 0;
-  const tierMax = credits?.tierMax || CREDITS_MAX;
+  const tierMax = resolveTierMax(credits, user);
   const resetAt = credits?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS);
   const daysLeft = Math.max(0, Math.ceil((resetAt - Date.now()) / 86400000));
   const pct = Math.min(100, (used / tierMax) * 100);
@@ -4837,8 +4851,7 @@ const App = () => {
         }
       }
 
-      const referralBonus = user?.user_metadata?.referral_bonus || 0;
-      const tierMax = user ? CREDITS_MAX + referralBonus : CREDITS_FREE;
+      const tierMax = getBaselineTierMax(user);
 
       if (!stored || typeof stored.resetAt !== 'number' || Date.now() > stored.resetAt) {
         stored = { used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS };
@@ -4850,8 +4863,8 @@ const App = () => {
       localStorage.setItem(key, JSON.stringify(stored));
       setCredits(stored);
     } catch {
-      const referralBonus = user?.user_metadata?.referral_bonus || 0;
-      setCredits({ used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS, tierMax: user ? CREDITS_MAX + referralBonus : CREDITS_FREE, userId: user ? user.id : null });
+      const tierMax = getBaselineTierMax(user);
+      setCredits({ used: 0, resetAt: Date.now() + CREDITS_PERIOD_MS, tierMax, userId: user ? user.id : null });
     }
   }, [user]);
 
@@ -4873,8 +4886,7 @@ const App = () => {
 
   const incrementCredits = () => {
     setCredits(prev => {
-      const bonus = user?.user_metadata?.referral_bonus || 0;
-      const max = user ? CREDITS_MAX + bonus : CREDITS_FREE;
+      const max = getBaselineTierMax(user);
       const next = { ...prev, used: Math.min(max, prev.used + 1), tierMax: max, userId: user?.id ?? null };
       const key = user ? `yte_credits_${user.id}` : 'yte_credits';
       localStorage.setItem(key, JSON.stringify(next));
@@ -4887,11 +4899,21 @@ const App = () => {
   const syncCreditsFromServer = (serverCredits) => {
     if (!serverCredits || !user) return;
     setCredits(prev => {
+      const baseline = getBaselineTierMax(user);
+      const serverUsed = Number(serverCredits.used);
+      const serverTier = Number(serverCredits.tier_max);
+      const normalizedTierMax = Number.isFinite(serverTier) && serverTier > 0
+        ? Math.max(serverTier, baseline)
+        : baseline;
+      const normalizedUsed = Number.isFinite(serverUsed)
+        ? Math.min(Math.max(0, serverUsed), normalizedTierMax)
+        : (prev?.used ?? 0);
+      const serverReset = new Date(serverCredits.reset_at).getTime();
       const next = {
         ...prev,
-        used: serverCredits.used,
-        tierMax: serverCredits.tier_max,
-        resetAt: new Date(serverCredits.reset_at).getTime(),
+        used: normalizedUsed,
+        tierMax: normalizedTierMax,
+        resetAt: Number.isFinite(serverReset) ? serverReset : (prev?.resetAt ?? (Date.now() + CREDITS_PERIOD_MS)),
         userId: user.id,
       };
       localStorage.setItem(`yte_credits_${user.id}`, JSON.stringify(next));
@@ -5153,7 +5175,7 @@ const App = () => {
   const getTranscript = async (langOverride) => {
     if (extractionRequestLockRef.current) return;
     const _used = credits?.used ?? 0;
-    const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+    const _max = resolveTierMax(credits, user);
     if (_used >= _max) return;
     const parsed = parseVideoUrl(videoUrl);
     if (!parsed) { setError(funnyTranscriptError('invalid url')); return; }
@@ -5336,7 +5358,7 @@ const App = () => {
   const getTranscriptFromUpload = async (file) => {
     if (extractionRequestLockRef.current) return;
     const _used = credits?.used ?? 0;
-    const _max  = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+    const _max = resolveTierMax(credits, user);
     if (_used >= _max) return;
     if (!file) { setError('Please select a file first.'); return; }
 
@@ -7190,7 +7212,7 @@ const App = () => {
                   </div>
                   {(() => {
                     const _used = credits?.used ?? 0;
-                    const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+                    const _max = resolveTierMax(credits, user);
                     const outOfCredits = _used >= _max;
                     const btnDisabled = loading || outOfCredits;
                     return (
@@ -7301,7 +7323,7 @@ const App = () => {
                   {/* Transcribe button */}
                   {(() => {
                     const _used = credits?.used ?? 0;
-                    const _max  = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+                    const _max = resolveTierMax(credits, user);
                     const outOfCredits = _used >= _max;
                     const btnDisabled  = loading || outOfCredits || !uploadFile;
                     const btnBg = btnDisabled ? (outOfCredits ? 'rgba(220,38,38,0.1)' : `rgba(60,140,255,${uploadFile ? '0.5' : '0.28'})`) : P.accent;
@@ -7393,7 +7415,7 @@ const App = () => {
               {/* Credits exhausted banner */}
               {(() => {
                 const _used = credits?.used ?? 0;
-                const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
+                const _max = resolveTierMax(credits, user);
                 if (_used < _max) return null;
                 const daysLeft = Math.max(0, Math.ceil(((credits?.resetAt ?? Date.now()) - Date.now()) / 86400000));
                 const resetLabel = daysLeft === 0 ? 'less than a day' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''}`;
