@@ -247,6 +247,8 @@ async function requireAuth(req, res, next) {
 // user_credits table (see supabase/user_credits.sql).
 // For anonymous / unauthenticated users: enforces server-side free credits per
 // client IP (default 2 per 7 days, configurable via ANON_CREDITS_MAX).
+// For token-authenticated requests: preserve legacy fail-open behavior on
+// Supabase/auth/DB errors so signed-in users are not downgraded to guest quota.
 //
 // Returns: { ok, user, creditInfo }
 //   ok         — true if the request may proceed
@@ -265,9 +267,9 @@ async function checkAndDeductCredit(req, res) {
     // Anonymous request — enforce guest credits server-side
     if (!token) return consumeAnonCredit(req, res);
 
-    // No Supabase admin client in a token-authenticated request.
-    // Fall back to anonymous quota instead of allowing unlimited usage.
-    if (!supabaseAdmin) return consumeAnonCredit(req, res);
+    // Legacy behavior: if auth infra is unavailable, do not downgrade a
+    // tokened request to anonymous quota.
+    if (!supabaseAdmin) return { ok: true, user: null, creditInfo: null };
 
     // Validate JWT
     let user = null;
@@ -277,11 +279,12 @@ async function checkAndDeductCredit(req, res) {
       user = authResult?.data?.user || null;
       authErr = authResult?.error || null;
     } catch (err) {
-      return fallbackToAnonOnCreditError(req, res, `auth_get_user_throw:${err?.message || err}`);
+      console.warn('[credits] auth lookup failed (fail-open):', err?.message || err);
+      return { ok: true, user: null, creditInfo: null };
     }
     if (authErr || !user) {
-      console.warn('[credits] invalid token; applying anonymous quota:', authErr?.message || 'no user');
-      return consumeAnonCredit(req, res);
+      console.warn('[credits] token invalid (fail-open):', authErr?.message || 'no user');
+      return { ok: true, user: null, creditInfo: null };
     }
 
     const referralBonus = user.user_metadata?.referral_bonus || 0;
@@ -309,8 +312,8 @@ async function checkAndDeductCredit(req, res) {
         .single();
 
       if (rowErr || !row) {
-        console.error('[credits] read error:', rowErr?.message);
-        return fallbackToAnonOnCreditError(req, res, rowErr?.message || 'row read failed');
+        console.error('[credits] read error (fail-open):', rowErr?.message);
+        return { ok: true, user, creditInfo: null };
       }
 
       let currentUsed = row.used;
@@ -352,7 +355,7 @@ async function checkAndDeductCredit(req, res) {
           await delay(20 + attempt * 20);
           continue;
         }
-        return fallbackToAnonOnCreditError(req, res, updateErr.message || 'update failed');
+        return { ok: true, user, creditInfo: null };
       }
 
       // No row updated means a concurrent request won the race; retry with fresh row.
@@ -361,7 +364,7 @@ async function checkAndDeductCredit(req, res) {
           await delay(20 + attempt * 20);
           continue;
         }
-        return fallbackToAnonOnCreditError(req, res, 'concurrent credit update retries exhausted');
+        return { ok: true, user, creditInfo: null };
       }
 
       const creditInfo = {
@@ -373,10 +376,10 @@ async function checkAndDeductCredit(req, res) {
       return { ok: true, user, creditInfo };
     }
 
-    return fallbackToAnonOnCreditError(req, res, 'credit retries exhausted');
+    return { ok: true, user, creditInfo: null };
   } catch (err) {
-    console.error('[credits] unexpected error:', err?.message || err);
-    return fallbackToAnonOnCreditError(req, res, err?.message || String(err));
+    console.error('[credits] unexpected error (fail-open):', err?.message || err);
+    return { ok: true, user: null, creditInfo: null };
   }
 }
 
