@@ -383,6 +383,38 @@ async function checkAndDeductCredit(req, res) {
   }
 }
 
+// Best-effort rollback when extraction fails after a credit was deducted.
+// Uses optimistic matching on the expected `used` value to avoid over-refunding.
+async function refundDeductedCredit(user, creditInfo, reason = 'unknown') {
+  try {
+    if (!supabaseAdmin || !user?.id) return false;
+    const deductedUsed = Number(creditInfo?.used);
+    if (!Number.isFinite(deductedUsed) || deductedUsed <= 0) return false;
+    const refundTo = deductedUsed - 1;
+    const { data: refunded, error } = await supabaseAdmin
+      .from('user_credits')
+      .update({ used: refundTo, updated_at: new Date().toISOString() })
+      .eq('user_id', user.id)
+      .eq('used', deductedUsed)
+      .select('used')
+      .maybeSingle();
+
+    if (error) {
+      console.warn(`[credits] refund failed for ${user.id}:`, error.message);
+      return false;
+    }
+    if (!refunded) {
+      console.warn(`[credits] refund skipped for ${user.id} (concurrent credit change). reason=${reason}`);
+      return false;
+    }
+    console.log(`[credits] refunded 1 credit for ${user.id}: ${deductedUsed} -> ${refundTo}. reason=${reason}`);
+    return true;
+  } catch (err) {
+    console.warn(`[credits] refund unexpected error for ${user?.id || 'unknown'}:`, err?.message || err);
+    return false;
+  }
+}
+
 async function aiComplete(prompt, maxTokens = 1024) {
   // Try Groq first
   if (process.env.GROQ_API_KEY) {
@@ -917,6 +949,17 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
     const payload = (event === 'done' && creditUser && creditInfo) ? { ...data, credits: creditInfo } : data;
     res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
   };
+  let creditRefunded = false;
+  const maybeRefundOnFailure = async (reason) => {
+    if (creditRefunded) return;
+    creditRefunded = true;
+    await refundDeductedCredit(creditUser, creditInfo, reason);
+  };
+  const sendErrorAndEnd = async (payload, reason) => {
+    await maybeRefundOnFailure(reason || payload?.error || 'transcript_error');
+    send('transcript_error', payload);
+    res.end();
+  };
 
   // ══════════════════════════════════════════════════════════════════════════
   // VIMEO
@@ -962,8 +1005,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 
       // ── Stage 2: Audio download ───────────────────────────────────────────
       if (!process.env.GROQ_API_KEY) {
-        send('transcript_error', { error: 'No captions found for this Vimeo video and AI transcription is not configured.' });
-        res.end();
+        await sendErrorAndEnd({ error: 'No captions found for this Vimeo video and AI transcription is not configured.' }, 'vimeo_no_ai_config');
         return;
       }
 
@@ -980,8 +1022,10 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
         ], { timeout: 300000 });
       } catch (err) {
         const friendly = classifyYtdlpError(err);
-        send('transcript_error', { error: friendly || 'Failed to download Vimeo audio', details: friendly ? undefined : err.message });
-        res.end();
+        await sendErrorAndEnd(
+          { error: friendly || 'Failed to download Vimeo audio', details: friendly ? undefined : err.message },
+          'vimeo_audio_download_failed'
+        );
         return;
       }
 
@@ -991,8 +1035,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
       const audioStat = await fsPromises.stat(audioFile).catch(() => null);
       if (!audioStat || audioStat.size > 24 * 1024 * 1024) {
         await fsPromises.unlink(audioFile).catch(() => {});
-        send('transcript_error', { error: 'Audio file too large for AI transcription (max ~25 min). Try a shorter video.' });
-        res.end();
+        await sendErrorAndEnd({ error: 'Audio file too large for AI transcription (max ~25 min). Try a shorter video.' }, 'vimeo_audio_too_large');
         return;
       }
 
@@ -1004,8 +1047,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 
     } catch (error) {
       await cleanup(tmpDir, filePrefix);
-      send('transcript_error', { error: 'Failed to fetch Vimeo transcript', details: error.message });
-      res.end();
+      await sendErrorAndEnd({ error: 'Failed to fetch Vimeo transcript', details: error.message }, 'vimeo_unexpected');
     }
     return;
   }
@@ -1052,8 +1094,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 
       // ── Stage 2: Audio download ───────────────────────────────────────────
       if (!process.env.GROQ_API_KEY) {
-        send('transcript_error', { error: 'No captions found for this video and AI transcription is not configured.' });
-        res.end();
+        await sendErrorAndEnd({ error: 'No captions found for this video and AI transcription is not configured.' }, 'generic_no_ai_config');
         return;
       }
 
@@ -1070,8 +1111,10 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
         ], { timeout: 300000 });
       } catch (err) {
         const friendly = classifyYtdlpError(err);
-        send('transcript_error', { error: friendly || 'Failed to download audio', details: friendly ? undefined : err.message });
-        res.end();
+        await sendErrorAndEnd(
+          { error: friendly || 'Failed to download audio', details: friendly ? undefined : err.message },
+          'generic_audio_download_failed'
+        );
         return;
       }
 
@@ -1081,8 +1124,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
       const audioStat = await fsPromises.stat(audioFile).catch(() => null);
       if (!audioStat || audioStat.size > 24 * 1024 * 1024) {
         await fsPromises.unlink(audioFile).catch(() => {});
-        send('transcript_error', { error: 'Audio file too large for AI transcription (max ~25 min). Try a shorter video.' });
-        res.end();
+        await sendErrorAndEnd({ error: 'Audio file too large for AI transcription (max ~25 min). Try a shorter video.' }, 'generic_audio_too_large');
         return;
       }
 
@@ -1094,8 +1136,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 
     } catch (error) {
       await cleanup(tmpDir, filePrefix);
-      send('transcript_error', { error: 'Failed to fetch transcript', details: error.message });
-      res.end();
+      await sendErrorAndEnd({ error: 'Failed to fetch transcript', details: error.message }, 'generic_unexpected');
     }
     return;
   }
@@ -1128,7 +1169,10 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 
     if (lastSubError) {
       const friendly = classifyYtdlpError(lastSubError);
-      if (friendly) { send('transcript_error', { error: friendly }); res.end(); return; }
+      if (friendly) {
+        await sendErrorAndEnd({ error: friendly }, 'youtube_subtitles_failed');
+        return;
+      }
     }
 
     const subFile = (await fsPromises.readdir(tmpDir)).find(
@@ -1187,8 +1231,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 
     // ── Stage 2: download audio ───────────────────────────────────────────────
     if (!process.env.GROQ_API_KEY) {
-      send('transcript_error', { error: 'No captions found for this video and AI transcription is not configured.' });
-      res.end();
+      await sendErrorAndEnd({ error: 'No captions found for this video and AI transcription is not configured.' }, 'youtube_no_ai_config');
       return;
     }
 
@@ -1208,8 +1251,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
     const audioStat = await fsPromises.stat(audioFile);
     if (audioStat.size > 24 * 1024 * 1024) {
       await fsPromises.unlink(audioFile).catch(() => {});
-      send('transcript_error', { error: 'Audio file too large for AI transcription (max 24 MB). Try a shorter video.' });
-      res.end();
+      await sendErrorAndEnd({ error: 'Audio file too large for AI transcription (max 24 MB). Try a shorter video.' }, 'youtube_audio_too_large');
       return;
     }
 
@@ -1223,8 +1265,10 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
   } catch (error) {
     await cleanup(tmpDir, videoId);
     const friendly = classifyYtdlpError(error);
-    send('transcript_error', { error: friendly || 'Failed to fetch transcript', details: friendly ? undefined : error.message });
-    res.end();
+    await sendErrorAndEnd(
+      { error: friendly || 'Failed to fetch transcript', details: friendly ? undefined : error.message },
+      'youtube_unexpected'
+    );
   }
 });
 
@@ -1673,13 +1717,24 @@ app.post('/api/transcript/upload', uploadRateLimit, (req, res) => {
       const payload = (event === 'done' && creditUser && creditInfo) ? { ...data, credits: creditInfo } : data;
       res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
     };
+    let creditRefunded = false;
+    const maybeRefundOnFailure = async (reason) => {
+      if (creditRefunded) return;
+      creditRefunded = true;
+      await refundDeductedCredit(creditUser, creditInfo, reason);
+    };
+    const sendErrorAndEnd = async (payload, reason) => {
+      await maybeRefundOnFailure(reason || payload?.error || 'upload_transcript_error');
+      send('transcript_error', payload);
+      res.end();
+    };
 
     const uploadedFile = req.file.path;
 
     if (!process.env.GROQ_API_KEY) {
       await fsPromises.unlink(uploadedFile).catch(() => {});
-      send('transcript_error', { error: 'AI transcription is not configured on this server.' });
-      return res.end();
+      await sendErrorAndEnd({ error: 'AI transcription is not configured on this server.' }, 'upload_no_ai_config');
+      return;
     }
 
     let compressedFile = null;
@@ -1698,8 +1753,7 @@ app.post('/api/transcript/upload', uploadRateLimit, (req, res) => {
     } catch (err) {
       await fsPromises.unlink(uploadedFile).catch(() => {});
       if (compressedFile) await fsPromises.unlink(compressedFile).catch(() => {});
-      send('transcript_error', { error: 'Transcription failed', details: safeErr(err) });
-      res.end();
+      await sendErrorAndEnd({ error: 'Transcription failed', details: safeErr(err) }, 'upload_transcription_failed');
     }
   });
 });

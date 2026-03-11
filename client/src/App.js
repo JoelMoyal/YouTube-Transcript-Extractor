@@ -4340,6 +4340,7 @@ const App = () => {
   const ytPlayerRef        = useRef(null);
   const ytPlayerDivRef     = useRef(null);
   const timeIntervalRef    = useRef(null);
+  const extractionRequestLockRef = useRef(false);
   const segmentsRef        = useRef([]);
   const urlInputRef     = useRef(null);
   const fileInputRef    = useRef(null);
@@ -5150,6 +5151,7 @@ const App = () => {
   }, [qaMessages, qaLoading]);
 
   const getTranscript = async (langOverride) => {
+    if (extractionRequestLockRef.current) return;
     const _used = credits?.used ?? 0;
     const _max = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
     if (_used >= _max) return;
@@ -5157,6 +5159,7 @@ const App = () => {
     if (!parsed) { setError(funnyTranscriptError('invalid url')); return; }
     const { platform, id: videoId, url: videoCanonical } = parsed;
     const langToUse = langOverride || lang;
+    extractionRequestLockRef.current = true;
 
     setError(''); setTranscript(''); setTranscriptSource('');
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform(platform); setCurrentThumbnail(null); setSearch('');
@@ -5326,10 +5329,12 @@ const App = () => {
       clearLoading();
     } finally {
       clearTimeout(killTimer);
+      extractionRequestLockRef.current = false;
     }
   };
 
   const getTranscriptFromUpload = async (file) => {
+    if (extractionRequestLockRef.current) return;
     const _used = credits?.used ?? 0;
     const _max  = credits?.tierMax ?? (user ? CREDITS_MAX : CREDITS_FREE);
     if (_used >= _max) return;
@@ -5340,6 +5345,7 @@ const App = () => {
       setError('That file is too big (max 500 MB). Please trim or compress the video first.');
       return;
     }
+    extractionRequestLockRef.current = true;
 
     setError(''); setTranscript(''); setTranscriptSource('');
     setSegments([]); setCurrentVideoId(null); setCurrentPlatform('upload'); setCurrentThumbnail(null); setSearch('');
@@ -5435,6 +5441,8 @@ const App = () => {
       setError('Upload failed — ' + (err.message || 'please try again.'));
       finishSmoothLoading(false);
       setLoading(false); setLoadingMsg(''); setLoadingPercent(0); setLoadingStage('');
+    } finally {
+      extractionRequestLockRef.current = false;
     }
   };
 
