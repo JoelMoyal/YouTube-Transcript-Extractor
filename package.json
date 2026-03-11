@@ -10,6 +10,7 @@
     "client": "cd client && npm start",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "build": "cd client && npm install && npm run build",
+    "secrets:scan": "bash scripts/check-secrets.sh",
     "clean": "rm -rf node_modules && cd client && rm -rf node_modules",
     "reinstall": "npm run clean && npm install && cd client && npm install"
   },
