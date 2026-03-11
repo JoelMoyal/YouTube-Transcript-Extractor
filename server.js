@@ -1183,6 +1183,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
     // ── Stage 1b: yt-dlp subtitles (primary fast path) ───────────────────────
     send('progress', { stage: 'subtitles', message: 'Looking for subtitles…', percent: 10 });
     let lastSubError = null;
+    let subtitleGateFriendly = null;
 
     for (const langArgs of [['--sub-lang', safeLang], []]) {
       try {
@@ -1203,8 +1204,13 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
     if (lastSubError) {
       const friendly = classifyYtdlpError(lastSubError);
       if (friendly) {
-        await sendErrorAndEnd({ error: friendly }, 'youtube_subtitles_failed');
-        return;
+        const recoverableGate = friendly.includes('rate-limiting') || friendly.includes('blocking this request');
+        if (recoverableGate) {
+          subtitleGateFriendly = friendly;
+        } else {
+          await sendErrorAndEnd({ error: friendly }, 'youtube_subtitles_failed');
+          return;
+        }
       }
     }
 
@@ -1290,6 +1296,13 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
       } catch {
         // Fall through to audio/whisper
       }
+    }
+
+    // If subtitles were blocked by YouTube anti-bot checks and backup provider
+    // could not return transcript content, fail fast with a clear reason.
+    if (subtitleGateFriendly) {
+      await sendErrorAndEnd({ error: subtitleGateFriendly }, 'youtube_subtitles_gate_blocked');
+      return;
     }
 
     // ── Stage 2: download audio ───────────────────────────────────────────────
