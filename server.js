@@ -19,8 +19,14 @@ require('dotenv').config();
 const hashEmail = (email) => crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
 const ANON_CREDITS_MAX = Math.max(0, Number.parseInt(process.env.ANON_CREDITS_MAX || '2', 10) || 2);
 const ANON_CREDITS_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
+const AI_REQUIRE_AUTH = process.env.AI_REQUIRE_AUTH === '1';
+const AI_ANON_RPM = Math.max(1, Number.parseInt(process.env.AI_ANON_RPM || '6', 10) || 6);
+const AI_AUTH_RPM = Math.max(1, Number.parseInt(process.env.AI_AUTH_RPM || '20', 10) || 20);
+const ANON_AI_MAX_PER_DAY = Math.max(0, Number.parseInt(process.env.ANON_AI_MAX_PER_DAY || '24', 10) || 24);
+const ANON_AI_PERIOD_MS = 24 * 60 * 60 * 1000;
 const _anonCreditsMap = new Map();
 const _creditFallbackCounts = new Map();
+const _anonAiQuotaMap = new Map();
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const getClientKey = (req) => String(req.ip || req.socket?.remoteAddress || 'unknown');
@@ -53,6 +59,11 @@ function decodeJwtPayload(token) {
 function sendSseEventAndClose(res, event, body) {
   res.write(`event: ${event}\ndata: ${JSON.stringify(body)}\n\n`);
   res.end();
+}
+
+function extractBearerToken(req) {
+  const authHeader = req.headers.authorization || '';
+  return authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
 }
 
 function denyCreditRequest(req, res, { status, body, sseEvent = 'transcript_error', user = null }) {
@@ -114,6 +125,30 @@ function fallbackToAnonOnCreditError(req, res, reason) {
     );
   }
   return consumeAnonCredit(req, res);
+}
+
+function consumeAnonAiQuota(req, res) {
+  if (ANON_AI_MAX_PER_DAY <= 0) {
+    res.status(401).json({ error: 'Sign in required for AI features.' });
+    return false;
+  }
+  const key = getClientKey(req);
+  const now = Date.now();
+  let entry = _anonAiQuotaMap.get(key);
+  if (!entry || now > entry.resetAt) entry = { used: 0, resetAt: now + ANON_AI_PERIOD_MS };
+  if (entry.used >= ANON_AI_MAX_PER_DAY) {
+    res.setHeader('Retry-After', Math.max(1, Math.ceil((entry.resetAt - now) / 1000)));
+    res.status(429).json({
+      error: 'Anonymous AI limit reached for today. Please sign in or try again later.',
+      used: entry.used,
+      max: ANON_AI_MAX_PER_DAY,
+      reset_at: new Date(entry.resetAt).toISOString(),
+    });
+    return false;
+  }
+  entry.used += 1;
+  _anonAiQuotaMap.set(key, entry);
+  return true;
 }
 
 // ── Multer config for local file uploads ──────────────────────────────────────
@@ -508,10 +543,12 @@ setInterval(() => {
   const now = Date.now();
   for (const [key, e] of _rlMap) if (now > e.resetAt) _rlMap.delete(key);
   for (const [key, e] of _anonCreditsMap) if (now > e.resetAt) _anonCreditsMap.delete(key);
+  for (const [key, e] of _anonAiQuotaMap) if (now > e.resetAt) _anonAiQuotaMap.delete(key);
 }, 60_000).unref(); // .unref() so this timer doesn't keep the process alive alone
-function makeRateLimit({ windowMs, max, scope }) {
+function makeRateLimit({ windowMs, max, scope, keyFn }) {
   return function rateLimitMw(req, res, next) {
-    const key = `${scope}:${getClientKey(req)}`;
+    const keyPart = keyFn ? keyFn(req) : getClientKey(req);
+    const key = `${scope}:${String(keyPart || getClientKey(req))}`;
     const now = Date.now();
     let e = _rlMap.get(key);
     if (!e || now > e.resetAt) e = { count: 0, resetAt: now + windowMs };
@@ -541,9 +578,30 @@ function makeRateLimit({ windowMs, max, scope }) {
     next();
   };
 }
-const aiRateLimit         = makeRateLimit({ scope: 'ai',         windowMs: 60_000, max: 20 }); // 20 AI calls/min per IP
+const aiAnonRateLimit     = makeRateLimit({ scope: 'ai_anon',    windowMs: 60_000, max: AI_ANON_RPM }); // anon AI calls/min per IP
+const aiAuthRateLimit     = makeRateLimit({ scope: 'ai_auth',    windowMs: 60_000, max: AI_AUTH_RPM, keyFn: (req) => req.aiUser?.id || getClientKey(req) }); // auth AI calls/min per user
 const uploadRateLimit     = makeRateLimit({ scope: 'upload',     windowMs: 60_000, max: 3  }); // 3 uploads/min per IP
 const transcriptRateLimit = makeRateLimit({ scope: 'transcript', windowMs: 60_000, max: 30 }); // 30 fetches/min per IP
+
+async function aiAccessGuard(req, res, next) {
+  const token = extractBearerToken(req);
+  if (token && supabaseAdmin) {
+    try {
+      const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+      if (!error && user) {
+        req.aiUser = user;
+        return aiAuthRateLimit(req, res, next);
+      }
+    } catch (err) {
+      console.warn('[ai-access] auth lookup failed, treating as anonymous:', err?.message || err);
+    }
+  }
+  if (AI_REQUIRE_AUTH) {
+    return res.status(401).json({ error: 'Sign in required for AI features.' });
+  }
+  if (!consumeAnonAiQuota(req, res)) return;
+  return aiAnonRateLimit(req, res, next);
+}
 
 // ── SSRF guard: only allow safe external http/https URLs ──────────────────────
 function isSafeExternalUrl(rawUrl) {
@@ -1168,7 +1226,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 });
 
 // ── AI summary endpoint ───────────────────────────────────────────────────────
-app.post('/api/summarize', aiRateLimit, async (req, res) => {
+app.post('/api/summarize', aiAccessGuard, async (req, res) => {
   const { transcript, platform } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -1188,7 +1246,7 @@ app.post('/api/summarize', aiRateLimit, async (req, res) => {
 });
 
 // ── Chapters endpoint ─────────────────────────────────────────────────────────
-app.post('/api/timeline', aiRateLimit, async (req, res) => {
+app.post('/api/timeline', aiAccessGuard, async (req, res) => {
   const { transcript, segments } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -1213,7 +1271,7 @@ app.post('/api/timeline', aiRateLimit, async (req, res) => {
 });
 
 // ── Flashcards endpoint ───────────────────────────────────────────────────────
-app.post('/api/flashcards', aiRateLimit, async (req, res) => {
+app.post('/api/flashcards', aiAccessGuard, async (req, res) => {
   const { transcript, existingQuestions } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -1251,7 +1309,7 @@ app.post('/api/flashcards', aiRateLimit, async (req, res) => {
 });
 
 // ── Study guide endpoint ──────────────────────────────────────────────────────
-app.post('/api/study-guide', aiRateLimit, async (req, res) => {
+app.post('/api/study-guide', aiAccessGuard, async (req, res) => {
   const { transcript } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -1274,7 +1332,7 @@ app.post('/api/study-guide', aiRateLimit, async (req, res) => {
 });
 
 // ── Academic Insights endpoint ────────────────────────────────────────────────
-app.post('/api/academic-insights', aiRateLimit, async (req, res) => {
+app.post('/api/academic-insights', aiAccessGuard, async (req, res) => {
   const { transcript } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -1297,7 +1355,7 @@ app.post('/api/academic-insights', aiRateLimit, async (req, res) => {
 });
 
 // ── Discover endpoint ─────────────────────────────────────────────────────────
-app.post('/api/discover', aiRateLimit, async (req, res) => {
+app.post('/api/discover', aiAccessGuard, async (req, res) => {
   const { transcript, videoId, title } = req.body;
   if (!transcript || typeof transcript !== 'string')
     return res.status(400).json({ error: 'Missing transcript' });
@@ -1402,7 +1460,7 @@ Transcript:\n${transcript.slice(0, 6000)}`,
 });
 
 // ── Q&A endpoint ─────────────────────────────────────────────────────────────
-app.post('/api/ask', aiRateLimit, async (req, res) => {
+app.post('/api/ask', aiAccessGuard, async (req, res) => {
   const { transcript, question, platform, segments, history } = req.body;
   if (!transcript || typeof transcript !== 'string' || !question || typeof question !== 'string')
     return res.status(400).json({ error: 'Missing transcript or question' });
