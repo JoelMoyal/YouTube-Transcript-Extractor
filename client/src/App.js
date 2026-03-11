@@ -236,9 +236,9 @@ const HERO_TRUST_LOGOS = ['youtube', 'tiktok', 'instagram', 'twitter', 'vimeo', 
 
 function getAuthRedirectUrl() {
   if (typeof window === 'undefined') return CANONICAL_APP_ORIGIN;
-  const { hostname, origin } = window.location;
-  if (LOCAL_DEV_HOSTS.has(hostname.toLowerCase())) return origin;
-  return CANONICAL_APP_ORIGIN;
+  // Keep OAuth callback on the same host that started auth so PKCE verifier
+  // stays in same-origin storage.
+  return window.location.origin;
 }
 
 function getPasswordResetRedirectUrl() {
@@ -274,7 +274,15 @@ const AUTH_URL_KEYS = [
 ];
 
 function getAuthUrlState() {
-  if (typeof window === 'undefined') return { hasAuthParams: false, isRecovery: false, tokenHash: '' };
+  if (typeof window === 'undefined') {
+    return {
+      hasAuthParams: false,
+      hasBlockingAuthParams: false,
+      isRecovery: false,
+      tokenHash: '',
+      authCode: '',
+    };
+  }
   const searchParams = new URLSearchParams(window.location.search);
   const hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
   const getParam = (key) => searchParams.get(key) || hashParams.get(key) || '';
@@ -293,9 +301,10 @@ function getAuthUrlState() {
   const action = getParam('action').toLowerCase();
   const resetFlag = getParam('reset').toLowerCase();
   const tokenHash = getParam('token_hash');
+  const authCode = getParam('code');
   const isRecovery = type === 'recovery' || mode === 'recovery' || mode === 'reset' || action === 'reset_password' || resetFlag === '1' || resetFlag === 'true';
 
-  return { hasAuthParams, hasBlockingAuthParams, isRecovery, tokenHash };
+  return { hasAuthParams, hasBlockingAuthParams, isRecovery, tokenHash, authCode };
 }
 
 function cleanupAuthUrl() {
@@ -1260,10 +1269,24 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
         <button
           onClick={async () => {
             setError('');
-            const { error: err } = await supabase.auth.signInWithOAuth({
+            const primaryRedirect = getAuthRedirectUrl();
+            let { error: err } = await supabase.auth.signInWithOAuth({
               provider: 'google',
-              options: { redirectTo: getAuthRedirectUrl() },
+              options: { redirectTo: primaryRedirect },
             });
+            // Fallback for environments where only canonical domain is allowlisted.
+            if (
+              err &&
+              !LOCAL_DEV_HOSTS.has(window.location.hostname.toLowerCase()) &&
+              primaryRedirect !== CANONICAL_APP_ORIGIN &&
+              /(redirect|allow|invalid.*url|not allowed)/i.test(err.message || '')
+            ) {
+              const retry = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: CANONICAL_APP_ORIGIN },
+              });
+              err = retry.error;
+            }
             if (err) setError(friendlyError(err.message));
           }}
           style={{
@@ -4457,6 +4480,7 @@ const App = () => {
   }, [currentTitle]);
 
   useEffect(() => {
+    if (getAuthUrlState().hasBlockingAuthParams) return;
     if (transcript) {
       window.history.replaceState({}, '', '/studio');
       // Noindex the studio so Google ignores it (no content for crawlers)
@@ -4469,7 +4493,7 @@ const App = () => {
       window.history.replaceState({}, '', '/');
       document.querySelector('meta[data-studio-noindex]')?.remove();
     }
-  }, [transcript]);
+  }, [transcript, user]);
 
   // Remove the SEO loading overlay once React has mounted
   useEffect(() => { document.getElementById('app-loader')?.remove(); }, []);
@@ -4707,6 +4731,17 @@ const App = () => {
 
     let mounted = true;
     const bootstrapAuth = async () => {
+      // Explicit PKCE code exchange fallback. detectSessionInUrl usually handles
+      // this automatically, but some callback timing/path cases can miss.
+      if (!authState.isRecovery && authState.authCode) {
+        try {
+          await supabase.auth.exchangeCodeForSession(authState.authCode);
+        } catch (err) {
+          // Non-fatal: getSession/onAuthStateChange can still recover.
+          console.warn('[auth] code exchange fallback failed:', err?.message || err);
+        }
+      }
+
       // Handle recovery links that arrive as token_hash + type=recovery.
       if (authState.isRecovery && authState.tokenHash) {
         const { data, error } = await supabase.auth.verifyOtp({
