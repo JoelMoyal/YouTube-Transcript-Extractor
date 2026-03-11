@@ -712,7 +712,8 @@ app.use(express.json({ limit: '5mb' }));
 
 // Redirect www → non-www (canonical domain)
 app.use((req, res, next) => {
-  if (req.hostname && req.hostname.startsWith('www.')) {
+  const isApiRoute = req.path === '/api' || req.path.startsWith('/api/');
+  if (!isApiRoute && req.hostname && req.hostname.startsWith('www.')) {
     const nonWww = req.hostname.slice(4);
     return res.redirect(301, `${req.protocol}://${nonWww}${req.originalUrl}`);
   }
