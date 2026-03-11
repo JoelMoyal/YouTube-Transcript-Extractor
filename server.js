@@ -721,7 +721,16 @@ const ytdlpAudioFormat = process.env.YTDLP_AUDIO_FORMAT || 'bestaudio';
 
 app.disable('x-powered-by');
 app.set('trust proxy', 1); // Trust Railway/Cloudflare's X-Forwarded-For so req.ip is the real client IP
-app.use(compression());
+app.use(compression({
+  filter: (req, res) => {
+    // Never compress SSE endpoints. Compression can buffer event chunks and
+    // break incremental delivery in some browsers/proxies.
+    const isTranscriptSseRoute = req.path === '/api/transcript' || req.path === '/api/transcript/upload';
+    const acceptsSse = String(req.headers.accept || '').toLowerCase().includes('text/event-stream');
+    if (isTranscriptSseRoute || acceptsSse) return false;
+    return compression.filter(req, res);
+  },
+}));
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
