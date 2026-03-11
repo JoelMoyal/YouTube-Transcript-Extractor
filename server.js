@@ -78,6 +78,11 @@ function consumeAnonCredit(req, res) {
   };
 }
 
+function fallbackToAnonOnCreditError(req, res, reason) {
+  console.warn(`[credits] fallback to anonymous quota: ${reason}`);
+  return consumeAnonCredit(req, res);
+}
+
 // ── Multer config for local file uploads ──────────────────────────────────────
 const uploadStorage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, os.tmpdir()),
@@ -221,11 +226,7 @@ async function checkAndDeductCredit(req, res) {
 
       if (rowErr || !row) {
         console.error('[credits] read error:', rowErr?.message);
-        return denyCreditRequest(req, res, {
-          status: 503,
-          body: { error: 'Credit check unavailable. Please try again.' },
-          user,
-        });
+        return fallbackToAnonOnCreditError(req, res, rowErr?.message || 'row read failed');
       }
 
       let currentUsed = row.used;
@@ -267,11 +268,7 @@ async function checkAndDeductCredit(req, res) {
           await delay(20 + attempt * 20);
           continue;
         }
-        return denyCreditRequest(req, res, {
-          status: 503,
-          body: { error: 'Credit update unavailable. Please retry.' },
-          user,
-        });
+        return fallbackToAnonOnCreditError(req, res, updateErr.message || 'update failed');
       }
 
       // No row updated means a concurrent request won the race; retry with fresh row.
@@ -280,11 +277,7 @@ async function checkAndDeductCredit(req, res) {
           await delay(20 + attempt * 20);
           continue;
         }
-        return denyCreditRequest(req, res, {
-          status: 503,
-          body: { error: 'Too many concurrent requests. Please retry.' },
-          user,
-        });
+        return fallbackToAnonOnCreditError(req, res, 'concurrent credit update retries exhausted');
       }
 
       const creditInfo = {
@@ -296,17 +289,10 @@ async function checkAndDeductCredit(req, res) {
       return { ok: true, user, creditInfo };
     }
 
-    return denyCreditRequest(req, res, {
-      status: 503,
-      body: { error: 'Credit check unavailable. Please try again.' },
-      user,
-    });
+    return fallbackToAnonOnCreditError(req, res, 'credit retries exhausted');
   } catch (err) {
     console.error('[credits] unexpected error:', err?.message || err);
-    return denyCreditRequest(req, res, {
-      status: 503,
-      body: { error: 'Credit check failed. Please retry.' },
-    });
+    return fallbackToAnonOnCreditError(req, res, err?.message || String(err));
   }
 }
 
@@ -812,13 +798,13 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
   // ── Server-side credit check ────────────────────────────────────────────────
   // Run this after SSE headers so "out of credits" can be emitted as an SSE
   // event (instead of an opaque EventSource network error on the client).
-  const { ok: creditOk, creditInfo } = await checkAndDeductCredit(req, res);
+  const { ok: creditOk, user: creditUser, creditInfo } = await checkAndDeductCredit(req, res);
   if (!creditOk) return; // checkAndDeductCredit already wrote out_of_credits + ended
 
   // Inject updated credit counts into every 'done' event so the client can
   // sync without an extra round-trip.
   const send = (event, data) => {
-    const payload = (event === 'done' && creditInfo) ? { ...data, credits: creditInfo } : data;
+    const payload = (event === 'done' && creditUser && creditInfo) ? { ...data, credits: creditInfo } : data;
     res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
   };
 
@@ -1561,7 +1547,7 @@ app.post('/api/transcript/upload', uploadRateLimit, (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No file received.' });
 
     // Credit check BEFORE SSE headers so we can still send a JSON 402 response.
-    const { ok: creditOk, creditInfo } = await checkAndDeductCredit(req, res);
+    const { ok: creditOk, user: creditUser, creditInfo } = await checkAndDeductCredit(req, res);
     if (!creditOk) {
       await fsPromises.unlink(req.file.path).catch(() => {});
       return;
@@ -1574,7 +1560,7 @@ app.post('/api/transcript/upload', uploadRateLimit, (req, res) => {
     res.flushHeaders();
 
     const send = (event, data) => {
-      const payload = (event === 'done' && creditInfo) ? { ...data, credits: creditInfo } : data;
+      const payload = (event === 'done' && creditUser && creditInfo) ? { ...data, credits: creditInfo } : data;
       res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
     };
 
