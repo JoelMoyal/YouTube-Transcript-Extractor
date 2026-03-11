@@ -19,6 +19,8 @@ require('dotenv').config();
 const hashEmail = (email) => crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
 const ANON_CREDITS_MAX = Math.max(0, Number.parseInt(process.env.ANON_CREDITS_MAX || '2', 10) || 2);
 const ANON_CREDITS_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
+const CREDIT_AUTH_TIMEOUT_MS = Math.max(500, Number.parseInt(process.env.CREDIT_AUTH_TIMEOUT_MS || '3500', 10) || 3500);
+const CREDIT_DB_TIMEOUT_MS = Math.max(500, Number.parseInt(process.env.CREDIT_DB_TIMEOUT_MS || '3500', 10) || 3500);
 const AI_REQUIRE_AUTH = process.env.AI_REQUIRE_AUTH === '1';
 const AI_ANON_RPM = Math.max(1, Number.parseInt(process.env.AI_ANON_RPM || '6', 10) || 6);
 const AI_AUTH_RPM = Math.max(1, Number.parseInt(process.env.AI_AUTH_RPM || '20', 10) || 20);
@@ -275,7 +277,10 @@ async function checkAndDeductCredit(req, res) {
     let user = null;
     let authErr = null;
     try {
-      const authResult = await supabaseAdmin.auth.getUser(token);
+      const authResult = await withTimeout(
+        supabaseAdmin.auth.getUser(token),
+        CREDIT_AUTH_TIMEOUT_MS
+      );
       user = authResult?.data?.user || null;
       authErr = authResult?.error || null;
     } catch (err) {
@@ -294,22 +299,27 @@ async function checkAndDeductCredit(req, res) {
     const resetAt = new Date(now.getTime() + ANON_CREDITS_PERIOD_MS).toISOString();
 
     // Ensure a credits row exists for this user (insert only if missing)
-    await supabaseAdmin
-      .from('user_credits')
-      .insert({ user_id: user.id, used: 0, reset_at: resetAt, tier_max: tierMax })
-      .select()
-      .maybeSingle() // ignore conflict (row already exists)
-      .catch((err) => {
-        console.warn('[credits] ensure-row insert failed (continuing):', err?.message || err);
-      });
+    await withTimeout(
+      supabaseAdmin
+        .from('user_credits')
+        .insert({ user_id: user.id, used: 0, reset_at: resetAt, tier_max: tierMax })
+        .select()
+        .maybeSingle(), // ignore conflict (row already exists)
+      CREDIT_DB_TIMEOUT_MS
+    ).catch((err) => {
+      console.warn('[credits] ensure-row insert failed (continuing):', err?.message || err);
+    });
 
     // Retry loop handles concurrent requests racing on the same user.
     for (let attempt = 0; attempt < 3; attempt++) {
-      const { data: row, error: rowErr } = await supabaseAdmin
-        .from('user_credits')
-        .select('used, reset_at, tier_max')
-        .eq('user_id', user.id)
-        .single();
+      const { data: row, error: rowErr } = await withTimeout(
+        supabaseAdmin
+          .from('user_credits')
+          .select('used, reset_at, tier_max')
+          .eq('user_id', user.id)
+          .single(),
+        CREDIT_DB_TIMEOUT_MS
+      );
 
       if (rowErr || !row) {
         console.error('[credits] read error (fail-open):', rowErr?.message);
@@ -322,12 +332,14 @@ async function checkAndDeductCredit(req, res) {
 
       if (new Date(row.reset_at) < now) {
         // Best-effort reset (guarded by reset_at < now so only stale windows are reset).
-        await supabaseAdmin
-          .from('user_credits')
-          .update({ used: 0, reset_at: resetAt, tier_max: effectiveTierMax, updated_at: nowIso })
-          .eq('user_id', user.id)
-          .lt('reset_at', nowIso)
-          .catch(() => {});
+        await withTimeout(
+          supabaseAdmin
+            .from('user_credits')
+            .update({ used: 0, reset_at: resetAt, tier_max: effectiveTierMax, updated_at: nowIso })
+            .eq('user_id', user.id)
+            .lt('reset_at', nowIso),
+          CREDIT_DB_TIMEOUT_MS
+        ).catch(() => {});
         currentUsed = 0;
         currentResetAt = resetAt;
       }
@@ -341,13 +353,16 @@ async function checkAndDeductCredit(req, res) {
         });
       }
 
-      const { data: updated, error: updateErr } = await supabaseAdmin
-        .from('user_credits')
-        .update({ used: currentUsed + 1, tier_max: effectiveTierMax, updated_at: nowIso })
-        .eq('user_id', user.id)
-        .eq('used', currentUsed)
-        .select('used, tier_max, reset_at')
-        .maybeSingle();
+      const { data: updated, error: updateErr } = await withTimeout(
+        supabaseAdmin
+          .from('user_credits')
+          .update({ used: currentUsed + 1, tier_max: effectiveTierMax, updated_at: nowIso })
+          .eq('user_id', user.id)
+          .eq('used', currentUsed)
+          .select('used, tier_max, reset_at')
+          .maybeSingle(),
+        CREDIT_DB_TIMEOUT_MS
+      );
 
       if (updateErr) {
         console.error(`[credits] deduct error (attempt ${attempt + 1}/3):`, updateErr.message);
