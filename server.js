@@ -20,9 +20,22 @@ const hashEmail = (email) => crypto.createHash('sha256').update(email.toLowerCas
 const ANON_CREDITS_MAX = Math.max(0, Number.parseInt(process.env.ANON_CREDITS_MAX || '2', 10) || 2);
 const ANON_CREDITS_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
 const _anonCreditsMap = new Map();
+const _creditFallbackCounts = new Map();
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const getClientKey = (req) => String(req.ip || req.socket?.remoteAddress || 'unknown');
+const redactClientKey = (value) => crypto.createHash('sha1').update(String(value)).digest('hex').slice(0, 10);
+
+function normalizeCreditFallbackReason(reason) {
+  const text = String(reason || 'unknown').toLowerCase();
+  if (text.includes('fetch failed')) return 'supabase_network_fetch_failed';
+  if (text.includes('network')) return 'supabase_network_error';
+  if (text.includes('timeout')) return 'supabase_timeout';
+  if (text.includes('jwt')) return 'auth_jwt_error';
+  if (text.includes('permission') || text.includes('denied') || text.includes('forbidden')) return 'db_permission_error';
+  if (text.includes('concurrent')) return 'db_concurrency_conflict';
+  return text.slice(0, 120);
+}
 
 function sendSseEventAndClose(res, event, body) {
   res.write(`event: ${event}\ndata: ${JSON.stringify(body)}\n\n`);
@@ -79,7 +92,14 @@ function consumeAnonCredit(req, res) {
 }
 
 function fallbackToAnonOnCreditError(req, res, reason) {
-  console.warn(`[credits] fallback to anonymous quota: ${reason}`);
+  const reasonKey = normalizeCreditFallbackReason(reason);
+  const count = (_creditFallbackCounts.get(reasonKey) || 0) + 1;
+  _creditFallbackCounts.set(reasonKey, count);
+  if (count <= 3 || count % 25 === 0) {
+    console.warn(
+      `[credits] fallback mode=anon reason=${reasonKey} count=${count} method=${req.method} path=${req.path} client=${redactClientKey(getClientKey(req))} auth=${Boolean(req.headers.authorization)}`
+    );
+  }
   return consumeAnonCredit(req, res);
 }
 
@@ -196,7 +216,15 @@ async function checkAndDeductCredit(req, res) {
     if (!supabaseAdmin) return consumeAnonCredit(req, res);
 
     // Validate JWT
-    const { data: { user }, error: authErr } = await supabaseAdmin.auth.getUser(token);
+    let user = null;
+    let authErr = null;
+    try {
+      const authResult = await supabaseAdmin.auth.getUser(token);
+      user = authResult?.data?.user || null;
+      authErr = authResult?.error || null;
+    } catch (err) {
+      return fallbackToAnonOnCreditError(req, res, `auth_get_user_throw:${err?.message || err}`);
+    }
     if (authErr || !user) {
       console.warn('[credits] invalid token; applying anonymous quota:', authErr?.message || 'no user');
       return consumeAnonCredit(req, res);
@@ -214,7 +242,9 @@ async function checkAndDeductCredit(req, res) {
       .insert({ user_id: user.id, used: 0, reset_at: resetAt, tier_max: tierMax })
       .select()
       .maybeSingle() // ignore conflict (row already exists)
-      .catch(() => {}); // never block on DB error
+      .catch((err) => {
+        console.warn('[credits] ensure-row insert failed (continuing):', err?.message || err);
+      });
 
     // Retry loop handles concurrent requests racing on the same user.
     for (let attempt = 0; attempt < 3; attempt++) {
