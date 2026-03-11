@@ -892,6 +892,14 @@ function classifyYtdlpError(err) {
     return 'Transcript extraction tool (yt-dlp) is not installed on this server.';
   if (msg.includes('429') || msg.includes('too many requests'))
     return 'YouTube is rate-limiting this IP. Please wait a minute and try again.';
+  if (
+    msg.includes("sign in to confirm you're not a bot") ||
+    msg.includes('sign in to confirm you’re not a bot') ||
+    msg.includes('not a bot') ||
+    msg.includes('use --cookies')
+  ) {
+    return 'YouTube is blocking this request right now. Please try again in a few minutes.';
+  }
   if (msg.includes('private') || msg.includes('members only'))
     return 'This video is private or members-only.';
   if (msg.includes('unavailable') || msg.includes('no longer available'))
@@ -1072,7 +1080,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 
     } catch (error) {
       await cleanup(tmpDir, filePrefix);
-      await sendErrorAndEnd({ error: 'Failed to fetch Vimeo transcript', details: error.message }, 'vimeo_unexpected');
+      await sendErrorAndEnd({ error: 'Vimeo transcript extraction failed', details: error.message }, 'vimeo_unexpected');
     }
     return;
   }
@@ -1161,7 +1169,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 
     } catch (error) {
       await cleanup(tmpDir, filePrefix);
-      await sendErrorAndEnd({ error: 'Failed to fetch transcript', details: error.message }, 'generic_unexpected');
+      await sendErrorAndEnd({ error: 'Transcript extraction failed', details: error.message }, 'generic_unexpected');
     }
     return;
   }
@@ -1225,22 +1233,52 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
     // Keep this bounded so it doesn't add large latency on normal requests.
     if (process.env.SUPADATA_API_KEY) {
       try {
-        send('progress', { stage: 'subtitles', message: 'Trying backup caption source…', percent: 35 });
         const supadata = new Supadata({ apiKey: process.env.SUPADATA_API_KEY });
-        let result = await supadata.transcript({ url: `https://www.youtube.com/watch?v=${videoId}`, lang: safeLang, mode: 'native' });
-        if (result && 'jobId' in result) {
-          const maxPolls = Math.max(1, parseInt(process.env.SUPADATA_MAX_POLLS || '6', 10));
-          const pollMs = Math.max(1000, parseInt(process.env.SUPADATA_POLL_MS || '2500', 10));
-          for (let i = 0; i < maxPolls; i++) {
-            await new Promise(r => setTimeout(r, pollMs));
-            const job = await supadata.transcript.getJobStatus(result.jobId);
-            if (job.status === 'completed') { result = job; break; }
-            if (job.status === 'failed') { result = null; break; }
+        const ytUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        const runSupadataMode = async ({ mode, message, percent, maxPollsEnv, pollMsEnv, fallbackPolls, fallbackPollMs }) => {
+          send('progress', { stage: 'subtitles', message, percent });
+          let result = await supadata.transcript({ url: ytUrl, lang: safeLang, mode });
+          if (result && 'jobId' in result) {
+            const maxPolls = Math.max(1, parseInt(process.env[maxPollsEnv] || String(fallbackPolls), 10));
+            const pollMs = Math.max(1000, parseInt(process.env[pollMsEnv] || String(fallbackPollMs), 10));
+            for (let i = 0; i < maxPolls; i++) {
+              await new Promise(r => setTimeout(r, pollMs));
+              const job = await supadata.transcript.getJobStatus(result.jobId);
+              if (job.status === 'completed') { result = job; break; }
+              if (job.status === 'failed') { result = null; break; }
+            }
           }
+          if (result && Array.isArray(result.content) && result.content.length > 0) {
+            return result.content;
+          }
+          return null;
+        };
+
+        let content = await runSupadataMode({
+          mode: 'native',
+          message: 'Trying backup caption source…',
+          percent: 35,
+          maxPollsEnv: 'SUPADATA_MAX_POLLS',
+          pollMsEnv: 'SUPADATA_POLL_MS',
+          fallbackPolls: 6,
+          fallbackPollMs: 2500,
+        });
+
+        if (!content && process.env.SUPADATA_AUTO_FALLBACK !== '0') {
+          content = await runSupadataMode({
+            mode: 'auto',
+            message: 'No captions found — trying AI transcript fallback…',
+            percent: 45,
+            maxPollsEnv: 'SUPADATA_AUTO_MAX_POLLS',
+            pollMsEnv: 'SUPADATA_AUTO_POLL_MS',
+            fallbackPolls: 14,
+            fallbackPollMs: 3000,
+          });
         }
-        if (result && Array.isArray(result.content) && result.content.length > 0) {
+
+        if (content) {
           const seen = new Set();
-          let segments = result.content
+          let segments = content
             .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
             .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
           segments = await translateSegments(segments, safeLang, send);
@@ -1291,7 +1329,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
     await cleanup(tmpDir, videoId);
     const friendly = classifyYtdlpError(error);
     await sendErrorAndEnd(
-      { error: friendly || 'Failed to fetch transcript', details: friendly ? undefined : error.message },
+      { error: friendly || 'Transcript extraction failed', details: friendly ? undefined : error.message },
       'youtube_unexpected'
     );
   }
