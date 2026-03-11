@@ -37,6 +37,19 @@ function normalizeCreditFallbackReason(reason) {
   return text.slice(0, 120);
 }
 
+function decodeJwtPayload(token) {
+  try {
+    const parts = String(token || '').split('.');
+    if (parts.length !== 3) return null;
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+    const json = Buffer.from(padded, 'base64').toString('utf8');
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
 function sendSseEventAndClose(res, event, body) {
   res.write(`event: ${event}\ndata: ${JSON.stringify(body)}\n\n`);
   res.end();
@@ -155,6 +168,12 @@ async function compressForWhisper(inputFile) {
 // ── Supabase admin client (server-side only, uses service role key) ───────────
 let supabaseAdmin = null;
 if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  const supabaseKeyPayload = decodeJwtPayload(process.env.SUPABASE_SERVICE_ROLE_KEY);
+  if (supabaseKeyPayload?.role && supabaseKeyPayload.role !== 'service_role') {
+    console.error(
+      `[config] SUPABASE_SERVICE_ROLE_KEY appears to have role="${supabaseKeyPayload.role}" (expected "service_role"). Credit checks may fail.`
+    );
+  }
   supabaseAdmin = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY,
