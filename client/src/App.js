@@ -5160,8 +5160,10 @@ const App = () => {
     setQaQuestion('');
     setQaLoading(true);
     try {
+      const token = await getAuthToken();
       const res = await fetch('/api/ask', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ transcript, segments: segments.some(s => s.seconds > 0) ? segments : [], question: q, history }),
       });
       const text = await res.text();
@@ -5908,8 +5910,10 @@ const App = () => {
     setSgQuestion('');
     setSgLoading(true);
     try {
+      const token = await getAuthToken();
       const res = await fetch('/api/ask', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ transcript, segments: segments.some(s => s.seconds > 0) ? segments : [], question: q, history }),
       });
       const data = await res.json();
