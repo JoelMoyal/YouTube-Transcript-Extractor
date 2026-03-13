@@ -5646,8 +5646,10 @@ const App = () => {
   const summarize = async () => {
     setSummarizing(true); setSummary('');
     try {
+      const token = await getAuthToken();
       const res = await fetch('/api/summarize', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ transcript, platform: currentPlatform }),
       });
       const text = await res.text();
@@ -5666,8 +5668,10 @@ const App = () => {
     if (timelineLoading) return;
     setTimelineLoading(true); setTimeline(null);
     try {
+      const token = await getAuthToken();
       const res = await fetch('/api/timeline', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ transcript, segments }),
       });
       const text = await res.text();
@@ -5684,8 +5688,10 @@ const App = () => {
     if (flashcardsLoading) return;
     setFlashcardsLoading(true); setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason('');
     try {
+      const token = await getAuthToken();
       const res = await fetch('/api/flashcards', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ transcript }),
       });
       const text = await res.text();
@@ -5719,8 +5725,10 @@ const App = () => {
     setFlashcardsMoreLoading(true);
     try {
       const existingQuestions = flashcards.map(c => c.question);
+      const token = await getAuthToken();
       const res = await fetch('/api/flashcards', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ transcript, existingQuestions }),
       });
       const text = await res.text();
@@ -5750,8 +5758,10 @@ const App = () => {
     if (studyGuideLoading) return;
     setStudyGuideLoading(true); setStudyGuide(null);
     try {
+      const token = await getAuthToken();
       const res = await fetch('/api/study-guide', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ transcript }),
       });
       const text = await res.text();
@@ -5770,8 +5780,10 @@ const App = () => {
     if (academicInsightsLoading) return;
     setAcademicInsightsLoading(true); setAcademicInsights(null);
     try {
+      const token = await getAuthToken();
       const res = await fetch('/api/academic-insights', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ transcript }),
       });
       const text = await res.text();
@@ -5792,8 +5804,10 @@ const App = () => {
     if (isDesktop) setActiveTab('discover');
     else setSidebarTab('discover');
     try {
+      const token = await getAuthToken();
       const res = await fetch('/api/discover', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ transcript, videoId: currentVideoId, title: currentTitle }),
       });
       const text = await res.text();
