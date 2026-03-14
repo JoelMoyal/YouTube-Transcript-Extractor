@@ -426,26 +426,11 @@ function timeAgo(dateStr) {
 }
 
 async function fetchVideoMeta(platform, canonicalUrl) {
-  const noembedUrl = `https://noembed.com/embed?url=${encodeURIComponent(canonicalUrl)}`;
-  const endpoints = platform === 'vimeo'
-    ? [`https://vimeo.com/api/oembed.json?url=${encodeURIComponent(canonicalUrl)}`, noembedUrl]
-    : platform === 'youtube'
-    ? [`https://www.youtube.com/oembed?url=${encodeURIComponent(canonicalUrl)}&format=json`, noembedUrl]
-    : [noembedUrl]; // all other platforms: noembed.com handles TikTok, Twitter, Instagram, etc.
-
-  for (const endpoint of endpoints) {
-    try {
-      const res = await fetch(endpoint);
-      if (!res.ok) continue;
-      const data = await res.json();
-      return {
-        title: (data.title || '').trim(),
-        channel: (data.author_name || '').trim(),
-        thumbnail: data.thumbnail_url || null,
-      };
-    } catch {}
-  }
-
+  try {
+    const res = await fetch(`/api/meta?platform=${encodeURIComponent(platform)}&url=${encodeURIComponent(canonicalUrl)}`);
+    if (!res.ok) return { title: '', channel: '', thumbnail: null };
+    return await res.json();
+  } catch {}
   return { title: '', channel: '', thumbnail: null };
 }
 

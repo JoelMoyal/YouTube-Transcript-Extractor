@@ -952,6 +952,32 @@ async function whisperTranscribe(audioFile, safeLang) {
   return { transcript, segments };
 }
 
+// ── Video metadata proxy (avoids browser CORS on oEmbed APIs) ─────────────────
+app.get('/api/meta', async (req, res) => {
+  const { platform, url } = req.query;
+  if (!url || typeof url !== 'string') return res.status(400).json({ error: 'Missing url' });
+  try {
+    let apiUrl;
+    if (platform === 'youtube') {
+      apiUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+    } else if (platform === 'vimeo') {
+      apiUrl = `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`;
+    } else {
+      apiUrl = `https://noembed.com/embed?url=${encodeURIComponent(url)}`;
+    }
+    const resp = await fetch(apiUrl, { signal: AbortSignal.timeout(5000) });
+    if (!resp.ok) return res.json({ title: null, channel: null, thumbnail: null });
+    const data = await resp.json();
+    res.json({
+      title:     (data.title       || '').trim() || null,
+      channel:   (data.author_name || '').trim() || null,
+      thumbnail: data.thumbnail_url || null,
+    });
+  } catch {
+    res.json({ title: null, channel: null, thumbnail: null });
+  }
+});
+
 // ── SSE transcript endpoint ───────────────────────────────────────────────────
 app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
   const { videoId, url, platform = 'youtube' } = req.query; // lang param ignored while translation is on ice
