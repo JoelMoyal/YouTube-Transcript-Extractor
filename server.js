@@ -633,13 +633,26 @@ const aiAuthRateLimit     = makeRateLimit({ scope: 'ai_auth',    windowMs: 60_00
 const uploadRateLimit     = makeRateLimit({ scope: 'upload',     windowMs: 60_000, max: 3  }); // 3 uploads/min per IP
 const transcriptRateLimit = makeRateLimit({ scope: 'transcript', windowMs: 60_000, max: 30 }); // 30 fetches/min per IP
 
+// Cache token → user for 60 s to avoid a Supabase round-trip on every AI call.
+const _tokenCache = new Map(); // token → { user, expiresAt }
 async function aiAccessGuard(req, res, next) {
   const token = extractBearerToken(req);
   if (token && supabaseAdmin) {
     try {
-      const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-      if (!error && user) {
-        req.aiUser = user;
+      const now = Date.now();
+      let cached = _tokenCache.get(token);
+      if (!cached || now > cached.expiresAt) {
+        const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+        if (!error && user) {
+          cached = { user, expiresAt: now + 60_000 };
+          _tokenCache.set(token, cached);
+        } else {
+          cached = null;
+          _tokenCache.delete(token);
+        }
+      }
+      if (cached) {
+        req.aiUser = cached.user;
         return aiAuthRateLimit(req, res, next);
       }
     } catch (err) {
