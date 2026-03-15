@@ -5313,6 +5313,12 @@ const App = () => {
                 setCurrentTitle(nextTitle);
                 setCurrentChannel(nextChannel);
                 setCurrentThumbnail(nextThumb);
+                // Update the history entry with the real title/channel/thumbnail
+                saveToHistory({
+                  id: videoId, platform, transcript: data.transcript, segments: data.segments || [],
+                  source: data.source || '', date: new Date().toISOString(),
+                  thumbnail: nextThumb, title: nextTitle, channel: nextChannel, url: videoCanonical,
+                });
               }).catch(() => {});
             } catch {
               setError(funnyTranscriptError('failed to process'));
