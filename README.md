@@ -142,3 +142,79 @@ npm start              # serves everything from Express on PORT (default 4999)
 docker build -t scribesnap .
 docker run -p 4999:4999 --env-file .env scribesnap
 ```
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+# ── AI ────────────────────────────────────────────────────────────────────────
+GROQ_API_KEY=          # Groq API key (primary LLM)
+OPENROUTER_API_KEY=    # OpenRouter API key (fallback LLM)
+
+# ── Supabase ──────────────────────────────────────────────────────────────────
+SUPABASE_URL=          # Your Supabase project URL
+SUPABASE_SERVICE_KEY=  # Supabase service role key (server-side only)
+
+# ── Transcript APIs ───────────────────────────────────────────────────────────
+SUPADATA_API_KEY=      # Supadata API key (caption fallback)
+
+# ── Rate Limits & Credits ─────────────────────────────────────────────────────
+ANON_CREDITS_MAX=2            # Free transcript credits for anonymous users (per 7 days)
+ANON_AI_MAX_PER_DAY=24        # Max AI calls/day for anonymous users
+AI_ANON_RPM=6                 # AI requests-per-minute for anonymous users
+AI_AUTH_RPM=20                # AI requests-per-minute for authenticated users
+AI_REQUIRE_AUTH=0             # Set to 1 to require login for all AI features
+
+# ── Server ────────────────────────────────────────────────────────────────────
+PORT=4999
+NODE_ENV=development
+```
+
+---
+
+## Deployment
+
+### Railway (recommended)
+1. Connect your GitHub repo to [Railway](https://railway.app/)
+2. Set all environment variables in the Railway dashboard
+3. Railway auto-detects `package.json` and runs `npm start`
+
+The included `railway.json` is pre-configured.
+
+### Vercel (frontend only)
+Deploy `client/` as a standalone Vite/CRA app and point `REACT_APP_API_URL` to your Railway backend URL.
+
+---
+
+## Project Structure
+
+```
+├── server.js              # Express backend — all API routes
+├── client/
+│   ├── src/
+│   │   ├── App.js         # Entire React SPA (~9,800 lines)
+│   │   ├── supabase.js    # Supabase client init
+│   │   └── components/    # Magic UI components (BorderBeam, ShimmerButton…)
+│   └── public/            # Static assets, SEO landing pages
+├── supabase/              # DB migrations & edge functions
+├── scripts/               # Utility scripts (secrets scan, etc.)
+├── Dockerfile
+└── railway.json
+```
+
+---
+
+## License
+
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE.md) file for details.
+
+---
+
+<div align="center">
+  Made with ♥ by <a href="https://github.com/JoelMoyal">Joel Moyal</a>
+  <br /><br />
+  <a href="#top">↑ Back to top</a>
+</div>
