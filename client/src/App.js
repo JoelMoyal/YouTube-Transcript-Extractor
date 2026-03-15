@@ -7293,7 +7293,7 @@ const App = () => {
                       if (f) setUploadFile(f);
                     }}
                     style={{
-                      flex: 1, display: 'flex', alignItems: 'center', gap: 12,
+                      flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 12,
                       padding: isMobile ? '18px 18px' : '22px 22px',
                       background: uploadDragOver ? 'rgba(60,140,255,0.05)' : P.paper,
                       border: `1.5px dashed ${uploadDragOver ? P.accent : uploadFile ? P.accent : P.border}`,
