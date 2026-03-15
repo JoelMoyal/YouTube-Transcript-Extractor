@@ -86,3 +86,59 @@ Express Server (server.js)
         ├── Supadata ────────── caption fallback
         └── Supabase ────────── user auth + credits
 ```
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Node.js ≥ 20
+- npm ≥ 9
+- A [Supabase](https://supabase.com/) project (free tier works)
+- A [Groq](https://console.groq.com/) API key (free tier available)
+
+### 1. Clone & install
+
+```bash
+git clone https://github.com/JoelMoyal/YouTube-Transcript-Extractor.git
+cd YouTube-Transcript-Extractor
+
+# Install server dependencies
+npm install
+
+# Install client dependencies
+cd client && npm install && cd ..
+```
+
+### 2. Configure environment
+
+Copy the example env file and fill in your keys:
+
+```bash
+cp .env.example .env   # or create .env manually
+```
+
+See the [Environment Variables](#environment-variables) section below for the full list.
+
+### 3. Run in development
+
+```bash
+npm run dev
+# Starts the Express server on :4999 and the React dev server on :3000
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 4. Build for production
+
+```bash
+npm run build          # builds React into client/build/
+npm start              # serves everything from Express on PORT (default 4999)
+```
+
+### Docker
+
+```bash
+docker build -t scribesnap .
+docker run -p 4999:4999 --env-file .env scribesnap
+```
