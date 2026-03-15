@@ -9,6 +9,7 @@
     <img alt="License" src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" />
   </p>
   <p><strong>Extract transcripts from YouTube, Vimeo, TikTok, and more — then unlock AI-powered study tools in one click.</strong></p>
+  <p><a href="https://scribesnap.ai">🌐 scribesnap.ai</a></p>
 </div>
 
 ---
