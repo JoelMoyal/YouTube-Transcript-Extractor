@@ -47,3 +47,42 @@ Whether you're a student reviewing a lecture, a researcher skimming a conference
 - Copy transcript to clipboard (plain text or formatted)
 - Download as `.txt` file
 - SRT subtitle format export
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 18 (CRA), inline styles design system, framer-motion |
+| **Backend** | Node.js 20+, Express 4 |
+| **AI — Primary** | [Groq](https://groq.com/) (`llama-3.3-70b-versatile`) |
+| **AI — Fallback** | [OpenRouter](https://openrouter.ai/) |
+| **Transcript API** | `youtube-transcript` npm package + [Supadata](https://supadata.ai/) fallback |
+| **Auth & Database** | [Supabase](https://supabase.com/) (Postgres + Auth) |
+| **Deployment** | [Railway](https://railway.app/) (backend), Vercel-compatible (frontend) |
+| **Containerization** | Docker (optional) |
+
+### Architecture Overview
+
+```
+Browser (React SPA)
+  │
+  │  REST + SSE
+  ▼
+Express Server (server.js)
+  ├── /api/transcript          ← SSE stream, credit gate
+  ├── /api/summary             ← AI endpoint (auth-gated)
+  ├── /api/insights            ← AI endpoint
+  ├── /api/flashcards          ← AI endpoint → [{question, answer, topic}]
+  ├── /api/study-guide         ← AI endpoint → structured JSON
+  ├── /api/chapters            ← AI endpoint
+  ├── /api/ask                 ← AI chat endpoint
+  └── /api/video-meta          ← proxied metadata fetch
+        │
+        ├── Groq SDK  ──────── primary LLM
+        ├── OpenRouter ──────── fallback LLM
+        ├── youtube-transcript ─ native captions
+        ├── Supadata ────────── caption fallback
+        └── Supabase ────────── user auth + credits
+```
