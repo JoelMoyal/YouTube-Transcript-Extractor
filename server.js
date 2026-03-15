@@ -935,13 +935,16 @@ async function cleanup(tmpDir, prefix) {
 async function whisperTranscribe(audioFile, safeLang) {
   const { createReadStream } = require('fs');
   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-  const transcription = await groq.audio.transcriptions.create({
-    file: createReadStream(audioFile),
-    model: 'whisper-large-v3-turbo',
-    response_format: 'verbose_json',
-    timestamp_granularities: ['segment'],
-    language: toWhisperLang(safeLang),
-  });
+  const transcription = await withTimeout(
+    groq.audio.transcriptions.create({
+      file: createReadStream(audioFile),
+      model: 'whisper-large-v3-turbo',
+      response_format: 'verbose_json',
+      timestamp_granularities: ['segment'],
+      language: toWhisperLang(safeLang),
+    }),
+    150000  // 2.5-minute cap — leaves buffer before the client's 3-minute kill timer
+  );
   await fsPromises.unlink(audioFile).catch(() => {});
   const rawSegments = transcription.segments || [];
   const seen = new Set();
@@ -1826,6 +1829,7 @@ app.post('/api/transcript/upload', uploadRateLimit, (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders();
 
     const send = (event, data) => {
