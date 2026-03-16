@@ -1655,7 +1655,8 @@ Transcript:\n${transcript.slice(0, 6000)}`,
 // ── Q&A endpoint ─────────────────────────────────────────────────────────────
 app.post('/api/ask', aiAccessGuard, async (req, res) => {
   const { transcript, question, platform, segments, history } = req.body;
-  if (!transcript || typeof transcript !== 'string' || !question || typeof question !== 'string')
+  const hasSegments = Array.isArray(segments) && segments.length > 0;
+  if (typeof transcript !== 'string' || (!transcript && !hasSegments) || !question || typeof question !== 'string')
     return res.status(400).json({ error: 'Missing transcript or question' });
   if (question.length > 500)
     return res.status(400).json({ error: 'Question too long' });
