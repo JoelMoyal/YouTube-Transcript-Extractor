@@ -5683,7 +5683,8 @@ const App = () => {
   const summarize = async () => {
     setSummarizing(true); setSummary('');
     if (isDesktop) setActiveTab('summary');
-    else { setSidebarTab('summary'); setMobilePanel('summary'); }
+    else if (isMobile) setMobilePanel('summary');
+    else setSidebarTab('summary');
     try {
       const token = await getAuthToken();
       const res = await fetch('/api/summarize', {
@@ -5727,7 +5728,8 @@ const App = () => {
     if (flashcardsLoading) return;
     setFlashcardsLoading(true); setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason('');
     if (isDesktop) setActiveTab('flashcards');
-    else { setSidebarTab('flashcards'); setMobilePanel('flashcards'); }
+    else if (isMobile) setMobilePanel('flashcards');
+    else setSidebarTab('flashcards');
     try {
       const token = await getAuthToken();
       const res = await fetch('/api/flashcards', {
@@ -5799,7 +5801,8 @@ const App = () => {
     if (studyGuideLoading) return;
     setStudyGuideLoading(true); setStudyGuide(null);
     if (isDesktop) setActiveTab('study-guide');
-    else { setSidebarTab('study-guide'); setMobilePanel('study-guide'); }
+    else if (isMobile) setMobilePanel('study-guide');
+    else setSidebarTab('study-guide');
     try {
       const token = await getAuthToken();
       const res = await fetch('/api/study-guide', {
@@ -5823,7 +5826,8 @@ const App = () => {
     if (academicInsightsLoading) return;
     setAcademicInsightsLoading(true); setAcademicInsights(null);
     if (isDesktop) setActiveTab('academic');
-    else { setSidebarTab('academic'); setMobilePanel('academic'); }
+    else if (isMobile) setMobilePanel('academic');
+    else setSidebarTab('academic');
     try {
       const token = await getAuthToken();
       const res = await fetch('/api/academic-insights', {
@@ -5847,7 +5851,7 @@ const App = () => {
     if (discoverLoading) return;
     setDiscoverLoading(true); setDiscover(null);
     if (isDesktop) setActiveTab('discover');
-    else { setSidebarTab('discover'); setMobilePanel('discover'); }
+    else setSidebarTab('discover');
     try {
       const token = await getAuthToken();
       const res = await fetch('/api/discover', {
@@ -8880,6 +8884,13 @@ const App = () => {
                 {/* Flashcards tab */}
                 {activeTab === 'flashcards' && (
                   <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px' }}>
+                    {flashcardsLoading && (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '60px 0', color: P.muted }}>
+                        <div style={{ width: 32, height: 32, border: `3px solid ${P.border}`, borderTopColor: P.accent, borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                        <div style={{ fontSize: 13, fontWeight: 500 }}>Generating flashcards…</div>
+                      </div>
+                    )}
+                    {!flashcardsLoading && <>
                     {/* Top bar */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                       <div>
@@ -8980,6 +8991,7 @@ const App = () => {
                         onMouseLeave={e => { e.currentTarget.style.color = P.muted; e.currentTarget.style.borderColor = P.border; }}
                       >Reset Progress</button>
                     )}
+                    </>}
                   </div>
                 )}
 
@@ -9880,31 +9892,31 @@ const App = () => {
                           bg: 'linear-gradient(135deg,rgba(60,140,255,0.12),rgba(60,140,255,0.06))', border: 'rgba(60,140,255,0.2)',
                           icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
                           label: summary ? 'View' : summarizing ? 'Generating…' : 'Generate',
-                          onClick: summary ? () => { setSidebarTab('summary'); setMobilePanel('summary'); } : summarize,
+                          onClick: summary ? () => isMobile ? setMobilePanel('summary') : setSidebarTab('summary') : summarize,
                           active: !!summary, loading: summarizing, badge: summary ? 'Ready' : null },
                         { title: 'Flashcards', sub: 'Q&A cards — flip to reveal', color: '#D97706',
                           bg: 'linear-gradient(135deg,rgba(217,119,6,0.12),rgba(217,119,6,0.06))', border: 'rgba(217,119,6,0.2)',
                           icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
                           label: flashcards.length > 0 ? 'View' : flashcardsLoading ? 'Generating…' : 'Generate',
-                          onClick: flashcards.length > 0 ? () => { setSidebarTab('flashcards'); setMobilePanel('flashcards'); } : generateFlashcards,
+                          onClick: flashcards.length > 0 ? () => isMobile ? setMobilePanel('flashcards') : setSidebarTab('flashcards') : generateFlashcards,
                           active: flashcards.length > 0, loading: flashcardsLoading, badge: flashcards.length > 0 ? `${flashcards.length} cards` : null },
                         { title: 'Study Guide', sub: 'Objectives, concepts & review', color: P.success,
                           bg: 'linear-gradient(135deg,rgba(15,118,110,0.12),rgba(15,118,110,0.06))', border: 'rgba(15,118,110,0.2)',
                           icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
                           label: (studyGuide && !studyGuide._error) ? 'View' : studyGuideLoading ? 'Generating…' : 'Generate',
-                          onClick: (studyGuide && !studyGuide._error) ? () => { setSidebarTab('study-guide'); setMobilePanel('study-guide'); } : generateStudyGuide,
+                          onClick: (studyGuide && !studyGuide._error) ? () => isMobile ? setMobilePanel('study-guide') : setSidebarTab('study-guide') : generateStudyGuide,
                           active: !!(studyGuide && !studyGuide._error), loading: studyGuideLoading, badge: (studyGuide && !studyGuide._error) ? 'Ready' : null },
                         { title: 'Academic', sub: 'References, claims & glossary', color: '#7C3AED',
                           bg: 'linear-gradient(135deg,rgba(124,58,237,0.12),rgba(124,58,237,0.06))', border: 'rgba(124,58,237,0.2)',
                           icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="13" y2="13"/></svg>,
                           label: (academicInsights && !academicInsights._error) ? 'View' : academicInsightsLoading ? 'Generating…' : 'Generate',
-                          onClick: (academicInsights && !academicInsights._error) ? () => { setSidebarTab('academic'); setMobilePanel('academic'); } : generateAcademicInsights,
+                          onClick: (academicInsights && !academicInsights._error) ? () => isMobile ? setMobilePanel('academic') : setSidebarTab('academic') : generateAcademicInsights,
                           active: !!(academicInsights && !academicInsights._error), loading: academicInsightsLoading, badge: (academicInsights && !academicInsights._error) ? 'Ready' : null },
                         { title: 'Discover', sub: 'Related videos & papers', color: '#C2410C',
                           bg: 'linear-gradient(135deg,rgba(194,65,12,0.12),rgba(194,65,12,0.06))', border: 'rgba(194,65,12,0.2)',
                           icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>,
                           label: (discover && !discover._error) ? 'View' : discoverLoading ? 'Finding…' : 'Discover',
-                          onClick: (discover && !discover._error) ? () => { setSidebarTab('discover'); setMobilePanel('discover'); } : generateDiscover,
+                          onClick: (discover && !discover._error) ? () => setSidebarTab('discover') : generateDiscover,
                           active: !!(discover && !discover._error), loading: discoverLoading, badge: discover && !discover._error ? `${(discover.videos?.length||0) + (discover.papers?.length||0)} results` : null },
                       ].map(item => (
                         <div key={item.title} onClick={item.loading ? undefined : item.onClick}
@@ -10346,7 +10358,7 @@ const App = () => {
             <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobilePanelBottomInsetCss, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
+                <button onClick={() => { setMobilePanel('insights'); setSidebarTab('insights'); }} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                   Back
                 </button>
@@ -10379,7 +10391,7 @@ const App = () => {
             <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobilePanelBottomInsetCss, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
+                <button onClick={() => { setMobilePanel('insights'); setSidebarTab('insights'); }} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                   Back
                 </button>
@@ -10460,7 +10472,7 @@ const App = () => {
             <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobilePanelBottomInsetCss, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
+                <button onClick={() => { setMobilePanel('insights'); setSidebarTab('insights'); }} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                   Back
                 </button>
@@ -10542,7 +10554,7 @@ const App = () => {
             <div style={{ position: 'fixed', top: topChromeOffset, left: 0, right: 0, bottom: mobilePanelBottomInsetCss, zIndex: 50, background: P.paper, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
               {/* Sticky back header */}
               <div style={{ position: 'sticky', top: 0, zIndex: 1, background: P.paper, borderBottom: `1px solid ${P.border}`, padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                <button onClick={() => setMobilePanel('insights')} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
+                <button onClick={() => { setMobilePanel('insights'); setSidebarTab('insights'); }} style={{ display: 'flex', alignItems: 'center', gap: 4, border: 'none', background: 'none', color: P.muted, cursor: 'pointer', padding: '4px 8px 4px 0', fontSize: 13, fontWeight: 600 }}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                   Back
                 </button>
