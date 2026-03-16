@@ -5682,6 +5682,8 @@ const App = () => {
 
   const summarize = async () => {
     setSummarizing(true); setSummary('');
+    if (isDesktop) setActiveTab('summary');
+    else { setSidebarTab('summary'); setMobilePanel('summary'); }
     try {
       const token = await getAuthToken();
       const res = await fetch('/api/summarize', {
@@ -5724,6 +5726,8 @@ const App = () => {
   const generateFlashcards = async () => {
     if (flashcardsLoading) return;
     setFlashcardsLoading(true); setFlashcards([]); setFlashcardsExhausted(false); setFlashcardsExhaustedReason('');
+    if (isDesktop) setActiveTab('flashcards');
+    else { setSidebarTab('flashcards'); setMobilePanel('flashcards'); }
     try {
       const token = await getAuthToken();
       const res = await fetch('/api/flashcards', {
@@ -5794,6 +5798,8 @@ const App = () => {
   const generateStudyGuide = async () => {
     if (studyGuideLoading) return;
     setStudyGuideLoading(true); setStudyGuide(null);
+    if (isDesktop) setActiveTab('study-guide');
+    else { setSidebarTab('study-guide'); setMobilePanel('study-guide'); }
     try {
       const token = await getAuthToken();
       const res = await fetch('/api/study-guide', {
@@ -5816,6 +5822,8 @@ const App = () => {
   const generateAcademicInsights = async () => {
     if (academicInsightsLoading) return;
     setAcademicInsightsLoading(true); setAcademicInsights(null);
+    if (isDesktop) setActiveTab('academic');
+    else { setSidebarTab('academic'); setMobilePanel('academic'); }
     try {
       const token = await getAuthToken();
       const res = await fetch('/api/academic-insights', {
@@ -5839,7 +5847,7 @@ const App = () => {
     if (discoverLoading) return;
     setDiscoverLoading(true); setDiscover(null);
     if (isDesktop) setActiveTab('discover');
-    else setSidebarTab('discover');
+    else { setSidebarTab('discover'); setMobilePanel('discover'); }
     try {
       const token = await getAuthToken();
       const res = await fetch('/api/discover', {
