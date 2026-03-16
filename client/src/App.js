@@ -5149,7 +5149,7 @@ const App = () => {
       const res = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ transcript, segments: segments.some(s => s.seconds > 0) ? segments : [], question: q, history }),
+        body: JSON.stringify({ transcript: segments.some(s => s.seconds > 0) ? '' : transcript, segments: segments.some(s => s.seconds > 0) ? segments.slice(0, 800) : [], question: q, history }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -5972,16 +5972,60 @@ const App = () => {
     setSgMessages(prev => [...prev, { role: 'user', text: q }]);
     setSgQuestion('');
     setSgLoading(true);
+    const hasSegs = segments.some(s => s.seconds > 0);
     try {
       const token = await getAuthToken();
       const res = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ transcript, segments: segments.some(s => s.seconds > 0) ? segments : [], question: q, history }),
+        body: JSON.stringify({ transcript: hasSegs ? '' : transcript, segments: hasSegs ? segments.slice(0, 800) : [], question: q, history }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed');
-      setSgMessages(prev => [...prev, { role: 'ai', text: data.answer }]);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.details || data.error || `Server error ${res.status}`);
+      }
+      // Stream tokens — accumulate and update last AI message
+      let accumulated = '';
+      let placeholderAdded = false;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop();
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data:')) continue;
+          const payload = trimmed.slice(5).trim();
+          if (payload === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(payload);
+            if (parsed.error) throw new Error(parsed.error);
+            if (parsed.token) {
+              accumulated += parsed.token;
+              if (!placeholderAdded) {
+                placeholderAdded = true;
+                setSgLoading(false);
+                setSgMessages(prev => [...prev, { role: 'ai', text: accumulated }]);
+              } else {
+                const snap = accumulated;
+                setSgMessages(prev => {
+                  const msgs = [...prev];
+                  if (msgs.length > 0 && msgs[msgs.length - 1].role === 'ai') {
+                    msgs[msgs.length - 1] = { ...msgs[msgs.length - 1], text: snap };
+                  }
+                  return msgs;
+                });
+              }
+            }
+          } catch (e) {
+            if (e.message !== 'Unexpected end of JSON input') throw e;
+          }
+        }
+      }
     } catch (err) {
       setSgMessages(prev => [...prev, { role: 'ai', text: `Error: ${err.message}`, isError: true }]);
     } finally { setSgLoading(false); }
