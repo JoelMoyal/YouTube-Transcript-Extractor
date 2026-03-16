@@ -10730,6 +10730,7 @@ const App = () => {
                     { label: 'GitHub', href: 'https://github.com/JoelMoyal' },
                     { label: 'joelmoyal.com', href: 'https://joelmoyal.com' },
                     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/joel-moyal-0a3109110/' },
+                    { label: 'Watch Intro ▶', href: 'https://www.youtube.com/watch?v=0CO9lSEXG3U' },
                   ].map(l => (
                     <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
                       style={{ fontSize: 13, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
