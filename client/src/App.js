@@ -8941,15 +8941,17 @@ const App = () => {
                         <div style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Flashcards</div>
                         <div style={{ fontSize: 11.5, color: P.muted }}>{flashcardKnown.size} / {flashcards.length} known</div>
                       </div>
-                      <button
-                        onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, border: 'none', background: P.accent, color: 'white', fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'background 0.15s' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = P.accentHover; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = P.accent; }}
-                      >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                        Study in Modal
-                      </button>
+                      {flashcards.length > 0 && (
+                        <button
+                          onClick={() => { setFlashcardIndex(0); setFlashcardFlipped(false); setShowFlashcardModal(true); }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 8, border: 'none', background: P.accent, color: 'white', fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'background 0.15s' }}
+                          onMouseEnter={e => { e.currentTarget.style.background = P.accentHover; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = P.accent; }}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                          Study in Modal
+                        </button>
+                      )}
                     </div>
                     {/* Progress bar */}
                     <div style={{ height: 6, borderRadius: 3, background: P.border, marginBottom: 18, overflow: 'hidden' }}>
