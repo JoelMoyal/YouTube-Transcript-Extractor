@@ -690,8 +690,16 @@ async function aiAccessGuard(req, res, next) {
       console.warn('[ai-access] auth lookup failed, treating as anonymous:', err?.message || err);
     }
   }
-  if (AI_REQUIRE_AUTH) {
-    return res.status(401).json({ error: 'Sign in required for AI features.' });
+  // AI features are free for guests who still have transcript credits remaining.
+  // Once they exhaust their free transcript quota, sign-in is required for AI too.
+  const anonKey = getClientKey(req);
+  const anonCreditEntry = _anonCreditsMap.get(anonKey);
+  const creditNow = Date.now();
+  const creditsUsed = (anonCreditEntry && creditNow <= anonCreditEntry.resetAt) ? anonCreditEntry.used : 0;
+  const guestOutOfCredits = creditsUsed >= ANON_CREDITS_MAX;
+
+  if (AI_REQUIRE_AUTH || guestOutOfCredits) {
+    return res.status(401).json({ error: 'Sign in to continue using AI features.', outOfCredits: guestOutOfCredits });
   }
   if (!consumeAnonAiQuota(req, res)) return;
   return aiAnonRateLimit(req, res, next);
@@ -934,33 +942,33 @@ function classifyYtdlpError(err) {
     (msg.includes('yt-dlp') && msg.includes('no such file or directory') && msg.includes('spawn'));
   if (missingBinary)
     return 'Transcript extraction tool (yt-dlp) is not installed on this server.';
-  if (msg.includes(‘429’) || msg.includes(‘too many requests’))
-    return ‘YouTube is rate-limiting this IP. Please wait a minute and try again.’;
+  if (msg.includes('429') || msg.includes('too many requests'))
+    return 'YouTube is rate-limiting this IP. Please wait a minute and try again.';
   if (
-    msg.includes("sign in to confirm you’re not a bot") ||
-    msg.includes("sign in to confirm you’re not a bot") ||
-    msg.includes(‘not a bot’) ||
-    msg.includes(‘use --cookies’)
+    msg.includes("sign in to confirm you're not a bot") ||
+    msg.includes("sign in to confirm you're not a bot") ||
+    msg.includes('not a bot') ||
+    msg.includes('use --cookies')
   ) {
-    return ‘YouTube is blocking this request right now. Please try again in a few minutes.’;
+    return 'YouTube is blocking this request right now. Please try again in a few minutes.';
   }
   // Instagram-specific errors
   if (
-    msg.includes(‘login required’) ||
-    msg.includes(‘login_required’) ||
-    msg.includes(‘challenge_required’) ||
-    msg.includes(‘checkpoint_required’) ||
-    msg.includes(‘please wait a few minutes’) ||
-    (msg.includes(‘instagram’) && msg.includes(‘not logged in’))
+    msg.includes('login required') ||
+    msg.includes('login_required') ||
+    msg.includes('challenge_required') ||
+    msg.includes('checkpoint_required') ||
+    msg.includes('please wait a few minutes') ||
+    (msg.includes('instagram') && msg.includes('not logged in'))
   ) {
-    return ‘Instagram requires a login to access this video. Public Reels and posts may be restricted — try a different video.’;
+    return 'Instagram requires a login to access this video. Public Reels and posts may be restricted — try a different video.';
   }
-  if (msg.includes(‘private’) || msg.includes(‘members only’))
-    return ‘This video is private or members-only.’;
-  if (msg.includes(‘unavailable’) || msg.includes(‘no longer available’))
-    return ‘This video is unavailable.’;
-  if (msg.includes(‘copyright’))
-    return ‘This video is unavailable due to a copyright claim.’;
+  if (msg.includes('private') || msg.includes('members only'))
+    return 'This video is private or members-only.';
+  if (msg.includes('unavailable') || msg.includes('no longer available'))
+    return 'This video is unavailable.';
+  if (msg.includes('copyright'))
+    return 'This video is unavailable due to a copyright claim.';
   return null;
 }
 
@@ -2013,7 +2021,7 @@ app.post('/api/report-bug', express.json(), async (req, res) => {
 
   try {
     await resend.emails.send({
-      from: 'ScribeSnap Bugs <bugs@scribesnap.io>',
+      from: 'ScribeSnap Bugs <bugs@scribesnap.ai>',
       to: toEmail,
       replyTo: userEmail || undefined,
       subject: `[ScribeSnap] ${categoryLabel}: ${description.slice(0, 60)}${description.length > 60 ? '…' : ''}`,

@@ -463,6 +463,15 @@ const SpinnerIcon = ({ size = 16 }) => (
     <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
   </svg>
 );
+const BugIcon = ({ size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 2l1.88 1.88"/><path d="M14.12 3.88 16 2"/>
+    <path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/>
+    <path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6z"/>
+    <path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 4-4"/>
+    <path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17 17c2.3.1 4 1.9 4 4"/>
+  </svg>
+);
 // ScribeSnap wave logo animated loading indicator
 const ScribeSnapWaveLoader = ({ width = 140, color }) => (
   <svg viewBox="0 0 512 512" width={width} height={Math.round(width * 0.35)} style={{ display: 'block', overflow: 'visible' }}>
@@ -4176,7 +4185,7 @@ const UserMenu = ({ user, onSignOut, onDashboard }) => {
 };
 
 // ── Navbar ────────────────────────────────────────────────────────────────────
-const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, onDashboard, onHome, onShowReferralPromo, isMobile }) => (
+const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, onDashboard, onHome, onShowReferralPromo, isMobile, onReportBug }) => (
   <nav style={{
     position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
     height: 56, display: 'flex', alignItems: 'center',
@@ -4209,6 +4218,11 @@ const Navbar = ({ onAskAI, hasTranscript, credits, user, onSignIn, onSignOut, on
     <div style={{ flex: 1 }} />
 
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <button onClick={onReportBug} title="Report a Bug"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 8, border: 'none', background: 'transparent', color: P.muted, cursor: 'pointer', transition: 'all 0.15s' }}
+        onMouseEnter={e => { e.currentTarget.style.background = P.paper; e.currentTarget.style.color = P.ink; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = P.muted; }}
+      ><BugIcon size={16} /></button>
       {!isMobile && <CreditsWidget credits={credits} onUpgrade={() => onSignIn('signup')} user={user} onShowReferralPromo={onShowReferralPromo} />}
       {!isMobile && <div style={{ width: 1, height: 18, background: P.border }} />}
       {user ? (
@@ -4300,6 +4314,10 @@ const App = () => {
   const [academicInsightsFull, setAcademicInsightsFull]       = useState(false);
   const [discover, setDiscover]                               = useState(null); // {keywords, videos, papers}
   const [discoverLoading, setDiscoverLoading]                 = useState(false);
+  const [showBugModal, setShowBugModal]           = useState(false);
+  const [bugForm, setBugForm]                     = useState({ category: 'bug', description: '', steps: '', email: '' });
+  const [bugSubmitting, setBugSubmitting]         = useState(false);
+  const [bugStatus, setBugStatus]                 = useState(null); // null | 'success' | 'error'
   const [activeLogo, setActiveLogo]               = useState('youtube');
   const [logoFlip, setLogoFlip]                   = useState('idle');    // 'idle' | 'out' | 'in'
   const [summaryDemoIdx, setSummaryDemoIdx]       = useState(0);
@@ -4510,6 +4528,14 @@ const App = () => {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [academicInsightsFull]);
+
+  // Bug report modal — Escape to close
+  useEffect(() => {
+    if (!showBugModal) return;
+    const handler = (e) => { if (e.key === 'Escape') { setShowBugModal(false); setBugStatus(null); } };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [showBugModal]);
 
   // Flashcard modal keyboard navigation
   useEffect(() => {
@@ -5153,6 +5179,7 @@ const App = () => {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
+        if (res.status === 401) { setQaMessages(prev => prev.slice(0, -1)); setQaQuestion(q); setShowAuthModal(true); setAuthInitialTab('signup'); return; }
         throw new Error(data.details || data.error || `Server error ${res.status}`);
       }
       // Stream tokens — accumulate locally and update last AI message each time
@@ -5695,7 +5722,7 @@ const App = () => {
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
-      if (!res.ok) throw new Error(data.details || data.error || 'Failed to summarize');
+      if (!res.ok) { if (res.status === 401) { setShowAuthModal(true); setAuthInitialTab('signup'); return; } throw new Error(data.details || data.error || 'Failed to summarize'); }
       setSummary(data.summary);
       setActiveTab('summary');
       setSidebarTab('summary');
@@ -5717,11 +5744,39 @@ const App = () => {
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
-      if (!res.ok) throw new Error(data.error || 'Failed to generate timeline');
+      if (!res.ok) { if (res.status === 401) { setShowAuthModal(true); setAuthInitialTab('signup'); return; } throw new Error(data.error || 'Failed to generate timeline'); }
       setTimeline(data.sections || []);
     } catch (err) {
       setTimeline([{ title: 'Error', startSeconds: 0, summary: err.message, _error: true }]);
     } finally { setTimelineLoading(false); }
+  };
+
+  const submitBugReport = async () => {
+    if (!bugForm.description.trim() || bugSubmitting) return;
+    setBugSubmitting(true); setBugStatus(null);
+    try {
+      const res = await fetch('/api/report-bug', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: bugForm.category,
+          description: bugForm.description,
+          steps: bugForm.steps,
+          userEmail: bugForm.email,
+          url: window.location.href,
+          userAgent: navigator.userAgent,
+        }),
+      });
+      if (res.ok) {
+        setBugStatus('success');
+        setTimeout(() => { setShowBugModal(false); setBugForm({ category: 'bug', description: '', steps: '', email: '' }); setBugStatus(null); }, 2200);
+      } else {
+        setBugStatus('error');
+      }
+    } catch {
+      setBugStatus('error');
+    }
+    setBugSubmitting(false);
   };
 
   const generateFlashcards = async () => {
@@ -5740,7 +5795,7 @@ const App = () => {
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
-      if (!res.ok) throw new Error(data.error || 'Failed to generate flashcards');
+      if (!res.ok) { if (res.status === 401) { setShowAuthModal(true); setAuthInitialTab('signup'); return; } throw new Error(data.error || 'Failed to generate flashcards'); }
       if (data.noMore) {
         setFlashcardsExhausted(true);
         setFlashcardsExhaustedReason(data.reason || 'This content doesn\'t have educational concepts suitable for flashcards.');
@@ -5813,7 +5868,7 @@ const App = () => {
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
-      if (!res.ok) throw new Error(data.error || 'Failed to generate study guide');
+      if (!res.ok) { if (res.status === 401) { setShowAuthModal(true); setAuthInitialTab('signup'); return; } throw new Error(data.error || 'Failed to generate study guide'); }
       setStudyGuide(data);
       setActiveTab('study-guide');
       setSidebarTab('study-guide');
@@ -5838,7 +5893,7 @@ const App = () => {
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
-      if (!res.ok) throw new Error(data.error || 'Failed to generate academic insights');
+      if (!res.ok) { if (res.status === 401) { setShowAuthModal(true); setAuthInitialTab('signup'); return; } throw new Error(data.error || 'Failed to generate academic insights'); }
       setAcademicInsights(data);
       setActiveTab('academic');
       setSidebarTab('academic');
@@ -5862,7 +5917,7 @@ const App = () => {
       const text = await res.text();
       let data;
       try { data = JSON.parse(text); } catch { throw new Error(`Server error ${res.status}`); }
-      if (!res.ok) throw new Error(data.error || 'Failed to discover related content');
+      if (!res.ok) { if (res.status === 401) { setShowAuthModal(true); setAuthInitialTab('signup'); return; } throw new Error(data.error || 'Failed to discover related content'); }
       setDiscover(data);
     } catch (err) { setDiscover({ _error: err.message }); }
     finally { setDiscoverLoading(false); }
@@ -7052,6 +7107,7 @@ const App = () => {
           onHome={goHome}
           onShowReferralPromo={() => setShowReferralPromo(true)}
           isMobile={isMobile}
+          onReportBug={() => setShowBugModal(true)}
         />
       )}
 
@@ -10738,6 +10794,11 @@ const App = () => {
                       onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
                     >{l.label}</a>
                   ))}
+                  <button onClick={() => setShowBugModal(true)}
+                    style={{ fontSize: 13, color: P.muted, background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', transition: 'color 0.15s', display: 'flex', alignItems: 'center', gap: 5 }}
+                    onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+                  ><BugIcon size={12} /> Report a Bug</button>
                 </div>
               </div>
             </div>
@@ -11215,6 +11276,90 @@ const App = () => {
             {/* Keyboard hint */}
             <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.02em' }}>
               Space to flip · ← → to navigate · Esc to close
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── Bug Report Modal ── */}
+      {showBugModal && (() => {
+        const closeBugModal = () => { if (bugSubmitting) return; setShowBugModal(false); setBugStatus(null); };
+        return (
+          <div
+            onClick={e => { if (e.target === e.currentTarget) closeBugModal(); }}
+            style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(29,29,31,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+          >
+            <div style={{ background: P.surface, borderRadius: 16, padding: isMobile ? 20 : 28, width: '100%', maxWidth: 480, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column', gap: 16, maxHeight: '90vh', overflowY: 'auto' }}>
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <BugIcon size={18} />
+                  <span style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Report a Bug</span>
+                </div>
+                <button onClick={closeBugModal} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: P.muted, padding: 4, borderRadius: 6, display: 'flex', alignItems: 'center' }}
+                  onMouseEnter={e => e.currentTarget.style.color = P.ink} onMouseLeave={e => e.currentTarget.style.color = P.muted}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+
+              {bugStatus === 'success' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '20px 0' }}>
+                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: P.ink, margin: 0 }}>Thanks! We'll look into it.</p>
+                  <p style={{ fontSize: 13, color: P.muted, margin: 0, textAlign: 'center' }}>Your report has been sent successfully.</p>
+                </div>
+              ) : (
+                <>
+                  {/* Category */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Type</label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {[{ value: 'bug', label: '🐛 Bug' }, { value: 'feature', label: '✨ Feature Request' }, { value: 'other', label: '💬 Other' }].map(opt => (
+                        <button key={opt.value} onClick={() => setBugForm(f => ({ ...f, category: opt.value }))}
+                          style={{ flex: 1, padding: '7px 6px', borderRadius: 8, border: `1.5px solid ${bugForm.category === opt.value ? P.accent : P.border}`, background: bugForm.category === opt.value ? P.accentLight : 'transparent', color: bugForm.category === opt.value ? P.accent : P.muted, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.12s' }}>
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description <span style={{ color: P.error }}>*</span></label>
+                    <textarea value={bugForm.description} onChange={e => setBugForm(f => ({ ...f, description: e.target.value }))} placeholder="What happened?" rows={3}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, fontSize: 14, color: P.ink, outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  </div>
+
+                  {/* Steps */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Steps to Reproduce <span style={{ color: P.muted, fontWeight: 400, textTransform: 'none' }}>(optional)</span></label>
+                    <textarea value={bugForm.steps} onChange={e => setBugForm(f => ({ ...f, steps: e.target.value }))} placeholder="1. Go to… 2. Click… 3. See error" rows={2}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, fontSize: 14, color: P.ink, outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  </div>
+
+                  {/* Email */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Email <span style={{ color: P.muted, fontWeight: 400, textTransform: 'none' }}>(optional)</span></label>
+                    <input type="email" value={bugForm.email} onChange={e => setBugForm(f => ({ ...f, email: e.target.value }))} placeholder="So we can follow up"
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, fontSize: 14, color: P.ink, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  </div>
+
+                  {/* Error */}
+                  {bugStatus === 'error' && (
+                    <p style={{ fontSize: 13, color: P.error, margin: 0 }}>Something went wrong. Please try again.</p>
+                  )}
+
+                  {/* Submit */}
+                  <button onClick={submitBugReport} disabled={!bugForm.description.trim() || bugSubmitting}
+                    style={{ padding: '11px 16px', borderRadius: 10, border: 'none', background: (!bugForm.description.trim() || bugSubmitting) ? P.border : P.accent, color: (!bugForm.description.trim() || bugSubmitting) ? P.muted : '#fff', fontWeight: 600, fontSize: 14, cursor: (!bugForm.description.trim() || bugSubmitting) ? 'not-allowed' : 'pointer', transition: 'background 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                    onMouseEnter={e => { if (bugForm.description.trim() && !bugSubmitting) e.currentTarget.style.background = P.accentHover; }}
+                    onMouseLeave={e => { if (bugForm.description.trim() && !bugSubmitting) e.currentTarget.style.background = P.accent; }}>
+                    {bugSubmitting ? <><SpinnerIcon size={14} /> Sending…</> : 'Send Report'}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         );
