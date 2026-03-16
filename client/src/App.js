@@ -5155,9 +5155,9 @@ const App = () => {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.details || data.error || `Server error ${res.status}`);
       }
-      // Stream tokens as they arrive
-      setQaMessages(prev => [...prev, { role: 'ai', text: '' }]);
-      setQaLoading(false);
+      // Stream tokens — accumulate locally and update last AI message each time
+      let accumulated = '';
+      let placeholderAdded = false;
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buf = '';
@@ -5176,11 +5176,21 @@ const App = () => {
             const parsed = JSON.parse(payload);
             if (parsed.error) throw new Error(parsed.error);
             if (parsed.token) {
-              setQaMessages(prev => {
-                const msgs = [...prev];
-                msgs[msgs.length - 1] = { ...msgs[msgs.length - 1], text: msgs[msgs.length - 1].text + parsed.token };
-                return msgs;
-              });
+              accumulated += parsed.token;
+              if (!placeholderAdded) {
+                placeholderAdded = true;
+                setQaLoading(false);
+                setQaMessages(prev => [...prev, { role: 'ai', text: accumulated }]);
+              } else {
+                const snap = accumulated;
+                setQaMessages(prev => {
+                  const msgs = [...prev];
+                  if (msgs.length > 0 && msgs[msgs.length - 1].role === 'ai') {
+                    msgs[msgs.length - 1] = { ...msgs[msgs.length - 1], text: snap };
+                  }
+                  return msgs;
+                });
+              }
             }
           } catch (e) {
             if (e.message !== 'Unexpected end of JSON input') throw e;
@@ -5190,7 +5200,6 @@ const App = () => {
     } catch (err) {
       setQaMessages(prev => {
         const msgs = [...prev];
-        // Replace empty streaming placeholder if present, otherwise append
         if (msgs.length > 0 && msgs[msgs.length - 1].role === 'ai' && msgs[msgs.length - 1].text === '') {
           msgs[msgs.length - 1] = { role: 'ai', text: `Error: ${err.message}`, isError: true };
           return msgs;
