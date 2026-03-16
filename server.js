@@ -476,20 +476,27 @@ async function aiComplete(prompt, maxTokens = 1024) {
 }
 
 // Multi-turn chat — accepts a full messages array (system / user / assistant)
-async function aiChat(messages, maxTokens = 1024) {
+// Streaming variant — calls onChunk(token) for each text delta, returns when done
+async function aiChatStream(messages, onChunk, maxTokens = 1024) {
   if (process.env.GROQ_API_KEY) {
     try {
       const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-      const completion = await groq.chat.completions.create({
+      const stream = await groq.chat.completions.create({
         model: 'llama-3.1-8b-instant',
         messages,
         max_tokens: maxTokens,
+        stream: true,
       });
-      return completion.choices[0].message.content;
+      for await (const chunk of stream) {
+        const token = chunk.choices[0]?.delta?.content;
+        if (token) onChunk(token);
+      }
+      return;
     } catch (err) {
       const msg = err.message || '';
       const status = err.status || err.statusCode || 0;
       if (status === 401 || msg.includes('401') || msg.includes('invalid_api_key') || msg.includes('unauthorized')) throw err;
+      // Fall through to OpenRouter
     }
   }
   if (process.env.OPENROUTER_API_KEY) {
@@ -503,14 +510,35 @@ async function aiChat(messages, maxTokens = 1024) {
         model: 'meta-llama/llama-3.1-8b-instruct:free',
         messages,
         max_tokens: maxTokens,
+        stream: true,
       }),
     });
     if (!response.ok) {
       const data = await response.json().catch(() => ({}));
       throw new Error(data.error?.message || `OpenRouter error: ${response.status}`);
     }
-    const data = await response.json();
-    return data.choices[0].message.content;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop(); // keep incomplete line
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data:')) continue;
+        const jsonStr = trimmed.slice(5).trim();
+        if (jsonStr === '[DONE]') return;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const token = parsed.choices?.[0]?.delta?.content;
+          if (token) onChunk(token);
+        } catch { /* skip malformed lines */ }
+      }
+    }
+    return;
   }
   throw new Error('No AI provider configured (GROQ_API_KEY or OPENROUTER_API_KEY required)');
 }
@@ -1667,10 +1695,23 @@ app.post('/api/ask', aiAccessGuard, async (req, res) => {
     }
     messages.push({ role: 'user', content: question });
 
-    const text = await aiChat(messages);
-    res.json({ answer: text });
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('X-Accel-Buffering', 'no');
+    if (typeof res.flushHeaders === 'function') res.flushHeaders();
+
+    await aiChatStream(messages, (token) => {
+      res.write(`data: ${JSON.stringify({ token })}\n\n`);
+    });
+    res.write('data: [DONE]\n\n');
+    res.end();
   } catch (err) {
-    res.status(500).json({ error: 'Failed to answer', details: safeErr(err) });
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Failed to answer', details: safeErr(err) });
+    } else {
+      res.write(`data: ${JSON.stringify({ error: safeErr(err) })}\n\n`);
+      res.end();
+    }
   }
 });
 

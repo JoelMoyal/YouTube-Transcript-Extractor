@@ -5151,15 +5151,52 @@ const App = () => {
         headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ transcript, segments: segments.some(s => s.seconds > 0) ? segments : [], question: q, history }),
       });
-      const text = await res.text();
-      let data;
-      try { data = JSON.parse(text); } catch {
-        throw new Error(res.ok ? 'Unexpected server response' : `Server error ${res.status}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.details || data.error || `Server error ${res.status}`);
       }
-      if (!res.ok) throw new Error(data.details || data.error || 'Failed to get answer');
-      setQaMessages(prev => [...prev, { role: 'ai', text: data.answer }]);
+      // Stream tokens as they arrive
+      setQaMessages(prev => [...prev, { role: 'ai', text: '' }]);
+      setQaLoading(false);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop();
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data:')) continue;
+          const payload = trimmed.slice(5).trim();
+          if (payload === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(payload);
+            if (parsed.error) throw new Error(parsed.error);
+            if (parsed.token) {
+              setQaMessages(prev => {
+                const msgs = [...prev];
+                msgs[msgs.length - 1] = { ...msgs[msgs.length - 1], text: msgs[msgs.length - 1].text + parsed.token };
+                return msgs;
+              });
+            }
+          } catch (e) {
+            if (e.message !== 'Unexpected end of JSON input') throw e;
+          }
+        }
+      }
     } catch (err) {
-      setQaMessages(prev => [...prev, { role: 'ai', text: `Error: ${err.message}`, isError: true }]);
+      setQaMessages(prev => {
+        const msgs = [...prev];
+        // Replace empty streaming placeholder if present, otherwise append
+        if (msgs.length > 0 && msgs[msgs.length - 1].role === 'ai' && msgs[msgs.length - 1].text === '') {
+          msgs[msgs.length - 1] = { role: 'ai', text: `Error: ${err.message}`, isError: true };
+          return msgs;
+        }
+        return [...msgs, { role: 'ai', text: `Error: ${err.message}`, isError: true }];
+      });
     } finally {
       setQaLoading(false);
       setTimeout(() => qaInputRef.current?.focus(), 50);
