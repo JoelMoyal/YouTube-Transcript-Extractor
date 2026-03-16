@@ -8,6 +8,7 @@ const { execFile } = require('child_process');
 const { promisify } = require('util');
 const crypto = require('crypto');
 const Groq = require('groq-sdk');
+const { Resend } = require('resend');
 const { Supadata } = require('@supadata/js');
 const { createClient } = require('@supabase/supabase-js');
 const multer = require('multer');
@@ -15,6 +16,8 @@ const multer = require('multer');
 // Load local .env values for `npm start`/local development.
 // In production, platform environment variables still take precedence.
 require('dotenv').config();
+
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 const hashEmail = (email) => crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
 const ANON_CREDITS_MAX = Math.max(0, Number.parseInt(process.env.ANON_CREDITS_MAX || '2', 10) || 2);
@@ -931,22 +934,33 @@ function classifyYtdlpError(err) {
     (msg.includes('yt-dlp') && msg.includes('no such file or directory') && msg.includes('spawn'));
   if (missingBinary)
     return 'Transcript extraction tool (yt-dlp) is not installed on this server.';
-  if (msg.includes('429') || msg.includes('too many requests'))
-    return 'YouTube is rate-limiting this IP. Please wait a minute and try again.';
+  if (msg.includes(‘429’) || msg.includes(‘too many requests’))
+    return ‘YouTube is rate-limiting this IP. Please wait a minute and try again.’;
   if (
-    msg.includes("sign in to confirm you're not a bot") ||
-    msg.includes('sign in to confirm you’re not a bot') ||
-    msg.includes('not a bot') ||
-    msg.includes('use --cookies')
+    msg.includes("sign in to confirm you’re not a bot") ||
+    msg.includes("sign in to confirm you’re not a bot") ||
+    msg.includes(‘not a bot’) ||
+    msg.includes(‘use --cookies’)
   ) {
-    return 'YouTube is blocking this request right now. Please try again in a few minutes.';
+    return ‘YouTube is blocking this request right now. Please try again in a few minutes.’;
   }
-  if (msg.includes('private') || msg.includes('members only'))
-    return 'This video is private or members-only.';
-  if (msg.includes('unavailable') || msg.includes('no longer available'))
-    return 'This video is unavailable.';
-  if (msg.includes('copyright'))
-    return 'This video is unavailable due to a copyright claim.';
+  // Instagram-specific errors
+  if (
+    msg.includes(‘login required’) ||
+    msg.includes(‘login_required’) ||
+    msg.includes(‘challenge_required’) ||
+    msg.includes(‘checkpoint_required’) ||
+    msg.includes(‘please wait a few minutes’) ||
+    (msg.includes(‘instagram’) && msg.includes(‘not logged in’))
+  ) {
+    return ‘Instagram requires a login to access this video. Public Reels and posts may be restricted — try a different video.’;
+  }
+  if (msg.includes(‘private’) || msg.includes(‘members only’))
+    return ‘This video is private or members-only.’;
+  if (msg.includes(‘unavailable’) || msg.includes(‘no longer available’))
+    return ‘This video is unavailable.’;
+  if (msg.includes(‘copyright’))
+    return ‘This video is unavailable due to a copyright claim.’;
   return null;
 }
 
@@ -1174,7 +1188,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
       try {
         await execFileAsync('yt-dlp', [
           '--skip-download', '--write-auto-sub', '--write-subs',
-          ...jsRuntimeArgs, ...proxyArgs,
+          ...jsRuntimeArgs, ...proxyArgs, ...cookieArgs,
           '-o', outputTemplate,
           url,
         ], { timeout: 45000 });
@@ -1208,7 +1222,7 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
         await execFileAsync('yt-dlp', [
           '--extract-audio', '--audio-format', 'mp3', '--audio-quality', ytdlpAudioQuality,
           '--format', ytdlpAudioFormat,
-          ...jsRuntimeArgs, ...proxyArgs,
+          ...jsRuntimeArgs, ...proxyArgs, ...cookieArgs,
           '-o', audioBase,
           url,
         ], { timeout: 300000 });
@@ -1970,6 +1984,46 @@ app.get('/transcribe-audio', (_req, res) => {
 });
 app.get('/transcribe-video', (_req, res) => {
   res.sendFile(path.join(__dirname, 'client/public', 'transcribe-video.html'));
+});
+
+// ── Bug reports ───────────────────────────────────────────────────────────────
+app.post('/api/report-bug', express.json(), async (req, res) => {
+  const { category = 'bug', description = '', steps = '', userEmail = '', url = '', userAgent = '' } = req.body || {};
+  if (!description.trim()) return res.status(400).json({ error: 'Description is required.' });
+
+  const toEmail = process.env.RESEND_TO_EMAIL;
+  if (!resend || !toEmail) {
+    // Graceful fallback — log locally if Resend isn't configured yet
+    console.log('[bug-report]', { category, description, steps, userEmail, url });
+    return res.json({ ok: true });
+  }
+
+  const categoryLabel = category === 'bug' ? '🐛 Bug' : category === 'feature' ? '✨ Feature Request' : '💬 Other';
+  const html = `
+    <h2 style="margin:0 0 16px">${categoryLabel}</h2>
+    <p><strong>Description:</strong><br>${description.replace(/\n/g, '<br>')}</p>
+    ${steps ? `<p><strong>Steps to reproduce:</strong><br>${steps.replace(/\n/g, '<br>')}</p>` : ''}
+    ${userEmail ? `<p><strong>User email:</strong> ${userEmail}</p>` : ''}
+    <hr style="margin:16px 0;border:none;border-top:1px solid #eee"/>
+    <p style="color:#888;font-size:12px">
+      <strong>URL:</strong> ${url || '—'}<br>
+      <strong>Browser:</strong> ${userAgent || '—'}
+    </p>
+  `;
+
+  try {
+    await resend.emails.send({
+      from: 'ScribeSnap Bugs <bugs@scribesnap.io>',
+      to: toEmail,
+      replyTo: userEmail || undefined,
+      subject: `[ScribeSnap] ${categoryLabel}: ${description.slice(0, 60)}${description.length > 60 ? '…' : ''}`,
+      html,
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[report-bug] Resend error:', err);
+    res.status(500).json({ error: 'Failed to send report.' });
+  }
 });
 
 // Studio route — serves the SPA (noindex handled client-side)
