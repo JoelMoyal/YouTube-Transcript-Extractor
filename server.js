@@ -1385,14 +1385,15 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
           res.end();
           return;
         }
-      } catch {
+      } catch (supadataErr) {
+        console.error('[Supadata] fallback error:', supadataErr?.message || supadataErr);
         // Fall through to audio/whisper
       }
     }
 
     // If subtitles were blocked by YouTube anti-bot checks and backup provider
-    // could not return transcript content, fail fast with a clear reason.
-    if (subtitleGateFriendly) {
+    // could not return transcript content, fail fast only when audio AI is also unavailable.
+    if (subtitleGateFriendly && !process.env.GROQ_API_KEY) {
       await sendErrorAndEnd({ error: subtitleGateFriendly }, 'youtube_subtitles_gate_blocked');
       return;
     }
