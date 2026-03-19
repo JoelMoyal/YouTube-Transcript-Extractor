@@ -1262,10 +1262,74 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
   const outputTemplate = path.join(tmpDir, videoId);
 
   try {
-    // ── Stage 1a: (reserved for future fast-path — currently falls through to yt-dlp) ──
+    // ── Stage 1: Supadata (primary — handles both captioned and non-captioned videos) ──
+    if (process.env.SUPADATA_API_KEY) {
+      try {
+        const supadata = new Supadata({ apiKey: process.env.SUPADATA_API_KEY });
+        const ytUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        const runSupadataMode = async ({ mode, message, percent, maxPollsEnv, pollMsEnv, fallbackPolls, fallbackPollMs }) => {
+          send('progress', { stage: 'subtitles', message, percent });
+          let result = await supadata.transcript({ url: ytUrl, lang: safeLang, mode });
+          if (result && 'jobId' in result) {
+            const maxPolls = Math.max(1, parseInt(process.env[maxPollsEnv] || String(fallbackPolls), 10));
+            const pollMs = Math.max(1000, parseInt(process.env[pollMsEnv] || String(fallbackPollMs), 10));
+            for (let i = 0; i < maxPolls; i++) {
+              await new Promise(r => setTimeout(r, pollMs));
+              const job = await supadata.transcript.getJobStatus(result.jobId);
+              if (job.status === 'completed') { result = job; break; }
+              if (job.status === 'failed') { result = null; break; }
+            }
+          }
+          if (result && Array.isArray(result.content) && result.content.length > 0) {
+            return result.content;
+          }
+          return null;
+        };
 
-    // ── Stage 1b: yt-dlp subtitles (primary fast path) ───────────────────────
-    send('progress', { stage: 'subtitles', message: 'Looking for subtitles…', percent: 10 });
+        // Try native captions first (fast), then AI transcription for videos without captions
+        let content = await runSupadataMode({
+          mode: 'native',
+          message: 'Fetching transcript…',
+          percent: 20,
+          maxPollsEnv: 'SUPADATA_MAX_POLLS',
+          pollMsEnv: 'SUPADATA_POLL_MS',
+          fallbackPolls: 8,
+          fallbackPollMs: 2000,
+        });
+
+        if (!content && process.env.SUPADATA_AUTO_FALLBACK !== '0') {
+          content = await runSupadataMode({
+            mode: 'auto',
+            message: 'No captions — generating AI transcript…',
+            percent: 40,
+            maxPollsEnv: 'SUPADATA_AUTO_MAX_POLLS',
+            pollMsEnv: 'SUPADATA_AUTO_POLL_MS',
+            fallbackPolls: 30,
+            fallbackPollMs: 5000,
+          });
+        }
+
+        if (content) {
+          const seen = new Set();
+          let segments = content
+            .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
+            .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
+          segments = await translateSegments(segments, safeLang, send);
+          const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
+          send('done', { transcript, segments, source: 'subtitles', translated: safeLang !== 'en' });
+          res.end();
+          return;
+        }
+
+        console.log('[Supadata] no content returned, falling back to yt-dlp');
+      } catch (supadataErr) {
+        console.error('[Supadata] error:', supadataErr?.message || supadataErr);
+        // Fall through to yt-dlp
+      }
+    }
+
+    // ── Stage 2: yt-dlp subtitles (fallback when Supadata is unavailable or fails) ──
+    send('progress', { stage: 'subtitles', message: 'Looking for subtitles…', percent: 55 });
     let lastSubError = null;
     let subtitleGateFriendly = null;
 
@@ -1308,7 +1372,6 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
       const content = await fsPromises.readFile(subPath, 'utf-8');
       await fsPromises.unlink(subPath);
       const result = subFile.endsWith('.json3') ? parseJSON3(content) : parseVTT(content);
-      // Check if yt-dlp found subs in the target language (filename contains lang code)
       const subIsNative = safeLang !== 'en' && (subFile.includes(`.${safeLang}.`) || subFile.includes(`.${safeLang}-`));
       const subNeedsTranslation = !subIsNative && safeLang !== 'en';
       let translatedSegs = result.segments;
@@ -1319,84 +1382,19 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
       return;
     }
 
-    // ── Stage 1c: Supadata API (fallback for edge cases / missing captions) ──
-    // Keep this bounded so it doesn't add large latency on normal requests.
-    if (process.env.SUPADATA_API_KEY) {
-      try {
-        const supadata = new Supadata({ apiKey: process.env.SUPADATA_API_KEY });
-        const ytUrl = `https://www.youtube.com/watch?v=${videoId}`;
-        const runSupadataMode = async ({ mode, message, percent, maxPollsEnv, pollMsEnv, fallbackPolls, fallbackPollMs }) => {
-          send('progress', { stage: 'subtitles', message, percent });
-          let result = await supadata.transcript({ url: ytUrl, lang: safeLang, mode });
-          if (result && 'jobId' in result) {
-            const maxPolls = Math.max(1, parseInt(process.env[maxPollsEnv] || String(fallbackPolls), 10));
-            const pollMs = Math.max(1000, parseInt(process.env[pollMsEnv] || String(fallbackPollMs), 10));
-            for (let i = 0; i < maxPolls; i++) {
-              await new Promise(r => setTimeout(r, pollMs));
-              const job = await supadata.transcript.getJobStatus(result.jobId);
-              if (job.status === 'completed') { result = job; break; }
-              if (job.status === 'failed') { result = null; break; }
-            }
-          }
-          if (result && Array.isArray(result.content) && result.content.length > 0) {
-            return result.content;
-          }
-          return null;
-        };
-
-        let content = await runSupadataMode({
-          mode: 'native',
-          message: 'Trying backup caption source…',
-          percent: 35,
-          maxPollsEnv: 'SUPADATA_MAX_POLLS',
-          pollMsEnv: 'SUPADATA_POLL_MS',
-          fallbackPolls: 6,
-          fallbackPollMs: 2500,
-        });
-
-        if (!content && process.env.SUPADATA_AUTO_FALLBACK !== '0') {
-          content = await runSupadataMode({
-            mode: 'auto',
-            message: 'No captions found — trying AI transcript fallback…',
-            percent: 45,
-            maxPollsEnv: 'SUPADATA_AUTO_MAX_POLLS',
-            pollMsEnv: 'SUPADATA_AUTO_POLL_MS',
-            fallbackPolls: 14,
-            fallbackPollMs: 3000,
-          });
-        }
-
-        if (content) {
-          const seen = new Set();
-          let segments = content
-            .map(s => ({ seconds: Math.floor((s.offset || 0) / 1000), text: (s.text || '').trim() }))
-            .filter(s => s.text && !seen.has(s.text) && seen.add(s.text));
-          segments = await translateSegments(segments, safeLang, send);
-          const transcript = segments.map(s => s.text).join(' ').replace(/\s+/g, ' ').trim();
-          send('done', { transcript, segments, source: 'subtitles', translated: safeLang !== 'en' });
-          res.end();
-          return;
-        }
-      } catch (supadataErr) {
-        console.error('[Supadata] fallback error:', supadataErr?.message || supadataErr);
-        // Fall through to audio/whisper
-      }
-    }
-
-    // If subtitles were blocked by YouTube anti-bot checks and backup provider
-    // could not return transcript content, fail fast only when audio AI is also unavailable.
+    // If YouTube anti-bot blocked yt-dlp and Whisper is also unavailable, fail fast.
     if (subtitleGateFriendly && !process.env.GROQ_API_KEY) {
       await sendErrorAndEnd({ error: subtitleGateFriendly }, 'youtube_subtitles_gate_blocked');
       return;
     }
 
-    // ── Stage 2: download audio ───────────────────────────────────────────────
+    // ── Stage 3: Groq Whisper (last resort) ──────────────────────────────────
     if (!process.env.GROQ_API_KEY) {
       await sendErrorAndEnd({ error: 'No captions found for this video and AI transcription is not configured.' }, 'youtube_no_ai_config');
       return;
     }
 
-    send('progress', { stage: 'audio', message: 'No captions found — downloading audio for AI transcription…', percent: 30 });
+    send('progress', { stage: 'audio', message: 'Downloading audio for AI transcription…', percent: 65 });
     const audioBase = path.join(tmpDir, `${videoId}_audio`);
     try {
       await execFileAsync('yt-dlp', [
