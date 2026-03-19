@@ -2037,11 +2037,12 @@ app.post('/api/report-bug', express.json(), async (req, res) => {
       subject: `[ScribeSnap] ${categoryLabel}: ${description.slice(0, 60)}${description.length > 60 ? '…' : ''}`,
       html,
     });
-    res.json({ ok: true });
   } catch (err) {
-    console.error('[report-bug] Resend error:', err);
-    res.status(500).json({ error: 'Failed to send report.' });
+    // Email send failed — log the report so it isn't lost, but still return ok
+    console.error('[report-bug] Resend error:', err?.message || err);
+    console.log('[report-bug] fallback log:', { category, description, steps, userEmail, url });
   }
+  res.json({ ok: true });
 });
 
 // Studio route — serves the SPA (noindex handled client-side)
