@@ -2031,7 +2031,7 @@ app.post('/api/report-bug', express.json(), async (req, res) => {
 
   try {
     await resend.emails.send({
-      from: 'ScribeSnap Bugs <bugs@scribesnap.ai>',
+      from: 'ScribeSnap Bugs <bugs@send.scribesnap.ai>',
       to: toEmail,
       replyTo: userEmail || undefined,
       subject: `[ScribeSnap] ${categoryLabel}: ${description.slice(0, 60)}${description.length > 60 ? '…' : ''}`,
