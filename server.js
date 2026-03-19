@@ -1398,21 +1398,40 @@ app.get('/api/transcript', transcriptRateLimit, async (req, res) => {
 
     send('progress', { stage: 'audio', message: 'No captions found — downloading audio for AI transcription…', percent: 30 });
     const audioBase = path.join(tmpDir, `${videoId}_audio`);
-    await execFileAsync('yt-dlp', [
-      '--extract-audio', '--audio-format', 'mp3', '--audio-quality', ytdlpAudioQuality,
-      '--format', ytdlpAudioFormat,
-      ...jsRuntimeArgs, ...proxyArgs, ...cookieArgs,
-      '-o', audioBase,
-      `https://www.youtube.com/watch?v=${videoId}`
-    ], { timeout: 300000 });
+    try {
+      await execFileAsync('yt-dlp', [
+        '--extract-audio', '--audio-format', 'mp3', '--audio-quality', ytdlpAudioQuality,
+        '--format', ytdlpAudioFormat,
+        ...jsRuntimeArgs, ...proxyArgs, ...cookieArgs,
+        '-o', audioBase,
+        `https://www.youtube.com/watch?v=${videoId}`
+      ], { timeout: 300000 });
+    } catch (err) {
+      const friendly = classifyYtdlpError(err);
+      await sendErrorAndEnd(
+        { error: friendly || 'Failed to download audio for transcription', details: friendly ? undefined : err.message },
+        'youtube_audio_download_failed'
+      );
+      return;
+    }
+
+    // ── Stage 2b: compress to speech-quality mp3 so even long videos stay under Groq's 25 MB cap ──
+    send('progress', { stage: 'audio', message: 'Compressing audio…', percent: 50 });
+    const rawAudioFile = `${audioBase}.mp3`;
+    let audioFile = rawAudioFile;
+    try {
+      audioFile = await compressForWhisper(rawAudioFile);
+      await fsPromises.unlink(rawAudioFile).catch(() => {});
+    } catch {
+      audioFile = rawAudioFile; // ffmpeg unavailable — proceed with raw file
+    }
 
     // ── Stage 3: Groq Whisper ─────────────────────────────────────────────────
     send('progress', { stage: 'whisper', message: 'Transcribing with Groq Whisper AI…', percent: 60 });
-    const audioFile = `${audioBase}.mp3`;
-    const audioStat = await fsPromises.stat(audioFile);
-    if (audioStat.size > 24 * 1024 * 1024) {
+    const audioStat = await fsPromises.stat(audioFile).catch(() => null);
+    if (!audioStat || audioStat.size > 24 * 1024 * 1024) {
       await fsPromises.unlink(audioFile).catch(() => {});
-      await sendErrorAndEnd({ error: 'Audio file too large for AI transcription (max 24 MB). Try a shorter video.' }, 'youtube_audio_too_large');
+      await sendErrorAndEnd({ error: 'Audio file too large for AI transcription (max ~25 min). Try a shorter video.' }, 'youtube_audio_too_large');
       return;
     }
 
