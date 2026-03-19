@@ -690,16 +690,8 @@ async function aiAccessGuard(req, res, next) {
       console.warn('[ai-access] auth lookup failed, treating as anonymous:', err?.message || err);
     }
   }
-  // AI features are free for guests who still have transcript credits remaining.
-  // Once they exhaust their free transcript quota, sign-in is required for AI too.
-  const anonKey = getClientKey(req);
-  const anonCreditEntry = _anonCreditsMap.get(anonKey);
-  const creditNow = Date.now();
-  const creditsUsed = (anonCreditEntry && creditNow <= anonCreditEntry.resetAt) ? anonCreditEntry.used : 0;
-  const guestOutOfCredits = creditsUsed >= ANON_CREDITS_MAX;
-
-  if (AI_REQUIRE_AUTH || guestOutOfCredits) {
-    return res.status(401).json({ error: 'Sign in to continue using AI features.', outOfCredits: guestOutOfCredits });
+  if (AI_REQUIRE_AUTH) {
+    return res.status(401).json({ error: 'Sign in to continue using AI features.' });
   }
   if (!consumeAnonAiQuota(req, res)) return;
   return aiAnonRateLimit(req, res, next);
