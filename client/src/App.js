@@ -5771,9 +5771,11 @@ const App = () => {
         setBugStatus('success');
         setTimeout(() => { setShowBugModal(false); setBugForm({ category: 'bug', description: '', steps: '', email: '' }); setBugStatus(null); }, 2200);
       } else {
+        console.error('[bug-report] server returned', res.status, res.statusText);
         setBugStatus('error');
       }
-    } catch {
+    } catch (err) {
+      console.error('[bug-report] fetch threw:', err);
       setBugStatus('error');
     }
     setBugSubmitting(false);
