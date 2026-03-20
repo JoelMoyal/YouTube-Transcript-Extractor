@@ -1971,19 +1971,23 @@ app.post('/api/report-bug', express.json(), async (req, res) => {
     </p>
   `;
 
-  try {
-    await resend.emails.send({
-      from: 'ScribeSnap Bugs <bugs@send.scribesnap.ai>',
-      to: toEmail,
-      replyTo: userEmail || undefined,
-      subject: `[ScribeSnap] ${categoryLabel}: ${description.slice(0, 60)}${description.length > 60 ? '…' : ''}`,
-      html,
-    });
-  } catch (err) {
-    // Email send failed — log the report so it isn't lost, but still return ok
-    console.error('[report-bug] Resend error:', err?.message || err);
+  // Fire-and-forget — respond immediately so a slow/unavailable Resend API
+  // never causes the client to see "Something went wrong".
+  resend.emails.send({
+    from: 'ScribeSnap Bugs <bugs@send.scribesnap.ai>',
+    to: toEmail,
+    reply_to: userEmail || undefined,
+    subject: `[ScribeSnap] ${categoryLabel}: ${description.slice(0, 60)}${description.length > 60 ? '…' : ''}`,
+    html,
+  }).then(({ error }) => {
+    if (error) {
+      console.error('[report-bug] Resend error:', error?.message || error);
+      console.log('[report-bug] fallback log:', { category, description, steps, userEmail, url });
+    }
+  }).catch(err => {
+    console.error('[report-bug] Resend throw:', err?.message || err);
     console.log('[report-bug] fallback log:', { category, description, steps, userEmail, url });
-  }
+  });
   res.json({ ok: true });
 });
 
