@@ -234,6 +234,12 @@ const PLATFORM_BRAND = {
 
 const HERO_TRUST_LOGOS = ['youtube', 'tiktok', 'instagram', 'twitter', 'vimeo', 'loom'];
 
+function isInAppBrowser() {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return /Instagram|FBAN|FBAV|FB_IAB|FB4A|FBIOS|Twitter|TikTok|Snapchat|Pinterest|LinkedIn|WhatsApp|Line\/|KAKAOTALK|MicroMessenger/i.test(ua);
+}
+
 function getAuthRedirectUrl() {
   if (typeof window === 'undefined') return CANONICAL_APP_ORIGIN;
   // Keep OAuth callback on the same host that started auth so PKCE verifier
@@ -1258,6 +1264,23 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
           <span style={{ fontSize: 12, color: P.muted }}>or</span>
           <div style={{ flex: 1, height: 1, background: P.border }} />
         </div>
+
+        {/* In-app browser warning */}
+        {isInAppBrowser() && (
+          <div style={{
+            display: 'flex', alignItems: 'flex-start', gap: 8,
+            padding: '10px 12px', borderRadius: 10,
+            background: 'rgba(180,91,24,0.08)', border: `1px solid rgba(180,91,24,0.22)`,
+            marginBottom: 10,
+          }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span style={{ fontSize: 12, color: '#B45309', lineHeight: 1.5 }}>
+              Google sign-in is blocked in in-app browsers. Tap <strong>···</strong> and choose <strong>"Open in Browser"</strong> to continue.
+            </span>
+          </div>
+        )}
 
         {/* Google button */}
         <button
