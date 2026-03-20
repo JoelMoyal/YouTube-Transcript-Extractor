@@ -1947,19 +1947,16 @@ app.get('/transcribe-video', (_req, res) => {
 });
 
 // ── Bug reports ───────────────────────────────────────────────────────────────
-app.post('/api/report-bug', express.json(), async (req, res) => {
-  const { category = 'bug', description = '', steps = '', userEmail = '', url = '', userAgent = '' } = req.body || {};
-  if (!description.trim()) return res.status(400).json({ error: 'Description is required.' });
+app.post('/api/report-bug', async (req, res) => {
+  // Always respond 200 — a failed report should never block the user.
+  try {
+    const { category = 'bug', description = '', steps = '', userEmail = '', url = '', userAgent = '' } = req.body || {};
+    console.log('[bug-report] received', { category, description: description.slice(0, 80) });
 
-  const toEmail = process.env.RESEND_TO_EMAIL;
-  if (!resend || !toEmail) {
-    // Graceful fallback — log locally if Resend isn't configured yet
-    console.log('[bug-report]', { category, description, steps, userEmail, url });
-    return res.json({ ok: true });
-  }
-
-  const categoryLabel = category === 'bug' ? '🐛 Bug' : category === 'feature' ? '✨ Feature Request' : '💬 Other';
-  const html = `
+    const toEmail = process.env.RESEND_TO_EMAIL;
+    if (resend && toEmail && description.trim()) {
+      const categoryLabel = category === 'bug' ? '🐛 Bug' : category === 'feature' ? '✨ Feature Request' : '💬 Other';
+      const html = `
     <h2 style="margin:0 0 16px">${categoryLabel}</h2>
     <p><strong>Description:</strong><br>${description.replace(/\n/g, '<br>')}</p>
     ${steps ? `<p><strong>Steps to reproduce:</strong><br>${steps.replace(/\n/g, '<br>')}</p>` : ''}
@@ -1970,24 +1967,27 @@ app.post('/api/report-bug', express.json(), async (req, res) => {
       <strong>Browser:</strong> ${userAgent || '—'}
     </p>
   `;
-
-  // Fire-and-forget — respond immediately so a slow/unavailable Resend API
-  // never causes the client to see "Something went wrong".
-  resend.emails.send({
-    from: 'ScribeSnap Bugs <bugs@send.scribesnap.ai>',
-    to: toEmail,
-    reply_to: userEmail || undefined,
-    subject: `[ScribeSnap] ${categoryLabel}: ${description.slice(0, 60)}${description.length > 60 ? '…' : ''}`,
-    html,
-  }).then(({ error }) => {
-    if (error) {
-      console.error('[report-bug] Resend error:', error?.message || error);
-      console.log('[report-bug] fallback log:', { category, description, steps, userEmail, url });
+      // Fire-and-forget: respond before awaiting Resend so a slow/down API never
+      // causes the client to see an error.
+      Promise.resolve().then(() => resend.emails.send({
+        from: 'ScribeSnap Bugs <bugs@send.scribesnap.ai>',
+        to: toEmail,
+        reply_to: userEmail || undefined,
+        subject: `[ScribeSnap] ${categoryLabel}: ${description.slice(0, 60)}${description.length > 60 ? '…' : ''}`,
+        html,
+      })).then(result => {
+        if (result?.error) console.error('[report-bug] Resend error:', result.error?.message || result.error);
+        else console.log('[report-bug] sent ok');
+      }).catch(err => {
+        console.error('[report-bug] Resend failed:', err?.message || err);
+        console.log('[report-bug] fallback log:', { category, description, steps, userEmail, url });
+      });
+    } else {
+      console.log('[bug-report] fallback (no Resend):', { category, description, steps, userEmail, url });
     }
-  }).catch(err => {
-    console.error('[report-bug] Resend throw:', err?.message || err);
-    console.log('[report-bug] fallback log:', { category, description, steps, userEmail, url });
-  });
+  } catch (err) {
+    console.error('[report-bug] unexpected error:', err?.message || err);
+  }
   res.json({ ok: true });
 });
 
