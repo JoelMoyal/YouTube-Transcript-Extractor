@@ -10821,9 +10821,6 @@ const App = () => {
                 onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
               >Privacy Policy</a>
             </span>
-            <a href="https://www.producthunt.com/products/scribesnap?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-scribesnap" target="_blank" rel="noopener noreferrer">
-              <img alt="ScribeSnap - AI-assisted video learning | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1099470&theme=neutral&t=1773647616044" style={{ display: 'block' }} />
-            </a>
           </div>
         </div>
       </footer>
