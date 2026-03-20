@@ -940,6 +940,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
   const [error, setError]       = React.useState('');
   const [resendLoading, setResendLoading] = React.useState(false);
   const [resendDone, setResendDone]       = React.useState(false);
+  const [linkCopied, setLinkCopied]       = React.useState(false);
   const overlayRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -1265,24 +1266,52 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
           <div style={{ flex: 1, height: 1, background: P.border }} />
         </div>
 
-        {/* In-app browser warning */}
-        {isInAppBrowser() && (
-          <div style={{
-            display: 'flex', alignItems: 'flex-start', gap: 8,
-            padding: '10px 12px', borderRadius: 10,
-            background: 'rgba(180,91,24,0.08)', border: `1px solid rgba(180,91,24,0.22)`,
-            marginBottom: 10,
-          }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
-              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-            <span style={{ fontSize: 12, color: '#B45309', lineHeight: 1.5 }}>
-              Google sign-in is blocked in in-app browsers. Tap <strong>···</strong> and choose <strong>"Open in Browser"</strong> to continue.
-            </span>
+        {/* Google button — replaced with copy-link CTA in in-app browsers */}
+        {isInAppBrowser() ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', gap: 8,
+              padding: '10px 12px', borderRadius: 10,
+              background: 'rgba(180,91,24,0.08)', border: '1px solid rgba(180,91,24,0.22)',
+            }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B45309" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              <span style={{ fontSize: 12, color: '#B45309', lineHeight: 1.5 }}>
+                Google sign-in doesn't work in in-app browsers. Open this page in Safari or Chrome first.
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 2500);
+                });
+              }}
+              style={{
+                width: '100%', padding: '10px 0', minHeight: 44, borderRadius: 10,
+                border: `1px solid ${P.border}`, background: P.paper,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                fontSize: 14, fontWeight: 600, color: linkCopied ? P.success : P.ink,
+                cursor: 'pointer', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = P.surface; }}
+              onMouseLeave={e => { e.currentTarget.style.background = P.paper; }}
+            >
+              {linkCopied ? (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Link copied!
+                </>
+              ) : (
+                <>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy link to open in browser
+                </>
+              )}
+            </button>
           </div>
-        )}
-
-        {/* Google button */}
+        ) : (
         <button
           onClick={async () => {
             setError('');
@@ -1326,6 +1355,7 @@ const AuthModal = ({ onClose, onAuthSuccess, initialTab = 'signin' }) => {
           </svg>
           Continue with Google
         </button>
+        )}
 
         <p style={{ textAlign: 'center', fontSize: 12, color: P.muted, marginTop: 16, marginBottom: 0 }}>
           {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
