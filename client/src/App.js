@@ -10771,6 +10771,7 @@ const App = () => {
                     { label: 'Extract Transcript', href: '#' },
                     { label: 'AI Summaries', href: '#' },
                     { label: 'Q&A', href: '#' },
+                    { label: 'Report a Bug', href: 'https://github.com/JoelMoyal/YouTube-Transcript-Extractor/issues' },
                   ].map(l => (
                     <a key={l.label} href={l.href} style={{ fontSize: 13, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
                       onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
