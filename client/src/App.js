@@ -4367,10 +4367,6 @@ const App = () => {
   const [academicInsightsFull, setAcademicInsightsFull]       = useState(false);
   const [discover, setDiscover]                               = useState(null); // {keywords, videos, papers}
   const [discoverLoading, setDiscoverLoading]                 = useState(false);
-  const [showBugModal, setShowBugModal]           = useState(false);
-  const [bugForm, setBugForm]                     = useState({ category: 'bug', description: '', steps: '', email: '' });
-  const [bugSubmitting, setBugSubmitting]         = useState(false);
-  const [bugStatus, setBugStatus]                 = useState(null); // null | 'success' | 'error'
   const [activeLogo, setActiveLogo]               = useState('youtube');
   const [logoFlip, setLogoFlip]                   = useState('idle');    // 'idle' | 'out' | 'in'
   const [summaryDemoIdx, setSummaryDemoIdx]       = useState(0);
@@ -4389,6 +4385,10 @@ const App = () => {
   const [selectedSegment, setSelectedSegment] = useState(null);
   const [playingSegment, setPlayingSegment] = useState(null);
   const [exportToggle, setExportToggle]   = useState(false);
+  const [showBugModal, setShowBugModal]           = useState(false);
+  const [bugForm, setBugForm]                     = useState({ category: 'bug', description: '', steps: '', email: '' });
+  const [bugSubmitting, setBugSubmitting]         = useState(false);
+  const [bugStatus, setBugStatus]                 = useState(null); // null | 'success' | 'error'
 
   // ── Responsive layout state ──────────────────────────────────────────────
   const [windowWidth, setWindowWidth]         = useState(() => window.innerWidth);
@@ -5803,6 +5803,7 @@ const App = () => {
       setTimeline([{ title: 'Error', startSeconds: 0, summary: err.message, _error: true }]);
     } finally { setTimelineLoading(false); }
   };
+
 
   const submitBugReport = async () => {
     if (!bugForm.description.trim() || bugSubmitting) return;
@@ -10826,7 +10827,6 @@ const App = () => {
                     { label: 'Extract Transcript', href: '#' },
                     { label: 'AI Summaries', href: '#' },
                     { label: 'Q&A', href: '#' },
-                    { label: 'Report a Bug', href: 'https://github.com/JoelMoyal/YouTube-Transcript-Extractor/issues' },
                   ].map(l => (
                     <a key={l.label} href={l.href} style={{ fontSize: 13, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
                       onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
@@ -10841,7 +10841,8 @@ const App = () => {
                   {[
                     { label: 'GitHub', href: 'https://github.com/JoelMoyal' },
                     { label: 'joelmoyal.com', href: 'https://joelmoyal.com' },
-                    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/joel-moyal-0a3109110/' },
+                    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/scribesnap-ai/' },
+                    { label: 'Instagram', href: 'https://www.instagram.com/scribesnap.ai/' },
                     { label: 'Watch Intro ▶', href: 'https://www.youtube.com/watch?v=0CO9lSEXG3U' },
                   ].map(l => (
                     <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
@@ -10880,6 +10881,90 @@ const App = () => {
           </div>
         </div>
       </footer>
+
+      {/* ── Bug Report Modal ── */}
+      {showBugModal && (() => {
+        const closeBugModal = () => { if (bugSubmitting) return; setShowBugModal(false); setBugStatus(null); };
+        return (
+          <div
+            onClick={e => { if (e.target === e.currentTarget) closeBugModal(); }}
+            style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(29,29,31,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+          >
+            <div style={{ background: P.surface, borderRadius: 16, padding: isMobile ? 20 : 28, width: '100%', maxWidth: 480, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column', gap: 16, maxHeight: '90vh', overflowY: 'auto' }}>
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <BugIcon size={18} />
+                  <span style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Report a Bug</span>
+                </div>
+                <button onClick={closeBugModal} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: P.muted, padding: 4, borderRadius: 6, display: 'flex', alignItems: 'center' }}
+                  onMouseEnter={e => e.currentTarget.style.color = P.ink} onMouseLeave={e => e.currentTarget.style.color = P.muted}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+
+              {bugStatus === 'success' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '20px 0' }}>
+                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: P.ink, margin: 0 }}>Thanks! We'll look into it.</p>
+                  <p style={{ fontSize: 13, color: P.muted, margin: 0, textAlign: 'center' }}>Your report has been sent successfully.</p>
+                </div>
+              ) : (
+                <>
+                  {/* Category */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Type</label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {[{ value: 'bug', label: '🐛 Bug' }, { value: 'feature', label: '✨ Feature Request' }, { value: 'other', label: '💬 Other' }].map(opt => (
+                        <button key={opt.value} onClick={() => setBugForm(f => ({ ...f, category: opt.value }))}
+                          style={{ flex: 1, padding: '7px 6px', borderRadius: 8, border: `1.5px solid ${bugForm.category === opt.value ? P.accent : P.border}`, background: bugForm.category === opt.value ? P.accentLight : 'transparent', color: bugForm.category === opt.value ? P.accent : P.muted, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.12s' }}>
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description <span style={{ color: P.error }}>*</span></label>
+                    <textarea value={bugForm.description} onChange={e => setBugForm(f => ({ ...f, description: e.target.value }))} placeholder="What happened?" rows={3}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, fontSize: 14, color: P.ink, outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  </div>
+
+                  {/* Steps */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Steps to Reproduce <span style={{ color: P.muted, fontWeight: 400, textTransform: 'none' }}>(optional)</span></label>
+                    <textarea value={bugForm.steps} onChange={e => setBugForm(f => ({ ...f, steps: e.target.value }))} placeholder="1. Go to… 2. Click… 3. See error" rows={2}
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, fontSize: 14, color: P.ink, outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  </div>
+
+                  {/* Email */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Email <span style={{ color: P.muted, fontWeight: 400, textTransform: 'none' }}>(optional)</span></label>
+                    <input type="email" value={bugForm.email} onChange={e => setBugForm(f => ({ ...f, email: e.target.value }))} placeholder="So we can follow up"
+                      style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, fontSize: 14, color: P.ink, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                  </div>
+
+                  {/* Error */}
+                  {bugStatus === 'error' && (
+                    <p style={{ fontSize: 13, color: P.error, margin: 0 }}>Something went wrong. Please try again.</p>
+                  )}
+
+                  {/* Submit */}
+                  <button onClick={submitBugReport} disabled={!bugForm.description.trim() || bugSubmitting}
+                    style={{ padding: '11px 16px', borderRadius: 10, border: 'none', background: (!bugForm.description.trim() || bugSubmitting) ? P.border : P.accent, color: (!bugForm.description.trim() || bugSubmitting) ? P.muted : '#fff', fontWeight: 600, fontSize: 14, cursor: (!bugForm.description.trim() || bugSubmitting) ? 'not-allowed' : 'pointer', transition: 'background 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                    onMouseEnter={e => { if (bugForm.description.trim() && !bugSubmitting) e.currentTarget.style.background = P.accentHover; }}
+                    onMouseLeave={e => { if (bugForm.description.trim() && !bugSubmitting) e.currentTarget.style.background = P.accent; }}>
+                    {bugSubmitting ? <><SpinnerIcon size={14} /> Sending…</> : 'Send Report'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Study Guide Fullscreen Overlay ──────────────────────────────── */}
       {studyGuideFull && studyGuide && !studyGuide._error && (
@@ -11334,89 +11419,6 @@ const App = () => {
         );
       })()}
 
-      {/* ── Bug Report Modal ── */}
-      {showBugModal && (() => {
-        const closeBugModal = () => { if (bugSubmitting) return; setShowBugModal(false); setBugStatus(null); };
-        return (
-          <div
-            onClick={e => { if (e.target === e.currentTarget) closeBugModal(); }}
-            style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(29,29,31,0.5)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-          >
-            <div style={{ background: P.surface, borderRadius: 16, padding: isMobile ? 20 : 28, width: '100%', maxWidth: 480, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column', gap: 16, maxHeight: '90vh', overflowY: 'auto' }}>
-              {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <BugIcon size={18} />
-                  <span style={{ fontSize: 15, fontWeight: 700, color: P.ink }}>Report a Bug</span>
-                </div>
-                <button onClick={closeBugModal} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: P.muted, padding: 4, borderRadius: 6, display: 'flex', alignItems: 'center' }}
-                  onMouseEnter={e => e.currentTarget.style.color = P.ink} onMouseLeave={e => e.currentTarget.style.color = P.muted}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-              </div>
-
-              {bugStatus === 'success' ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '20px 0' }}>
-                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(15,118,110,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={P.success} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  </div>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: P.ink, margin: 0 }}>Thanks! We'll look into it.</p>
-                  <p style={{ fontSize: 13, color: P.muted, margin: 0, textAlign: 'center' }}>Your report has been sent successfully.</p>
-                </div>
-              ) : (
-                <>
-                  {/* Category */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Type</label>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      {[{ value: 'bug', label: '🐛 Bug' }, { value: 'feature', label: '✨ Feature Request' }, { value: 'other', label: '💬 Other' }].map(opt => (
-                        <button key={opt.value} onClick={() => setBugForm(f => ({ ...f, category: opt.value }))}
-                          style={{ flex: 1, padding: '7px 6px', borderRadius: 8, border: `1.5px solid ${bugForm.category === opt.value ? P.accent : P.border}`, background: bugForm.category === opt.value ? P.accentLight : 'transparent', color: bugForm.category === opt.value ? P.accent : P.muted, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.12s' }}>
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description <span style={{ color: P.error }}>*</span></label>
-                    <textarea value={bugForm.description} onChange={e => setBugForm(f => ({ ...f, description: e.target.value }))} placeholder="What happened?" rows={3}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, fontSize: 14, color: P.ink, outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
-                  </div>
-
-                  {/* Steps */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Steps to Reproduce <span style={{ color: P.muted, fontWeight: 400, textTransform: 'none' }}>(optional)</span></label>
-                    <textarea value={bugForm.steps} onChange={e => setBugForm(f => ({ ...f, steps: e.target.value }))} placeholder="1. Go to… 2. Click… 3. See error" rows={2}
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, fontSize: 14, color: P.ink, outline: 'none', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
-                  </div>
-
-                  {/* Email */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: P.muted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Email <span style={{ color: P.muted, fontWeight: 400, textTransform: 'none' }}>(optional)</span></label>
-                    <input type="email" value={bugForm.email} onChange={e => setBugForm(f => ({ ...f, email: e.target.value }))} placeholder="So we can follow up"
-                      style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1px solid ${P.border}`, background: P.paper, fontSize: 14, color: P.ink, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
-                  </div>
-
-                  {/* Error */}
-                  {bugStatus === 'error' && (
-                    <p style={{ fontSize: 13, color: P.error, margin: 0 }}>Something went wrong. Please try again.</p>
-                  )}
-
-                  {/* Submit */}
-                  <button onClick={submitBugReport} disabled={!bugForm.description.trim() || bugSubmitting}
-                    style={{ padding: '11px 16px', borderRadius: 10, border: 'none', background: (!bugForm.description.trim() || bugSubmitting) ? P.border : P.accent, color: (!bugForm.description.trim() || bugSubmitting) ? P.muted : '#fff', fontWeight: 600, fontSize: 14, cursor: (!bugForm.description.trim() || bugSubmitting) ? 'not-allowed' : 'pointer', transition: 'background 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-                    onMouseEnter={e => { if (bugForm.description.trim() && !bugSubmitting) e.currentTarget.style.background = P.accentHover; }}
-                    onMouseLeave={e => { if (bugForm.description.trim() && !bugSubmitting) e.currentTarget.style.background = P.accent; }}>
-                    {bugSubmitting ? <><SpinnerIcon size={14} /> Sending…</> : 'Send Report'}
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        );
-      })()}
 
     </>
   );
