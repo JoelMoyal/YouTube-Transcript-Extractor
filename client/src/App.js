@@ -10836,14 +10836,27 @@ const App = () => {
                 </div>
               </div>
               <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: P.ink, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 12 }}>Follow Us</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                  {[
+                    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/scribesnap-ai/' },
+                    { label: 'Instagram', href: 'https://www.instagram.com/scribesnap.ai/' },
+                    { label: 'Watch Intro ▶', href: 'https://www.youtube.com/watch?v=0CO9lSEXG3U' },
+                  ].map(l => (
+                    <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 13, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
+                      onMouseEnter={e => { e.currentTarget.style.color = P.ink; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = P.muted; }}
+                    >{l.label}</a>
+                  ))}
+                </div>
+              </div>
+              <div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: P.ink, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 12 }}>Connect</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
                   {[
                     { label: 'GitHub', href: 'https://github.com/JoelMoyal' },
                     { label: 'joelmoyal.com', href: 'https://joelmoyal.com' },
-                    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/scribesnap-ai/' },
-                    { label: 'Instagram', href: 'https://www.instagram.com/scribesnap.ai/' },
-                    { label: 'Watch Intro ▶', href: 'https://www.youtube.com/watch?v=0CO9lSEXG3U' },
                   ].map(l => (
                     <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
                       style={{ fontSize: 13, color: P.muted, textDecoration: 'none', transition: 'color 0.15s' }}
